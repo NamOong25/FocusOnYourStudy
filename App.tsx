@@ -8,7 +8,7 @@ import { PlusJakartaSans_500Medium } from '@expo-google-fonts/plus-jakarta-sans/
 import { PlusJakartaSans_600SemiBold } from '@expo-google-fonts/plus-jakarta-sans/600SemiBold';
 import { PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans/700Bold';
 import { PlusJakartaSans_800ExtraBold } from '@expo-google-fonts/plus-jakarta-sans/800ExtraBold';
-import { Badge, Button, Card, Icon, IconButton, IconName, Row, Sheet, T } from './src/components';
+import { Badge, Button, Card, Icon, IconButton, IconName, Row, Segments, Sheet, T } from './src/components';
 import { C, F, S } from './src/theme';
 import { ClassItem, PrototypeProvider, Tab, Task, dueLabel, useApp } from './src/model';
 import { ClassForm, TaskForm } from './src/forms';
@@ -17,6 +17,7 @@ import Schedule from './src/screens/Schedule';
 import Focus from './src/screens/Focus';
 import Stats from './src/screens/Stats';
 import Assistant from './src/screens/Assistant';
+import Academics from './src/screens/Academics';
 
 const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] = [
   { id: 'home', label: 'Trang chủ', icon: 'home-outline', activeIcon: 'home' },
@@ -30,15 +31,19 @@ function AppShell() {
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [panel, setPanel] = useState<'profile' | 'notifications' | null>(null);
   const [read, setRead] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState('Lịch & bài tập');
   const date = new Date();
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
     <Row between style={styles.header}>
       <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T><T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'home' ? 'Không ngừng tiến bộ mỗi ngày' : tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T></View></Pressable>
       <View><IconButton name="notifications-outline" label="Thông báo" onPress={() => { setPanel('notifications'); setRead(true); }} bg={C.canvas} color={C.ink} />{!read && <View style={{ position: 'absolute', top: 7, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: C.red, borderWidth: 1, borderColor: C.canvas }} />}</View><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => setPanel('profile')} />
     </Row>
-    <ScrollView key={tab} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+    <ScrollView key={`${tab}-${scheduleMode}`} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {tab === 'home' && <Home onTask={setTaskForm} onProfile={() => setPanel('profile')} />}
-      {tab === 'schedule' && <Schedule onTask={setTaskForm} onNewTask={() => setTaskForm('new')} onClass={setClassForm} onNewClass={() => setClassForm('new')} />}
+      {tab === 'schedule' && <>
+        <Segments values={['Lịch & bài tập', 'Môn & học kỳ']} value={scheduleMode} onChange={setScheduleMode} />
+        {scheduleMode === 'Lịch & bài tập' ? <Schedule onTask={setTaskForm} onNewTask={() => setTaskForm('new')} onClass={setClassForm} onNewClass={() => setClassForm('new')} /> : <Academics />}
+      </>}
       {tab === 'focus' && <Focus />}
       {tab === 'stats' && <Stats />}
       {tab === 'ai' && <Assistant />}

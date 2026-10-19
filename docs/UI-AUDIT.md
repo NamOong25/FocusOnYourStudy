@@ -2,6 +2,8 @@
 
 Ngày rà soát: 20/10/2026. Nguồn: DESIGN.md và 5 ZIP Stitch (1)–(5) do người dùng cung cấp. Các file nguồn là tài liệu tham chiếu giao diện; không chạy HTML/script của template trong ứng dụng.
 
+Cập nhật: người dùng xác nhận chỉ có 9 nhóm chức năng; AI (mục 10 cũ) nay là mục 9. Đợt 2A đã dựng thêm Môn học & học kỳ, xem UI-PHASE-2.md; các cải thiện thao tác được hoãn theo UI-BACKLOG.md.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |
@@ -26,8 +28,8 @@ Ngày rà soát: 20/10/2026. Nguồn: DESIGN.md và 5 ZIP Stitch (1)–(5) do ng
 | 6. Lịch thi | Môn, ngày/giờ/phòng/hình thức, đếm ngày, nhắc | Chi tiết/sửa/xóa lịch thi, phát hiện trùng, phân loại giữa/cuối kỳ, cấu hình nhắc đồng bộ |
 | 7. Pomodoro | Timer, đổi môn, mục tiêu, chuỗi ngày | Liên kết bài đang học, lịch sử theo ngày, quy tắc hoàn thành/chuỗi, app chạy nền/bị hủy, âm thanh và quyền thông báo |
 | 8. Thống kê | Giờ học, hoàn thành/trễ hạn, phân bổ môn | So sánh GPA nhiều kỳ, biểu đồ từ dữ liệu thật, định nghĩa chỉ số, kỳ không có dữ liệu |
-| 9. Chưa được cung cấp | Không có ảnh/mô tả mục 9 trong hội thoại | Chờ bổ sung; không tự mặc định là nhóm học tập |
-| 10. AI | Đủ 5 lối vào và hội thoại | Form đầu vào, xử lý/chờ/lỗi, preview/chấp nhận/sửa, kiểm tra lịch rảnh/deadline, tải PDF, dẫn nguồn, câu hỏi/giải thích, kiểm soát chi phí |
+
+| 9. AI | Đủ 5 lối vào và hội thoại | Form đầu vào, xử lý/chờ/lỗi, preview/chấp nhận/sửa, kiểm tra lịch rảnh/deadline, tải PDF, dẫn nguồn, câu hỏi/giải thích, kiểm soát chi phí |
 | Nền tảng | Avatar, chuông thông báo | Đăng ký/đăng nhập/quên mật khẩu, hồ sơ chỉnh sửa, cài đặt sáng/tối/ngôn ngữ, quiet hours/quyền thông báo, lỗi mạng, đồng bộ và quyền riêng tư |
 
 ## Những điểm chỉnh ngay trong đợt đầu
@@ -72,3 +74,4 @@ Lưu và khôi phục timer khi process bị hủy, nhắc lịch thật, quiet 
 Kết nối AI qua backend, giữ API key phía server. Làm kế hoạch/kiểm tra rảnh/deadline và bước duyệt trước; sau đó PDF có dẫn trang, quiz có lời giải, điều chỉnh kế hoạch; thêm quota, hủy/yêu cầu lại, xử lý lỗi và riêng tư dữ liệu.
 
 Mỗi đợt có thể chia thành vài lượt làm nhỏ. Ưu tiên chốt một luồng có thể thử được rồi mới mở nhóm kế tiếp.
+

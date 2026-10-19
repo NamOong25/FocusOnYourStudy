@@ -46,3 +46,9 @@ Không dùng HTML trong WebView, không đưa Tailwind CDN vào React Native, kh
 - `docs/DECISIONS.md`: quy ước thiết kế và phạm vi kỹ thuật.
 
 Ảnh avatar, sách và trợ lý trong `assets/` lấy từ URL có sẵn trong HTML template bạn gửi. Cần xác nhận quyền sử dụng tài nguyên trước khi phát hành thương mại. Font Plus Jakarta Sans qua gói `@expo-google-fonts/plus-jakarta-sans`; icon từ Ionicons. Các tài nguyên giao diện đã có sẵn cục bộ sau khi cài dependency, không cần tải từ CDN mỗi lần mở màn.
+
+## Cập nhật đợt 2A: Môn học & học kỳ
+
+Mở **Lịch học → Môn & học kỳ** để quản lý học kỳ, môn học và xem lịch/bài/điểm của từng môn. Có tìm kiếm, lọc trạng thái, thêm/sửa và màu nhận diện. Các môn mới dùng chung trong lựa chọn môn của bài tập, ca học, lịch thi và Pomodoro.
+
+Phạm vi nay gồm 9 nhóm chức năng; AI là mục 9 (mục 10 cũ). Xem `docs/UI-PHASE-2.md` và `docs/UI-BACKLOG.md` để biết phần đã làm và các cải thiện người dùng muốn để sau.

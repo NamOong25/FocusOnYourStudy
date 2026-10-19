@@ -3,7 +3,7 @@ import { Image, Pressable, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Field, Icon, IconButton, IconName, IconTile, Row, Section, Sheet, T } from '../components';
 import { C, F, S } from '../theme';
-import { courses, useApp } from '../model';
+import { useApp } from '../model';
 
 const features: { icon: IconName; title: string; description: string; action: string; color: string; bg: string }[] = [
   { icon: 'alarm-outline', title: 'Kế hoạch ôn thi theo deadline', description: 'Chia mục tiêu lớn thành những phiên học vừa sức, bắt đầu từ bài cần ưu tiên.', action: 'Tạo lộ trình', color: C.primary, bg: C.soft },
@@ -13,7 +13,7 @@ const features: { icon: IconName; title: string; description: string; action: st
   { icon: 'analytics-outline', title: 'Đánh giá & điều chỉnh kế hoạch', description: 'Nhìn lại tiến độ và dành thêm thời gian cho những phần bạn cần cải thiện.', action: 'Xem đề xuất', color: C.primary, bg: C.soft },
 ];
 export default function Assistant() {
-  const { tasks, classes, setStudyPlan, studyPlan, setToast, setTab } = useApp();
+  const { tasks, classes, setStudyPlan, studyPlan, setToast, setTab, focusCourse } = useApp();
   const [feature, setFeature] = useState<number | null>(null); const [prompt, setPrompt] = useState(''); const [sent, setSent] = useState(''); const [answer, setAnswer] = useState<number | null>(null);
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a,b) => a.deadline.localeCompare(b.deadline));
   const firstTask = pending[0];
@@ -22,7 +22,7 @@ export default function Assistant() {
     const end = `${start.slice(0,2)}:45`;
     return !dayClasses.some(c => start < c.end && end > c.start);
   }).slice(0, 2).sort();
-  const proposed = slots.map((s,i) => `${s} – ${s.slice(0,2)}:45 · ${i === 0 ? firstTask?.title ?? 'Ôn lại kiến thức hôm nay' : `Ôn tập ${courses[0]}`}`);
+  const proposed = slots.map((s,i) => `${s} – ${s.slice(0,2)}:45 · ${i === 0 ? firstTask?.title ?? 'Ôn lại kiến thức hôm nay' : `Ôn tập ${focusCourse}`}`);
   const send = () => { if (!prompt.trim()) return; setSent(prompt.trim()); setPrompt(''); setFeature(0); };
   return <>
     <LinearGradient colors={['#7862EA', '#5341CD', '#7865DE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 23, borderRadius: 32, gap: 20, boxShadow: '0px 12px 24px rgba(108,92,231,0.18)' }}>
