@@ -33,7 +33,7 @@ export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onCl
 }
 
 export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void }) {
-  const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, setToast } = useApp();
+  const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, studySessions, setToast } = useApp();
   const [name, setName] = useState(item?.name ?? ''); const [code, setCode] = useState(item?.code ?? '');
   const [credits, setCredits] = useState(String(item?.credits ?? 3));
   const [teacher, setTeacher] = useState(item?.teacher ?? ''); const [room, setRoom] = useState(item?.room ?? '');
@@ -42,7 +42,7 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
   const [color, setColor] = useState<CourseColor>(item?.color ?? 'lavender');
   const [description, setDescription] = useState(item?.description ?? '');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
-  const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length : 0;
+  const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length + studySessions.filter(s => s.courseId === item.id).length : 0;
   const save = () => {
     if (!name.trim() || !code.trim()) { setError('Hãy nhập tên môn và mã môn học.'); return; }
     if (!/^\d+$/.test(credits) || Number(credits) < 1 || Number(credits) > 30) { setError('Số tín chỉ cần là số nguyên từ 1 đến 30.'); return; }
@@ -67,9 +67,8 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
     <Button label="Lưu môn học" icon="checkmark" onPress={save} />
     {item && <>
-      {linkCount > 0 && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang liên kết với {linkCount} bài tập, ca học hoặc lịch thi. Bạn có thể sửa thông tin; chỉ xóa môn khi đã xử lý các mục liên quan.</T></Card>}
+      {linkCount > 0 && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang liên kết với {linkCount} bài tập, ca học, lịch thi hoặc buổi tự học. Bạn có thể sửa thông tin; chỉ xóa môn khi đã xử lý các mục liên quan.</T></Card>}
       <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={linkCount > 0} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } if (!deleteCourse(item.id)) { setError('Môn học vẫn còn dữ liệu liên quan.'); return; } setToast('Đã xóa môn học'); onDeleted(); }} />
     </>}
   </Sheet>;
 }
-

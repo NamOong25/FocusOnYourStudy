@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { Course, Semester, initialCourses, initialSemesters } from './academic';
+import { StudySession, TaskExtras, initialTaskExtras } from './learning';
 
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
 export type TaskStatus = 'Chưa làm' | 'Đang làm' | 'Hoàn thành';
@@ -33,6 +34,12 @@ const initialExams: Exam[] = [
   { id: 'e2', courseId: 'course-oop', course: courses[1]!, date: dateKey(addDays(today, 11)), time: '14:00', room: 'Phòng máy 3', type: 'Cuối kỳ • Thực hành', reminder: false },
 ];
 const durations = [25 * 60, 5 * 60, 15 * 60];
+const initialStudySessions: StudySession[] = [
+  { id: 'study-1', title: 'Hoàn thiện bố cục trang chủ', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '18:00', duration: 45, notes: 'Bắt đầu từ thẻ tổng quan, sau đó đến danh sách công việc.', status: 'Đã lên lịch', focusedSeconds: 0 },
+  { id: 'study-2', title: 'Kiểm tra luồng và bản trình bày', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '20:00', duration: 25, notes: 'Dành một phiên để rà soát lần cuối trước khi nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
+  { id: 'study-3', title: 'Đọc lại kiến thức cây nhị phân', courseId: 'course-dsa', date: dateKey(today), start: '21:00', duration: 25, notes: 'Tự ôn tập, không gắn với bài phải nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
+  { id: 'study-4', title: 'Phác thảo ERD cho báo cáo', courseId: 'course-db', taskId: 't2', date: dateKey(addDays(today, 1)), start: '19:00', duration: 45, notes: '', status: 'Đã lên lịch', focusedSeconds: 0 },
+];
 function usePrototype() {
   const [semesters, setSemesters] = useState(initialSemesters);
   const [courseCatalog, setCourseCatalog] = useState(initialCourses);
@@ -49,26 +56,62 @@ function usePrototype() {
   const [history, setHistory] = useState<string[]>([]);
   const [toast, setToast] = useState('');
   const [studyPlan, setStudyPlan] = useState<string[]>([]);
+  const [studySessions, setStudySessions] = useState(initialStudySessions);
+  const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(initialTaskExtras);
+  const [focusTaskId, setFocusTaskId] = useState<string | undefined>();
+  const [focusSessionId, setFocusSessionId] = useState<string | undefined>();
+  const lastCompletedEnd = useRef<number | null>(null);
   // Time derives from a timestamp, including after the app/tab returns to foreground.
   useEffect(() => {
     const tick = () => {
       if (!endsAt) return;
       const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
       setSeconds(remaining);
-      if (remaining === 0) {
+      if (remaining === 0 && lastCompletedEnd.current !== endsAt) {
+        lastCompletedEnd.current = endsAt;
         setEndsAt(null);
-        if (mode === 0) { setCompleted(v => v + 1); setHistory(v => [`${focusCourse} • 25 phút`, ...v]); }
+        if (mode === 0) {
+          setCompleted(v => v + 1);
+          const focusedTitle = studySessions.find(s => s.id === focusSessionId)?.title ?? tasks.find(t => t.id === focusTaskId)?.title;
+          setHistory(v => [`${focusedTitle ? focusedTitle + ' · ' : ''}${focusCourse} • 25 phút`, ...v]);
+          if (focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId ? { ...s, focusedSeconds: s.focusedSeconds + 1500, status: s.focusedSeconds + 1500 >= s.duration * 60 ? 'Hoàn thành' : 'Đang học' } : s));
+        }
         setToast(mode === 0 ? 'Hoàn thành một phiên. Nghỉ một chút nhé!' : 'Hết giờ nghỉ. Sẵn sàng học tiếp!');
       }
     };
     tick(); const id = setInterval(tick, 500); const listener = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
     return () => { clearInterval(id); listener.remove(); };
-  }, [endsAt, mode, focusCourse]);
+  }, [endsAt, mode, focusCourse, focusSessionId, focusTaskId, studySessions, tasks]);
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''), 3500); return () => clearTimeout(id); }, [toast]);
   const setMode = (n: number) => { setModeState(n); setEndsAt(null); setSeconds(durations[n]!); };
-  const toggleTimer = () => { if (endsAt) { setSeconds(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))); setEndsAt(null); } else { const duration = seconds || durations[mode]!; setSeconds(duration); setEndsAt(Date.now() + duration * 1000); } };
+  const toggleTimer = () => { if (endsAt) { setSeconds(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))); setEndsAt(null); } else { const duration = seconds || durations[mode]!; setSeconds(duration); lastCompletedEnd.current = null; setEndsAt(Date.now() + duration * 1000); if (mode === 0 && focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s)); } };
   const resetTimer = () => { setEndsAt(null); setSeconds(durations[mode]!); };
   const saveTask = (task: Task) => setTasks(v => v.some(t => t.id === task.id) ? v.map(t => t.id === task.id ? task : t) : [...v, task]);
+  const deleteTask = (id: string) => {
+    setTasks(v => v.filter(t => t.id !== id));
+    setStudySessions(v => v.map(s => s.taskId === id ? { ...s, taskId: undefined } : s));
+    setTaskExtras(v => { const next = { ...v }; delete next[id]; return next; });
+    if (focusTaskId === id) setFocusTaskId(undefined);
+  };
+  const updateTaskExtras = (id: string, extras: TaskExtras) => setTaskExtras(v => ({ ...v, [id]: extras }));
+  const saveStudySession = (session: StudySession) => {
+    setStudySessions(v => v.some(s => s.id === session.id) ? v.map(s => s.id === session.id ? session : s) : [...v, session]);
+    if (focusSessionId === session.id && (session.status === 'Hoàn thành' || session.courseId !== focusCourseId || session.taskId !== focusTaskId)) {
+      setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(session.courseId); setFocusTaskId(session.taskId);
+    }
+  };
+  const deleteStudySession = (id: string) => {
+    setStudySessions(v => v.filter(s => s.id !== id));
+    if (focusSessionId === id) { setFocusSessionId(undefined); setFocusTaskId(undefined); setEndsAt(null); setSeconds(durations[mode]!); }
+  };
+  const completeStudySession = (id: string) => {
+    setStudySessions(v => v.map(s => s.id === id ? { ...s, status: s.status === 'Hoàn thành' ? 'Đã lên lịch' : 'Hoàn thành' } : s));
+    if (focusSessionId === id) { setEndsAt(null); setSeconds(durations[mode]!); }
+  };
+  const prepareFocus = ({ courseId, taskId, sessionId }: { courseId: string; taskId?: string; sessionId?: string }) => {
+    setFocusCourseId(courseId); setFocusTaskId(taskId); setFocusSessionId(sessionId);
+    setEndsAt(null); setModeState(0); setSeconds(durations[0]!); setTab('focus');
+  };
   const saveClass = (item: ClassItem) => setClasses(v => v.some(c => c.id === item.id) ? v.map(c => c.id === item.id ? item : c) : [...v, item]);
   const saveSemester = (semester: Semester) => setSemesters(v => v.some(s => s.id === semester.id) ? v.map(s => s.id === semester.id ? semester : s) : [...v, semester]);
   const saveCourse = (course: Course) => {
@@ -80,12 +123,12 @@ function usePrototype() {
     setExams(v => v.map(e => e.courseId === course.id ? { ...e, course: course.name } : e));
   };
   const deleteCourse = (id: string) => {
-    if (tasks.some(t => t.courseId === id) || classes.some(c => c.courseId === id) || exams.some(e => e.courseId === id)) return false;
+    if (tasks.some(t => t.courseId === id) || classes.some(c => c.courseId === id) || exams.some(e => e.courseId === id) || studySessions.some(s => s.courseId === id)) return false;
     setCourseCatalog(v => v.filter(c => c.id !== id));
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, classes, setClasses, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
+  return { semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }

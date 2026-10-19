@@ -18,6 +18,8 @@ import Focus from './src/screens/Focus';
 import Stats from './src/screens/Stats';
 import Assistant from './src/screens/Assistant';
 import Academics from './src/screens/Academics';
+import TaskDialog from './src/TaskDialog';
+import StudyPlan from './src/screens/StudyPlan';
 
 const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] = [
   { id: 'home', label: 'Trang chủ', icon: 'home-outline', activeIcon: 'home' },
@@ -41,17 +43,18 @@ function AppShell() {
     <ScrollView key={`${tab}-${scheduleMode}`} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {tab === 'home' && <Home onTask={setTaskForm} onProfile={() => setPanel('profile')} />}
       {tab === 'schedule' && <>
-        <Segments values={['Lịch & bài tập', 'Môn & học kỳ']} value={scheduleMode} onChange={setScheduleMode} />
-        {scheduleMode === 'Lịch & bài tập' ? <Schedule onTask={setTaskForm} onNewTask={() => setTaskForm('new')} onClass={setClassForm} onNewClass={() => setClassForm('new')} /> : <Academics />}
+        <Segments values={['Lịch & bài tập', 'Môn & học kỳ', 'Tự học']} value={scheduleMode} onChange={setScheduleMode} />
+        {scheduleMode === 'Lịch & bài tập' ? <Schedule onTask={setTaskForm} onNewTask={() => setTaskForm('new')} onClass={setClassForm} onNewClass={() => setClassForm('new')} /> : scheduleMode === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}
       </>}
-      {tab === 'focus' && <Focus />}
+      {tab === 'focus' && <Focus onStudyPlan={() => { setScheduleMode('Tự học'); setTab('schedule'); }} />}
       {tab === 'stats' && <Stats />}
       {tab === 'ai' && <Assistant />}
       <T style={{ textAlign: 'center', color: '#91909F', fontSize: 9, lineHeight: 16, letterSpacing: 0.5 }}>FOCUSYOURSTUDY · BẢN GIAO DIỆN · DỮ LIỆU MẪU</T>
     </ScrollView>
     <View style={[styles.dockWrap, { bottom: Math.max(14, inset.bottom) }]}><View style={styles.dock}>{tabs.map(t => { const active = tab === t.id; const center = t.id === 'focus'; return <Pressable accessibilityRole="tab" accessibilityLabel={t.label} accessibilityState={{ selected: active }} key={t.id} onPress={() => setTab(t.id)} style={({ pressed }) => ({ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 63, gap: 4, opacity: pressed ? 0.65 : 1 })}>{center ? <View style={{ marginTop: -18, width: 54, height: 54, borderRadius: 27, backgroundColor: active ? C.primary : C.purple, justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#fff', boxShadow: '0px 5px 14px rgba(108,92,231,0.27)' }}><Icon name={t.icon} color="#fff" size={27} /></View> : <Icon name={active ? t.activeIcon : t.icon} color={active ? C.primary : '#686878'} size={21} />}<T style={{ fontFamily: active ? F.bold : F.medium, fontSize: 9, lineHeight: 14, color: active ? C.primary : '#686878' }}>{t.label}</T></Pressable>; })}</View></View>
     {!!toast && <View pointerEvents="none" style={{ position: 'absolute', bottom: 105 + inset.bottom, left: 24, right: 24, backgroundColor: '#29243E', borderRadius: 18, padding: 15 }}><T accessibilityLiveRegion="polite" style={{ color: '#fff', fontSize: 12, textAlign: 'center' }}>{toast}</T></View>}
-    {taskForm && <TaskForm item={taskForm === 'new' ? undefined : taskForm} onClose={() => setTaskForm(null)} />}
+    {taskForm === 'new' && <TaskForm onClose={() => setTaskForm(null)} />}
+    {taskForm && taskForm !== 'new' && <TaskDialog key={taskForm.id} taskId={taskForm.id} onClose={() => setTaskForm(null)} />}
     {classForm && <ClassForm item={classForm === 'new' ? undefined : classForm} onClose={() => setClassForm(null)} />}
     {panel === 'profile' && <Sheet title="Hồ sơ học tập" onClose={() => setPanel(null)}><Row style={{ gap: 15 }}><Image source={require('./assets/avatar.png')} style={{ width: 64, height: 64, borderRadius: 23 }} /><View><T style={{ fontFamily: F.bold, fontSize: 18 }}>Nguyễn Hoàng Nam</T><T style={S.small}>Sinh viên Công nghệ thông tin</T><Badge label="Học kỳ 5 · 2026 – 2027" /></View></Row><Card style={{ backgroundColor: C.canvas, gap: 12 }}><T style={{ fontFamily: F.bold }}>Góc học tập của bạn</T><T style={S.small}>Một nơi để sắp xếp lịch học, quản lý bài tập và tập trung vào điều quan trọng.</T></Card><Badge label="Bản giao diện · Dữ liệu mẫu" /><T style={S.small}>Bạn đang thử giao diện. Dữ liệu thay đổi trong phiên này sẽ trở về mẫu khi tải lại ứng dụng. Đăng nhập, hồ sơ thật và đồng bộ sẽ được bổ sung ở giai đoạn backend.</T><Button label="Quay lại học thôi" icon="school-outline" onPress={() => setPanel(null)} /></Sheet>}
     {panel === 'notifications' && <Sheet title="Góc nhắc nhở" onClose={() => setPanel(null)}><T style={S.small}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T>{tasks.filter(t => t.status !== 'Hoàn thành').slice(0,2).map(task => <Pressable key={task.id} onPress={() => { setPanel(null); setTaskForm(task); }}><Card><Row><Icon name="notifications-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{task.title}</T><T style={S.small}>{dueLabel(task.deadline)} · Đừng quên dành một phiên để hoàn thành.</T></View><Icon name="chevron-forward" size={16} /></Row></Card></Pressable>)}{exams[0] && <Card><T style={{ fontFamily: F.bold }}>Chuẩn bị cho {exams[0].course}</T><T style={S.small}>{dueLabel(exams[0].date)} · Bạn có thể xem chi tiết ở mục Thống kê.</T><Button label="Xem lịch thi" secondary onPress={() => { setPanel(null); setTab('stats'); }} /></Card>}<T style={S.small}>Đây là danh sách nhắc nhở trong ứng dụng. Thông báo trên thiết bị sẽ được triển khai ở giai đoạn sau.</T></Sheet>}

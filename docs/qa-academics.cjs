@@ -67,8 +67,9 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await page.getByLabel('Tên môn học', { exact: true }).fill('Kỹ nghệ phần mềm');
     await button('Lưu môn học').click(); await tab('Bài tập').click();
     await button('Mở bài tập Báo cáo thiết kế học phần').click();
+    await button('Chỉnh sửa bài tập').click();
     assert.equal(await page.getByRole('radio', { name: 'Kỹ nghệ phần mềm · SE301', exact: true }).getAttribute('aria-checked'), 'true');
-    await close(); await close();
+    await close(); await close(); await close();
     // The same subject/code in another semester must not inherit the original subject's tasks.
     await button('+ Thêm môn').click();
     await page.getByLabel('Tên môn học', { exact: true }).fill('Cấu trúc dữ liệu & Giải thuật');

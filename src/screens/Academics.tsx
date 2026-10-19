@@ -5,6 +5,7 @@ import { Badge, Button, Card, Icon, IconButton, IconTile, Progress, Row, Section
 import { Course, courseColors } from '../academic';
 import { CourseForm, SemesterForm } from '../academicForms';
 import { ClassForm, TaskForm } from '../forms';
+import TaskDialog from '../TaskDialog';
 import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../model';
 import { C, F, S } from '../theme';
 
@@ -50,13 +51,13 @@ export default function Academics() {
     {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { selectSemester(id); setSheet(null); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { selectSemester(targetSemesterId); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
     {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" onClose={() => setSheet(null)}><CourseDetail course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} /></Sheet>}
-    {sheet === 'task' && openedCourse && <TaskForm item={taskItem} initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />}
+    {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && <ClassForm item={classItem} initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />}
   </>;
 }
 
 function CourseDetail({ course, onEdit, onClose, onTask, onClass }: { course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void }) {
-  const { tasks, classes, exams, semesters, setFocusCourseId, resetTimer, setTab } = useApp();
+  const { tasks, classes, exams, semesters, prepareFocus } = useApp();
   const [section, setSection] = useState('Tổng quan'); const colors = courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
   const linkedTasks = tasks.filter(t => t.courseId === course.id).sort((a,b) => a.deadline.localeCompare(b.deadline));
@@ -70,7 +71,7 @@ function CourseDetail({ course, onEdit, onClose, onTask, onClass }: { course: Co
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Về môn học này</T><T style={{ fontSize: 13, lineHeight: 23, color: C.muted }}>{course.description || 'Bạn có thể thêm nội dung và mục tiêu môn học trong phần chỉnh sửa.'}</T>
       <Row style={{ alignItems: 'stretch' }}><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="calendar-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedClasses.length}</T><T style={S.small}>ca học mỗi tuần</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="clipboard-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedTasks.filter(t => t.status !== 'Hoàn thành').length}</T><T style={S.small}>bài tập cần làm</T></Card></Row>
       {linkedExams.map(exam => <Card key={exam.id} style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card>)}
-      <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { setFocusCourseId(course.id); resetTimer(); onClose(); setTab('focus'); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
+      <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { onClose(); prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
     </>}
     {section === 'Lịch học' && <>
       <Row between><T style={{ fontFamily: F.bold }}>Các ca học trong tuần</T><IconButton name="add" label="Thêm ca học cho môn" onPress={() => onClass()} /></Row>

@@ -11,12 +11,15 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên dựng các giao diện còn thiếu
 
 Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thành **nhóm 9**. Phạm vi hiện gồm 9 nhóm: Dashboard; Thời khóa biểu; Bài tập; Điểm/GPA; Môn học/học kỳ; Lịch thi; Pomodoro; Thống kê; Trợ lý AI. Không có nhóm còn thiếu cần người dùng bổ sung.
 
-## Đợt tiếp theo sau Môn học & học kỳ
+## Tiến độ các đợt giao diện
 
-- Chi tiết bài tập có tài liệu/checklist và màn kế hoạch tự học riêng.
-- Hoàn thiện giao diện lịch thi và lịch lặp/ngoại lệ.
-- Giao diện nhập điểm/GPA, tài khoản/cài đặt và các luồng con của AI.
-- Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
+- [x] UI 2A: Môn học & học kỳ, chi tiết môn và liên kết dữ liệu mẫu.
+- [x] UI 2B: Chi tiết bài tập, checklist, tài liệu mẫu; kế hoạch tự học ngày/tuần, nhiều buổi cho một bài và liên kết Pomodoro. Xem `UI-PHASE-2B.md`.
+- [ ] Hoàn thiện giao diện lịch thi và lịch lặp/ngoại lệ.
+- [ ] Giao diện nhập điểm/GPA, tài khoản/cài đặt và các luồng con của AI.
+- [ ] Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
+
+Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu trong bộ nhớ. Các yêu cầu nghiệp vụ thật, lưu/đồng bộ, tệp và chạy nền bên dưới vẫn để mở.
 
 ## Các yêu cầu cần bổ sung hoặc làm rõ
 

@@ -52,3 +52,11 @@ Không dùng HTML trong WebView, không đưa Tailwind CDN vào React Native, kh
 Mở **Lịch học → Môn & học kỳ** để quản lý học kỳ, môn học và xem lịch/bài/điểm của từng môn. Có tìm kiếm, lọc trạng thái, thêm/sửa và màu nhận diện. Các môn mới dùng chung trong lựa chọn môn của bài tập, ca học, lịch thi và Pomodoro.
 
 Phạm vi nay gồm 9 nhóm chức năng; AI là mục 9 (mục 10 cũ). Xem `docs/UI-PHASE-2.md` và `docs/UI-BACKLOG.md` để biết phần đã làm và các cải thiện người dùng muốn để sau.
+
+## Cập nhật đợt 2B: Bài tập & tự học
+
+Bấm một bài tập để mở màn chi tiết với checklist việc nhỏ, tài liệu mẫu và các buổi học liên quan. Mở **Lịch học → Tự học** để tạo/sửa/xóa buổi học, xem lịch ngày/tuần và bắt đầu Pomodoro cho đúng buổi. Mỗi bài có thể có nhiều buổi; trạng thái hai loại độc lập.
+
+Tài liệu chỉ dùng thư viện minh họa có nội dung đọc được, chưa tải tệp thật. Thời gian buổi học được cộng từ các phiên Pomodoro 25 phút đã hoàn tất; đánh dấu buổi xong thủ công không tự cộng thời gian và không hoàn tất bài tập. Dữ liệu vẫn đặt lại khi tải lại ứng dụng.
+
+Xem `docs/UI-PHASE-2B.md` để biết phạm vi và kiểm tra. `docs/qa-learning.cjs` là smoke test tùy chọn với Playwright/Chromium; hỗ trợ biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` như các script QA trước.
