@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "FocusYourStudy",
+    "slug": "quan-ly-hoc-tap",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "focusyourstudy",
+    "backgroundColor": "#F4FAFD",
+    "ios": { "supportsTablet": true },
+    "android": { "package": "com.focusyourstudy.app" },
+    "web": { "bundler": "metro", "name": "FocusYourStudy" }
+  }
+}

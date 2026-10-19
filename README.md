@@ -1,0 +1,48 @@
+# QuanLyHocTap — FocusYourStudy
+
+Frontend React Native + Expo SDK 56, dựng từ 5 màn Stitch và DESIGN.md do bạn cung cấp. Project độc lập với StudyPlanner cũ. Giai đoạn hiện tại chỉ làm giao diện tương tác với dữ liệu mẫu; chưa có backend Spring Boot.
+
+## Chạy ứng dụng
+
+Yêu cầu Node.js 20.19 trở lên (khuyên dùng Node 22 LTS).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+npm install
+npx expo start
+```
+
+Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 56 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
+
+```powershell
+npm run typecheck
+npm run check:dependencies
+npm run build:web
+```
+
+## Đợt giao diện đầu tiên
+
+- Trang chủ: người dùng, thẻ tập trung, tổng quan bài tập, ca học hôm nay, bài sắp đến hạn và gợi ý.
+- Lịch học: ngày/tuần/tháng, chuyển khoảng thời gian, thêm/sửa/xóa ca học lặp hằng tuần; kiểm tra khung giờ và trùng ca học.
+- Bài tập: thêm/sửa/xóa, môn học, deadline, ưu tiên, ghi chú; 3 trạng thái, lọc môn. Trang chủ và thống kê cập nhật cùng dữ liệu.
+- Pomodoro: tập trung 25 phút, nghỉ 5/15 phút, đổi môn, bắt đầu/tạm dừng/đặt lại, lịch sử các phiên mới. Dùng mốc kết thúc để thời gian cập nhật khi quay về ứng dụng, không đếm trừ dựa trên số lần interval chạy.
+- Thống kê: bộ lọc tuần/tháng/học kỳ và biểu đồ có thể chạm; dữ liệu giờ học và GPA là mẫu. Tỷ lệ hoàn thành/trễ hạn lấy từ bài tập hiện tại. Mô phỏng GPA dùng công thức trung bình có trọng số tín chỉ, ghi rõ giả định.
+- Lịch thi: danh sách, thêm lịch, bật/tắt tùy chọn nhắc mẫu.
+- Trợ lý AI: 5 công cụ, xem đề xuất mẫu, chấp nhận/để sau, trắc nghiệm mẫu có giải thích, tóm tắt mẫu kèm nguồn minh họa. Đề xuất khung giờ đối chiếu lịch học mẫu và chỉ thêm vào danh sách tự học khi chấp nhận.
+- Hộp thoại hồ sơ và nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
+
+**Dữ liệu nằm trong bộ nhớ. Tải lại ứng dụng sẽ trở về mẫu.** Không có đăng nhập thật, thông báo hệ thống, đồng bộ, upload PDF hoặc gọi AI thật. Pomodoro không phát chuông khi app bị đóng; chưa lưu phiên khi process bị hủy. Không coi kiểm tra bằng trình duyệt/Mobile View là đã kiểm tra chạy nền trên điện thoại thật.
+
+## Cấu trúc
+
+`App.tsx` chứa khung ứng dụng, header, dock và điều hướng 5 tab của prototype. `src/components.tsx` và `src/theme.ts` là thành phần dùng chung. `src/model.tsx` quản lý dữ liệu mẫu và timer. `src/forms.tsx` chứa form bài tập/lịch học/lịch thi. `src/screens/` chứa 5 màn riêng.
+
+Không dùng HTML trong WebView, không đưa Tailwind CDN vào React Native, không dùng SQLite cho bản UI này. Khi mở rộng luồng chi tiết và tài khoản ở đợt tiếp theo, thay điều hướng tab nội bộ bằng navigation stack có deep link/back gesture và tách API service khỏi state giao diện.
+
+## Tài liệu tiếp theo
+
+- `docs/UI-AUDIT.md`: đối chiếu yêu cầu, điểm đã sửa, phần còn thiếu và thứ tự phát triển.
+- `docs/references/`: 5 screenshot gốc và DESIGN.md gốc để đối chiếu.
+- `docs/DECISIONS.md`: quy ước thiết kế và phạm vi kỹ thuật.
+
+Ảnh avatar, sách và trợ lý trong `assets/` lấy từ URL có sẵn trong HTML template bạn gửi. Cần xác nhận quyền sử dụng tài nguyên trước khi phát hành thương mại. Font Plus Jakarta Sans qua gói `@expo-google-fonts/plus-jakarta-sans`; icon từ Ionicons. Các tài nguyên giao diện đã có sẵn cục bộ sau khi cài dependency, không cần tải từ CDN mỗi lần mở màn.

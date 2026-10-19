@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+.cache/
+dist/
+*.tsbuildinfo
+.env*.local
+npm-debug.*
+/android
+/ios
