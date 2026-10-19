@@ -3,7 +3,8 @@ import { Image, Pressable, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Field, Icon, IconButton, IconName, IconTile, Row, Section, Sheet, T } from '../components';
 import { C, F, S } from '../theme';
-import { useApp } from '../model';
+import { dateKey, today, useApp } from '../model';
+import { calendarEvents, findConflicts } from '../calendar';
 
 const features: { icon: IconName; title: string; description: string; action: string; color: string; bg: string }[] = [
   { icon: 'alarm-outline', title: 'Kế hoạch ôn thi theo deadline', description: 'Chia mục tiêu lớn thành những phiên học vừa sức, bắt đầu từ bài cần ưu tiên.', action: 'Tạo lộ trình', color: C.primary, bg: C.soft },
@@ -13,14 +14,14 @@ const features: { icon: IconName; title: string; description: string; action: st
   { icon: 'analytics-outline', title: 'Đánh giá & điều chỉnh kế hoạch', description: 'Nhìn lại tiến độ và dành thêm thời gian cho những phần bạn cần cải thiện.', action: 'Xem đề xuất', color: C.primary, bg: C.soft },
 ];
 export default function Assistant() {
-  const { tasks, classes, setStudyPlan, studyPlan, setToast, setTab, focusCourse } = useApp();
+  const { tasks, classes, classExceptions, exams, studySessions, setStudyPlan, studyPlan, setToast, setTab, focusCourse } = useApp();
   const [feature, setFeature] = useState<number | null>(null); const [prompt, setPrompt] = useState(''); const [sent, setSent] = useState(''); const [answer, setAnswer] = useState<number | null>(null);
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a,b) => a.deadline.localeCompare(b.deadline));
   const firstTask = pending[0];
-  const dayClasses = classes.filter(c => c.weekday === new Date().getDay());
+  const dayEvents = calendarEvents(dateKey(today), classes, classExceptions, exams, studySessions);
   const slots = ['18:00', '19:00', '20:00', '21:00', '17:00', '16:00', '15:00', '14:00', '11:00', '10:00', '09:00', '08:00'].filter(start => {
     const end = `${start.slice(0,2)}:45`;
-    return !dayClasses.some(c => start < c.end && end > c.start);
+    return findConflicts(dateKey(today), start, end, dayEvents).length === 0;
   }).slice(0, 2).sort();
   const proposed = slots.map((s,i) => `${s} – ${s.slice(0,2)}:45 · ${i === 0 ? firstTask?.title ?? 'Ôn lại kiến thức hôm nay' : `Ôn tập ${focusCourse}`}`);
   const send = () => { if (!prompt.trim()) return; setSent(prompt.trim()); setPrompt(''); setFeature(0); };

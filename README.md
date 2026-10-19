@@ -60,3 +60,11 @@ Bấm một bài tập để mở màn chi tiết với checklist việc nhỏ, 
 Tài liệu chỉ dùng thư viện minh họa có nội dung đọc được, chưa tải tệp thật. Thời gian buổi học được cộng từ các phiên Pomodoro 25 phút đã hoàn tất; đánh dấu buổi xong thủ công không tự cộng thời gian và không hoàn tất bài tập. Dữ liệu vẫn đặt lại khi tải lại ứng dụng.
 
 Xem `docs/UI-PHASE-2B.md` để biết phạm vi và kiểm tra. `docs/qa-learning.cjs` là smoke test tùy chọn với Playwright/Chromium; hỗ trợ biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` như các script QA trước.
+
+## Cập nhật đợt 2C: Lịch thi & ngoại lệ lịch học
+
+Mở **Lịch học → Lịch & bài tập → Kỳ thi** để quản lý lịch thi, loại/hình thức, giờ kết thúc và các mốc nhắc mẫu. Thống kê và Chi tiết môn cũng mở được cùng lịch thi đó.
+
+Trong **Thời khóa biểu**, bấm một buổi để nghỉ, đổi giờ/phòng riêng ngày đó, khôi phục hoặc sửa/xóa cả chuỗi. Form chuỗi chọn nhiều thứ và khoảng ngày áp dụng. Cảnh báo trùng giờ dùng chung cho ca học, thi và tự học, chỉ rõ lịch liên quan. Các màn đọc cùng ngoại lệ; không coi buổi đã nghỉ là giờ bận.
+
+Xem `docs/UI-PHASE-2C.md` để biết quy tắc và giới hạn. Dữ liệu/tùy chọn nhắc vẫn là mẫu trong bộ nhớ. Ngày giờ tiếp tục nhập chuỗi theo checklist đã hoãn.

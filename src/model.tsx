@@ -2,19 +2,15 @@ import React, { createContext, useContext, useEffect, useRef, useState, ReactNod
 import { AppState } from 'react-native';
 import { Course, Semester, initialCourses, initialSemesters } from './academic';
 import { StudySession, TaskExtras, initialTaskExtras } from './learning';
+import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from './calendar';
+import { addDays, dateKey, today } from './dates';
+export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from './dates';
 
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
 export type TaskStatus = 'Chưa làm' | 'Đang làm' | 'Hoàn thành';
 export type Task = { id: string; title: string; courseId: string; course: string; deadline: string; priority: 'Cao' | 'Trung bình'; status: TaskStatus; notes: string };
-export type ClassItem = { id: string; courseId: string; title: string; weekday: number; start: string; end: string; room: string; teacher: string };
+export type { ClassItem, ClassException, Exam } from './calendar';
 export const courses = ['Cấu trúc dữ liệu & Giải thuật', 'Lập trình Hướng đối tượng', 'Cơ sở dữ liệu', 'Mạng máy tính', 'Toán rời rạc'];
-export const today = new Date();
-export function dateKey(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-export function addDays(d: Date, n: number) { const next = new Date(d); next.setDate(next.getDate() + n); return next; }
-export function parseDay(s: string) { const [y, m, d] = s.split('-').map(Number); return new Date(y!, m! - 1, d!); }
-export function dateLabel(s: string) { return parseDay(s).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }); }
-export function dueLabel(s: string) { const diff = Math.round((parseDay(s).getTime() - parseDay(dateKey(new Date())).getTime()) / 86400000); return diff < 0 ? `Trễ ${-diff} ngày` : diff === 0 ? 'Hôm nay' : diff === 1 ? 'Ngày mai' : `Còn ${diff} ngày`; }
-export function isValidDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) && dateKey(parseDay(s)) === s; }
 export function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }
 export const initialTasks: Task[] = [
   { id: 't1', title: 'Đồ án cuối kỳ Web App', courseId: 'course-oop', course: courses[1]!, deadline: dateKey(today), priority: 'Cao', status: 'Đang làm', notes: 'Hoàn thiện giao diện trang chủ và luồng đăng nhập. Kiểm tra lại bản trình bày trước khi nộp.' },
@@ -23,15 +19,15 @@ export const initialTasks: Task[] = [
   { id: 't4', title: 'Ôn tập chương Cây nhị phân', courseId: 'course-dsa', course: courses[0]!, deadline: dateKey(addDays(today, 5)), priority: 'Trung bình', status: 'Hoàn thành', notes: 'Đã hoàn thành 10 bài luyện tập.' },
 ];
 const initialClasses: ClassItem[] = [
-  { id: 'c1', courseId: 'course-oop', title: courses[1]!, weekday: today.getDay(), start: '08:00', end: '10:30', room: 'A2.301', teacher: 'TS. Lê Văn Tuấn' },
-  { id: 'c2', courseId: 'course-dsa', title: courses[0]!, weekday: today.getDay(), start: '13:30', end: '16:00', room: 'Lab 4', teacher: 'ThS. Trần Mai' },
-  { id: 'c3', courseId: 'course-db', title: courses[2]!, weekday: (today.getDay() + 1) % 7, start: '07:30', end: '10:00', room: 'B1.204', teacher: 'ThS. Hoàng Linh' },
-  { id: 'c4', courseId: 'course-network', title: courses[3]!, weekday: (today.getDay() + 3) % 7, start: '09:00', end: '11:30', room: 'C3.104', teacher: 'TS. Phạm Đức Minh' },
+
+  { id: 'c1', courseId: 'course-oop', title: courses[1]!, weekday: today.getDay(), weekdays: [today.getDay()], startsOn: dateKey(addDays(today, -30)), endsOn: dateKey(addDays(today, 90)), reminderMinutes: 15, start: '08:00', end: '10:30', room: 'A2.301', teacher: 'TS. Lê Văn Tuấn' },
+  { id: 'c2', courseId: 'course-dsa', title: courses[0]!, weekday: today.getDay(), weekdays: [today.getDay()], startsOn: dateKey(addDays(today, -30)), endsOn: dateKey(addDays(today, 90)), reminderMinutes: 15, start: '13:30', end: '16:00', room: 'Lab 4', teacher: 'ThS. Trần Mai' },
+  { id: 'c3', courseId: 'course-db', title: courses[2]!, weekday: (today.getDay() + 1) % 7, weekdays: [(today.getDay() + 1) % 7], startsOn: dateKey(addDays(today, -30)), endsOn: dateKey(addDays(today, 90)), reminderMinutes: 15, start: '07:30', end: '10:00', room: 'B1.204', teacher: 'ThS. Hoàng Linh' },
+  { id: 'c4', courseId: 'course-network', title: courses[3]!, weekday: (today.getDay() + 3) % 7, weekdays: [(today.getDay() + 3) % 7], startsOn: dateKey(addDays(today, -30)), endsOn: dateKey(addDays(today, 90)), reminderMinutes: 15, start: '09:00', end: '11:30', room: 'C3.104', teacher: 'TS. Phạm Đức Minh' },
 ];
-export type Exam = { id: string; courseId: string; course: string; date: string; time: string; room: string; type: string; reminder: boolean };
 const initialExams: Exam[] = [
-  { id: 'e1', courseId: 'course-math', course: courses[4]!, date: dateKey(addDays(today, 6)), time: '08:30', room: 'B202', type: 'Giữa kỳ • Tự luận', reminder: true },
-  { id: 'e2', courseId: 'course-oop', course: courses[1]!, date: dateKey(addDays(today, 11)), time: '14:00', room: 'Phòng máy 3', type: 'Cuối kỳ • Thực hành', reminder: false },
+  { id: 'e1', courseId: 'course-math', course: courses[4]!, date: dateKey(addDays(today, 6)), time: '08:30', room: 'B202', type: 'Giữa kỳ • Tự luận', end: '10:00', kind: 'Giữa kỳ', format: 'Tự luận', reminder: true, reminderMinutes: [1440, 180], notes: 'Mang theo thẻ sinh viên và máy tính được phép sử dụng.' },
+  { id: 'e2', courseId: 'course-oop', course: courses[1]!, date: dateKey(addDays(today, 11)), time: '14:00', room: 'Phòng máy 3', type: 'Cuối kỳ • Thực hành', end: '16:00', kind: 'Cuối kỳ', format: 'Thực hành', reminder: false, reminderMinutes: [1440, 180], notes: 'Kiểm tra tài khoản phòng máy trước ngày thi.' },
 ];
 const durations = [25 * 60, 5 * 60, 15 * 60];
 const initialStudySessions: StudySession[] = [
@@ -45,6 +41,7 @@ function usePrototype() {
   const [courseCatalog, setCourseCatalog] = useState(initialCourses);
   const [tasks, setTasks] = useState(initialTasks);
   const [classes, setClasses] = useState(initialClasses);
+  const [classExceptions, setClassExceptions] = useState<ClassException[]>([]);
   const [exams, setExams] = useState(initialExams);
   const [tab, setTab] = useState<Tab>('home');
   const [focusCourseId, setFocusCourseId] = useState('course-dsa');
@@ -112,7 +109,16 @@ function usePrototype() {
     setFocusCourseId(courseId); setFocusTaskId(taskId); setFocusSessionId(sessionId);
     setEndsAt(null); setModeState(0); setSeconds(durations[0]!); setTab('focus');
   };
-  const saveClass = (item: ClassItem) => setClasses(v => v.some(c => c.id === item.id) ? v.map(c => c.id === item.id ? item : c) : [...v, item]);
+  const saveClass = (item: ClassItem) => {
+    setClasses(v => v.some(c => c.id === item.id) ? v.map(c => c.id === item.id ? item : c) : [...v, item]);
+    setClassExceptions(v => v.filter(e => e.seriesId !== item.id || isClassDate(item, e.date)));
+  };
+  const deleteClass = (id: string) => { setClasses(v => v.filter(c => c.id !== id)); setClassExceptions(v => v.filter(e => e.seriesId !== id)); };
+  const saveClassException = (item: ClassException) => setClassExceptions(v => [...v.filter(e => !(e.seriesId === item.seriesId && e.date === item.date)), item]);
+  const restoreClassOccurrence = (seriesId: string, date: string) => setClassExceptions(v => v.filter(e => !(e.seriesId === seriesId && e.date === date)));
+  const getClassesOn = (date: string) => classOccurrences(date, classes, classExceptions);
+  const saveExam = (item: Exam) => setExams(v => (v.some(e => e.id === item.id) ? v.map(e => e.id === item.id ? item : e) : [...v, item]).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)));
+  const deleteExam = (id: string) => setExams(v => v.filter(e => e.id !== id));
   const saveSemester = (semester: Semester) => setSemesters(v => v.some(s => s.id === semester.id) ? v.map(s => s.id === semester.id ? semester : s) : [...v, semester]);
   const saveCourse = (course: Course) => {
     const previous = courseCatalog.find(c => c.id === course.id);
@@ -128,7 +134,7 @@ function usePrototype() {
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
+  return { semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }

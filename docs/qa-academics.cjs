@@ -57,11 +57,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await button('Tạo bài tập').click(); await tab('Bài tập').click();
     await button('Mở bài tập Báo cáo thiết kế học phần').waitFor();
     await tab('Lịch học').click(); await button('Thêm ca học cho môn').click();
-    await page.getByLabel('Bắt đầu (HH:mm)', { exact: true }).fill('18:00');
-    await page.getByLabel('Kết thúc (HH:mm)', { exact: true }).fill('19:00');
+    await page.getByLabel('Bắt đầu (HH:mm)', { exact: true }).fill('22:00');
+    await page.getByLabel('Kết thúc (HH:mm)', { exact: true }).fill('22:45');
     assert.equal(await page.getByLabel('Giảng viên', { exact: true }).inputValue(), 'ThS. Minh Anh');
     await button('Lưu lịch học').click(); await tab('Lịch học').click();
-    await page.getByText('18:00 – 19:00', { exact: true }).waitFor();
+    await page.getByText('22:00 – 22:45', { exact: true }).waitFor();
     await button('Chỉnh sửa môn học').click();
     assert.equal(await button('Xóa môn học').isDisabled(), true);
     await page.getByLabel('Tên môn học', { exact: true }).fill('Kỹ nghệ phần mềm');
@@ -92,4 +92,3 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));
   } finally { await page.screenshot({ path: path.join(out, 'last-state.png') }); fs.writeFileSync(path.join(out, 'console-errors.json'), JSON.stringify(errors)); await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
-

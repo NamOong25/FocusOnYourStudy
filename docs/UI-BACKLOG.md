@@ -15,7 +15,7 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 
 - [x] UI 2A: Môn học & học kỳ, chi tiết môn và liên kết dữ liệu mẫu.
 - [x] UI 2B: Chi tiết bài tập, checklist, tài liệu mẫu; kế hoạch tự học ngày/tuần, nhiều buổi cho một bài và liên kết Pomodoro. Xem `UI-PHASE-2B.md`.
-- [ ] Hoàn thiện giao diện lịch thi và lịch lặp/ngoại lệ.
+- [x] UI 2C: Chi tiết/tạo/sửa/xóa lịch thi, tùy chọn nhắc mẫu; chuỗi lịch học nhiều thứ/có phạm vi, nghỉ/đổi/khôi phục một buổi và cảnh báo lịch bị trùng. Xem `UI-PHASE-2C.md`.
 - [ ] Giao diện nhập điểm/GPA, tài khoản/cài đặt và các luồng con của AI.
 - [ ] Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
 

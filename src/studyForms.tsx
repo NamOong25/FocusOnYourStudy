@@ -3,11 +3,13 @@ import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, T } from './components';
 import { CourseChoices } from './forms';
 import { StudySession, StudyStatus, endTime, timeMinutes } from './learning';
+import { CalendarEvent, calendarEvents, findConflicts } from './calendar';
+import ConflictPanel from './ConflictPanel';
 import { dateKey, isValidDate, parseDay, today, uid, useApp } from './model';
 import { C, F, S } from './theme';
 
 export function StudySessionForm({ item, initialTaskId, initialCourseId, initialDate, onClose, onSaved, onDeleted }: { item?: StudySession; initialTaskId?: string; initialCourseId?: string; initialDate?: string; onClose: () => void; onSaved?: (id: string) => void; onDeleted?: () => void }) {
-  const { tasks, courseCatalog, classes, studySessions, saveStudySession, deleteStudySession, setToast } = useApp();
+  const { tasks, courseCatalog, classes, classExceptions, exams, studySessions, saveStudySession, deleteStudySession, setToast } = useApp();
   const initialTask = tasks.find(t => t.id === initialTaskId);
   const [title, setTitle] = useState(item?.title ?? '');
   const [courseId, setCourseId] = useState(item?.courseId ?? initialTask?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
@@ -16,8 +18,10 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
   const [start, setStart] = useState(item?.start ?? '19:00'); const [duration, setDuration] = useState(String(item?.duration ?? 45));
   const [notes, setNotes] = useState(item?.notes ?? ''); const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
   const [status, setStatus] = useState<StudyStatus>(item?.status ?? 'Đã lên lịch');
+  const [conflicts, setConflicts] = useState<CalendarEvent[]>([]);
   const availableTasks = tasks.filter(t => t.courseId === courseId);
   const save = () => {
+    setConflicts([]); setError('');
     if (!title.trim()) { setError('Đặt tên nội dung bạn muốn học trong buổi này.'); return; }
     const course = courseCatalog.find(c => c.id === courseId);
     if (!course) { setError('Hãy chọn môn học.'); return; }
@@ -27,8 +31,8 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     if (taskId && (!task || task.courseId !== courseId)) { setError('Bài tập cần thuộc đúng môn đang chọn.'); return; }
     if (task && date > task.deadline) { setError('Buổi học đang sau hạn nộp bài. Chọn ngày trước hạn hoặc bỏ liên kết bài tập để ôn tập độc lập.'); return; }
     const ending = endTime(start, Number(duration));
-    if (classes.some(c => courseCatalog.find(subject => subject.id === c.courseId)?.semesterId === course.semesterId && c.weekday === parseDay(date).getDay() && start < c.end && ending > c.start)) { setError('Khung giờ này đang trùng ca học. Hãy chọn khoảng trống khác.'); return; }
-    if (studySessions.some(s => s.id !== item?.id && s.date === date && start < endTime(s.start, s.duration) && ending > s.start)) { setError('Khung giờ này đang trùng một buổi tự học đã lên lịch.'); return; }
+    const clashes = findConflicts(date, start, ending, calendarEvents(date, classes, classExceptions, exams, studySessions), item ? { kind: 'Tự học', id: item.id } : undefined);
+    if (clashes.length) { setConflicts(clashes); if (clashes.some(e => e.kind === 'Tự học')) setError('Khung giờ này đang trùng một buổi tự học đã lên lịch.'); return; }
     const session: StudySession = { id: item?.id ?? uid(), title: title.trim(), courseId, taskId: taskId || undefined, date, start, duration: Number(duration), notes: notes.trim(), status, focusedSeconds: item?.focusedSeconds ?? 0 };
     saveStudySession(session);
     setToast(item ? 'Đã cập nhật buổi tự học' : 'Đã thêm buổi tự học'); if (onSaved) onSaved(session.id); else onClose();
@@ -45,6 +49,7 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     {item && <><T style={{ fontFamily: F.semi, fontSize: 12 }}>Trạng thái buổi học</T><Segments values={['Đã lên lịch', 'Đang học', 'Hoàn thành']} value={status} onChange={v => setStatus(v as StudyStatus)} /></>}
     <Field label="Ghi chú buổi học" value={notes} onChange={setNotes} placeholder="Tài liệu cần đọc, mục tiêu nhỏ cần đạt…" multiline />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
+    <ConflictPanel conflicts={conflicts} candidate={`${title || 'Buổi tự học'} · ${start} – ${endTime(start, Number(duration) || 0)}`} />
     <Button label="Lưu buổi tự học" icon="checkmark" onPress={save} />
     <T style={S.small}>Buổi học có thời gian riêng. Trạng thái bài tập và hạn nộp được quản lý độc lập.</T>
     {item && <Button label={confirmDelete ? 'Xác nhận xóa buổi tự học' : 'Xóa buổi tự học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteStudySession(item.id); setToast('Đã xóa buổi tự học'); (onDeleted ?? onClose)(); }} />}

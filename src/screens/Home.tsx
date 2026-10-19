@@ -3,12 +3,12 @@ import { Image, Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Icon, IconTile, Progress, Row, Section, T, Empty } from '../components';
 import { C, F, S } from '../theme';
-import { Task, dateLabel, dueLabel, useApp } from '../model';
+import { Task, dateKey, dateLabel, dueLabel, useApp } from '../model';
 
 export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void; onProfile: () => void }) {
-  const { tasks, classes, exams, completed, focusCourse, setTab, studyPlan } = useApp();
+  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan } = useApp();
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
-  const todayClasses = classes.filter(c => c.weekday === new Date().getDay()).sort((a, b) => a.start.localeCompare(b.start));
+  const todayClasses = getClassesOn(dateKey(new Date())).filter(c => !c.cancelled);
   const done = tasks.filter(t => t.status === 'Hoàn thành').length;
   const percent = tasks.length ? Math.round(done / tasks.length * 100) : 0;
   const nextExam = [...exams].sort((a, b) => a.date.localeCompare(b.date))[0];
