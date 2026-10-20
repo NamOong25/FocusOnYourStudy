@@ -5,7 +5,7 @@ import { Course, Semester, initialCourses, initialSemesters } from '../features/
 import { StudySession, TaskExtras, initialTaskExtras } from '../features/study/learning';
 import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from '../features/schedule/calendar';
 import { addDays, dateKey, today } from '../shared/utils/dates';
-import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook } from '../features/grades/grades';
+import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, autoLinkAttempts } from '../features/grades/grades';
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from '../features/account/account';
 import { AiProposal, proposalSessions, validateProposal } from '../features/assistant/aiPlanner';
 import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from '../navigation/navigationState';
@@ -49,7 +49,8 @@ function usePrototype(empty: boolean) {
   const [previewSignedIn, setPreviewSignedIn] = useState(true);
   const [semesters, setSemesters] = useState(empty ? [] : initialSemesters);
   const [courseCatalog, setCourseCatalog] = useState(empty ? [] : initialCourses);
-  const [gradeBook, setGradeBook] = useState<GradeBook>(empty ? {} : initialGradeBook);
+  const [storedGradeBook, setGradeBook] = useState<GradeBook>(empty ? {} : initialGradeBook);
+  const gradeBook = React.useMemo(() => autoLinkAttempts(courseCatalog, storedGradeBook, semesters), [courseCatalog, storedGradeBook, semesters]);
   const [gradeRules, setGradeRules] = useState<GradeRules>(defaultRules);
   const saveGrades = (id: string, record: CourseGrades) => setGradeBook(v => ({ ...v, [id]: record }));
   const [tasks, setTasks] = useState(empty ? [] : initialTasks);

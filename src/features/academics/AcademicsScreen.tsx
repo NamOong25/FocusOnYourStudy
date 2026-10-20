@@ -13,13 +13,15 @@ import ClassDialog from '../schedule/ClassDialog';
 import { weekdaysLabel } from '../schedule/calendar';
 import { ExamDialog } from '../exams/Exams';
 import GradePanel from '../grades/GradePanel';
+import GradeStatus from '../grades/GradeStatus';
+import {courseResult} from '../grades/grades';
 import { GradeEditor } from '../grades/GradeEditor';
 import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 
 type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
-  const { semesters, courseCatalog, tasks, classes } = useApp();
+  const { semesters, courseCatalog, tasks, classes, gradeBook, gradeRules } = useApp();
   const [semesterId, setSemesterId] = useState('sem-5'); const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
   const [detailSection, setDetailSection] = useState('Tổng quan');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
@@ -29,9 +31,9 @@ export default function Academics() {
   const semester = semesters.find(s => s.id === semesterId) ?? semesters[0]!;
   const semesterCourses = courseCatalog.filter(c => c.semesterId === semester.id);
   const credits = semesterCourses.reduce((sum, c) => sum + c.credits, 0);
-  const completedCredits = semesterCourses.filter(c => c.status === 'Hoàn thành').reduce((sum,c) => sum + c.credits, 0);
+  const completedCredits = semesterCourses.filter(c => { const grade=courseResult(gradeBook[c.id],gradeRules); return grade.passed || (!grade.failed && c.status === 'Hoàn thành'); }).reduce((sum,c) => sum + c.credits, 0);
   const normalizedQuery = query.trim().toLocaleLowerCase();
-  const list = semesterCourses.filter(c => (filter === 'Tất cả' || c.status === filter) && `${c.name} ${c.code} ${c.teacher}`.toLocaleLowerCase().includes(normalizedQuery));
+  const list = semesterCourses.filter(c => (filter === 'Tất cả' || (filter === 'Không đạt' ? courseResult(gradeBook[c.id],gradeRules).failed : !courseResult(gradeBook[c.id],gradeRules).failed && (courseResult(gradeBook[c.id],gradeRules).passed ? 'Hoàn thành' : c.status) === filter)) && `${c.name} ${c.code} ${c.teacher}`.toLocaleLowerCase().includes(normalizedQuery));
   const openedCourse = courseCatalog.find(c => c.id === courseId);
   const selectSemester = (id: string) => { setSemesterId(id); setFilter('Tất cả'); setQuery(''); };
   const openCourse = (course: Course) => { setCourseId(course.id); setDetailSection('Tổng quan'); setSheet('detail'); };
@@ -47,12 +49,13 @@ export default function Academics() {
     </LinearGradient>
     <Section title="Môn học trong kỳ" action="+ Thêm môn" onAction={() => setSheet('new-course')} />
     <Row style={{ borderRadius: 17, backgroundColor: '#fff', borderWidth: 1, borderColor: C.line, paddingHorizontal: 14, minHeight: 49 }}><Icon name="search-outline" color={C.muted} size={19} /><TextInput accessibilityLabel="Tìm môn học" placeholder="Tên môn, mã môn hoặc giảng viên" placeholderTextColor={C.muted} value={query} onChangeText={setQuery} style={{ flex: 1, minWidth: 0, fontFamily: F.regular, fontSize: 12, color: C.ink, paddingVertical: 13 }} />{!!query && <IconButton name="close" label="Xóa tìm kiếm" onPress={() => setQuery('')} bg="#fff" />}</Row>
-    <Segments values={['Tất cả', 'Đang học', 'Hoàn thành', 'Dự kiến']} value={filter} onChange={setFilter} />
+    <Segments values={['Tất cả', 'Đang học', 'Hoàn thành', 'Dự kiến', 'Không đạt']} value={filter} onChange={setFilter} />
     {list.map(course => {
-      const colors = courseColors[course.color]; const linkedTasks = tasks.filter(t => t.courseId === course.id); const done = linkedTasks.filter(t => t.status === 'Hoàn thành').length; const classCount = classes.filter(c => c.courseId === course.id).reduce((sum,c) => sum + c.weekdays.length, 0);
-      return <Pressable key={course.id} accessibilityRole="button" accessibilityLabel={`Mở môn ${course.name}`} onPress={() => openCourse(course)}><Card style={{ gap: 14 }}>
+      const grade=courseResult(gradeBook[course.id],gradeRules); const colors = grade.failed ? {bg:C.redSoft,ink:C.red} : courseColors[course.color]; const linkedTasks = tasks.filter(t => t.courseId === course.id); const done = linkedTasks.filter(t => t.status === 'Hoàn thành').length; const classCount = classes.filter(c => c.courseId === course.id).reduce((sum,c) => sum + c.weekdays.length, 0);
+      return <Pressable key={course.id} accessibilityRole="button" accessibilityLabel={`Mở môn ${course.name}`} onPress={() => openCourse(course)}><Card style={{ gap: 14,backgroundColor:grade.failed?C.redSoft:'#fff',borderColor:grade.failed?C.red:C.line }}>
         <Row><IconTile name="book-outline" color={colors.ink} bg={colors.bg} size={46} /><View style={[S.grow, { gap: 4 }]}><T style={{ color: colors.ink, fontFamily: F.bold, fontSize: 10, letterSpacing: 0.7 }}>{course.code}</T><T style={{ fontFamily: F.bold, fontSize: 17, lineHeight: 25, letterSpacing: -0.3 }}>{course.name}</T></View><Icon name="chevron-forward" color={C.muted} size={17} /></Row>
-        <Row between><Row style={[S.grow, { gap: 5 }]}><Icon name="person-outline" color={C.muted} size={14} /><T numberOfLines={1} style={{ color: C.muted, fontSize: 11, flex: 1 }}>{course.teacher || 'Chưa có giảng viên'}</T></Row><Badge label={course.status} bg={course.status === 'Hoàn thành' ? C.greenSoft : colors.bg} color={course.status === 'Hoàn thành' ? C.green : colors.ink} /></Row>
+        <Row between><Row style={[S.grow, { gap: 5 }]}><Icon name="person-outline" color={C.muted} size={14} /><T numberOfLines={1} style={{ color: C.muted, fontSize: 11, flex: 1 }}>{course.teacher || 'Chưa có giảng viên'}</T></Row><Badge label={grade.failed?'Không đạt':grade.passed?'Hoàn thành':course.status} bg={grade.failed ? C.redSoft : grade.passed || course.status === 'Hoàn thành' ? C.greenSoft : colors.bg} color={grade.failed ? C.red : grade.passed || course.status === 'Hoàn thành' ? C.green : colors.ink} /></Row>
+        {(grade.failed||grade.passed)&&<GradeStatus result={grade}/>}
         <Row style={{ gap: 7, flexWrap: 'wrap' }}><Badge label={`${course.credits} tín chỉ`} bg={C.canvas} color={C.muted} icon="ribbon-outline" /><Badge label={`${classCount} ca học`} bg={C.canvas} color={C.muted} icon="calendar-outline" /><Badge label={`${linkedTasks.length} bài tập`} bg={C.canvas} color={C.muted} icon="clipboard-outline" /></Row>
         {!!linkedTasks.length && <View style={{ gap: 7 }}><Row between><T style={{ color: C.muted, fontSize: 10 }}>Bài tập đã hoàn thành</T><T style={{ color: colors.ink, fontSize: 10, fontFamily: F.bold }}>{done}/{linkedTasks.length}</T></Row><Progress value={done / linkedTasks.length * 100} /></View>}
       </Card></Pressable>;
@@ -70,14 +73,16 @@ export default function Academics() {
 }
 
 function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
-  const { tasks, classes, exams, semesters, prepareFocus } = useApp();
-  const colors = courseColors[course.color];
+  const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules } = useApp();
+  const grade=courseResult(gradeBook[course.id],gradeRules);
+  const colors = grade.failed?{bg:C.redSoft,ink:C.red}:courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
   const linkedTasks = tasks.filter(t => t.courseId === course.id).sort((a,b) => a.deadline.localeCompare(b.deadline));
   const linkedClasses = classes.filter(c => c.courseId === course.id).sort((a,b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7) || a.start.localeCompare(b.start));
   const linkedExams = exams.filter(e => e.courseId === course.id);
   return <>
-    <Card style={{ backgroundColor: colors.bg, borderColor: colors.bg, gap: 12 }}><Row between><Badge label={`${course.code} · ${course.credits} tín chỉ`} bg="#FFFFFFAA" color={colors.ink} /><IconButton name="create-outline" label="Chỉnh sửa môn học" onPress={onEdit} bg="#FFFFFFBB" color={colors.ink} /></Row><T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33, color: colors.ink, letterSpacing: -0.6 }}>{course.name}</T><Row style={{ flexWrap: 'wrap' }}><Badge label={course.status} bg="#FFFFFFAA" color={colors.ink} /><T style={{ fontSize: 11, color: colors.ink }}>{semester?.name} · {semester?.academicYear}</T></Row></Card>
+    <Card style={{ backgroundColor: colors.bg, borderColor: colors.bg, gap: 12 }}><Row between><Badge label={`${course.code} · ${course.credits} tín chỉ`} bg="#FFFFFFAA" color={colors.ink} /><IconButton name="create-outline" label="Chỉnh sửa môn học" onPress={onEdit} bg="#FFFFFFBB" color={colors.ink} /></Row><T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33, color: colors.ink, letterSpacing: -0.6 }}>{course.name}</T><Row style={{ flexWrap: 'wrap' }}><Badge label={grade.failed?'Không đạt':grade.passed?'Hoàn thành':course.status} bg="#FFFFFFAA" color={colors.ink} /><T style={{ fontSize: 11, color: colors.ink }}>{semester?.name} · {semester?.academicYear}</T></Row></Card>
+    {(grade.failed||grade.passed)&&<GradeStatus result={grade} detail/>}
     <Segments values={['Tổng quan', 'Lịch học', 'Bài tập', 'Điểm số']} value={section} onChange={setSection} />
     {section === 'Tổng quan' && <>
       <Card style={{ gap: 15 }}><Row><IconTile name="person-outline" size={38} bg={C.canvas} /><View style={S.grow}><T style={S.small}>Giảng viên</T><T style={{ fontFamily: F.semi }}>{course.teacher || 'Chưa cập nhật'}</T></View></Row><Row><IconTile name="business-outline" size={38} bg={C.canvas} /><View style={S.grow}><T style={S.small}>Phòng học thường dùng</T><T style={{ fontFamily: F.semi }}>{course.room || 'Chưa cập nhật'}</T></View></Row></Card>

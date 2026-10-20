@@ -1,16 +1,22 @@
-import { Course } from '../academics/academic';
+import { Course, Semester } from '../academics/academic';
 
-export type GradePart = { id: string; name: string; weight: number; score: number | null };
-export type CourseGrades = { parts: GradePart[]; previousCourseId?: string };
+export const gradePartOptions = ['Điểm thường kỳ', 'Kiểm tra thường kỳ', 'Giữa kỳ', 'Thực hành', 'Kiểm tra thực hành', 'Cuối kỳ'] as const;
+export type GradeKind = typeof gradePartOptions[number];
+export type Assessment = 'theory' | 'practical' | 'integrated' | 'pass-fail' | 'thesis' | 'custom';
+export const assessmentOptions: {value:Assessment;label:string}[] = [{value:'theory',label:'Lý thuyết'},{value:'practical',label:'Thực hành'},{value:'integrated',label:'Tích hợp LT + TH'},{value:'pass-fail',label:'Đạt / không đạt'},{value:'thesis',label:'Đồ án / khóa luận'},{value:'custom',label:'Theo đề cương riêng'}];
+export type GradePart = { id: string; name: string; kind?: GradeKind; weight: number; score: number | null };
+export type CourseGrades = { parts: GradePart[]; previousCourseId?: string; assessment?: Assessment; theoryCredits?: number; practicalCredits?: number };
 export type GradeBook = Record<string, CourseGrades>;
-export type GradeRules = { scale: 'expanded' | 'simple'; decimals: 1 | 2; retake: 'latest' | 'highest' };
-export const defaultRules: GradeRules = { scale: 'expanded', decimals: 1, retake: 'highest' };
+export type GradeRules = { scale: 'iuh' | 'expanded' | 'simple'; decimals: 1 | 2; retake: 'latest' | 'highest' };
+export const defaultRules: GradeRules = { scale: 'iuh', decimals: 1, retake: 'highest' };
 export const gradeScales = {
+  iuh: [{ min: 9, letter: 'A+', point: 4 }, { min: 8.5, letter: 'A', point: 3.8 }, { min: 8, letter: 'B+', point: 3.5 }, { min: 7, letter: 'B', point: 3 }, { min: 6, letter: 'C+', point: 2.5 }, { min: 5.5, letter: 'C', point: 2 }, { min: 5, letter: 'D+', point: 1.5 }, { min: 4, letter: 'D', point: 1 }, { min: 0, letter: 'F', point: 0 }],
   expanded: [{ min: 8.5, letter: 'A', point: 4 }, { min: 8, letter: 'B+', point: 3.5 }, { min: 7, letter: 'B', point: 3 }, { min: 6.5, letter: 'C+', point: 2.5 }, { min: 5.5, letter: 'C', point: 2 }, { min: 5, letter: 'D+', point: 1.5 }, { min: 4, letter: 'D', point: 1 }, { min: 0, letter: 'F', point: 0 }],
   simple: [{ min: 8.5, letter: 'A', point: 4 }, { min: 7, letter: 'B', point: 3 }, { min: 5.5, letter: 'C', point: 2 }, { min: 4, letter: 'D', point: 1 }, { min: 0, letter: 'F', point: 0 }],
 };
-export function emptyGrades(): CourseGrades { return { parts: [{ id: 'regular', name: 'Thường xuyên', weight: 20, score: null }, { id: 'mid', name: 'Giữa kỳ', weight: 30, score: null }, { id: 'final', name: 'Cuối kỳ', weight: 50, score: null }] }; }
-function example(scores: (number | null)[]): CourseGrades { return { parts: emptyGrades().parts.map((p,i) => ({ ...p, score: scores[i] ?? null })) }; }
+export function partKind(part: GradePart): GradeKind { return part.kind ?? (part.id==='mid'||part.name==='Giữa kỳ'?'Giữa kỳ':part.id==='final'||part.name==='Cuối kỳ'?'Cuối kỳ':gradePartOptions.includes(part.name as GradeKind)?part.name as GradeKind:'Điểm thường kỳ'); }
+export function emptyGrades(): CourseGrades { return { assessment:'theory', parts: [{ id: 'regular', name: 'Điểm thường kỳ', kind:'Điểm thường kỳ', weight: 20, score: null }, { id: 'mid', name: 'Giữa kỳ', kind:'Giữa kỳ', weight: 30, score: null }, { id: 'final', name: 'Cuối kỳ', kind:'Cuối kỳ', weight: 50, score: null }] }; }
+function example(scores: (number | null)[]): CourseGrades { return { ...emptyGrades(), parts: emptyGrades().parts.map((p,i) => ({ ...p, score: scores[i] ?? null })) }; }
 export const initialGradeBook: GradeBook = {
   'course-oop': example([8,7.5,null]),
   'course-db': example([8,8,8.5]),
@@ -27,14 +33,63 @@ export function validateGrades(parts: GradePart[]): string | null {
   if (parts.some(p => p.score !== null && (!Number.isFinite(p.score) || p.score < 0 || p.score > 10))) return 'Điểm cần từ 0 đến 10; để trống nếu chưa có.';
   return null;
 }
+const isPractice = (p:GradePart) => ['Thực hành','Kiểm tra thực hành'].includes(partKind(p));
+export function validateAssessment(record:CourseGrades):string|null {
+  const error=validateGrades(record.parts); if(error)return error;
+  const mode=record.assessment??'custom', parts=record.parts;
+  if(parts.some(p=>p.kind && !gradePartOptions.includes(p.kind)))return 'Chọn loại thành phần điểm hợp lệ.';
+  if(mode==='practical' && parts.some(p=>!isPractice(p)))return 'Học phần thực hành chỉ gồm điểm thực hành hoặc kiểm tra thực hành.';
+  if(mode==='practical' && parts.length!==(record.practicalCredits!==undefined&&record.practicalCredits>=3?5:3))return 'Thực hành cần 3 cột cho 1–2 tín chỉ, 5 cột khi từ 3 tín chỉ.';
+  if(mode==='practical' && Math.max(...parts.map(p=>p.weight))-Math.min(...parts.map(p=>p.weight))>0.000001)return 'Điểm thực hành cần có trọng số bằng nhau (trung bình cộng).';
+  if(mode==='theory'||mode==='integrated') {
+    const lt=mode==='integrated'?record.theoryCredits!:1, th=mode==='integrated'?record.practicalCredits!:0;
+    if(!Number.isFinite(lt)||lt<=0||!Number.isFinite(th)||th<0||(mode==='integrated'&&th<=0))return 'Nhập số tín chỉ lý thuyết và thực hành lớn hơn 0.';
+    const ratio=lt/(lt+th), sum=(k:GradeKind[])=>parts.filter(p=>k.includes(partKind(p))).reduce((s,p)=>s+p.weight,0);
+    if(parts.filter(p=>partKind(p)==='Giữa kỳ').length!==1||parts.filter(p=>partKind(p)==='Cuối kỳ').length!==1)return 'Cần đúng một cột giữa kỳ và một cột cuối kỳ.';
+    if(Math.abs(sum(['Điểm thường kỳ','Kiểm tra thường kỳ'])-20*ratio)>0.000001||Math.abs(sum(['Giữa kỳ'])-30*ratio)>0.000001||Math.abs(sum(['Cuối kỳ'])-50*ratio)>0.000001||Math.abs(sum(['Thực hành','Kiểm tra thực hành'])-100*(1-ratio))>0.000001)return 'Trọng số cần đúng nhóm thường kỳ 20%, giữa kỳ 30%, cuối kỳ 50% của phần lý thuyết; thực hành theo tín chỉ.';
+    const practice=parts.filter(isPractice);if(practice.length&&Math.max(...practice.map(p=>p.weight))-Math.min(...practice.map(p=>p.weight))>0.000001)return 'Các cột thực hành cần có trọng số bằng nhau.';
+    const regular=parts.filter(p=>['Điểm thường kỳ','Kiểm tra thường kỳ'].includes(partKind(p)));if(regular.length>1&&Math.max(...regular.map(p=>p.weight))-Math.min(...regular.map(p=>p.weight))>0.000001)return 'Các cột thường kỳ cần trọng số bằng nhau để tính trung bình cộng.';
+    if(mode==='integrated'&&practice.length!==(th>=3?5:3))return 'Số cột thực hành cần là 3 hoặc 5 theo số tín chỉ thực hành.';
+  }
+  if(mode==='thesis'&&parts.length!==1)return 'Đồ án / khóa luận dùng một cột điểm tổng kết.';
+  return null;
+}
+export function assessmentTemplate(mode:Assessment,credits:number,theoryCredits=credits-1,practicalCredits=1):CourseGrades {
+  if(mode==='custom')return {...emptyGrades(),assessment:mode};
+  if(mode==='pass-fail'||mode==='thesis')return {assessment:mode,parts:[{id:'total',name:'Điểm tổng kết',kind:'Cuối kỳ',weight:100,score:null}]};
+  const lt=mode==='integrated'?theoryCredits:credits,th=mode==='integrated'?practicalCredits:mode==='practical'?credits:0;
+  const ratio=mode==='integrated'?lt/(lt+th):mode==='practical'?0:1;
+  const parts:GradePart[]=ratio?emptyGrades().parts.map(p=>({...p,weight:p.weight*ratio})):[];
+  if(th>0){const n=th>=3?5:3;for(let i=0;i<n;i++)parts.push({id:`practice-${i}`,name:`Thực hành ${i+1}`,kind:'Thực hành',weight:100*(1-ratio)/n,score:null});}
+  return {assessment:mode,theoryCredits:lt,practicalCredits:th,parts};
+}
 export function courseResult(record: CourseGrades | undefined, rules: GradeRules) {
-  const parts = record?.parts ?? emptyGrades().parts; const valid = validateGrades(parts) === null;
-  const entered = parts.filter(p => p.score !== null); const complete = valid && entered.length === parts.length;
-  const raw = complete ? parts.reduce((sum,p) => sum + p.score! * p.weight / 100,0) : null;
-  const factor = 10 ** rules.decimals;
+  const value=record??emptyGrades(), parts=value.parts, mode=value.assessment??'custom'; const valid=validateAssessment(value)===null;
+  const entered=parts.filter(p=>p.score!==null), allEntered=valid&&entered.length===parts.length;
+  const theory=mode==='theory'||mode==='integrated', mid=parts.find(p=>partKind(p)==='Giữa kỳ')?.score, final=parts.find(p=>partKind(p)==='Cuối kỳ')?.score;
+  const blocked=valid&&theory&&mid===0, finalFailed=valid&&theory&&final!==null&&final!==undefined&&final<3;
+  const complete=allEntered&&!blocked;
+  let raw=complete?parts.reduce((sum,p)=>sum+p.score!*p.weight/100,0):null;
+  if(raw!==null&&finalFailed){const ratio=mode==='integrated'?value.theoryCredits!/(value.theoryCredits!+value.practicalCredits!):1;raw=final!*ratio+parts.filter(isPractice).reduce((s,p)=>s+p.score!*p.weight/100,0);}
+  const factor = 10 ** (rules.scale==='iuh'?1:rules.decimals);
   const total = raw === null ? null : Math.round((raw + Number.EPSILON * Math.max(1,Math.abs(raw))) * factor) / factor;
   const band = total === null ? null : gradeScales[rules.scale].find(b => total >= b.min)!;
-  return { valid, complete, entered: entered.length, count: parts.length, enteredWeight: entered.reduce((s,p) => s+p.weight,0), total, raw, letter: band?.letter ?? null, point: band?.point ?? null, passed: total !== null && total >= 4 };
+  const threshold=mode==='pass-fail'||mode==='thesis'?5:4;
+  const passed=total!==null&&total>=threshold;
+  // A blocked exam identifies a problem but does not invent an official final score.
+  const failed=valid&&(blocked||(total!==null&&!passed)||(mode==='theory'&&finalFailed));
+  const status=!valid?'Dữ liệu chưa hợp lệ':blocked?'Không đủ điều kiện thi':failed?'Không đạt · Cần học lại':passed?'Đạt môn':'Chưa đủ dữ liệu';
+  const reason=blocked?'Giữa kỳ bằng 0: không được dự thi cuối kỳ. Chưa tự gán điểm cuối kỳ hay tổng kết.':mode==='theory'&&finalFailed?'Cuối kỳ dưới 3,0: tổng kết bằng điểm cuối kỳ, xếp F.':total!==null&&!passed?`Tổng kết dưới ${threshold},0: chưa đạt môn.`:passed?`Đạt ngưỡng ${threshold},0 theo loại học phần đã chọn.`:'Để trống phần chưa có điểm; điểm 0 là kết quả đã nhập.';
+  return { valid, complete, failed, blocked, status, reason, threshold, completeForGpa:complete&&mode!=='pass-fail', entered: entered.length, count: parts.length, enteredWeight: entered.reduce((s,p) => s+p.weight,0), total, raw, letter:mode==='pass-fail'?(total===null?null:passed?'P':'F'):band?.letter??null, point:mode==='pass-fail'?null:band?.point??null, passed };
+}
+
+// Derive attempts from stable course code, equal credits and semester chronology, never names.
+export function autoLinkAttempts(catalog:Course[],book:GradeBook,semesters:Semester[]):GradeBook {
+  const order=(id:string)=>{const s=semesters.find(s=>s.id===id);const year=s?.academicYear.match(/^\d{4}/)?.[0];return s&&year?Number(year)*10+s.term:null;};
+  const next:GradeBook={};for(const c of catalog){const current=order(c.semesterId);const candidates=catalog.filter(p=>p.id!==c.id&&p.code.trim().toUpperCase()===c.code.trim().toUpperCase()&&p.credits===c.credits&&current!==null&&order(p.semesterId)!==null&&order(p.semesterId)!<current).sort((a,b)=>order(b.semesterId)!-order(a.semesterId)!);
+    const previous=candidates[0], ambiguous=previous&&candidates[1]&&order(previous.semesterId)===order(candidates[1].semesterId);
+    next[c.id]={...(book[c.id]??emptyGrades()),previousCourseId:previous&&!ambiguous?previous.id:undefined};}
+  return next;
 }
 export function rootCourseId(id: string, book: GradeBook) {
   const seen = new Set<string>(); let current = id;
@@ -58,7 +113,7 @@ export function validateRetake(id: string, previousId: string | undefined, catal
   return null;
 }
 export function summarizeGrades(catalog: Course[], book: GradeBook, rules: GradeRules, cumulative = false) {
-  const eligible = catalog.filter(c => courseResult(book[c.id],rules).complete);
+  const eligible = catalog.filter(c => courseResult(book[c.id],rules).completeForGpa);
   let selected = eligible;
   if (cumulative) {
     const groups = new Map<string, Course[]>();

@@ -1,5 +1,7 @@
 # UI 2D — Điểm số & GPA
 
+> Cập nhật: giao diện hiện dùng bộ chọn loại điểm/học phần và tự nhận diện học lại. Các mô tả nhập tên thành phần/liên kết thủ công bên dưới là bản đầu; xem [IUH-GRADING.md](./IUH-GRADING.md) cho hành vi hiện tại.
+
 ## Mở giao diện
 
 - **Thống kê → Điểm & GPA**: chọn học kỳ, xem điểm/GPA, tìm môn và lọc môn đủ/chưa đủ điểm.

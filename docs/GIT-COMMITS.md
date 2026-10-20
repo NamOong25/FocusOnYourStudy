@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 3C và bộ chọn học kỳ
+## Đợt vừa hoàn thành: Điểm IUH và tự nhận diện học lại
 
-Tên bên dưới dùng khi đẩy chung UI 3C và chỉnh sửa bộ chọn học kỳ. Chạy tại thư mục project, xem `git status` để kiểm tra các file trước khi thêm:
+Đã thêm bộ chọn loại điểm/học phần, xét đạt/không đạt, cảnh báo đỏ, bảng quy đổi IUH và tự ghép các lần học theo mã môn/tín chỉ/học kỳ. Nguồn và giới hạn: `IUH-GRADING.md`. Chạy tại thư mục project, xem `git status` để kiểm tra các file trước khi thêm:
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện trạng thái giao diện và bộ chọn học kỳ"
+git commit -m "Bổ sung quy tắc điểm IUH và tự xác định môn cần học lại"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 3C và bộ chọn học kỳ | `Hoàn thiện trạng thái giao diện và bộ chọn học kỳ` |
 | UI 2D — Điểm số & GPA | `Thêm giao diện điểm số, GPA và mục tiêu học tập` |
 | UI 2E — Tài khoản, hồ sơ và cài đặt | `Thêm giao diện tài khoản, hồ sơ và cài đặt` |
 | UI 2F — Trợ lý AI và duyệt kế hoạch học | `Hoàn thiện giao diện trợ lý AI và duyệt kế hoạch học` |

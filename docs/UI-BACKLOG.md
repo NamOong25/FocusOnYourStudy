@@ -13,6 +13,8 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 
 ## Quy ước học kỳ
 
+- [x] Giao diện điểm theo tài liệu IUH năm 2023: chọn loại điểm/học phần, tự xét đạt và cảnh báo đỏ khi không đạt/chặn thi; tự nhận diện lần học trước. Xem `IUH-GRADING.md` về nguồn, công thức, kiểm tra và giới hạn. Chưa nghiệm thu quy chế toàn chương trình, GPA chính thức hay backend lưu điểm.
+
 - [x] Chọn học kỳ 1/2 là kỳ chính; kỳ 3 (hè) tùy chọn trong từng năm học, không đếm kỳ 4/5/6. Chọn năm bằng nút, chặn trùng kỳ/năm và hiển thị năm khi chọn môn/bảng điểm. Xem `SEMESTERS.md`.
 
 ## Tổ chức mã nguồn
