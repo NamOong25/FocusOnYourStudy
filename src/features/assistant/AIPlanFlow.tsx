@@ -1,3 +1,4 @@
+import { StateView } from '../../shared/components';
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -25,6 +26,7 @@ export default function AIPlanFlow({ variant, request = '', onClose, onStudyPlan
   const [proposal, setProposal] = useState<AiProposal | null>(null); const [step, setStep] = useState<'input' | 'review' | 'done'>('input');
   const [error, setError] = useState(''); const [editId, setEditId] = useState(''); const applying = useRef(false);
   const adjusting = variant === 'adjust'; const task = tasks.find(t => t.id === taskId), exam = exams.find(e => e.id === examId);
+  if (!courseCatalog.length) return <Sheet title="Cùng chuẩn bị kế hoạch học" onClose={onClose}><StateView title="Cần một môn học để lập kế hoạch" message="Thêm học kỳ và môn học trước, rồi quay lại chọn mục tiêu. Bạn vẫn có thể khám phá tài liệu và trắc nghiệm mẫu." actionLabel="Đến Môn & học kỳ" onAction={() => context.setScheduleMode('Môn & học kỳ')} /></Sheet>;
   const title = step === 'done' ? 'Kế hoạch đã được duyệt' : step === 'review' ? 'Xem trước & duyệt kế hoạch' : adjusting ? 'Điều chỉnh một buổi học' : variant === 'free' ? 'Tìm lịch theo giờ rảnh' : 'Lập kế hoạch học tập';
   const issues = proposal && step === 'review' ? validateProposal(proposal, context) : [];
   const selected = proposal?.drafts.filter(d => d.selected) ?? [];
@@ -51,7 +53,7 @@ export default function AIPlanFlow({ variant, request = '', onClose, onStudyPlan
       <T style={{ fontFamily: F.bold }}>Khung giờ rảnh mỗi ngày</T><Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><TimeField label="Rảnh từ" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Rảnh đến" value={end} onChange={setEnd} /></View></Row>
       <Field label="Mỗi buổi (phút)" value={duration} onChange={setDuration} numeric /><Segments values={['25', '45', '60', '90']} value={duration} onChange={setDuration} />
       {!adjusting && <><T style={{ fontFamily: F.bold }}>Số buổi muốn lên lịch</T><Segments values={['1', '2', '3', '4', '5', '6']} value={count} onChange={setCount} /></>}
-      {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<Button label="Tạo đề xuất mẫu" icon="sparkles-outline" onPress={generate} />
+      {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<Button label="Tạo đề xuất mẫu" icon="sparkles-outline" onPress={generate} actionLabel="Đang chuẩn bị đề xuất" />
       <T style={S.small}>Tối đa 14 ngày mỗi lần; tự chừa ít nhất 10 phút giữa các buổi được đề xuất.</T>
     </>}
     {step === 'review' && proposal && <>
@@ -64,7 +66,7 @@ export default function AIPlanFlow({ variant, request = '', onClose, onStudyPlan
         <Button label={`${editId === d.id ? 'Thu gọn' : 'Chỉnh sửa'} buổi ${i + 1}`} secondary icon="create-outline" onPress={() => setEditId(editId === d.id ? '' : d.id)} />{rowIssues.map((issue, j) => <View key={j} style={{ gap: 8 }}><T accessibilityRole="alert" style={{ fontSize: 12, color: C.red }}>{issue.message}</T><ConflictPanel conflicts={issue.conflicts} candidate={d.title} /></View>)}
       </Card>; })}
       {issues.filter(i => i.id === 'all').map((i, n) => <T key={n} accessibilityRole="alert" style={{ color: C.red }}>{i.message}</T>)}{!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
-      <Button label={adjusting ? 'Duyệt thay đổi buổi học' : 'Chấp nhận kế hoạch mẫu'} icon="checkmark" disabled={issues.length > 0 || !selected.length} onPress={() => { if (applying.current) return; applying.current = true; const result = applyAiProposal(proposal); if (!result.ok) { setError(result.message); applying.current = false; return; } setStep('done'); }} />
+      <Button label={adjusting ? 'Duyệt thay đổi buổi học' : 'Chấp nhận kế hoạch mẫu'} icon="checkmark" disabled={issues.length > 0 || !selected.length} onPress={() => { if (applying.current) return; applying.current = true; const result = applyAiProposal(proposal); if (!result.ok) { setError(result.message); applying.current = false; return; } setStep('done'); }} actionLabel="Đang lưu" />
       <Button label="Đổi điều kiện đề xuất" secondary onPress={() => { setStep('input'); setError(''); }} /><Button label="Hủy đề xuất" secondary onPress={onClose} />
     </>}
     {step === 'done' && <><Card style={{ backgroundColor: C.greenSoft, alignItems: 'center', gap: 14, padding: 26 }}><IconTile name="checkmark-circle-outline" color={C.green} bg="#FFFFFFAA" size={66} /><T style={{ fontFamily: F.extra, fontSize: 23, color: C.green, textAlign: 'center' }}>{adjusting ? 'Đã cập nhật buổi học' : `Đã thêm ${selected.length} buổi tự học`}</T><T style={[S.small, { textAlign: 'center' }]}>Bài tập giữ deadline và trạng thái riêng. Bạn có thể sửa lịch hoặc bắt đầu Pomodoro từ buổi đã duyệt.</T></Card><Button label="Xem lịch tự học" icon="calendar-outline" onPress={() => { onStudyPlan(); }} /><Button label="Quay lại trợ lý" secondary onPress={onClose} /><T style={S.small}>Dữ liệu chỉ giữ trong phiên dùng thử, tải lại app sẽ trở về mẫu.</T></>}

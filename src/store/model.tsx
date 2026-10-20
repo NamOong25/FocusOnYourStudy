@@ -1,3 +1,4 @@
+import { useFeedback } from '../shared/feedback/FeedbackProvider';
 import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { Course, Semester, initialCourses, initialSemesters } from '../features/academics/academic';
@@ -40,36 +41,39 @@ const initialStudySessions: StudySession[] = [
   { id: 'study-3', title: 'Đọc lại kiến thức cây nhị phân', courseId: 'course-dsa', date: dateKey(today), start: '21:00', duration: 25, notes: 'Tự ôn tập, không gắn với bài phải nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
   { id: 'study-4', title: 'Phác thảo ERD cho báo cáo', courseId: 'course-db', taskId: 't2', date: dateKey(addDays(today, 1)), start: '19:00', duration: 45, notes: '', status: 'Đã lên lịch', focusedSeconds: 0 },
 ];
-function usePrototype() {
+function usePrototype(empty: boolean) {
+  const { notice, showNotice: setToast } = useFeedback();
+  const toast = notice?.message ?? "";
   const [profile, saveProfile] = useState<StudentProfile>(initialProfile);
   const [accountPreferences, setAccountPreferences] = useState<AccountPreferences>(initialPreferences);
   const [previewSignedIn, setPreviewSignedIn] = useState(true);
-  const [semesters, setSemesters] = useState(initialSemesters);
-  const [courseCatalog, setCourseCatalog] = useState(initialCourses);
-  const [gradeBook, setGradeBook] = useState<GradeBook>(initialGradeBook);
+  const [semesters, setSemesters] = useState(empty ? [] : initialSemesters);
+  const [courseCatalog, setCourseCatalog] = useState(empty ? [] : initialCourses);
+  const [gradeBook, setGradeBook] = useState<GradeBook>(empty ? {} : initialGradeBook);
   const [gradeRules, setGradeRules] = useState<GradeRules>(defaultRules);
   const saveGrades = (id: string, record: CourseGrades) => setGradeBook(v => ({ ...v, [id]: record }));
-  const [tasks, setTasks] = useState(initialTasks);
-  const [classes, setClasses] = useState(initialClasses);
+  const [tasks, setTasks] = useState(empty ? [] : initialTasks);
+  const [classes, setClasses] = useState(empty ? [] : initialClasses);
   const [classExceptions, setClassExceptions] = useState<ClassException[]>([]);
-  const [exams, setExams] = useState(initialExams);
+  const [exams, setExams] = useState(empty ? [] : initialExams);
   const [routeTrail, setRouteTrail] = useState<AppRoute[]>([homeRoute]);
   const route = routeTrail[routeTrail.length - 1]!; const tab = route.tab; const scheduleMode = route.scheduleMode;
   const setTab = (next: Tab) => setRouteTrail(v => next === 'home' ? [{ ...v[v.length - 1]!, tab: 'home' }] : pushRoute(v, { ...v[v.length - 1]!, tab: next }));
   const setScheduleMode = (next: ScheduleMode) => setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: next }));
   const goBackRoute = () => setRouteTrail(previousRoute);
-  const [focusCourseId, setFocusCourseId] = useState('course-dsa');
+  const [focusCourseId, setFocusCourseId] = useState(empty ? '' : 'course-dsa');
+  useEffect(() => { if (!courseCatalog.some(c => c.id === focusCourseId) && courseCatalog[0]) setFocusCourseId(courseCatalog[0].id); }, [courseCatalog, focusCourseId]);
   const focusCourse = courseCatalog.find(c => c.id === focusCourseId)?.name ?? 'Chọn môn học';
   const [mode, setModeState] = useState(0);
   const [seconds, setSeconds] = useState(durations[0]!);
   const [endsAt, setEndsAt] = useState<number | null>(null);
-  const [completed, setCompleted] = useState(3);
+  const [completed, setCompleted] = useState(empty ? 0 : 3);
   const [history, setHistory] = useState<string[]>([]);
-  const [toast, setToast] = useState('');
+
   const [aiSessionIds, setAiSessionIds] = useState<string[]>([]);
   const appliedAiProposals = useRef(new Set<string>());
-  const [studySessions, setStudySessions] = useState(initialStudySessions);
-  const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(initialTaskExtras);
+  const [studySessions, setStudySessions] = useState(empty ? [] : initialStudySessions);
+  const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(empty ? {} : initialTaskExtras);
   const [focusTaskId, setFocusTaskId] = useState<string | undefined>();
   const [focusSessionId, setFocusSessionId] = useState<string | undefined>();
   const lastCompletedEnd = useRef<number | null>(null);
@@ -94,7 +98,6 @@ function usePrototype() {
     tick(); const id = setInterval(tick, 500); const listener = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
     return () => { clearInterval(id); listener.remove(); };
   }, [endsAt, mode, focusCourse, focusSessionId, focusTaskId, studySessions, tasks]);
-  useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''), 3500); return () => clearTimeout(id); }, [toast]);
   const setMode = (n: number) => { setModeState(n); setEndsAt(null); setSeconds(durations[n]!); };
   const toggleTimer = () => { if (endsAt) { setSeconds(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))); setEndsAt(null); } else { const duration = seconds || durations[mode]!; setSeconds(duration); lastCompletedEnd.current = null; setEndsAt(Date.now() + duration * 1000); if (mode === 0 && focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s)); } };
   const resetTimer = () => { setEndsAt(null); setSeconds(durations[mode]!); };
@@ -161,8 +164,8 @@ function usePrototype() {
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
+  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
-export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }
+export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }
 export function useApp() { const value = useContext(Context); if (!value) throw new Error('Missing PrototypeProvider'); return value; }

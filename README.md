@@ -12,6 +12,8 @@ npm install
 npx expo start
 ```
 
+Khi mở app, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Tải lại sẽ trở về màn chọn ban đầu.
+
 Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 56 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
 
 ```powershell
@@ -31,7 +33,7 @@ npm run build:web
 - Trợ lý AI: 5 công cụ với form đầu vào; sửa/bỏ chọn/duyệt kế hoạch mẫu thành buổi tự học dùng chung sau khi kiểm tra lịch/deadline; điều chỉnh buổi chưa học; tóm tắt và quiz 3/5 câu có trang nguồn minh họa đọc được (bổ sung ở 2F).
 - Hồ sơ/cài đặt với các luồng tài khoản minh họa (bổ sung ở 2E), hộp nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
 
-**Dữ liệu nằm trong bộ nhớ. Tải lại ứng dụng sẽ trở về mẫu.** Không có đăng nhập thật, thông báo hệ thống, đồng bộ, upload PDF hoặc gọi AI thật. Pomodoro không phát chuông khi app bị đóng; chưa lưu phiên khi process bị hủy. Không coi kiểm tra bằng trình duyệt/Mobile View là đã kiểm tra chạy nền trên điện thoại thật.
+**Dữ liệu nằm trong bộ nhớ. Tải lại ứng dụng sẽ về màn chọn ban đầu và xóa thay đổi trong phiên.** Không có đăng nhập thật, thông báo hệ thống, đồng bộ, upload PDF hoặc gọi AI thật. Pomodoro không phát chuông khi app bị đóng; chưa lưu phiên khi process bị hủy. Không coi kiểm tra bằng trình duyệt/Mobile View là đã kiểm tra chạy nền trên điện thoại thật.
 
 ## Cấu trúc
 
@@ -118,3 +120,15 @@ Mũi tên trong chi tiết quay lại một bước; X đóng cả luồng. Màn
 Browser Back/Escape và Back Android dùng cùng nguyên tắc (picker → chi tiết → màn chính). Web ở gốc vẫn Back ra trang trước bình thường. Chưa có deep link/Forward replay hoặc gesture iOS; chưa thử Back/cảm ứng trên thiết bị thật. Dữ liệu/navigation vẫn chỉ giữ trong phiên.
 
 Xem `docs/UI-POLISH-3B.md`, `docs/qa-navigation-unit.cjs`, `docs/qa-navigation.cjs`. Tên commit: **Hoàn thiện điều hướng và luồng quay lại**; lệnh push ở `docs/GIT-COMMITS.md`. Tiếp theo là 3C — trạng thái giao diện, rồi 3D — Dashboard.
+
+
+## Cập nhật đợt 3C: Trạng thái giao diện
+
+Đã có màn bắt đầu, chế độ học tập trống và hướng dẫn thiết lập. Các form chính có chờ/khóa nút, lỗi giữ nội dung, thử lại và hủy; thông báo kết quả hiển thị trong hộp thoại đang mở. Bấm **Bản xem trước · Thử trạng thái** dưới header để xem tải/lỗi và bật lỗi cho lần xử lý kế tiếp. Đây là mô phỏng UI, chưa gọi backend.
+
+Xem `docs/UI-POLISH-3C.md`, `docs/qa-ui-states.cjs` và `docs/GIT-COMMITS.md`. Tiếp theo là UI 3D — Dashboard theo học kỳ và kỳ thi gần nhất.
+
+
+## Chọn học kỳ theo năm học
+
+Học kỳ dùng lựa chọn cố định: **Học kỳ 1**, **Học kỳ 2**, **Học kỳ 3 (Hè)**. Kỳ hè tùy chọn, không tự thêm. Năm học chọn bằng nút trước/sau; không nhập tên kỳ tự do. Cùng kỳ ở hai năm khác nhau được quản lý riêng; không lưu trùng kỳ trong một năm. Xem `docs/SEMESTERS.md`.

@@ -1,5 +1,12 @@
+export type SemesterTerm = 1 | 2 | 3;
+export const semesterOptions: { value: SemesterTerm; label: string }[] = [
+  { value: 1, label: 'Học kỳ 1' },
+  { value: 2, label: 'Học kỳ 2' },
+  { value: 3, label: 'Học kỳ 3 (Hè)' },
+];
+export const semesterName = (term: SemesterTerm) => semesterOptions.find(option => option.value === term)!.label;
 export type SemesterStatus = 'Đang học' | 'Sắp tới' | 'Đã kết thúc';
-export type Semester = { id: string; name: string; academicYear: string; status: SemesterStatus; note: string };
+export type Semester = { id: string; term: SemesterTerm; name: string; academicYear: string; status: SemesterStatus; note: string };
 export type CourseStatus = 'Đang học' | 'Hoàn thành' | 'Dự kiến';
 export type CourseColor = 'lavender' | 'mint' | 'peach' | 'blue';
 export type Course = { id: string; semesterId: string; code: string; name: string; credits: number; teacher: string; room: string; status: CourseStatus; color: CourseColor; description: string };
@@ -10,9 +17,9 @@ export const courseColors: Record<CourseColor, { bg: string; ink: string; label:
   blue: { bg: '#E5F3FF', ink: '#2879B5', label: 'Xanh dương' },
 };
 export const initialSemesters: Semester[] = [
-  { id: 'sem-5', name: 'Học kỳ 5', academicYear: '2026 – 2027', status: 'Đang học', note: 'Giữ nhịp học đều đặn, dành thời gian cho thực hành và các đồ án.' },
-  { id: 'sem-4', name: 'Học kỳ 4', academicYear: '2025 – 2026', status: 'Đã kết thúc', note: 'Một học kỳ đã hoàn thành. Những nền tảng để tiếp tục tiến bộ.' },
-  { id: 'sem-6', name: 'Học kỳ 6', academicYear: '2026 – 2027', status: 'Sắp tới', note: 'Chuẩn bị trước những môn học và mục tiêu cho hành trình tiếp theo.' },
+  { id: 'sem-5', term: 1, name: 'Học kỳ 1', academicYear: '2026 – 2027', status: 'Đang học', note: 'Giữ nhịp học đều đặn, dành thời gian cho thực hành và các đồ án.' },
+  { id: 'sem-4', term: 2, name: 'Học kỳ 2', academicYear: '2025 – 2026', status: 'Đã kết thúc', note: 'Một học kỳ đã hoàn thành. Những nền tảng để tiếp tục tiến bộ.' },
+  { id: 'sem-6', term: 2, name: 'Học kỳ 2', academicYear: '2026 – 2027', status: 'Sắp tới', note: 'Chuẩn bị trước những môn học và mục tiêu cho hành trình tiếp theo.' },
 ];
 export const initialCourses: Course[] = [
   { id: 'course-dsa', semesterId: 'sem-5', code: 'IT301', name: 'Cấu trúc dữ liệu & Giải thuật', credits: 4, teacher: 'ThS. Trần Mai', room: 'Lab 4', status: 'Đang học', color: 'lavender', description: 'Từ cấu trúc dữ liệu cơ bản đến cây, đồ thị và các kỹ thuật thiết kế giải thuật. Kết hợp lý thuyết với bài tập lập trình.' },

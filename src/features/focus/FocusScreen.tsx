@@ -1,3 +1,4 @@
+import { StateView } from '../../shared/components';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
@@ -8,9 +9,10 @@ import { useApp } from '../../store/model';
 
 const modes = ["Tập trung 25′", "Nghỉ ngắn 5′", "Nghỉ dài 15′"];
 export default function Focus({ onStudyPlan }: { onStudyPlan: () => void }) {
-  const { mode, setMode, seconds, running, toggleTimer, resetTimer, completed, focusCourse, focusCourseId, prepareFocus, focusTaskId, focusSessionId, tasks, studySessions, history, timerProgress, setTab } = useApp();
+  const { mode, setMode, seconds, running, toggleTimer, resetTimer, completed, focusCourse, focusCourseId, prepareFocus, focusTaskId, focusSessionId, tasks, studySessions, history, timerProgress, setTab, courseCatalog, setScheduleMode } = useApp();
   const focusedSession = studySessions.find(s => s.id === focusSessionId); const focusedTask = tasks.find(t => t.id === focusTaskId);
   const [choose, setChoose] = useState(false); const [showHistory, setShowHistory] = useState(false);
+  if (!courseCatalog.length) return <StateView title="Chọn một môn để bắt đầu tập trung" message="Thêm môn học trước. Sau đó bạn có thể gắn phiên Pomodoro với bài tập hoặc buổi tự học." actionLabel="Thêm môn học đầu tiên" onAction={() => setScheduleMode('Môn & học kỳ')} />;
   const radius = 121, circumference = 2 * Math.PI * radius;
   const minutes = Math.floor(seconds / 60).toString().padStart(2, '0'); const secs = (seconds % 60).toString().padStart(2, '0');
   return <>

@@ -1,3 +1,6 @@
+import { ActionScope, InteractionBlock, useActionState } from '../feedback/ActionScope';
+import { ActionStatus } from './ActionStatus';
+import { NoticeToast } from './NoticeToast';
 import React, { type ReactNode } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,17 +21,18 @@ type SheetProps = {
 
 export function Sheet(props: SheetProps) {
     return (
-        <DateTimeProvider>
+        <ActionScope><DateTimeProvider>
             <SheetContent {...props} />
-        </DateTimeProvider>
+        </DateTimeProvider></ActionScope>
     );
 }
 
 function SheetContent({ title, children, onClose, onBack, scrollKey }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
-    const back = picker.active ? picker.cancel : onBack ?? onClose;
-    const dismiss = picker.active ? picker.cancel : scope.closeFlow ?? onClose;
+    const action = useActionState();
+    const back = () => { action?.cancel(); (picker.active ? picker.cancel : onBack ?? onClose)(); };
+    const dismiss = () => { action?.cancel(); (picker.active ? picker.cancel : scope.closeFlow ?? onClose)(); };
     useBackAction(true, back, picker.active ? 1000 + scope.depth : undefined);
     return (
         <Modal visible={scope.active} transparent animationType="slide" onRequestClose={back}>
@@ -78,14 +82,16 @@ function SheetContent({ title, children, onClose, onBack, scrollKey }: SheetProp
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={{ padding: 22, paddingTop: 4, gap: 16 }}
                     >
-                        {children}
+                        <InteractionBlock>{children}</InteractionBlock>
                     </RememberedScrollView>
                     {picker.active && (
                         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 22, paddingTop: 4 }}>
                             <DateTimePanel />
                         </ScrollView>
                     )}
+                    <ActionStatus />
                 </View>
+                <NoticeToast modal bottom={Math.max(22, inset.bottom)} />
             </KeyboardAvoidingView>
         </Modal>
     );

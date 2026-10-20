@@ -1,3 +1,4 @@
+import { StateView } from '../../shared/components';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,12 +17,14 @@ export default function Stats() {
   return <><Segments values={['Tổng quan', 'Điểm & GPA']} value={view} onChange={setView} /><NavigationScope active={view === 'Tổng quan'}><View style={{display:view === 'Tổng quan'?'flex':'none',gap:16}}><StudyStats /></View></NavigationScope><NavigationScope active={view === 'Điểm & GPA'}><View style={{display:view === 'Điểm & GPA'?'flex':'none',gap:16}}><Grades /></View></NavigationScope></>;
 }
 function StudyStats() {
-  const { tasks, courseCatalog, gradeBook, gradeRules } = useApp(); const [period, setPeriod] = useState('Tuần'); const [forecast, setForecast] = useState(false); const [selectedBar, setSelectedBar] = useState(3);
+  const { tasks, courseCatalog, gradeBook, gradeRules, isEmptyWorkspace, setScheduleMode, semesters } = useApp(); const [period, setPeriod] = useState('Tuần'); const [forecast, setForecast] = useState(false); const [selectedBar, setSelectedBar] = useState(3);
+  if (isEmptyWorkspace) return <StateView title="Chưa có thống kê tổng hợp" message="Hãy thêm môn, bài tập và các phiên học trước. Biểu đồ giờ học hiện chỉ có trong chế độ dữ liệu mẫu." actionLabel="Đến Môn & học kỳ" onAction={() => setScheduleMode('Môn & học kỳ')} />;
+  const currentSemester = semesters.find(s => s.status === 'Đang học') ?? semesters[0];
   const series = charts[period]!; const total = series.reduce((a, b) => a + b, 0); const done = tasks.filter(t => t.status === 'Hoàn thành').length; const percent = tasks.length ? Math.round(done / tasks.length * 100) : 0;
   const overdue = tasks.filter(t => t.status !== 'Hoàn thành' && new Date(`${t.deadline}T23:59:59`).getTime() < Date.now()).length;
   const summary = summarizeGrades(courseCatalog, gradeBook, gradeRules, true);
   return <>
-    <Row between><View><T style={{ fontFamily: F.bold, fontSize: 18 }}>Từng ngày, tốt hơn một chút ✨</T><T style={S.small}>Học kỳ 5 · Năm học 2026 – 2027</T></View></Row>
+    <Row between><View><T style={{ fontFamily: F.bold, fontSize: 18 }}>Từng ngày, tốt hơn một chút ✨</T><T style={S.small}>{currentSemester ? `${currentSemester.name} · Năm học ${currentSemester.academicYear}` : 'Chưa có học kỳ'}</T></View></Row>
     <LinearGradient colors={['#5341CD', '#7462E7', '#9681EB']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 25, padding: 22, gap: 23, boxShadow: '0px 12px 22px rgba(108,92,231,0.16)' }}>
       <Row between><Badge label="BỨC TRANH HỌC TẬP" color="#fff" bg="#FFFFFF25" icon="ribbon-outline" /><Icon name="trending-up-outline" color="#fff" /></Row>
       <Row between><View><T style={{ fontSize: 11, color: '#ECE7FF' }}>GPA tích lũy trong app</T><T style={{ fontFamily: F.extra, fontSize: 35, lineHeight: 50, color: '#fff' }}>{formatGpa(summary.gpa)}<T style={{ fontFamily: F.semi, color: '#DFD7FF', fontSize: 15 }}> / 4.0</T></T><T style={{ color: '#E5DEFF', fontSize: 10 }}>Từ điểm đã nhập · Quy tắc mẫu</T></View><View style={{ width: 117, gap: 5 }}><T style={{ color: '#ECE7FF', fontSize: 11 }}>Tín chỉ đạt</T><T style={{ fontFamily: F.extra, fontSize: 27, lineHeight: 40, color: '#fff' }}>{summary.earnedCredits}<T style={{ color: '#DED7FF', fontSize: 12 }}>/{summary.scoredCredits} TC</T></T><Progress value={summary.scoredCredits ? summary.earnedCredits/summary.scoredCredits*100 : 0} white /><T style={{ color: '#ECE7FF', fontSize: 10 }}>{summary.excludedIncomplete} môn chưa đủ điểm</T></View></Row>

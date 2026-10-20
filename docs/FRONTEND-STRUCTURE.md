@@ -9,12 +9,15 @@ App.tsx                          Khung ứng dụng, ghép các màn và provide
 src/
 ├── features/
 │   ├── academics/               Học kỳ, môn học, form và CourseChoices
+│   │   └── components/          SemesterPicker và AcademicYearPicker
 │   ├── account/                 Tài khoản, hồ sơ, cài đặt và validation mẫu
 │   ├── assignments/             TaskForm và chi tiết bài tập
 │   ├── assistant/               Trợ lý AI, đề xuất lịch, tài liệu/quiz mẫu
 │   ├── dashboard/               HomeScreen
 │   ├── exams/                   Danh sách/chi tiết và form lịch thi
 │   ├── focus/                   FocusScreen (Pomodoro)
+│   ├── onboarding/              Màn bắt đầu và hướng dẫn thiết lập
+│   ├── preview/                 Bảng thử trạng thái UI
 │   ├── grades/                  Bảng điểm, editor, quy tắc và tính GPA
 │   ├── schedule/                Lịch học, chuỗi/ngoại lệ và kiểm tra trùng
 │   ├── statistics/              StatsScreen
@@ -23,7 +26,11 @@ src/
 │   ├── Navigation.tsx           Provider, scope, cuộn và xử lý Back
 │   └── navigationState.ts       Route và quy tắc quay lại thuần TypeScript
 ├── shared/
+│   ├── feedback/                Thông báo và phạm vi thao tác chờ/lỗi/hủy
 │   ├── components/
+│   │   ├── ActionStatus.tsx         Đang xử lý, lỗi, thử lại và hủy
+│   │   ├── NoticeToast.tsx          Thông báo kết quả dùng chung
+│   │   ├── StateView.tsx            Trạng thái tải, lỗi và trống
 │   │   ├── Badge.tsx                Nhãn trạng thái
 │   │   ├── Button.tsx               Nút hành động
 │   │   ├── Card.tsx                 Khung thẻ nội dung
@@ -99,7 +106,7 @@ npx expo export --platform android --output-dir .expo/native-check
 
 Với Metro đang chạy ở cổng 8092 và Playwright/Chrome đã cài, chạy thêm `node docs/qa-smoke.cjs` và `node docs/qa-navigation.cjs`. Có thể thiết lập `PLAYWRIGHT_MODULE`/`CHROME_PATH` như các đợt trước. Kết quả ở `.expo/`, không commit.
 
-Tên commit hiện tại: **Tổ chức thư mục frontend và tách component dùng chung**. Lệnh push ở `GIT-COMMITS.md`. Checklist UI 3C/3D và backend vẫn chưa đánh dấu hoàn thành.
+Tên commit của đợt sắp xếp: **Tổ chức thư mục frontend và tách component dùng chung**. Đợt mới nhất xem `GIT-COMMITS.md`. Lệnh push ở `GIT-COMMITS.md`. Checklist UI 3C/3D và backend vẫn chưa đánh dấu hoàn thành.
 
 ## Kết quả kiểm tra sau khi sắp xếp (20/10/2026)
 
@@ -115,3 +122,9 @@ Tên commit hiện tại: **Tổ chức thư mục frontend và tách component 
 - TypeScript, web export và Android Hermes export: qua. Đối chiếu cấu trúc JavaScript của 15 component sau biên dịch: giữ nguyên phần triển khai so với bản trước khi tách.
 - `qa-smoke.cjs` và `qa-navigation.cjs`: qua ở 320/390/430/1280px; không ghi nhận lỗi runtime/console hoặc tràn ngang. Luồng hộp thoại, bộ chọn, AI và quay lại giữ trạng thái vẫn hoạt động. Lượt mở trình duyệt đầu hết thời gian chờ Metro; chạy lại sau khi bundle hoàn tất đã qua.
 - Chưa kiểm tra trên điện thoại thật; đợt này chỉ tổ chức mã nguồn, không thêm chức năng.
+
+
+Từ UI 3C, xem `UI-POLISH-3C.md` cho luồng khởi tạo trống và các file trạng thái dùng chung. `Button.actionLabel` chỉ đánh dấu các thao tác cần chờ mẫu; API thật sẽ thay cơ chế mô phỏng ở giai đoạn backend.
+
+
+Quy ước kỳ 1/2 chính, kỳ 3 hè tùy chọn theo từng năm ở `SEMESTERS.md`. Hai bộ chọn thuộc chức năng academics; không đặt vào thư mục UI dùng chung.

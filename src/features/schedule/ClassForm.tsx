@@ -42,8 +42,8 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     <Field label="Phòng học" value={room} onChange={setRoom} /><Field label="Giảng viên" value={teacher} onChange={setTeacher} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${course?.name ?? 'Ca học'} · ${start} – ${end}`} />
-    <Button label="Lưu lịch học" icon="checkmark" onPress={save} />
+    <Button label="Lưu lịch học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
     <T style={S.small}>Phạm vi áp dụng thuộc môn/học kỳ đã chọn. Khi sửa cả chuỗi, ngoại lệ còn thuộc khoảng ngày và các thứ mới sẽ được giữ; ngoại lệ ngoài phạm vi mới được bỏ. Tùy chọn nhắc hiện là mẫu, chưa phát thông báo trên thiết bị.</T>
-    {item && <Button label={confirmDelete ? 'Xác nhận xóa cả chuỗi' : 'Xóa cả chuỗi lịch học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteClass(item.id); setToast('Đã xóa chuỗi và các ngoại lệ của chuỗi'); (onDeleted ?? onClose)(); }} />}
+    {item && <Button label={confirmDelete ? 'Xác nhận xóa cả chuỗi' : 'Xóa cả chuỗi lịch học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteClass(item.id); setToast('Đã xóa chuỗi và các ngoại lệ của chuỗi'); (onDeleted ?? onClose)(); }} actionLabel={confirmDelete ? 'Đang xóa' : undefined} />}
   </Sheet>;
 }

@@ -1,3 +1,4 @@
+import { StateView } from '../../shared/components';
 import { FlowScope } from '../../navigation/Navigation';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -24,6 +25,7 @@ export default function Academics() {
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
+  if (!semesters.length) return <FlowScope onClose={() => setSheet(null)}><StateView title="Chưa có học kỳ" message="Tạo học kỳ đầu tiên, rồi thêm môn học và tín chỉ của bạn." actionLabel="Tạo học kỳ đầu tiên" onAction={() => setSheet('new-semester')} />{sheet === 'new-semester' && <SemesterForm onClose={() => setSheet(null)} onSaved={id => { setSemesterId(id); setSheet(null); }} />}</FlowScope>;
   const semester = semesters.find(s => s.id === semesterId) ?? semesters[0]!;
   const semesterCourses = courseCatalog.filter(c => c.semesterId === semester.id);
   const credits = semesterCourses.reduce((sum, c) => sum + c.credits, 0);
@@ -37,7 +39,7 @@ export default function Academics() {
     <View style={{ gap: 5, marginTop: 5 }}><T style={{ fontFamily: F.bold, fontSize: 10, color: C.primary, letterSpacing: 1.4 }}>HÀNH TRÌNH HỌC TẬP</T><T style={{ fontFamily: F.extra, fontSize: 25, lineHeight: 36, letterSpacing: -0.8 }}>Môn học & học kỳ</T><T style={{ fontSize: 12, color: C.muted }}>Hiểu rõ từng môn. Tiến bộ qua từng học kỳ.</T></View>
     <Section title="Học kỳ của bạn" action="+ Thêm" onAction={() => setSheet('new-semester')} />
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingVertical: 3 }}>
-      {semesters.map(s => { const active = s.id === semester.id; const count = courseCatalog.filter(c => c.semesterId === s.id).length; return <Pressable key={s.id} accessibilityRole="button" accessibilityLabel={`Chọn ${s.name}`} accessibilityState={{ selected: active }} aria-selected={active} onPress={() => selectSemester(s.id)} style={{ width: 159, minHeight: 108, borderRadius: 21, backgroundColor: active ? C.primary : '#fff', padding: 15, gap: 5, borderWidth: 1, borderColor: active ? C.primary : C.line }}><Row between><Icon name="calendar-outline" size={19} color={active ? '#fff' : C.primary} /><T style={{ color: active ? '#EEE9FF' : C.muted, fontSize: 9 }}>{s.status}</T></Row><T style={{ fontFamily: F.bold, fontSize: 16, color: active ? '#fff' : C.ink }}>{s.name}</T><T style={{ fontSize: 10, color: active ? '#DAD2FF' : C.muted }}>{s.academicYear} · {count} môn</T></Pressable>; })}
+      {semesters.map(s => { const active = s.id === semester.id; const count = courseCatalog.filter(c => c.semesterId === s.id).length; return <Pressable key={s.id} accessibilityRole="button" accessibilityLabel={`Chọn ${s.name}, ${s.academicYear}`} accessibilityState={{ selected: active }} aria-selected={active} onPress={() => selectSemester(s.id)} style={{ width: 159, minHeight: 108, borderRadius: 21, backgroundColor: active ? C.primary : '#fff', padding: 15, gap: 5, borderWidth: 1, borderColor: active ? C.primary : C.line }}><Row between><Icon name="calendar-outline" size={19} color={active ? '#fff' : C.primary} /><T style={{ color: active ? '#EEE9FF' : C.muted, fontSize: 9 }}>{s.status}</T></Row><T style={{ fontFamily: F.bold, fontSize: 16, color: active ? '#fff' : C.ink }}>{s.name}</T><T style={{ fontSize: 10, color: active ? '#DAD2FF' : C.muted }}>{s.academicYear} · {count} môn</T></Pressable>; })}
     </ScrollView>
     <LinearGradient colors={['#ECE6FF', '#F7F4FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 16, gap: 9 }}>
       <Row between><View style={[S.grow, { gap: 3 }]}><T style={{ fontFamily: F.bold, fontSize: 17, color: C.primary }}>{semesterCourses.length} môn học · {credits} tín chỉ</T><T style={{ fontSize: 11, color: '#685F89' }}>Tín chỉ môn đã hoàn thành: {completedCredits}/{credits}</T></View><IconButton name="create-outline" label="Chỉnh sửa học kỳ" onPress={() => setSheet('edit-semester')} bg="#FFFFFFBB" /></Row>

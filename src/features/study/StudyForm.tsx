@@ -51,8 +51,8 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     <Field label="Ghi chú buổi học" value={notes} onChange={setNotes} placeholder="Tài liệu cần đọc, mục tiêu nhỏ cần đạt…" multiline />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
     <ConflictPanel conflicts={conflicts} candidate={`${title || 'Buổi tự học'} · ${start} – ${endTime(start, Number(duration) || 0)}`} />
-    <Button label="Lưu buổi tự học" icon="checkmark" onPress={save} />
+    <Button label="Lưu buổi tự học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
     <T style={S.small}>Buổi học có thời gian riêng. Trạng thái bài tập và hạn nộp được quản lý độc lập.</T>
-    {item && <Button label={confirmDelete ? 'Xác nhận xóa buổi tự học' : 'Xóa buổi tự học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteStudySession(item.id); setToast('Đã xóa buổi tự học'); (onDeleted ?? onClose)(); }} />}
+    {item && <Button label={confirmDelete ? 'Xác nhận xóa buổi tự học' : 'Xóa buổi tự học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteStudySession(item.id); setToast('Đã xóa buổi tự học'); (onDeleted ?? onClose)(); }} actionLabel={confirmDelete ? 'Đang xóa' : undefined} />}
   </Sheet>;
 }

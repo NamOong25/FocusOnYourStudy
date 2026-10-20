@@ -1,34 +1,34 @@
+import { SemesterPicker } from './components/SemesterPicker';
+import { AcademicYearPicker } from './components/AcademicYearPicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, T } from '../../shared/components';
-import { Course, CourseColor, CourseStatus, Semester, SemesterStatus, courseColors } from './academic';
+import { Course, CourseColor, CourseStatus, Semester, SemesterStatus, SemesterTerm, semesterName, courseColors } from './academic';
 import { uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 
 export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onClose: () => void; onSaved: (id: string) => void }) {
   const { semesters, saveSemester, setToast } = useApp();
-  const [name, setName] = useState(item?.name ?? '');
-  const [academicYear, setAcademicYear] = useState(item?.academicYear ?? '2026 – 2027');
+  const [term, setTerm] = useState<SemesterTerm>(item?.term ?? 1);
+  const [yearStart, setYearStart] = useState(() => Number((item?.academicYear ?? semesters.find(s => s.status === 'Đang học')?.academicYear ?? String(new Date().getFullYear())).slice(0, 4)));
   const [status, setStatus] = useState<SemesterStatus>(item?.status ?? 'Sắp tới');
   const [note, setNote] = useState(item?.note ?? ''); const [error, setError] = useState('');
   const save = () => {
-    if (!name.trim()) { setError('Hãy đặt tên cho học kỳ.'); return; }
-    const years = /^(\d{4})\s*[-–]\s*(\d{4})$/.exec(academicYear.trim());
-    if (!years || Number(years[2]) !== Number(years[1]) + 1) { setError('Năm học cần có hai năm liên tiếp, ví dụ 2026 – 2027.'); return; }
-    const normalizedYear = `${years[1]} – ${years[2]}`;
-    if (semesters.some(s => s.id !== item?.id && s.name.toLocaleLowerCase() === name.trim().toLocaleLowerCase() && s.academicYear === normalizedYear)) { setError('Học kỳ này đã có trong năm học đã chọn.'); return; }
-    const semester: Semester = { id: item?.id ?? uid(), name: name.trim(), academicYear: normalizedYear, status, note: note.trim() };
+    if (![1, 2, 3].includes(term) || !Number.isInteger(yearStart) || yearStart < 1900 || yearStart > 2099) { setError('Hãy chọn học kỳ và năm học hợp lệ.'); return; }
+    const academicYear = `${yearStart} – ${yearStart + 1}`;
+    if (semesters.some(s => s.id !== item?.id && s.term === term && s.academicYear === academicYear)) { setError('Học kỳ này đã có trong năm học đã chọn. Hãy chọn kỳ hoặc năm học khác.'); return; }
+    const semester: Semester = { id: item?.id ?? uid(), term, name: semesterName(term), academicYear, status, note: note.trim() };
     saveSemester(semester); setToast(item ? 'Đã cập nhật học kỳ' : 'Đã tạo học kỳ mới'); onSaved(semester.id);
   };
   return <Sheet title={item ? 'Chỉnh sửa học kỳ' : 'Học kỳ mới'} onClose={onClose}>
     <Badge label="Mỗi học kỳ, một chặng đường" icon="school-outline" />
-    <Field label="Tên học kỳ" value={name} onChange={setName} placeholder="Ví dụ: Học kỳ 6" />
-    <Field label="Năm học" value={academicYear} onChange={setAcademicYear} placeholder="2026 – 2027" />
+    <AcademicYearPicker value={yearStart} onChange={year => { setYearStart(year); setError(''); }} />
+    <SemesterPicker value={term} onChange={value => { setTerm(value); setError(''); }} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Trạng thái học kỳ</T>
     <Segments values={['Đang học', 'Sắp tới', 'Đã kết thúc']} value={status} onChange={v => setStatus(v as SemesterStatus)} />
     <Field label="Ghi chú cho học kỳ" value={note} onChange={setNote} placeholder="Bạn muốn tập trung vào điều gì trong học kỳ này?" multiline />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
-    <Button label="Lưu học kỳ" icon="checkmark" onPress={save} />
+    <Button label="Lưu học kỳ" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
   </Sheet>;
 }
 
@@ -68,10 +68,10 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
     <Row style={{ flexWrap: 'wrap' }}>{(Object.keys(courseColors) as CourseColor[]).map(key => <Pressable key={key} accessibilityRole="radio" accessibilityLabel={`Màu ${courseColors[key].label}`} accessibilityState={{ checked: key === color }} aria-checked={key === color} onPress={() => setColor(key)} style={{ minHeight: 46, paddingHorizontal: 12, borderWidth: 2, borderColor: key === color ? courseColors[key].ink : 'transparent', borderRadius: 16, backgroundColor: courseColors[key].bg, alignItems: 'center', justifyContent: 'center' }}><T style={{ fontSize: 11, fontFamily: F.semi, color: courseColors[key].ink }}>{courseColors[key].label}</T></Pressable>)}</Row>
     <Field label="Giới thiệu & mục tiêu môn học" value={description} onChange={setDescription} placeholder="Nội dung chính, điều bạn muốn đạt được…" multiline />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
-    <Button label="Lưu môn học" icon="checkmark" onPress={save} />
+    <Button label="Lưu môn học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
     {item && <>
       {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có lịch, bài tập, điểm hoặc liên kết học lại. Chỉ xóa môn khi đã xử lý các mục liên quan.</T></Card>}
-      <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={linkCount > 0 || gradeLinked} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } if (!deleteCourse(item.id)) { setError('Môn học vẫn còn dữ liệu liên quan.'); return; } setToast('Đã xóa môn học'); onDeleted(); }} />
+      <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={linkCount > 0 || gradeLinked} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } if (!deleteCourse(item.id)) { setError('Môn học vẫn còn dữ liệu liên quan.'); return; } setToast('Đã xóa môn học'); onDeleted(); }} actionLabel={confirmDelete ? 'Đang xóa' : undefined} />
     </>}
   </Sheet>;
 }

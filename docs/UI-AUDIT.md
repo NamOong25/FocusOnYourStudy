@@ -84,3 +84,8 @@ Lưu và khôi phục timer khi process bị hủy, nhắc lịch thật, quiet 
 Kết nối AI qua backend, giữ API key phía server. Làm kế hoạch/kiểm tra rảnh/deadline và bước duyệt trước; sau đó PDF có dẫn trang, quiz có lời giải, điều chỉnh kế hoạch; thêm quota, hủy/yêu cầu lại, xử lý lỗi và riêng tư dữ liệu.
 
 Mỗi đợt có thể chia thành vài lượt làm nhỏ. Ưu tiên chốt một luồng có thể thử được rồi mới mở nhóm kế tiếp.
+
+
+## Cập nhật UI 3C
+
+Đã bổ sung màn bắt đầu và dữ liệu học tập trống; hướng dẫn học kỳ → môn → bài; tải/lỗi/retry giữ nội dung; xử lý mẫu ở form có khóa nút, giữ bản nháp, thử lại và hủy; thông báo kết quả dùng chung cả trong Modal. Xem `UI-POLISH-3C.md`. Bảng thiếu ở phần đầu là đối chiếu template gốc; hiện còn UI 3D và các nghiệp vụ/backend thật trong checklist.
