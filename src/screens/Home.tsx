@@ -7,8 +7,9 @@ import { formatGpa, summarizeGrades } from '../grades';
 import { StudentAvatar } from '../accountUI';
 import { Task, dateKey, dateLabel, dueLabel, useApp } from '../model';
 
-export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void; onProfile: () => void }) {
-  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan, courseCatalog, gradeBook, gradeRules, profile, previewSignedIn } = useApp();
+export default function Home({ onTask, onProfile, onStudyPlan }: { onTask: (t: Task) => void; onProfile: () => void; onStudyPlan: () => void }) {
+  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, aiSessionIds, studySessions, courseCatalog, gradeBook, gradeRules, profile, previewSignedIn } = useApp();
+  const acceptedSessions = studySessions.filter(s => aiSessionIds.includes(s.id)).sort((a, b) => `${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`));
   const gradeSummary = summarizeGrades(courseCatalog, gradeBook, gradeRules, true);
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
   const todayClasses = getClassesOn(dateKey(new Date())).filter(c => !c.cancelled);
@@ -41,7 +42,7 @@ export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void;
     <Section title="Bài tập sắp đến hạn" icon="documents-outline" action={`${pending.length} bài`} onAction={() => setTab('schedule')} />
     {pending.slice(0, 2).map((task, i) => <Pressable key={task.id} accessibilityRole="button" onPress={() => onTask(task)}><Card style={{ padding: 14, borderRadius: 27 }}><Row style={{ gap: 11 }}><IconTile name={i === 0 ? 'alert-outline' : 'document-text-outline'} bg={i === 0 ? C.redSoft : C.soft} color={i === 0 ? C.red : C.primary} /><View style={S.grow}><T numberOfLines={1} style={{ fontFamily: F.bold, fontSize: 13 }}>{task.title}</T><T style={{ fontSize: 11, color: i === 0 ? C.red : C.muted, marginTop: 2 }}>{dueLabel(task.deadline)} · {dateLabel(task.deadline)}</T></View><Icon name="chevron-forward" size={17} color={C.muted} /></Row></Card></Pressable>)}
     {pending.length === 0 && <Empty title="Bạn đã hoàn thành tất cả!" message="Nghỉ ngơi một chút, rồi lên kế hoạch tiếp nhé." />}
-    {studyPlan.length > 0 && <Card style={{ backgroundColor: C.greenSoft, gap: 10 }}><Row><Icon name="checkmark-circle-outline" color={C.green} /><T style={{ fontFamily: F.bold, color: C.green }}>Kế hoạch tự học đã chọn</T></Row>{studyPlan.map(p => <T key={p} style={{ fontSize: 12 }}>{p}</T>)}</Card>}
+    {acceptedSessions.length > 0 && <Card style={{ backgroundColor: C.greenSoft, gap: 10 }}><Row><Icon name="checkmark-circle-outline" color={C.green} /><T style={[S.grow, { fontFamily: F.bold, color: C.green }]}>Kế hoạch tự học đã chọn</T></Row>{acceptedSessions.slice(0, 3).map(s => <View key={s.id}><T style={{ fontFamily: F.semi, fontSize: 12 }}>{s.title}</T><T style={S.small}>{dateLabel(s.date)} · {s.start} · {s.duration} phút · {s.status}</T></View>)}<Button label={`Xem ${acceptedSessions.length} buổi đã duyệt trong lịch tự học`} secondary onPress={onStudyPlan} /></Card>}
     <Pressable accessibilityRole="button" accessibilityLabel="Xem gợi ý từ Trợ lý AI" onPress={() => setTab('ai')}><LinearGradient colors={['#E6DFFF', '#FFFFFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 18, borderRadius: 22 }}><Row style={{ gap: 14 }}><Image source={require('../../assets/mentor.png')} style={{ width: 56, height: 56, borderRadius: 18 }} /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 12, color: C.primary }}>Một chút gợi ý cho hôm nay ✨</T><T style={{ fontSize: 12, lineHeight: 19, marginTop: 4 }}>Chia nhỏ bài tập thành những phiên học. Mỗi bước nhỏ đều đáng ghi nhận.</T></View><Icon name="chevron-forward" size={18} /></Row></LinearGradient></Pressable>
   </>;
 }

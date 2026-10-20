@@ -28,7 +28,7 @@ npm run build:web
 - Pomodoro: tập trung 25 phút, nghỉ 5/15 phút, đổi môn, bắt đầu/tạm dừng/đặt lại, lịch sử các phiên mới. Dùng mốc kết thúc để thời gian cập nhật khi quay về ứng dụng, không đếm trừ dựa trên số lần interval chạy.
 - Thống kê: bộ lọc tuần/tháng/học kỳ và biểu đồ có thể chạm; dữ liệu giờ học là mẫu. Tỷ lệ hoàn thành/trễ hạn lấy từ bài tập hiện tại. Từ đợt 2D, GPA/tín chỉ tính từ bảng điểm trong bộ nhớ; mô phỏng dùng kết quả đó với giả định được ghi rõ.
 - Lịch thi: danh sách, thêm lịch, bật/tắt tùy chọn nhắc mẫu.
-- Trợ lý AI: 5 công cụ, xem đề xuất mẫu, chấp nhận/để sau, trắc nghiệm mẫu có giải thích, tóm tắt mẫu kèm nguồn minh họa. Đề xuất khung giờ đối chiếu lịch học mẫu và chỉ thêm vào danh sách tự học khi chấp nhận.
+- Trợ lý AI: 5 công cụ với form đầu vào; sửa/bỏ chọn/duyệt kế hoạch mẫu thành buổi tự học dùng chung sau khi kiểm tra lịch/deadline; điều chỉnh buổi chưa học; tóm tắt và quiz 3/5 câu có trang nguồn minh họa đọc được (bổ sung ở 2F).
 - Hồ sơ/cài đặt với các luồng tài khoản minh họa (bổ sung ở 2E), hộp nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
 
 **Dữ liệu nằm trong bộ nhớ. Tải lại ứng dụng sẽ trở về mẫu.** Không có đăng nhập thật, thông báo hệ thống, đồng bộ, upload PDF hoặc gọi AI thật. Pomodoro không phát chuông khi app bị đóng; chưa lưu phiên khi process bị hủy. Không coi kiểm tra bằng trình duyệt/Mobile View là đã kiểm tra chạy nền trên điện thoại thật.
@@ -84,3 +84,11 @@ Bấm **Hồ sơ** góc phải trên cùng hoặc avatar trang chủ để mở 
 **Các luồng tài khoản chỉ là bản dùng thử giao diện**: không gửi/lưu/xác thực mật khẩu, không gửi email, các hồ sơ dùng chung dữ liệu học tập mẫu. Theme và ngôn ngữ mới đổi trên thẻ xem trước; chưa áp dụng toàn app. Tùy chọn nhắc chưa gửi thông báo thiết bị. Tải lại app vẫn đặt lại dữ liệu.
 
 Xem `docs/UI-PHASE-2E.md` và `docs/qa-account.cjs` để biết phạm vi/kiểm tra. Tên commit: **Thêm giao diện tài khoản, hồ sơ và cài đặt**; lệnh push được cập nhật trong `docs/GIT-COMMITS.md`. Tiếp theo là UI 2F — các luồng con AI.
+
+## Cập nhật đợt 2F: Trợ lý AI & duyệt kế hoạch
+
+Mở **Trợ lý AI**. **Tạo lộ trình/Tìm lịch trống** cho chọn mục tiêu, bài/kỳ thi, ngày/giờ rảnh, số buổi và thời lượng → xem trước → sửa hoặc bỏ chọn từng buổi → duyệt. Các buổi được kiểm tra trùng lịch/deadline và lưu vào cùng **Lịch học → Tự học**, mở được chi tiết/Pomodoro. **Xem đề xuất** cho điều chỉnh một buổi chưa bắt đầu và duyệt thay thế, giữ liên kết/ghi chú, không tạo bản sao.
+
+**Xem bản mẫu** có hai tài liệu minh họa, tóm tắt ngắn/chi tiết và đọc từng trang nguồn. **Luyện thử** có 3/5 câu, quay lại sửa đáp án, nộp bài, kết quả/giải thích, đọc nguồn và làm lại. Đây là nội dung có sẵn, chưa upload/đọc PDF hoặc gọi AI thật. Kế hoạch được sinh local để thử luồng; ô hỏi chỉ làm mục tiêu, chưa được AI phân tích. Dữ liệu vẫn đặt lại khi tải lại.
+
+Xem `docs/UI-PHASE-2F.md`, `docs/qa-ai-unit.cjs`, `docs/qa-ai.cjs`. Tên commit và lệnh push mới nhất ở `docs/GIT-COMMITS.md`. Sau đợt này nên rà soát tổng thể và quay lại bốn nhóm hoàn thiện đang hoãn trong `docs/UI-BACKLOG.md`.

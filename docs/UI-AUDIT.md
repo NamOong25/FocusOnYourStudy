@@ -8,6 +8,8 @@ Cập nhật sau đợt 2D: đã có UI chi tiết bài tập/tự học (2B), l
 
 Cập nhật sau đợt 2E: đã có khu vực hồ sơ/cài đặt, chỉnh hồ sơ dùng chung trang chủ, các luồng tài khoản/khôi phục mật khẩu minh họa, tùy chọn nhắc và thẻ preview theme/ngôn ngữ. Auth/email/thông báo thật và theme/i18n toàn app vẫn còn thiếu; xem `UI-PHASE-2E.md`.
 
+Cập nhật sau đợt 2F: các công cụ AI có form, duyệt/sửa/bỏ chọn kế hoạch thành buổi tự học dùng chung, thay một buổi chưa học, tóm tắt và quiz có trang nguồn mẫu đọc được. Chưa có AI/PDF thật hoặc lịch sử quiz lâu dài. Xem `UI-PHASE-2F.md`; bước tiếp theo đề xuất là rà soát các mục hoàn thiện đã hoãn.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |

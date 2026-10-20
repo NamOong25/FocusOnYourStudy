@@ -18,8 +18,10 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 - [x] UI 2C: Chi tiết/tạo/sửa/xóa lịch thi, tùy chọn nhắc mẫu; chuỗi lịch học nhiều thứ/có phạm vi, nghỉ/đổi/khôi phục một buổi và cảnh báo lịch bị trùng. Xem `UI-PHASE-2C.md`.
 - [x] UI 2D: Bảng điểm theo học kỳ; nhập/sửa điểm thành phần và trọng số; GPA kỳ/tích lũy, liên kết học lại, quy tắc mẫu và dự báo mục tiêu. Chi tiết môn, trang chủ và thống kê dùng chung điểm. Xem `UI-PHASE-2D.md`.
 - [x] UI 2E: Hồ sơ chỉnh sửa/ảnh mẫu dùng chung trang chủ; đăng nhập/đăng ký/khôi phục/đổi mật khẩu và đăng xuất minh họa; tùy chọn nhắc, giờ yên lặng; thẻ xem trước sáng/tối và ngôn ngữ. Xem `UI-PHASE-2E.md`. Chưa có auth/email/thông báo thật hoặc theme/i18n toàn app.
-- [ ] UI 2F: Hoàn thiện các luồng con AI, tài liệu và bước xem trước/sửa/duyệt đề xuất mẫu.
+- [x] UI 2F: Form mục tiêu/giờ rảnh; preview, sửa/bỏ chọn/duyệt vào buổi tự học dùng chung; điều chỉnh một buổi chưa bắt đầu; tóm tắt và quiz 3/5 câu từ hai bộ nguồn theo trang có sẵn. Xem `UI-PHASE-2F.md`. Chưa gọi AI, upload/đọc PDF thật hoặc lưu lịch sử quiz.
 - [ ] Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
+
+Sau 2F, các nhóm màn chính đã có prototype. Đề xuất bước kế tiếp: rà soát tổng thể rồi quay lại bốn mục hoãn ở đầu file; đợt 2F chỉ ghi lại việc này, chưa tự triển khai chúng hoặc chuyển sang backend.
 
 Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu trong bộ nhớ. Các yêu cầu nghiệp vụ thật, lưu/đồng bộ, tệp và chạy nền bên dưới vẫn để mở.
 

@@ -44,14 +44,14 @@ function AppShell() {
       <View><IconButton name="notifications-outline" label="Thông báo" onPress={() => { setPanel('notifications'); setRead(true); }} bg={C.canvas} color={C.ink} />{!read && <View style={{ position: 'absolute', top: 7, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: C.red, borderWidth: 1, borderColor: C.canvas }} />}</View><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => setPanel('profile')} />
     </Row>
     <ScrollView key={`${tab}-${scheduleMode}`} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-      {tab === 'home' && <Home onTask={setTaskForm} onProfile={() => setPanel('profile')} />}
+      {tab === 'home' && <Home onTask={setTaskForm} onProfile={() => setPanel('profile')} onStudyPlan={() => { setScheduleMode('Tự học'); setTab('schedule'); }} />}
       {tab === 'schedule' && <>
         <Segments values={['Lịch & bài tập', 'Môn & học kỳ', 'Tự học']} value={scheduleMode} onChange={setScheduleMode} />
         {scheduleMode === 'Lịch & bài tập' ? <Schedule onTask={setTaskForm} onNewTask={() => setTaskForm('new')} onClass={(item, date) => { setClassForm(item); setClassDate(date); }} onNewClass={() => setClassForm('new')} /> : scheduleMode === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}
       </>}
       {tab === 'focus' && <Focus onStudyPlan={() => { setScheduleMode('Tự học'); setTab('schedule'); }} />}
       {tab === 'stats' && <Stats />}
-      {tab === 'ai' && <Assistant />}
+      {tab === 'ai' && <Assistant onStudyPlan={() => { setScheduleMode('Tự học'); setTab('schedule'); }} />}
       <T style={{ textAlign: 'center', color: '#91909F', fontSize: 9, lineHeight: 16, letterSpacing: 0.5 }}>FOCUSYOURSTUDY · BẢN GIAO DIỆN · DỮ LIỆU MẪU</T>
     </ScrollView>
     <View style={[styles.dockWrap, { bottom: Math.max(14, inset.bottom) }]}><View style={styles.dock}>{tabs.map(t => { const active = tab === t.id; const center = t.id === 'focus'; return <Pressable accessibilityRole="tab" accessibilityLabel={t.label} accessibilityState={{ selected: active }} key={t.id} onPress={() => setTab(t.id)} style={({ pressed }) => ({ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 63, gap: 4, opacity: pressed ? 0.65 : 1 })}>{center ? <View style={{ marginTop: -18, width: 54, height: 54, borderRadius: 27, backgroundColor: active ? C.primary : C.purple, justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#fff', boxShadow: '0px 5px 14px rgba(108,92,231,0.27)' }}><Icon name={t.icon} color="#fff" size={27} /></View> : <Icon name={active ? t.activeIcon : t.icon} color={active ? C.primary : '#686878'} size={21} />}<T style={{ fontFamily: active ? F.bold : F.medium, fontSize: 9, lineHeight: 14, color: active ? C.primary : '#686878' }}>{t.label}</T></Pressable>; })}</View></View>

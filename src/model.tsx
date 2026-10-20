@@ -6,6 +6,7 @@ import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from '
 import { addDays, dateKey, today } from './dates';
 import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook } from './grades';
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from './account';
+import { AiProposal, proposalSessions, validateProposal } from './aiPlanner';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from './dates';
 
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
@@ -60,7 +61,8 @@ function usePrototype() {
   const [completed, setCompleted] = useState(3);
   const [history, setHistory] = useState<string[]>([]);
   const [toast, setToast] = useState('');
-  const [studyPlan, setStudyPlan] = useState<string[]>([]);
+  const [aiSessionIds, setAiSessionIds] = useState<string[]>([]);
+  const appliedAiProposals = useRef(new Set<string>());
   const [studySessions, setStudySessions] = useState(initialStudySessions);
   const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(initialTaskExtras);
   const [focusTaskId, setFocusTaskId] = useState<string | undefined>();
@@ -105,6 +107,16 @@ function usePrototype() {
       setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(session.courseId); setFocusTaskId(session.taskId);
     }
   };
+  const applyAiProposal = (proposal: AiProposal) => {
+    if (appliedAiProposals.current.has(proposal.id)) return { ok: false, message: 'Đề xuất này đã được duyệt.' };
+    const issues = validateProposal(proposal, { courseCatalog, tasks, classes, classExceptions, exams, studySessions });
+    if (issues.length) return { ok: false, message: issues[0]!.message };
+    const sessions = proposalSessions(proposal); const ids = new Set(sessions.map(s => s.id));
+    appliedAiProposals.current.add(proposal.id);
+    setStudySessions(v => [...v.filter(s => !ids.has(s.id)), ...sessions]);
+    setAiSessionIds(v => [...new Set([...v, ...ids])]);
+    return { ok: true, message: '' };
+  };
   const deleteStudySession = (id: string) => {
     setStudySessions(v => v.filter(s => s.id !== id));
     if (focusSessionId === id) { setFocusSessionId(undefined); setFocusTaskId(undefined); setEndsAt(null); setSeconds(durations[mode]!); }
@@ -144,7 +156,7 @@ function usePrototype() {
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
+  return { profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }
