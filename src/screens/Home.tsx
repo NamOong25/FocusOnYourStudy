@@ -3,10 +3,12 @@ import { Image, Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Icon, IconTile, Progress, Row, Section, T, Empty } from '../components';
 import { C, F, S } from '../theme';
+import { formatGpa, summarizeGrades } from '../grades';
 import { Task, dateKey, dateLabel, dueLabel, useApp } from '../model';
 
 export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void; onProfile: () => void }) {
-  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan } = useApp();
+  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan, courseCatalog, gradeBook, gradeRules } = useApp();
+  const gradeSummary = summarizeGrades(courseCatalog, gradeBook, gradeRules, true);
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
   const todayClasses = getClassesOn(dateKey(new Date())).filter(c => !c.cancelled);
   const done = tasks.filter(t => t.status === 'Hoàn thành').length;
@@ -21,7 +23,7 @@ export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void;
       </Pressable><Badge label="Học kỳ 5" bg={C.track} icon="ribbon-outline" />
     </Row>
     <LinearGradient colors={['#6C5CE7', '#8875E9', '#A69AFC']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 21, borderRadius: 24, gap: 19, boxShadow: '0px 12px 24px rgba(108,92,231,0.18)' }}>
-      <Row between><Badge label="Trọng tâm hôm nay" color="#fff" bg="#FFFFFF30" icon="ellipse" /><Badge label="GPA 3.82 / 4.0" color="#fff" bg="#FFFFFF30" /></Row>
+      <Row between><Badge label="Trọng tâm hôm nay" color="#fff" bg="#FFFFFF30" icon="ellipse" /><Badge label={`GPA ${formatGpa(gradeSummary.gpa)} / 4.0`} color="#fff" bg="#FFFFFF30" /></Row>
       <Row><View style={S.grow}><T style={{ fontFamily: F.extra, color: '#fff', fontSize: 21, lineHeight: 30, letterSpacing: -0.6 }}>{focusCourse}</T><T style={{ color: '#F1EDFF', fontSize: 12, marginTop: 5 }}>Đã hoàn thành {completed} / 5 phiên Pomodoro</T></View><View style={{ width: 62, height: 70, borderRadius: 23, backgroundColor: '#FFFFFF25', justifyContent: 'center', padding: 4 }}><Image source={require('../../assets/books.png')} style={{ width: 54, height: 54, borderRadius: 15 }} /></View></Row>
       <View style={{ gap: 8 }}><Row between><T style={{ fontSize: 11, color: '#F7F4FF', fontFamily: F.medium }}>Mục tiêu tập trung hôm nay</T><T style={{ fontSize: 12, color: '#fff', fontFamily: F.bold }}>{Math.min(100, completed * 20)}%</T></Row><Progress value={completed * 20} white /></View>
       <Button label="Tiếp tục học ngay" icon="play" onPress={() => setTab('focus')} style={{ backgroundColor: '#fff' }} secondary />

@@ -12,3 +12,9 @@
 - Dữ liệu GPA mẫu 3.82, 68 tín chỉ đã đạt/135 tổng; mô phỏng giả định 20 tín chỉ mới cùng thang 4. Công thức: (target × 88 − 3.82 × 68) / 20. Chưa mô phỏng quy tắc học lại/thang điểm trường.
 - AI không gọi dịch vụ. Kế hoạch, summary, quiz đều ghi rõ mẫu; không upload tài liệu hoặc khẳng định đã phân tích câu hỏi. Quyền chấp nhận kế hoạch thuộc người dùng.
 - Dùng lockfile để tái lập dependency. Không đưa node_modules, cache hoặc build output vào Git. Cài npm cache trên ổ D để giảm dùng dung lượng ổ C.
+
+## Thay thế trong các đợt sau
+
+- Đợt 2C đã bổ sung phạm vi chuỗi, nhiều thứ, ngoại lệ một buổi và lịch thi dùng chung kiểm tra trùng. Mô tả lịch đơn giản phía trên chỉ ghi lại trạng thái đợt đầu.
+- Đợt 2D thay hằng GPA 3,82 và tín chỉ 68/135 bằng điểm thành phần và GPA theo tín chỉ trong Context. Quy tắc mẫu có hai thang quy đổi, làm tròn trước quy đổi và liên kết học lại rõ; xem `UI-PHASE-2D.md`. Chưa chốt quy chế trường, không dùng dữ liệu này làm bảng điểm chính thức.
+- Từ đợt 2D, mỗi đợt kèm tên commit tiếng Việt/lệnh push trong `GIT-COMMITS.md` và câu trả lời hoàn thành. Người dùng tự chạy commit/push.

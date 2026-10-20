@@ -4,6 +4,8 @@ Ngày rà soát: 20/10/2026. Nguồn: DESIGN.md và 5 ZIP Stitch (1)–(5) do ng
 
 Cập nhật: người dùng xác nhận chỉ có 9 nhóm chức năng; AI (mục 10 cũ) nay là mục 9. Đợt 2A đã dựng thêm Môn học & học kỳ, xem UI-PHASE-2.md; các cải thiện thao tác được hoãn theo UI-BACKLOG.md.
 
+Cập nhật sau đợt 2D: đã có UI chi tiết bài tập/tự học (2B), lịch thi/ngoại lệ/trùng lịch (2C), bảng điểm/trọng số/GPA/học lại và mục tiêu (2D). Bảng đối chiếu phía dưới ghi nhận những gì thiếu trong template ban đầu; trạng thái hiện tại xem `UI-BACKLOG.md` và các tài liệu từng đợt. GPA cố định 3,82 của đợt đầu đã được thay bằng kết quả tính từ điểm trong bộ nhớ. Dữ liệu vẫn là prototype, chưa theo quy chế trường hoặc lưu backend.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |
@@ -74,4 +76,3 @@ Lưu và khôi phục timer khi process bị hủy, nhắc lịch thật, quiet 
 Kết nối AI qua backend, giữ API key phía server. Làm kế hoạch/kiểm tra rảnh/deadline và bước duyệt trước; sau đó PDF có dẫn trang, quiz có lời giải, điều chỉnh kế hoạch; thêm quota, hủy/yêu cầu lại, xử lý lỗi và riêng tư dữ liệu.
 
 Mỗi đợt có thể chia thành vài lượt làm nhỏ. Ưu tiên chốt một luồng có thể thử được rồi mới mở nhóm kế tiếp.
-

@@ -26,7 +26,7 @@ npm run build:web
 - Lịch học: ngày/tuần/tháng, chuyển khoảng thời gian, thêm/sửa/xóa ca học lặp hằng tuần; kiểm tra khung giờ và trùng ca học.
 - Bài tập: thêm/sửa/xóa, môn học, deadline, ưu tiên, ghi chú; 3 trạng thái, lọc môn. Trang chủ và thống kê cập nhật cùng dữ liệu.
 - Pomodoro: tập trung 25 phút, nghỉ 5/15 phút, đổi môn, bắt đầu/tạm dừng/đặt lại, lịch sử các phiên mới. Dùng mốc kết thúc để thời gian cập nhật khi quay về ứng dụng, không đếm trừ dựa trên số lần interval chạy.
-- Thống kê: bộ lọc tuần/tháng/học kỳ và biểu đồ có thể chạm; dữ liệu giờ học và GPA là mẫu. Tỷ lệ hoàn thành/trễ hạn lấy từ bài tập hiện tại. Mô phỏng GPA dùng công thức trung bình có trọng số tín chỉ, ghi rõ giả định.
+- Thống kê: bộ lọc tuần/tháng/học kỳ và biểu đồ có thể chạm; dữ liệu giờ học là mẫu. Tỷ lệ hoàn thành/trễ hạn lấy từ bài tập hiện tại. Từ đợt 2D, GPA/tín chỉ tính từ bảng điểm trong bộ nhớ; mô phỏng dùng kết quả đó với giả định được ghi rõ.
 - Lịch thi: danh sách, thêm lịch, bật/tắt tùy chọn nhắc mẫu.
 - Trợ lý AI: 5 công cụ, xem đề xuất mẫu, chấp nhận/để sau, trắc nghiệm mẫu có giải thích, tóm tắt mẫu kèm nguồn minh họa. Đề xuất khung giờ đối chiếu lịch học mẫu và chỉ thêm vào danh sách tự học khi chấp nhận.
 - Hộp thoại hồ sơ và nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
@@ -68,3 +68,11 @@ Mở **Lịch học → Lịch & bài tập → Kỳ thi** để quản lý lị
 Trong **Thời khóa biểu**, bấm một buổi để nghỉ, đổi giờ/phòng riêng ngày đó, khôi phục hoặc sửa/xóa cả chuỗi. Form chuỗi chọn nhiều thứ và khoảng ngày áp dụng. Cảnh báo trùng giờ dùng chung cho ca học, thi và tự học, chỉ rõ lịch liên quan. Các màn đọc cùng ngoại lệ; không coi buổi đã nghỉ là giờ bận.
 
 Xem `docs/UI-PHASE-2C.md` để biết quy tắc và giới hạn. Dữ liệu/tùy chọn nhắc vẫn là mẫu trong bộ nhớ. Ngày giờ tiếp tục nhập chuỗi theo checklist đã hoãn.
+
+## Cập nhật đợt 2D: Điểm số & GPA
+
+Mở **Thống kê → Điểm & GPA** để chọn học kỳ, tìm/lọc môn, xem bảng điểm và so sánh GPA. Bấm môn để nhập điểm thành phần, sửa trọng số, thêm phần điểm và xem trước tổng kết. Trong **Chi tiết môn → Điểm số** cũng sửa cùng dữ liệu này.
+
+Có quy tắc mẫu về thang quy đổi, làm tròn và học lại, dự báo điểm còn thiếu và mô phỏng mục tiêu GPA tích lũy. Ô chưa nhập hiển thị chưa đủ dữ liệu; điểm 0 vẫn tính là điểm đã có. Trang chủ và thống kê lấy GPA cùng nguồn với bảng điểm. Quy tắc hiện tại cần đối chiếu quy chế trường trước khi dùng thật; dữ liệu vẫn đặt lại khi tải lại app.
+
+Xem `docs/UI-PHASE-2D.md` để biết phạm vi và kiểm tra. **Tên commit tiếng Việt và lệnh push mỗi đợt** được ghi trong `docs/GIT-COMMITS.md`, kèm tên dự kiến cho các đợt giao diện tiếp theo. Checklist phần hoãn vẫn ở `docs/UI-BACKLOG.md`.

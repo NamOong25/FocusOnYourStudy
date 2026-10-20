@@ -9,10 +9,12 @@ import TaskDialog from '../TaskDialog';
 import ClassDialog from '../ClassDialog';
 import { weekdaysLabel } from '../calendar';
 import { ExamDialog } from '../Exams';
+import GradePanel from '../GradePanel';
+import { GradeEditor } from '../GradeEditor';
 import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../model';
 import { C, F, S } from '../theme';
 
-type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | null;
+type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
   const { semesters, courseCatalog, tasks, classes } = useApp();
   const [semesterId, setSemesterId] = useState('sem-5'); const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
@@ -54,14 +56,15 @@ export default function Academics() {
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
     {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { selectSemester(id); setSheet(null); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { selectSemester(targetSemesterId); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
-    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" onClose={() => setSheet(null)}><CourseDetail course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} /></Sheet>}
+    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" onClose={() => setSheet(null)}><CourseDetail course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onGrades={() => setSheet('grades')} /></Sheet>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && (classItem ? <ClassDialog id={classItem.id} onClose={() => setSheet('detail')} /> : <ClassForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'exam' && examId && <ExamDialog id={examId} onClose={() => setSheet('detail')} />}
+    {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} onClose={() => setSheet('detail')} />}
   </>;
 }
 
-function CourseDetail({ course, onEdit, onClose, onTask, onClass, onExam }: { course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void }) {
+function CourseDetail({ course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
   const { tasks, classes, exams, semesters, prepareFocus } = useApp();
   const [section, setSection] = useState('Tổng quan'); const colors = courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
@@ -88,9 +91,6 @@ function CourseDetail({ course, onEdit, onClose, onTask, onClass, onExam }: { co
       {linkedTasks.map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={`Mở bài tập ${task.title}`} onPress={() => onTask(task)}><Card style={{ backgroundColor: C.canvas, gap: 10 }}><Row between><Badge label={task.status} color={task.status === 'Hoàn thành' ? C.green : C.primary} bg={task.status === 'Hoàn thành' ? C.greenSoft : C.soft} /><T style={{ fontSize: 10, color: C.muted }}>{dueLabel(task.deadline)}</T></Row><T style={{ fontFamily: F.bold, fontSize: 15 }}>{task.title}</T><T style={S.small}>Hạn nộp {dateLabel(task.deadline)} · Ưu tiên {task.priority.toLowerCase()}</T></Card></Pressable>)}
       {!linkedTasks.length && <Card style={{ backgroundColor: C.canvas, gap: 10 }}><IconTile name="clipboard-outline" /><T style={{ fontFamily: F.bold }}>Chưa có bài tập cho môn này</T><T style={S.small}>Ghi lại yêu cầu và deadline ngay khi nhận bài nhé.</T><Button label="Tạo bài tập cho môn" secondary onPress={() => onTask()} /></Card>}
     </>}
-    {section === 'Điểm số' && <>
-      <Card style={{ backgroundColor: C.canvas, gap: 14 }}><Badge label="Cấu trúc điểm minh họa" icon="information-circle-outline" /><T style={{ fontFamily: F.bold, fontSize: 16 }}>Từng phần, từng tiến bộ</T>{[{ name: 'Thường xuyên', weight: '20%' }, { name: 'Giữa kỳ', weight: '30%' }, { name: 'Cuối kỳ', weight: '50%' }].map(grade => <Row key={grade.name} between style={{ borderBottomWidth: 1, borderColor: C.line, paddingBottom: 13 }}><View style={S.grow}><T style={{ fontSize: 13, fontFamily: F.semi }}>{grade.name}</T><T style={{ fontSize: 10, color: C.muted }}>Trọng số mẫu {grade.weight}</T></View><T style={{ fontSize: 12, color: C.muted }}>Chưa nhập</T></Row>)}<Row between><T style={{ fontFamily: F.bold }}>Điểm tổng kết</T><T style={{ color: C.primary, fontFamily: F.bold }}>Chưa đủ dữ liệu</T></Row></Card>
-      <T style={S.small}>Đây là bố cục xem điểm của môn. Nhập điểm, chỉnh trọng số và quy tắc GPA sẽ được làm ở đợt giao diện điểm số; điểm chưa nhập không được xem là 0.</T>
-    </>}
+    {section === 'Điểm số' && <GradePanel courseId={course.id} onEdit={onGrades} />}
   </>;
 }

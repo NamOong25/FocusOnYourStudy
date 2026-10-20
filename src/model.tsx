@@ -4,6 +4,7 @@ import { Course, Semester, initialCourses, initialSemesters } from './academic';
 import { StudySession, TaskExtras, initialTaskExtras } from './learning';
 import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from './calendar';
 import { addDays, dateKey, today } from './dates';
+import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook } from './grades';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from './dates';
 
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
@@ -39,6 +40,9 @@ const initialStudySessions: StudySession[] = [
 function usePrototype() {
   const [semesters, setSemesters] = useState(initialSemesters);
   const [courseCatalog, setCourseCatalog] = useState(initialCourses);
+  const [gradeBook, setGradeBook] = useState<GradeBook>(initialGradeBook);
+  const [gradeRules, setGradeRules] = useState<GradeRules>(defaultRules);
+  const saveGrades = (id: string, record: CourseGrades) => setGradeBook(v => ({ ...v, [id]: record }));
   const [tasks, setTasks] = useState(initialTasks);
   const [classes, setClasses] = useState(initialClasses);
   const [classExceptions, setClassExceptions] = useState<ClassException[]>([]);
@@ -129,12 +133,14 @@ function usePrototype() {
     setExams(v => v.map(e => e.courseId === course.id ? { ...e, course: course.name } : e));
   };
   const deleteCourse = (id: string) => {
+    if (gradeBook[id]?.parts.some(p => p.score !== null) || gradeBook[id]?.previousCourseId || Object.values(gradeBook).some(g => g.previousCourseId === id)) return false;
     if (tasks.some(t => t.courseId === id) || classes.some(c => c.courseId === id) || exams.some(e => e.courseId === id) || studySessions.some(s => s.courseId === id)) return false;
     setCourseCatalog(v => v.filter(c => c.id !== id));
+    setGradeBook(v => { const next = { ...v }; delete next[id]; return next; });
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
+  return { gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }

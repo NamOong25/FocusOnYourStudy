@@ -33,7 +33,7 @@ export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onCl
 }
 
 export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void }) {
-  const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, studySessions, setToast } = useApp();
+  const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, studySessions, gradeBook, setToast } = useApp();
   const [name, setName] = useState(item?.name ?? ''); const [code, setCode] = useState(item?.code ?? '');
   const [credits, setCredits] = useState(String(item?.credits ?? 3));
   const [teacher, setTeacher] = useState(item?.teacher ?? ''); const [room, setRoom] = useState(item?.room ?? '');
@@ -43,12 +43,15 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
   const [description, setDescription] = useState(item?.description ?? '');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
   const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length + studySessions.filter(s => s.courseId === item.id).length : 0;
+  const gradeLinked = !!item && (!!gradeBook[item.id]?.parts.some(p=>p.score!==null) || !!gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id));
   const save = () => {
     if (!name.trim() || !code.trim()) { setError('Hãy nhập tên môn và mã môn học.'); return; }
     if (!/^\d+$/.test(credits) || Number(credits) < 1 || Number(credits) > 30) { setError('Số tín chỉ cần là số nguyên từ 1 đến 30.'); return; }
     if (!semesters.some(s => s.id === semester)) { setError('Hãy chọn học kỳ cho môn học.'); return; }
     if (courseCatalog.some(c => c.id !== item?.id && c.semesterId === semester && c.code.toUpperCase() === code.trim().toUpperCase())) { setError('Mã môn này đã có trong học kỳ đã chọn.'); return; }
     if (item && semester !== item.semesterId && linkCount > 0) { setError('Môn đang có lịch hoặc bài tập liên quan. Giữ nguyên học kỳ để tránh chuyển nhầm dữ liệu.'); return; }
+    if (item && gradeLinked && semester !== item.semesterId) { setError('Môn đang có điểm hoặc liên kết học lại. Giữ nguyên học kỳ để không thay đổi lịch sử điểm.'); return; }
+    if (item && Number(credits)!==item.credits && (gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id))) { setError('Các lần học lại cần cùng số tín chỉ. Xử lý liên kết học lại trước khi đổi tín chỉ.'); return; }
     const course: Course = { id: item?.id ?? uid(), name: name.trim(), code: code.trim().toUpperCase(), credits: Number(credits), teacher: teacher.trim(), room: room.trim(), semesterId: semester, status, color, description: description.trim() };
     saveCourse(course); setToast(item ? 'Đã cập nhật môn học' : 'Đã thêm môn học mới'); onSaved(course.id, course.semesterId);
   };
@@ -67,8 +70,8 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}
     <Button label="Lưu môn học" icon="checkmark" onPress={save} />
     {item && <>
-      {linkCount > 0 && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang liên kết với {linkCount} bài tập, ca học, lịch thi hoặc buổi tự học. Bạn có thể sửa thông tin; chỉ xóa môn khi đã xử lý các mục liên quan.</T></Card>}
-      <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={linkCount > 0} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } if (!deleteCourse(item.id)) { setError('Môn học vẫn còn dữ liệu liên quan.'); return; } setToast('Đã xóa môn học'); onDeleted(); }} />
+      {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có lịch, bài tập, điểm hoặc liên kết học lại. Chỉ xóa môn khi đã xử lý các mục liên quan.</T></Card>}
+      <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={linkCount > 0 || gradeLinked} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } if (!deleteCourse(item.id)) { setError('Môn học vẫn còn dữ liệu liên quan.'); return; } setToast('Đã xóa môn học'); onDeleted(); }} />
     </>}
   </Sheet>;
 }
