@@ -1,3 +1,4 @@
+const { chooseDate, chooseTime } = require('./qa-picker-helpers.cjs');
 // Optional browser smoke check: start Metro, provide Playwright/Chromium or their environment paths.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -57,8 +58,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await button('Tạo bài tập').click(); await tab('Bài tập').click();
     await button('Mở bài tập Báo cáo thiết kế học phần').waitFor();
     await tab('Lịch học').click(); await button('Thêm ca học cho môn').click();
-    await page.getByLabel('Bắt đầu (HH:mm)', { exact: true }).fill('22:00');
-    await page.getByLabel('Kết thúc (HH:mm)', { exact: true }).fill('22:45');
+    await chooseTime(page, 'Bắt đầu (HH:mm)', '22:00');
+    await chooseTime(page, 'Kết thúc (HH:mm)', '22:45');
     assert.equal(await page.getByLabel('Giảng viên', { exact: true }).inputValue(), 'ThS. Minh Anh');
     await button('Lưu lịch học').click(); await tab('Lịch học').click();
     await page.getByText('22:00 – 22:45', { exact: true }).waitFor();

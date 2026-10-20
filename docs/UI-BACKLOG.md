@@ -1,8 +1,8 @@
 # Checklist giao diện và chức năng để bổ sung sau
 
-Theo yêu cầu ngày 20/10/2026: ưu tiên dựng các giao diện còn thiếu trước. Bốn nhóm cải thiện dưới đây được hoãn; nhắc lại khi rà soát hoàn thiện UI trước khi nối backend. Đây là checklist trong project, không phải lịch nhắc tự động.
+Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F người dùng đã yêu cầu bắt đầu bộ chọn ngày/giờ (3A). Ba nhóm còn lại tiếp tục để sau. Đây là checklist trong project, không phải lịch nhắc tự động.
 
-- [ ] Thay nhập chuỗi ngày/giờ bằng bộ chọn lịch và đồng hồ trên các form.
+- [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.
 - [ ] Hoàn thiện điều hướng có nút quay lại và luồng trang chi tiết xuyên suốt ứng dụng. Trong bản hiện tại vẫn dùng sheet đóng/mở và tab nội bộ cho các màn mới.
 - [ ] Bổ sung đồng bộ các trạng thái lần đầu sử dụng, đang tải, lỗi, lưu thành công và chưa có dữ liệu. Giữ các phản hồi/validation cơ bản cần thiết cho prototype, chưa làm cả hệ thống trạng thái.
 - [ ] Dashboard: thẻ lịch thi gần nhất đầy đủ hơn và bộ chọn học kỳ rõ ràng. Bộ chọn học kỳ trong màn quản lý môn chỉ thay danh sách của màn đó, không đổi ngữ cảnh Dashboard.
@@ -19,9 +19,9 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 - [x] UI 2D: Bảng điểm theo học kỳ; nhập/sửa điểm thành phần và trọng số; GPA kỳ/tích lũy, liên kết học lại, quy tắc mẫu và dự báo mục tiêu. Chi tiết môn, trang chủ và thống kê dùng chung điểm. Xem `UI-PHASE-2D.md`.
 - [x] UI 2E: Hồ sơ chỉnh sửa/ảnh mẫu dùng chung trang chủ; đăng nhập/đăng ký/khôi phục/đổi mật khẩu và đăng xuất minh họa; tùy chọn nhắc, giờ yên lặng; thẻ xem trước sáng/tối và ngôn ngữ. Xem `UI-PHASE-2E.md`. Chưa có auth/email/thông báo thật hoặc theme/i18n toàn app.
 - [x] UI 2F: Form mục tiêu/giờ rảnh; preview, sửa/bỏ chọn/duyệt vào buổi tự học dùng chung; điều chỉnh một buổi chưa bắt đầu; tóm tắt và quiz 3/5 câu từ hai bộ nguồn theo trang có sẵn. Xem `UI-PHASE-2F.md`. Chưa gọi AI, upload/đọc PDF thật hoặc lưu lịch sử quiz.
-- [ ] Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
+- [x] Sau UI 2F đã nhắc lại bốn nhóm đã hoãn; người dùng yêu cầu làm bộ chọn ngày/giờ trước và đã thực hiện ở 3A.
 
-Sau 2F, các nhóm màn chính đã có prototype. Đề xuất bước kế tiếp: rà soát tổng thể rồi quay lại bốn mục hoãn ở đầu file; đợt 2F chỉ ghi lại việc này, chưa tự triển khai chúng hoặc chuyển sang backend.
+Sau 2F, các nhóm màn chính đã có prototype. Hiện đã hoàn thành 3A về bộ chọn; tiếp theo đề xuất làm riêng từng đợt **3B Điều hướng**, **3C Trạng thái**, **3D Dashboard**. Chưa triển khai ba đợt đó hoặc chuyển sang backend trong 3A.
 
 Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu trong bộ nhớ. Các yêu cầu nghiệp vụ thật, lưu/đồng bộ, tệp và chạy nền bên dưới vẫn để mở.
 

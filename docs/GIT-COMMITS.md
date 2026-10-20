@@ -2,7 +2,7 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 2F — Trợ lý AI và duyệt kế hoạch học
+## Đợt vừa hoàn thành: UI 3A — Bộ chọn ngày và giờ
 
 Chạy tại thư mục project, xem `git status` để kiểm tra các file trước khi thêm:
 
@@ -10,7 +10,7 @@ Chạy tại thư mục project, xem `git status` để kiểm tra các file tr�
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện giao diện trợ lý AI và duyệt kế hoạch học"
+git commit -m "Thêm bộ chọn ngày giờ cho các biểu mẫu"
 git push
 ```
 
@@ -22,6 +22,7 @@ git push
 | --- | --- |
 | UI 2D — Điểm số & GPA | `Thêm giao diện điểm số, GPA và mục tiêu học tập` |
 | UI 2E — Tài khoản, hồ sơ và cài đặt | `Thêm giao diện tài khoản, hồ sơ và cài đặt` |
+| UI 2F — Trợ lý AI và duyệt kế hoạch học | `Hoàn thiện giao diện trợ lý AI và duyệt kế hoạch học` |
 
 ## Tên dự kiến cho các đợt tiếp theo
 
@@ -29,6 +30,8 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| Hoàn thiện UI | Rà lại các cải thiện đang hoãn sau khi các màn chính được duyệt | `Hoàn thiện điều hướng, chọn ngày giờ và trạng thái giao diện` |
+| UI 3B | Điều hướng chi tiết và trở về đúng màn trước | `Hoàn thiện điều hướng và luồng quay lại` |
+| UI 3C | Lần đầu, tải, lỗi, lưu và dữ liệu trống | `Bổ sung trạng thái tải, lỗi và dữ liệu trống` |
+| UI 3D | Dashboard, học kỳ và kỳ thi gần nhất | `Hoàn thiện Dashboard và bộ chọn học kỳ` |
 
-Đợt hoàn thiện UI chỉ bắt đầu khi quay lại checklist đã hoãn theo yêu cầu. Chưa tự chuyển sang backend Spring Boot ở các đợt này.
+Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Chưa tự chuyển sang backend Spring Boot ở các đợt này.

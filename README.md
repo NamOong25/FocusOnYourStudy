@@ -67,7 +67,7 @@ Mở **Lịch học → Lịch & bài tập → Kỳ thi** để quản lý lị
 
 Trong **Thời khóa biểu**, bấm một buổi để nghỉ, đổi giờ/phòng riêng ngày đó, khôi phục hoặc sửa/xóa cả chuỗi. Form chuỗi chọn nhiều thứ và khoảng ngày áp dụng. Cảnh báo trùng giờ dùng chung cho ca học, thi và tự học, chỉ rõ lịch liên quan. Các màn đọc cùng ngoại lệ; không coi buổi đã nghỉ là giờ bận.
 
-Xem `docs/UI-PHASE-2C.md` để biết quy tắc và giới hạn. Dữ liệu/tùy chọn nhắc vẫn là mẫu trong bộ nhớ. Ngày giờ tiếp tục nhập chuỗi theo checklist đã hoãn.
+Xem `docs/UI-PHASE-2C.md` để biết quy tắc và giới hạn. Dữ liệu/tùy chọn nhắc vẫn là mẫu trong bộ nhớ. Từ UI 3A, ngày giờ được chọn bằng lịch/đồng hồ.
 
 ## Cập nhật đợt 2D: Điểm số & GPA
 
@@ -92,3 +92,11 @@ Mở **Trợ lý AI**. **Tạo lộ trình/Tìm lịch trống** cho chọn mụ
 **Xem bản mẫu** có hai tài liệu minh họa, tóm tắt ngắn/chi tiết và đọc từng trang nguồn. **Luyện thử** có 3/5 câu, quay lại sửa đáp án, nộp bài, kết quả/giải thích, đọc nguồn và làm lại. Đây là nội dung có sẵn, chưa upload/đọc PDF hoặc gọi AI thật. Kế hoạch được sinh local để thử luồng; ô hỏi chỉ làm mục tiêu, chưa được AI phân tích. Dữ liệu vẫn đặt lại khi tải lại.
 
 Xem `docs/UI-PHASE-2F.md`, `docs/qa-ai-unit.cjs`, `docs/qa-ai.cjs`. Tên commit và lệnh push mới nhất ở `docs/GIT-COMMITS.md`. Sau đợt này nên rà soát tổng thể và quay lại bốn nhóm hoàn thiện đang hoãn trong `docs/UI-BACKLOG.md`.
+
+## Cập nhật đợt 3A: Bộ chọn ngày & giờ
+
+Bấm các ô lịch/đồng hồ trong form để chọn, thay cho gõ chuỗi. Lịch có chọn tháng/năm, ngày nhuận và Hôm nay; đồng hồ có hai cột giờ/phút theo hệ 24 giờ, chọn đến từng phút và mốc nhanh 00/15/30/45. Bấm Xác nhận để áp dụng hoặc Hủy để giữ nguyên. Hiển thị ngày `dd/mm/yyyy`; dữ liệu nội bộ giữ nguyên định dạng cũ.
+
+Đã áp dụng cho bài tập, chuỗi lịch học/ngoại lệ một buổi, lịch thi, tự học, form/preview AI và giờ yên lặng. Nội dung đang sửa được giữ khi mở bộ chọn. Kiểm tra trùng lịch, giờ kết thúc và deadline vẫn thực hiện khi lưu. Không thêm dependency; dữ liệu vẫn là mẫu trong bộ nhớ.
+
+Xem `docs/UI-POLISH-3A.md`, `docs/qa-picker-unit.cjs` và `docs/qa-picker.cjs`. Tên commit: **Thêm bộ chọn ngày giờ cho các biểu mẫu**; lệnh push ở `docs/GIT-COMMITS.md`. Ba mục tiếp theo còn trong checklist: điều hướng, trạng thái giao diện và Dashboard.

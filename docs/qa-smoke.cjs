@@ -1,3 +1,4 @@
+const { chooseDate, chooseTime } = require('./qa-picker-helpers.cjs');
 // Development smoke check. Uses the host's bundled Playwright, never a personal browser profile.
 // Run: node docs/qa-smoke.cjs [http://localhost:8092]
 const path = require('node:path');
@@ -31,10 +32,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await tab('Theo ngày').click();
     await page.getByRole('button', { name: 'Thêm bài tập mới', exact: true }).click();
     await page.getByLabel('Tên bài tập', { exact: true }).fill('Bài kiểm tra giao diện');
-    await page.getByLabel('Hạn nộp (YYYY-MM-DD)', { exact: true }).fill('2026-02-30');
-    await page.getByRole('button', { name: 'Tạo bài tập', exact: true }).click();
-    await page.getByRole('alert').filter({ hasText: 'Ngày chưa hợp lệ' }).waitFor();
-    await page.getByLabel('Hạn nộp (YYYY-MM-DD)', { exact: true }).fill('2026-10-28');
+    await chooseDate(page, 'Hạn nộp (YYYY-MM-DD)', '2026-10-28');
     await page.getByRole('button', { name: 'Tạo bài tập', exact: true }).click();
     await tab('Chưa làm').click();
     await page.getByText('Bài kiểm tra giao diện', { exact: true }).click();
@@ -50,8 +48,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await page.getByRole('button', { name: 'Thêm lịch học', exact: true }).click();
     await page.getByRole('button', { name: 'Lưu lịch học', exact: true }).click();
     await page.getByRole('alert').filter({ hasText: 'Khung giờ bị trùng' }).waitFor();
-    await page.getByLabel('Bắt đầu (HH:mm)', { exact: true }).fill('11:00');
-    await page.getByLabel('Kết thúc (HH:mm)', { exact: true }).fill('11:45');
+    await chooseTime(page, 'Bắt đầu (HH:mm)', '11:00');
+    await chooseTime(page, 'Kết thúc (HH:mm)', '11:45');
     await page.getByRole('button', { name: 'Lưu lịch học', exact: true }).click();
     await page.getByText('11:00 – 11:45', { exact: true }).waitFor();
     await tab('Tập trung').click();
@@ -71,8 +69,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     await tab('Tự học').last().click();
     const aiDay = new Date(); aiDay.setDate(aiDay.getDate() + 1);
     const aiDate = `${aiDay.getFullYear()}-${String(aiDay.getMonth()+1).padStart(2,'0')}-${String(aiDay.getDate()).padStart(2,'0')}`;
-    await page.getByLabel('Từ ngày (YYYY-MM-DD)', {exact:true}).fill(aiDate);
-    await page.getByLabel('Đến ngày (YYYY-MM-DD)', {exact:true}).fill(aiDate);
+    await chooseDate(page, 'Từ ngày (YYYY-MM-DD)', aiDate);
+    await chooseDate(page, 'Đến ngày (YYYY-MM-DD)', aiDate);
     await page.getByRole('button', { name: 'Tạo đề xuất mẫu', exact: true }).click();
     await page.getByRole('button', { name: 'Chấp nhận kế hoạch mẫu', exact: true }).click();
     await page.getByRole('button', {name:'Quay lại trợ lý',exact:true}).click();
@@ -91,7 +89,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       await page.screenshot({ path: path.join(out, `home-${width}.png`) });
     }
     assert.deepEqual(errors, [], 'Browser runtime errors');
-    const result = { passed: true, widths: [320, 390, 430, 1280], checks: ['5 tabs', 'calendar day/week/month', 'task validation/create/edit', 'shared dashboard/stats state', 'schedule conflict validation/create', 'timer start/pause/tab switch', 'AI preview/approve', 'horizontal overflow', 'browser console'], errors };
+    const result = { passed: true, widths: [320, 390, 430, 1280], checks: ['5 tabs', 'calendar day/week/month', 'task create/edit and selected date', 'shared dashboard/stats state', 'schedule conflict validation/create', 'timer start/pause/tab switch', 'AI preview/approve', 'horizontal overflow', 'browser console'], errors };
     fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2));
     console.log(JSON.stringify(result));
   } finally { await page.screenshot({ path: path.join(out, 'last-state.png') }); fs.writeFileSync(path.join(out, 'console-errors.json'), JSON.stringify(errors, null, 2)); await browser.close(); }

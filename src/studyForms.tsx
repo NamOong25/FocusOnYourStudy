@@ -1,3 +1,4 @@
+import { DateField, TimeField } from './DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, T } from './components';
@@ -43,8 +44,8 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Môn học</T><CourseChoices value={courseId} onChange={id => { setCourseId(id); setTaskId(''); }} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Liên kết bài tập (không bắt buộc)</T>
     <View style={{ gap: 7 }}>{[{ id: '', title: 'Tự học độc lập' }, ...availableTasks].map(task => <Pressable key={task.id || 'independent'} accessibilityRole="radio" accessibilityLabel={`Liên kết: ${task.title}`} aria-checked={taskId === task.id} accessibilityState={{ checked: taskId === task.id }} onPress={() => setTaskId(task.id)} style={{ backgroundColor: taskId === task.id ? C.soft : C.canvas, borderRadius: 14, minHeight: 48, padding: 12 }}><Row><Icon name={taskId === task.id ? 'radio-button-on' : 'radio-button-off'} size={18} /><T style={[S.grow, { fontSize: 12 }]}>{task.title}</T></Row></Pressable>)}</View>
-    <Field label="Ngày học (YYYY-MM-DD)" value={date} onChange={setDate} />
-    <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><Field label="Bắt đầu (HH:mm)" value={start} onChange={setStart} /></View><View style={S.grow}><Field label="Thời lượng (phút)" value={duration} onChange={setDuration} numeric /></View></Row>
+    <DateField label="Ngày học" value={date} onChange={setDate} />
+    <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><TimeField label="Bắt đầu" value={start} onChange={setStart} /></View><View style={S.grow}><Field label="Thời lượng (phút)" value={duration} onChange={setDuration} numeric /></View></Row>
     <Segments values={['25', '45', '60', '90']} value={duration} onChange={setDuration} />
     {item && <><T style={{ fontFamily: F.semi, fontSize: 12 }}>Trạng thái buổi học</T><Segments values={['Đã lên lịch', 'Đang học', 'Hoàn thành']} value={status} onChange={v => setStatus(v as StudyStatus)} /></>}
     <Field label="Ghi chú buổi học" value={notes} onChange={setNotes} placeholder="Tài liệu cần đọc, mục tiêu nhỏ cần đạt…" multiline />

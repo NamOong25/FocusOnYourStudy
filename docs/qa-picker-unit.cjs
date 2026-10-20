@@ -1,0 +1,12 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),ts=require('typescript');
+const out=path.resolve(__dirname,'../.expo/qa-picker/unit');fs.mkdirSync(out,{recursive:true});
+for(const name of ['dates','pickerDates'])fs.writeFileSync(path.join(out,`${name}.js`),ts.transpileModule(fs.readFileSync(path.resolve(__dirname,`../src/${name}.ts`),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText);
+const {dateInMonth,displayDate,initialPickerDate,isTime,monthCells,moveMonth}=require(path.join(out,'pickerDates.js'));
+let assertions=0;const eq=(a,b)=>{assert.deepEqual(a,b);assertions++;};
+eq(displayDate('2028-02-29'),'29/02/2028');eq(displayDate('2026-02-30'),'Chọn ngày');
+eq(dateInMonth(2026,1,31),'2026-02-28');eq(dateInMonth(2028,1,31),'2028-02-29');eq(dateInMonth(1900,1,29),'1900-02-28');eq(dateInMonth(2000,1,29),'2000-02-29');eq(dateInMonth(2100,1,29),'2100-02-28');
+eq(moveMonth('2026-12-31',1),'2027-01-31');eq(moveMonth('2026-01-31',1),'2026-02-28');eq(moveMonth('2028-03-31',-1),'2028-02-29');eq(moveMonth('1900-01-01',-1),'1900-01-01');eq(moveMonth('2100-12-31',1),'2100-12-31');
+eq(monthCells(2026,1).length,42);eq(monthCells(2026,1).filter(Boolean).length,28);eq(monthCells(2028,1).filter(Boolean).length,29);eq(monthCells(2026,9)[3],'2026-10-01');
+eq(initialPickerDate('bad',new Date(2026,9,20)),'2026-10-20');eq(initialPickerDate('2028-02-29'),'2028-02-29');
+eq(isTime('00:00'),true);eq(isTime('23:59'),true);eq(isTime('08:37'),true);eq(isTime('24:00'),false);eq(isTime('12:60'),false);eq(isTime('8:3'),false);
+console.log(JSON.stringify({passed:true,assertions,checks:['leap/century years','month day clamping','year rollover and limits','Monday-first 42-cell grid','local date strings without UTC conversion','24-hour minute precision']}));

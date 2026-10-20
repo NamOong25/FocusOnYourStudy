@@ -1,3 +1,4 @@
+import { DateField, TimeField } from './DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from './components';
@@ -29,8 +30,8 @@ export function ExamForm({ item, onClose, onDeleted, onSaved }: { item?: Exam; o
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Loại kỳ thi</T><Segments values={['Giữa kỳ', 'Cuối kỳ', 'Khác']} value={kind} onChange={v => setKind(v as Exam['kind'])} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Hình thức thi</T>
     <Row style={{ flexWrap: 'wrap' }}>{(['Tự luận', 'Trắc nghiệm', 'Thực hành', 'Vấn đáp', 'Trực tuyến'] as const).map(value => <Pressable key={value} accessibilityRole="radio" accessibilityLabel={`Hình thức ${value}`} accessibilityState={{ checked: format === value }} aria-checked={format === value} onPress={() => setFormat(value)} style={{ minHeight: 44, borderRadius: 17, paddingHorizontal: 13, justifyContent: 'center', backgroundColor: format === value ? C.primary : C.track }}><T style={{ fontFamily: F.semi, fontSize: 12, color: format === value ? '#fff' : C.muted }}>{value}</T></Pressable>)}</Row>
-    <Field label="Ngày thi (YYYY-MM-DD)" value={date} onChange={setDate} />
-    <Row><View style={S.grow}><Field label="Giờ thi (HH:mm)" value={time} onChange={setTime} /></View><View style={S.grow}><Field label="Kết thúc thi (HH:mm)" value={end} onChange={setEnd} /></View></Row>
+    <DateField label="Ngày thi" value={date} onChange={setDate} />
+    <Row><View style={S.grow}><TimeField label="Giờ thi" value={time} onChange={setTime} /></View><View style={S.grow}><TimeField label="Kết thúc thi" value={end} onChange={setEnd} /></View></Row>
     <Field label={format === 'Trực tuyến' ? 'Phòng / đường dẫn thi' : 'Phòng thi'} value={room} onChange={setRoom} placeholder="Ví dụ: B202 hoặc Phòng máy 3" />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Tùy chọn nhắc</T><Segments values={['Không nhắc', 'Có nhắc']} value={reminder ? 'Có nhắc' : 'Không nhắc'} onChange={v => setReminder(v === 'Có nhắc')} />
     {reminder && <View style={{ gap: 7 }}>{[1440,180,60,15].map(value => <Pressable key={value} accessibilityRole="checkbox" accessibilityLabel={`Nhắc trước ${reminderLabel(value)}`} accessibilityState={{ checked: minutes.includes(value) }} aria-checked={minutes.includes(value)} onPress={() => setMinutes(v => v.includes(value) ? v.filter(n => n !== value) : [...v,value])} style={{ backgroundColor: minutes.includes(value) ? C.soft : C.canvas, padding: 12, minHeight: 46, borderRadius: 14 }}><Row><Icon name={minutes.includes(value) ? 'checkbox' : 'square-outline'} size={19} /><T style={{ fontSize: 12 }}>Trước {reminderLabel(value)}</T></Row></Pressable>)}</View>}

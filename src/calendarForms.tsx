@@ -1,3 +1,4 @@
+import { DateField, TimeField } from './DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from './components';
@@ -36,8 +37,8 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     <CourseChoices value={courseId} onChange={id => { setCourseId(id); const next = courseCatalog.find(c => c.id === id); setRoom(next?.room ?? ''); setTeacher(next?.teacher ?? ''); }} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Các thứ trong tuần</T>
     <Row style={{ gap: 0 }}>{[1,2,3,4,5,6,0].map(day => <Pressable key={day} accessibilityRole="checkbox" accessibilityLabel={`Học vào ${dayNames[day]}`} accessibilityState={{ checked: weekdays.includes(day) }} aria-checked={weekdays.includes(day)} onPress={() => setWeekdays(v => v.includes(day) ? v.filter(d => d !== day) : [...v, day])} style={{ flex: 1, minHeight: 46, alignItems: 'center', justifyContent: 'center' }}><View style={{ width: 34, height: 38, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: weekdays.includes(day) ? C.primary : C.track }}><T style={{ fontFamily: F.bold, fontSize: 11, color: weekdays.includes(day) ? '#fff' : C.muted }}>{dayNames[day]}</T></View></Pressable>)}</Row>
-    <Field label="Áp dụng từ (YYYY-MM-DD)" value={startsOn} onChange={setStartsOn} /><Field label="Áp dụng đến (YYYY-MM-DD)" value={endsOn} onChange={setEndsOn} />
-    <Row><View style={S.grow}><Field label="Bắt đầu (HH:mm)" value={start} onChange={setStart} /></View><View style={S.grow}><Field label="Kết thúc (HH:mm)" value={end} onChange={setEnd} /></View></Row>
+    <DateField label="Áp dụng từ" value={startsOn} onChange={setStartsOn} /><DateField label="Áp dụng đến" value={endsOn} onChange={setEndsOn} />
+    <Row><View style={S.grow}><TimeField label="Bắt đầu" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Kết thúc" value={end} onChange={setEnd} /></View></Row>
     <Field label="Phòng học" value={room} onChange={setRoom} /><Field label="Giảng viên" value={teacher} onChange={setTeacher} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${course?.name ?? 'Ca học'} · ${start} – ${end}`} />

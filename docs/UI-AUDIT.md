@@ -10,6 +10,8 @@ Cập nhật sau đợt 2E: đã có khu vực hồ sơ/cài đặt, chỉnh h�
 
 Cập nhật sau đợt 2F: các công cụ AI có form, duyệt/sửa/bỏ chọn kế hoạch thành buổi tự học dùng chung, thay một buổi chưa học, tóm tắt và quiz có trang nguồn mẫu đọc được. Chưa có AI/PDF thật hoặc lịch sử quiz lâu dài. Xem `UI-PHASE-2F.md`; bước tiếp theo đề xuất là rà soát các mục hoàn thiện đã hoãn.
 
+Cập nhật sau đợt 3A: các form đã dùng lịch/đồng hồ thay gõ chuỗi ngày giờ, gồm cả AI và giờ yên lặng. Có xác nhận/hủy và giữ dữ liệu form; giới hạn/trùng lịch/deadline vẫn kiểm tra khi lưu. Xem `UI-POLISH-3A.md`. Còn ba đợt hoàn thiện: điều hướng, trạng thái và Dashboard.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |
