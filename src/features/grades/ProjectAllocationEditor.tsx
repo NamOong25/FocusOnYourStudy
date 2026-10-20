@@ -1,0 +1,12 @@
+import React,{useState} from 'react';
+import {View} from 'react-native';
+import {Button,Field,Segments,T} from '../../shared/components';
+import {C,F,S} from '../../shared/theme';
+
+export type DraftProject={target:'practice'|'final';share:string;remainderScore:string};
+export default function ProjectAllocationEditor({index,value,practical,onChange}:{index:number;value:DraftProject;practical:boolean;onChange:(value:DraftProject)=>void}){
+  const [partial,setPartial]=useState(value.share!==''&&value.share!=='100');
+  return <View style={{gap:12,borderTopWidth:1,borderColor:C.line,paddingTop:13}}><T style={{fontFamily:F.bold,fontSize:13}}>Bài tập lớn tính vào đâu?</T>{practical?<Segments values={['Một cột thực hành','Điểm cuối kỳ']} value={value.target==='practice'?'Một cột thực hành':'Điểm cuối kỳ'} onChange={v=>{setPartial(false);onChange({...value,target:v==='Một cột thực hành'?'practice':'final',share:v==='Một cột thực hành'?'100':''});}}/>:<T style={S.small}>BTL của học phần lý thuyết được quy vào cột cuối kỳ.</T>}
+    {value.target==='practice'?<T style={S.small}>BTL thay toàn bộ cột thực hành này. Tổng số cột và trọng số toàn môn giữ nguyên, không cộng thêm BTL lần thứ hai.</T>:<><Button label={`BTL cột ${index}: thay toàn bộ cuối kỳ`} secondary={value.share!=='100'} onPress={()=>{setPartial(false);onChange({...value,share:'100'});}}/><Button label={`BTL cột ${index}: góp một phần cuối kỳ`} secondary={!partial} onPress={()=>{setPartial(true);onChange({...value,share:''});}}/>{partial&&<><Field label="BTL chiếm bao nhiêu % điểm cuối kỳ?" accessibilityLabel={`Tỷ lệ BTL thành phần ${index} (%)`} value={value.share} onChange={share=>onChange({...value,share})} placeholder="Theo đề cương, không tự mặc định" numeric/><Field label="Điểm phần còn lại của cuối kỳ / 10" accessibilityLabel={`Phần còn lại cuối kỳ thành phần ${index}`} value={value.remainderScore} onChange={remainderScore=>onChange({...value,remainderScore})} placeholder="Chưa có điểm" numeric/></>}<T style={S.small}>{value.share==='100'?'Điểm BTL là điểm cuối kỳ, chỉ tính một lần.':partial?'Điểm cuối kỳ = BTL × tỷ lệ + phần còn lại × tỷ lệ còn lại. Tỷ lệ nhập ở đây tính trong cột cuối kỳ.':'Chọn cách quy đổi theo thông báo của môn. Chưa chọn thì chưa tính tổng kết.'}</T>{practical&&<T style={{fontSize:11,lineHeight:18,color:C.amber}}>Theo cách trung bình cộng của học phần thực hành, cột cuối kỳ này vẫn là một trong các cột thực hành, không tự chuyển thành 50% toàn môn.</T>}</>}
+  </View>;
+}

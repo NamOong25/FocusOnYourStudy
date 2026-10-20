@@ -1,3 +1,4 @@
+import { hasGradeData } from '../grades/grades';
 import { SemesterPicker } from './components/SemesterPicker';
 import { AcademicYearPicker } from './components/AcademicYearPicker';
 import React, { useState } from 'react';
@@ -43,7 +44,7 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
   const [description, setDescription] = useState(item?.description ?? '');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
   const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length + studySessions.filter(s => s.courseId === item.id).length : 0;
-  const gradeLinked = !!item && (!!gradeBook[item.id]?.parts.some(p=>p.score!==null) || !!gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id));
+  const gradeLinked = !!item && (hasGradeData(gradeBook[item.id]) || !!gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id));
   const save = () => {
     if (!name.trim() || !code.trim()) { setError('Hãy nhập tên môn và mã môn học.'); return; }
     if (!/^\d+$/.test(credits) || Number(credits) < 1 || Number(credits) > 30) { setError('Số tín chỉ cần là số nguyên từ 1 đến 30.'); return; }

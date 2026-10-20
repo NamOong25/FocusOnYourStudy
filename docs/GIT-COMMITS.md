@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 3D — Dashboard theo học kỳ
+## Đợt vừa hoàn thành: Cột điểm đề xuất có thể chỉnh sửa và điểm bài tập lớn
 
-Dashboard có bộ chọn học kỳ/năm, GPA và tiến độ từ dữ liệu trong phiên, lịch thi gần nhất, lịch hôm nay, bài quá hạn/sắp hạn, tự học và cảnh báo điểm. Hướng dẫn kiểm tra một vòng: `DASHBOARD-TEST.md`. Chạy tại thư mục project và kiểm tra các file trước khi thêm:
+Cột đề xuất có thể thêm/xóa/sửa tên/đổi loại và khôi phục; tự chia trọng số theo nhóm, lưu bản thiếu cột mà chưa tính GPA. Giữ hai loại Lý thuyết/Thực hành và cách quy BTL thay một cột hoặc toàn bộ/một phần cuối kỳ; bộ cột thực hành tùy chỉnh được ghi rõ. Xem `GRADE-COLUMNS.md` và `GRADES-PROJECTS.md`. Chạy tại thư mục project và kiểm tra các file trước khi thêm:
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện Dashboard theo học kỳ và lịch thi gần nhất"
+git commit -m "Cho phép thêm xóa sửa cột điểm và quy đổi bài tập lớn"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 3D — Dashboard | `Hoàn thiện Dashboard theo học kỳ và lịch thi gần nhất` |
 | Điểm IUH và tự nhận diện học lại | `Bổ sung quy tắc điểm IUH và tự xác định môn cần học lại` |
 | UI 3C và bộ chọn học kỳ | `Hoàn thiện trạng thái giao diện và bộ chọn học kỳ` |
 | UI 2D — Điểm số & GPA | `Thêm giao diện điểm số, GPA và mục tiêu học tập` |

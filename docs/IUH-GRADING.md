@@ -1,5 +1,7 @@
 # Giao diện điểm IUH — đối chiếu K19
 
+> Cập nhật: giao diện chọn hai loại Lý thuyết/Thực hành, có BTL thay cột hoặc quy vào cuối kỳ; bỏ lựa chọn thang quy đổi mô phỏng. Xem [GRADES-PROJECTS.md](./GRADES-PROJECTS.md) để biết hành vi hiện tại. Các loại khác bên dưới chỉ còn được giữ để đọc bản ghi cũ.
+
 Đợt này chỉ sửa frontend trong `D:\Video OBS\QuanLyHocTap`. Dữ liệu vẫn ở bộ nhớ trong phiên, chưa có Spring Boot, lưu lâu dài hoặc kết nối bảng điểm IUH.
 
 ## Nguồn đã đọc
@@ -42,4 +44,4 @@ Thống kê → Điểm & GPA → chọn môn → Nhập/chỉnh sửa điểm. 
 5. Đạt/không đạt: 4,9 không đạt; 5 đạt P, không tham gia GPA.
 6. Tạo cùng mã môn và tín chỉ ở kỳ sau → tự nhận diện lần học trước, không cần chọn công tắc Học lại.
 
-Kiểm tra tự động: `node docs/qa-grades-unit.cjs` (68 kiểm tra), `node docs/qa-iuh-grades.cjs`, `node docs/qa-grades.cjs`; các bài trình duyệt dùng Playwright/Chrome như tài liệu QA hiện có. Chạy `npm run typecheck`, `npm run build:web` và xuất Android để kiểm tra bundle; chưa thay thế chạy thật trên điện thoại.
+Kiểm tra tự động: `node docs/qa-grades-unit.cjs` (106 kiểm tra), `node docs/qa-iuh-grades.cjs`, `node docs/qa-grades.cjs`; các bài trình duyệt dùng Playwright/Chrome như tài liệu QA hiện có. Chạy `npm run typecheck`, `npm run build:web` và xuất Android để kiểm tra bundle; chưa thay thế chạy thật trên điện thoại.

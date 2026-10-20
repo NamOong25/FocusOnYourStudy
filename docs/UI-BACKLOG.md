@@ -11,6 +11,12 @@ Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước,
 
 Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thành **nhóm 9**. Phạm vi hiện gồm 9 nhóm: Dashboard; Thời khóa biểu; Bài tập; Điểm/GPA; Môn học/học kỳ; Lịch thi; Pomodoro; Thống kê; Trợ lý AI. Không có nhóm còn thiếu cần người dùng bổ sung.
 
+## Điểm bài tập lớn
+
+- [x] Cột điểm đề xuất có thể thêm/xóa/sửa tên/đổi loại, có xác nhận xóa khi đã nhập điểm và khôi phục gợi ý. Tự chia trọng số theo nhóm; thiếu nhóm lý thuyết được lưu bản đang nhập, chưa tính tổng kết/GPA. Số cột thực hành tùy chỉnh có ghi chú đối chiếu đề cương, BTL không cộng trùng. Xem `GRADE-COLUMNS.md`.
+
+- [x] Hai lựa chọn Lý thuyết/Thực hành; lọc loại điểm; đổi tên Thường kỳ thực hành; BTL thay một cột thực hành hoặc toàn bộ/một phần cuối kỳ theo cấu hình môn. Trọng số theo công thức IUH đối chiếu; chặn cấu hình thiếu và tránh tính trùng. Xem `GRADES-PROJECTS.md`. Chưa đồng bộ bảng điểm trường/lưu backend.
+
 ## Quy ước học kỳ
 
 - [x] Giao diện điểm theo tài liệu IUH năm 2023: chọn loại điểm/học phần, tự xét đạt và cảnh báo đỏ khi không đạt/chặn thi; tự nhận diện lần học trước. Xem `IUH-GRADING.md` về nguồn, công thức, kiểm tra và giới hạn. Chưa nghiệm thu quy chế toàn chương trình, GPA chính thức hay backend lưu điểm.

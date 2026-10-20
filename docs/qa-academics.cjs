@@ -88,7 +88,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
     assert.equal(await button('Mở môn Môn tạm').count(), 0);
     await button('Mở môn Kỹ nghệ phần mềm').click(); await settleAction(page); await button('Tập trung môn này').click(); await settleAction(page);
     await visibleText(page,'Kỹ nghệ phần mềm', { exact: true }).first().waitFor();
-    await tab('Trang chủ').click(); await settleAction(page); await visibleText(page,'Kỹ nghệ phần mềm', { exact: true }).first().waitFor();
+    await tab('Trang chủ').click(); await settleAction(page); await button('Đổi học kỳ trên Trang chủ').waitFor(); await tab('Tập trung').click(); await settleAction(page); await visibleText(page,'Kỹ nghệ phần mềm', { exact: true }).first().waitFor();
     assert.deepEqual(errors, []);
     const result = { passed: true, widths: [320, 390, 430, 1280], checks: ['semester switch/create/validation', 'course search/status filter', 'course create/edit/delete validation', 'course default in task/schedule forms', 'teacher/room prefilling', 'rename keeps linked tasks', 'same name across semesters isolated by ID', 'linked course deletion blocked', 'course focus link', 'grade preview without zero defaults', 'browser console'], errors };
     fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));

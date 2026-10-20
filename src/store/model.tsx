@@ -5,7 +5,7 @@ import { Course, Semester, initialCourses, initialSemesters } from '../features/
 import { StudySession, TaskExtras, initialTaskExtras } from '../features/study/learning';
 import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from '../features/schedule/calendar';
 import { addDays, dateKey, today } from '../shared/utils/dates';
-import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, autoLinkAttempts } from '../features/grades/grades';
+import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, autoLinkAttempts, hasGradeData } from '../features/grades/grades';
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from '../features/account/account';
 import { AiProposal, proposalSessions, validateProposal } from '../features/assistant/aiPlanner';
 import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from '../navigation/navigationState';
@@ -159,7 +159,7 @@ function usePrototype(empty: boolean) {
     setExams(v => v.map(e => e.courseId === course.id ? { ...e, course: course.name } : e));
   };
   const deleteCourse = (id: string) => {
-    if (gradeBook[id]?.parts.some(p => p.score !== null) || gradeBook[id]?.previousCourseId || Object.values(gradeBook).some(g => g.previousCourseId === id)) return false;
+    if (hasGradeData(gradeBook[id]) || gradeBook[id]?.previousCourseId || Object.values(gradeBook).some(g => g.previousCourseId === id)) return false;
     if (tasks.some(t => t.courseId === id) || classes.some(c => c.courseId === id) || exams.some(e => e.courseId === id) || studySessions.some(s => s.courseId === id)) return false;
     setCourseCatalog(v => v.filter(c => c.id !== id));
     setGradeBook(v => { const next = { ...v }; delete next[id]; return next; });
