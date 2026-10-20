@@ -3,7 +3,8 @@ import type {Task} from '../../store/model';
 import type {ClassOccurrence,Exam} from '../schedule/calendar';
 import type {StudySession} from '../study/learning';
 import {courseResult,summarizeGrades,type GradeBook,type GradeRules} from '../grades/grades';
-import {addDays,dateKey} from '../../shared/utils/dates';
+import {dateKey} from '../../shared/utils/dates';
+import {compareTaskDeadlines,taskIsOverdue,taskIsSoon} from '../assignments/assignments';
 
 export function examCountdown(exam:Exam,now:Date):string {
   const start=new Date(`${exam.date}T${exam.time}:00`).getTime(),end=new Date(`${exam.date}T${exam.end}:00`).getTime();
@@ -17,11 +18,11 @@ export function examCountdown(exam:Exam,now:Date):string {
 
 // Every dashboard section uses course IDs from one semester; titles are not identities.
 export function dashboardData(input:{semesterId:string;catalog:Course[];tasks:Task[];exams:Exam[];sessions:StudySession[];classes:ClassOccurrence[];book:GradeBook;rules:GradeRules;now:Date}){
-  const {semesterId,catalog,book,rules,now}=input,today=dateKey(now),weekEnd=dateKey(addDays(now,7));
+  const {semesterId,catalog,book,rules,now}=input,today=dateKey(now);
   const courses=catalog.filter(c=>c.semesterId===semesterId),ids=new Set(courses.map(c=>c.id));
   const tasks=input.tasks.filter(t=>ids.has(t.courseId));
-  const pending=tasks.filter(t=>t.status!=='Hoàn thành').sort((a,b)=>a.deadline.localeCompare(b.deadline)||(a.priority===b.priority?0:a.priority==='Cao'?-1:1)||a.title.localeCompare(b.title));
-  const overdue=pending.filter(t=>t.deadline<today),soon=pending.filter(t=>t.deadline>=today&&t.deadline<=weekEnd);
+  const pending=tasks.filter(t=>t.status!=='Hoàn thành').sort(compareTaskDeadlines);
+  const overdue=pending.filter(t=>taskIsOverdue(t,now)),soon=pending.filter(t=>taskIsSoon(t,now));
   const done=tasks.length-pending.length,percent=tasks.length?Math.round(done/tasks.length*100):0;
   const exams=input.exams.filter(e=>ids.has(e.courseId)&&new Date(`${e.date}T${e.end}:00`).getTime()>now.getTime()).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const classes=input.classes.filter(c=>ids.has(c.courseId)&&c.date===today&&!c.cancelled).sort((a,b)=>a.start.localeCompare(b.start));

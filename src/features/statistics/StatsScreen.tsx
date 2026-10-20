@@ -10,6 +10,8 @@ import Grades, { GpaForecast } from '../grades/GradesScreen';
 import { formatGpa, summarizeGrades } from '../grades/grades';
 import { C, F, S } from '../../shared/theme';
 import { dateLabel, dueLabel, useApp } from '../../store/model';
+import {taskIsOverdue} from '../assignments/assignments';
+import useCurrentTime from '../../shared/hooks/useCurrentTime';
 
 const charts: Record<string, number[]> = { Tuần: [3.5, 2.6, 4.2, 5.2, 4.8, 4.4, 3.9], Tháng: [19, 25, 28, 22], 'Học kỳ': [52, 68, 85, 72, 94] };
 export default function Stats() {
@@ -17,11 +19,11 @@ export default function Stats() {
   return <><Segments values={['Tổng quan', 'Điểm & GPA']} value={view} onChange={setView} /><NavigationScope active={view === 'Tổng quan'}><View style={{display:view === 'Tổng quan'?'flex':'none',gap:16}}><StudyStats /></View></NavigationScope><NavigationScope active={view === 'Điểm & GPA'}><View style={{display:view === 'Điểm & GPA'?'flex':'none',gap:16}}><Grades /></View></NavigationScope></>;
 }
 function StudyStats() {
-  const { tasks, courseCatalog, gradeBook, gradeRules, isEmptyWorkspace, setScheduleMode, semesters } = useApp(); const [period, setPeriod] = useState('Tuần'); const [forecast, setForecast] = useState(false); const [selectedBar, setSelectedBar] = useState(3);
+  const { tasks, courseCatalog, gradeBook, gradeRules, isEmptyWorkspace, setScheduleMode, semesters } = useApp(); const [period, setPeriod] = useState('Tuần'); const [forecast, setForecast] = useState(false); const [selectedBar, setSelectedBar] = useState(3); const now=useCurrentTime();
   if (isEmptyWorkspace) return <StateView title="Chưa có thống kê tổng hợp" message="Hãy thêm môn, bài tập và các phiên học trước. Biểu đồ giờ học hiện chỉ có trong chế độ dữ liệu mẫu." actionLabel="Đến Môn & học kỳ" onAction={() => setScheduleMode('Môn & học kỳ')} />;
   const currentSemester = semesters.find(s => s.status === 'Đang học') ?? semesters[0];
   const series = charts[period]!; const total = series.reduce((a, b) => a + b, 0); const done = tasks.filter(t => t.status === 'Hoàn thành').length; const percent = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-  const overdue = tasks.filter(t => t.status !== 'Hoàn thành' && new Date(`${t.deadline}T23:59:59`).getTime() < Date.now()).length;
+  const overdue = tasks.filter(t => taskIsOverdue(t,now)).length;
   const summary = summarizeGrades(courseCatalog, gradeBook, gradeRules, true);
   return <>
     <Row between><View><T style={{ fontFamily: F.bold, fontSize: 18 }}>Từng ngày, tốt hơn một chút ✨</T><T style={S.small}>{currentSemester ? `${currentSemester.name} · Năm học ${currentSemester.academicYear}` : 'Chưa có học kỳ'}</T></View></Row>

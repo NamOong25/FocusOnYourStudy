@@ -1,4 +1,5 @@
 import { FlowScope } from '../../navigation/Navigation';
+import {compareTaskDeadlines} from '../assignments/assignments';
 import React, { useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +19,7 @@ const features: { icon: IconName; title: string; description: string; action: st
 export default function Assistant({ onStudyPlan }: { onStudyPlan: () => void }) {
   const { tasks, setTab } = useApp();
   const [feature, setFeature] = useState<number | null>(null); const [prompt, setPrompt] = useState(''); const [sent, setSent] = useState('');
-  const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
+  const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort(compareTaskDeadlines);
   const firstTask = pending[0];
   const send = () => { if (!prompt.trim()) return; setSent(prompt.trim()); setPrompt(''); setFeature(0); };
   return <FlowScope onClose={() => setFeature(null)}>

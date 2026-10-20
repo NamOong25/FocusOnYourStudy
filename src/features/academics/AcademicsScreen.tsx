@@ -18,6 +18,8 @@ import {courseResult} from '../grades/grades';
 import { GradeEditor } from '../grades/GradeEditor';
 import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from '../assignments/assignments';
+import useCurrentTime from '../../shared/hooks/useCurrentTime';
 
 type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
@@ -74,11 +76,12 @@ export default function Academics() {
 }
 
 function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
+  const now=useCurrentTime();
   const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules } = useApp();
   const grade=courseResult(gradeBook[course.id],gradeRules);
   const colors = grade.failed?{bg:C.redSoft,ink:C.red}:courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
-  const linkedTasks = tasks.filter(t => t.courseId === course.id).sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const linkedTasks = tasks.filter(t => t.courseId === course.id).sort(compareTaskDeadlines);
   const linkedClasses = classes.filter(c => c.courseId === course.id).sort((a,b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7) || a.start.localeCompare(b.start));
   const linkedExams = exams.filter(e => e.courseId === course.id);
   return <>
@@ -99,7 +102,7 @@ function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, on
     </>}
     {section === 'Bài tập' && <>
       <Row between><T style={{ fontFamily: F.bold }}>Bài tập của môn</T><IconButton name="add" label="Thêm bài tập cho môn" onPress={() => onTask()} /></Row>
-      {linkedTasks.map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={`Mở bài tập ${task.title}`} onPress={() => onTask(task)}><Card style={{ backgroundColor: C.canvas, gap: 10 }}><Row between><Badge label={task.status} color={task.status === 'Hoàn thành' ? C.green : C.primary} bg={task.status === 'Hoàn thành' ? C.greenSoft : C.soft} /><T style={{ fontSize: 10, color: C.muted }}>{dueLabel(task.deadline)}</T></Row><T style={{ fontFamily: F.bold, fontSize: 15 }}>{task.title}</T><T style={S.small}>Hạn nộp {dateLabel(task.deadline)} · Ưu tiên {task.priority.toLowerCase()}</T></Card></Pressable>)}
+      {linkedTasks.map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={`Mở bài tập ${task.title}`} onPress={() => onTask(task)}><Card style={{ backgroundColor: C.canvas, gap: 10 }}><Row between><Badge label={task.status} color={task.status === 'Hoàn thành' ? C.green : C.primary} bg={task.status === 'Hoàn thành' ? C.greenSoft : C.soft} /><T style={{ fontSize: 10, color: C.muted }}>{taskDueLabel(task,now)}</T></Row><T style={{ fontFamily: F.bold, fontSize: 15 }}>{task.title}</T><T style={S.small}>Hạn nộp {taskDeadlineLabel(task)} · Ưu tiên {task.priority.toLowerCase()}</T></Card></Pressable>)}
       {!linkedTasks.length && <Card style={{ backgroundColor: C.canvas, gap: 10 }}><IconTile name="clipboard-outline" /><T style={{ fontFamily: F.bold }}>Chưa có bài tập cho môn này</T><T style={S.small}>Ghi lại yêu cầu và deadline ngay khi nhận bài nhé.</T><Button label="Tạo bài tập cho môn" secondary onPress={() => onTask()} /></Card>}
     </>}
     {section === 'Điểm số' && <GradePanel courseId={course.id} onEdit={onGrades} />}

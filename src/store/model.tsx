@@ -12,8 +12,8 @@ import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from '../shared/utils/dates';
 
 export type { Tab } from '../navigation/navigationState';
-export type TaskStatus = 'Chưa làm' | 'Đang làm' | 'Hoàn thành';
-export type Task = { id: string; title: string; courseId: string; course: string; deadline: string; priority: 'Cao' | 'Trung bình'; status: TaskStatus; notes: string };
+import type {Task} from '../features/assignments/assignments';
+export type {Task,TaskStatus} from '../features/assignments/assignments';
 export type { ClassItem, ClassException, Exam } from '../features/schedule/calendar';
 export const courses = ['Cấu trúc dữ liệu & Giải thuật', 'Lập trình Hướng đối tượng', 'Cơ sở dữ liệu', 'Mạng máy tính', 'Toán rời rạc'];
 export function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }

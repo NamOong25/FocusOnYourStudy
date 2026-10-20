@@ -1,4 +1,5 @@
 import { StateView } from '../../shared/components';
+import {compareTaskDeadlines,taskDeadlineLabel} from '../assignments/assignments';
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -12,7 +13,7 @@ import { C, F, S } from '../../shared/theme';
 
 export default function AIPlanFlow({ variant, request = '', onClose, onStudyPlan }: { variant: 'deadline' | 'free' | 'adjust'; request?: string; onClose: () => void; onStudyPlan: () => void }) {
   const context = useApp(); const { tasks, exams, studySessions, courseCatalog, applyAiProposal } = context;
-  const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
+  const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort(compareTaskDeadlines);
   const eligible = studySessions.filter(s => s.status === 'Đã lên lịch' && s.focusedSeconds === 0);
   const initial = variant === 'adjust' ? eligible[0] : undefined;
   const [original, setOriginal] = useState<StudySession | undefined>(initial);
@@ -43,10 +44,10 @@ export default function AIPlanFlow({ variant, request = '', onClose, onStudyPlan
     {step === 'input' && <>
       <Card style={{ backgroundColor: C.soft, gap: 8 }}><T style={{ fontFamily: F.extra, fontSize: 21, lineHeight: 30 }}>{adjusting ? 'Đổi lịch, vẫn giữ nhịp học.' : 'Một kế hoạch vừa sức với bạn.'}</T><T style={{ fontSize: 12, lineHeight: 20, color: C.primary }}>Bạn chọn mục tiêu và giờ rảnh. Mọi buổi học đều được xem, sửa và duyệt trước khi lưu.</T></Card>
       {adjusting ? <><T style={{ fontFamily: F.bold }}>Chọn buổi chưa bắt đầu</T>{!eligible.length && <T style={S.small}>Chưa có buổi phù hợp. Chỉ điều chỉnh buổi đã lên lịch, chưa bắt đầu và chưa ghi thời gian tập trung.</T>}{eligible.map(s => <Pressable key={s.id} accessibilityRole="radio" accessibilityLabel={`Điều chỉnh: ${s.title}`} accessibilityState={{ checked: original?.id === s.id }} aria-checked={original?.id === s.id} onPress={() => { setOriginal(s); setCourseId(s.courseId); setTaskId(s.taskId ?? ''); setGoal(s.title.slice(0, 120)); setDuration(String(s.duration)); }}><Card style={{ backgroundColor: original?.id === s.id ? C.soft : C.canvas, gap: 5 }}><T style={{ fontFamily: F.semi, fontSize: 13 }}>{s.title}</T><T style={S.small}>{dateLabel(s.date)} · {s.start} – {endTime(s.start, s.duration)}</T></Card></Pressable>)}</> : <><T style={{ fontFamily: F.bold }}>Môn học</T><CourseChoices value={courseId} onChange={id => { setCourseId(id); setTaskId(''); setExamId(''); }} /><T style={{ fontFamily: F.bold }}>Mục tiêu gắn với</T><Segments values={['Bài tập', 'Kỳ thi', 'Tự học']} value={target} onChange={v => { setTarget(v); setError(''); }} />
-        {target === 'Bài tập' && <>{pending.filter(t => t.courseId === courseId).map(t => <Target key={t.id} title={t.title} detail={`Hạn nộp ${dateLabel(t.deadline)}/${t.deadline.slice(0, 4)}`} selected={taskId === t.id} onPress={() => setTaskId(t.id)} />)}{!pending.some(t => t.courseId === courseId) && <T style={S.small}>Môn này chưa có bài cần làm. Chọn môn khác hoặc Tự học.</T>}</>}
+        {target === 'Bài tập' && <>{pending.filter(t => t.courseId === courseId).map(t => <Target key={t.id} title={t.title} detail={`Hạn nộp ${taskDeadlineLabel(t)}`} selected={taskId === t.id} onPress={() => setTaskId(t.id)} />)}{!pending.some(t => t.courseId === courseId) && <T style={S.small}>Môn này chưa có bài cần làm. Chọn môn khác hoặc Tự học.</T>}</>}
         {target === 'Kỳ thi' && <>{exams.filter(e => e.courseId === courseId).map(e => <Target key={e.id} title={`${e.kind}: ${e.course}`} detail={`${dateLabel(e.date)} · ${e.time}`} selected={examId === e.id} onPress={() => setExamId(e.id)} />)}{!exams.some(e => e.courseId === courseId) && <T style={S.small}>Chưa có lịch thi cho môn này.</T>}</>}
       </>}
-      {((adjusting || target === 'Bài tập') && task) && <Badge label={`Không sau hạn nộp ${dateLabel(task.deadline)}`} icon="flag-outline" />}
+      {((adjusting || target === 'Bài tập') && task) && <Badge label={`Không sau hạn nộp ${taskDeadlineLabel(task)}`} icon="flag-outline" />}
       {!adjusting && target === 'Kỳ thi' && exam && <Badge label={`Kết thúc trước ${exam.time} · ${dateLabel(exam.date)}`} icon="flag-outline" />}
       <Field label="Mục tiêu học tập" value={goal} onChange={setGoal} multiline />{request && <T style={S.small}>Câu hỏi được dùng làm mục tiêu mẫu, chưa được AI phân tích.</T>}
       <DateField label="Từ ngày" value={from} onChange={setFrom} /><DateField label="Đến ngày" value={to} onChange={setTo} />

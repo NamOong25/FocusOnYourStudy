@@ -13,12 +13,12 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Giữ trang, bộ lọc và ngữ cảnh khi đổi mục/quay lại. Bài tập mặc định hiển thị Tất cả; vẫn lọc được trạng thái và môn, bộ chọn môn có mã môn/học kỳ/năm.
 - [x] Hướng dẫn bắt đầu và nút đến danh sách bài tập trên Dashboard dẫn tới màn Bài tập riêng. Xem `UI-POLISH-4A.md` để kiểm tra bản mẫu/trống và phạm vi đã làm.
 
-### Đợt 2 — Giờ deadline, tìm kiếm và lọc bài tập (chưa làm)
+### Đợt 2 — Giờ deadline, tìm kiếm và lọc bài tập
 
-- [ ] Chọn cả ngày và giờ hạn nộp bằng lịch/đồng hồ; hiển thị nhất quán trên danh sách, chi tiết, Dashboard và nhắc bài.
-- [ ] Tìm kiếm bài theo tên hoặc môn học; có xóa tìm kiếm và trạng thái không có kết quả.
-- [ ] Lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn, kết hợp trạng thái và môn; nêu rõ phạm vi “sắp hạn”. Lối xem Tất cả theo trạng thái đã có ở đợt 1, bộ lọc theo thời hạn chưa làm.
-- [ ] Xử lý đúng bài đến hạn trong ngày và qua mốc giờ; sửa deadline cập nhật các nơi liên quan và kiểm tra buổi tự học theo hạn mới.
+- [x] Chọn cả ngày và giờ hạn nộp bằng lịch/đồng hồ 24 giờ; hiển thị trên danh sách, chi tiết, Dashboard, nhắc bài, môn học và các nơi liên kết. Bài cũ chưa có giờ dùng 23:59.
+- [x] Tìm theo tên bài, tên môn hoặc mã môn; hỗ trợ gõ không dấu/hoa thường, có xóa tìm kiếm và trạng thái không có kết quả.
+- [x] Lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn, kết hợp trạng thái và môn. Sắp hạn là bài chưa hoàn thành từ hiện tại đến cùng giờ sau 7 ngày; Quá hạn không tính bài đã hoàn thành.
+- [x] Xét hạn bằng ngày và giờ; cập nhật đầu mỗi phút và khi trở lại màn/ứng dụng. Sửa deadline kiểm tra giờ kết thúc các buổi tự học đã liên kết; tạo/sửa buổi học và duyệt kế hoạch AI dùng cùng mốc hạn. Xem `UI-POLISH-4B.md` để kiểm tra và xem giới hạn frontend.
 
 ### Các đề xuất lưu để làm sau
 

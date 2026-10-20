@@ -8,6 +8,7 @@ import { CalendarEvent, calendarEvents, findConflicts } from '../schedule/calend
 import ConflictPanel from '../schedule/ConflictPanel';
 import { dateKey, isValidDate, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import {sessionExceedsDeadline,taskDeadlineLabel} from '../assignments/assignments';
 
 export function StudySessionForm({ item, initialTaskId, initialCourseId, initialDate, onClose, onSaved, onDeleted }: { item?: StudySession; initialTaskId?: string; initialCourseId?: string; initialDate?: string; onClose: () => void; onSaved?: (id: string) => void; onDeleted?: () => void }) {
   const { tasks, courseCatalog, classes, classExceptions, exams, studySessions, saveStudySession, deleteStudySession, setToast } = useApp();
@@ -30,7 +31,7 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     if (!/^\d+$/.test(duration) || Number(duration) < 1 || Number(duration) > 240 || timeMinutes(start) + Number(duration) >= 1440) { setError('Thời lượng cần từ 1 đến 240 phút và kết thúc trước 24:00.'); return; }
     const task = tasks.find(t => t.id === taskId);
     if (taskId && (!task || task.courseId !== courseId)) { setError('Bài tập cần thuộc đúng môn đang chọn.'); return; }
-    if (task && date > task.deadline) { setError('Buổi học đang sau hạn nộp bài. Chọn ngày trước hạn hoặc bỏ liên kết bài tập để ôn tập độc lập.'); return; }
+    if (task && sessionExceedsDeadline(task,{date,start,duration:Number(duration)})) { setError(`Buổi học kết thúc sau hạn nộp bài ${taskDeadlineLabel(task)}. Chọn giờ kết thúc không sau hạn hoặc bỏ liên kết để tự học độc lập.`); return; }
     const ending = endTime(start, Number(duration));
     const clashes = findConflicts(date, start, ending, calendarEvents(date, classes, classExceptions, exams, studySessions), item ? { kind: 'Tự học', id: item.id } : undefined);
     if (clashes.length) { setConflicts(clashes); if (clashes.some(e => e.kind === 'Tự học')) setError('Khung giờ này đang trùng một buổi tự học đã lên lịch.'); return; }

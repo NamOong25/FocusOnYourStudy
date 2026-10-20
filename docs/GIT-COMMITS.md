@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 4A — Điều hướng Lịch học và Bài tập riêng
+## Đợt vừa hoàn thành: UI 4B — Giờ deadline, tìm kiếm và lọc bài tập
 
-Tách Bài tập ra màn riêng, một hàng lối vào Lịch học/Bài tập/Lịch thi/Tự học và nút Môn & học kỳ. Giữ ngữ cảnh/bộ lọc khi quay lại, nút thêm bài ở phía trên. Ghi đợt 2 (giờ deadline/tìm kiếm/lọc thời hạn) và các đề xuất còn lại vào `UI-BACKLOG.md` để làm sau. Xem `UI-POLISH-4A.md`.
+Chọn ngày và giờ hạn nộp, tìm kiếm không dấu theo tên bài/môn/mã môn, lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn kết hợp trạng thái và môn. Dashboard/chi tiết/nhắc bài dùng cùng mốc hạn; kiểm tra giờ kết thúc buổi tự học và kế hoạch AI khi liên kết bài. Xem `UI-POLISH-4B.md`. Dữ liệu vẫn trong bộ nhớ phiên, chưa nối backend/thông báo thiết bị.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Đơn giản hóa điều hướng lịch học và tách màn bài tập"
+git commit -m "Bổ sung giờ deadline tìm kiếm và lọc bài tập"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 4A — Điều hướng và Bài tập riêng | `Đơn giản hóa điều hướng lịch học và tách màn bài tập` |
 | Checklist backend | `Bổ sung lộ trình backend 5 đợt vào checklist` |
 | Cột điểm đề xuất và BTL | `Cho phép thêm xóa sửa cột điểm và quy đổi bài tập lớn` |
 | UI 3D — Dashboard | `Hoàn thiện Dashboard theo học kỳ và lịch thi gần nhất` |
@@ -38,7 +39,6 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| UI 4B — Bài tập và deadline | Chọn giờ hạn nộp, tìm kiếm và bộ lọc thời hạn | `Bổ sung giờ deadline tìm kiếm và lọc bài tập` |
 | Backend — cần chốt phạm vi riêng | Thiết kế dữ liệu, tài khoản và nối API theo từng giai đoạn | Chốt tên khi triển khai thực tế |
 
 Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Chưa tự chuyển sang backend Spring Boot ở các đợt này.

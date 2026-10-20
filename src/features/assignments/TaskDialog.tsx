@@ -9,9 +9,12 @@ import { TaskStatus, dateLabel, dueLabel, uid, useApp } from '../../store/model'
 import { StudySessionForm } from '../study/StudyForm';
 import { StudySessionCard } from '../study/components';
 import { C, F, S } from '../../shared/theme';
+import {taskDeadlineLabel,taskDueLabel,taskIsOverdue} from './assignments';
+import useCurrentTime from '../../shared/hooks/useCurrentTime';
 
 export default function TaskDialog({ taskId, onClose }: { taskId: string; onClose: () => void }) {
   const { tasks, taskExtras, updateTaskExtras, saveTask, studySessions, prepareFocus } = useApp();
+  const now=useCurrentTime();
   const [mode, setMode] = useState<'detail' | 'edit' | 'session' | 'attach' | 'preview'>('detail');
   const [section, setSection] = useState('Tổng quan'); const [draft, setDraft] = useState('');
   const [sessionId, setSessionId] = useState<string | undefined>(); const [preview, setPreview] = useState<SampleAttachment | null>(null);
@@ -28,7 +31,7 @@ export default function TaskDialog({ taskId, onClose }: { taskId: string; onClos
     <LinearGradient colors={['#E8E1FF', '#F4F0FF']} style={{ padding: 18, borderRadius: 24, gap: 13 }}>
       <Row between><Badge label={`Ưu tiên ${task.priority.toLowerCase()}`} color={task.priority === 'Cao' ? C.red : C.primary} bg={task.priority === 'Cao' ? C.redSoft : C.soft} icon="flag-outline" /><IconButton name="create-outline" label="Chỉnh sửa bài tập" bg="#FFFFFFCC" onPress={() => setMode('edit')} /></Row>
       <T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33, letterSpacing: -0.5 }}>{task.title}</T><T style={{ color: C.primary, fontFamily: F.semi, fontSize: 12 }}>{task.course}</T>
-      <Row style={{ backgroundColor: '#FFFFFF99', borderRadius: 15, padding: 12 }}><Icon name="calendar-outline" color={task.status === 'Hoàn thành' ? C.green : C.red} /><View style={S.grow}><T style={{ color: C.muted, fontSize: 10 }}>HẠN NỘP BÀI</T><T style={{ fontFamily: F.bold, fontSize: 14 }}>{dateLabel(task.deadline)}/{task.deadline.slice(0,4)}</T></View><Badge label={task.status === 'Hoàn thành' ? 'Đã hoàn thành' : dueLabel(task.deadline)} bg={task.status === 'Hoàn thành' ? C.greenSoft : C.redSoft} color={task.status === 'Hoàn thành' ? C.green : C.red} /></Row>
+      <View style={{backgroundColor:'#FFFFFF99',borderRadius:15,padding:12,gap:9}}><Row between><Row><Icon name="calendar-outline" size={16}/><T style={{color:C.muted,fontSize:10}}>HẠN NỘP BÀI</T></Row><Badge label={taskDueLabel(task,now)} bg={task.status==='Hoàn thành'?C.greenSoft:taskIsOverdue(task,now)?C.redSoft:C.soft} color={task.status==='Hoàn thành'?C.green:taskIsOverdue(task,now)?C.red:C.primary}/></Row><T style={{fontFamily:F.bold,fontSize:14,lineHeight:22}}>{taskDeadlineLabel(task)}</T></View>
     </LinearGradient>
     <Segments values={['Chưa làm', 'Đang làm', 'Hoàn thành']} value={task.status} onChange={v => saveTask({ ...task, status: v as TaskStatus })} />
     <Segments values={['Tổng quan', 'Việc nhỏ', 'Tài liệu', 'Buổi học']} value={section} onChange={setSection} />

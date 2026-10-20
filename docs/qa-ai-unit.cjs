@@ -1,6 +1,6 @@
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict'), ts = require('typescript');
 const out = path.resolve(__dirname, '../.expo/qa-ai/unit'); fs.mkdirSync(out, { recursive: true });
-for (const name of ['features/assistant/aiPlanner', 'features/schedule/calendar', 'features/study/learning', 'shared/utils/dates']) { fs.mkdirSync(path.dirname(path.join(out, `${name}.js`)), { recursive:true }); fs.writeFileSync(path.join(out, `${name}.js`), ts.transpileModule(fs.readFileSync(path.resolve(__dirname, `../src/${name}.ts`), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText); }
+for (const name of ['features/assistant/aiPlanner', 'features/schedule/calendar', 'features/study/learning', 'features/assignments/assignments', 'shared/utils/dates']) { fs.mkdirSync(path.dirname(path.join(out, `${name}.js`)), { recursive:true }); fs.writeFileSync(path.join(out, `${name}.js`), ts.transpileModule(fs.readFileSync(path.resolve(__dirname, `../src/${name}.ts`), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText); }
 const { generateProposal, validatePlanInput, validateProposal, proposalSessions } = require(path.join(out, 'features/assistant/aiPlanner.js'));
 const now = new Date(2026, 9, 20, 12), course = { id: 'c', name: 'Môn mẫu' };
 const context = { courseCatalog: [course], tasks: [], classes: [], classExceptions: [], exams: [], studySessions: [] };

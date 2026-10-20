@@ -24,6 +24,8 @@ import { C, F, S } from './src/shared/theme';
 import { ClassItem, PrototypeProvider, Tab, Task, dueLabel, useApp } from './src/store/model';
 import { ClassForm } from './src/features/schedule/ClassForm';
 import { TaskForm } from './src/features/assignments/TaskForm';
+import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from './src/features/assignments/assignments';
+import useCurrentTime from './src/shared/hooks/useCurrentTime';
 import Home from './src/features/dashboard/HomeScreen';
 import Schedule from './src/features/schedule/ScheduleScreen';
 import Focus from './src/features/focus/FocusScreen';
@@ -64,7 +66,7 @@ function AppShell() {
     if (loadTimer.current) clearTimeout(loadTimer.current);
     setLoadState('ready'); action?.cancel();
   }, [current, action?.cancel]);
-  const date = new Date(); const canBack = routeTrail.length > 1;
+  const date = useCurrentTime(); const canBack = routeTrail.length > 1;
   useBackAction(canBack, goBackRoute, 0);
   const openTask = (task: Task | 'new') => { setTaskOrigin(current); setTaskForm(task); };
   const openClass = (item: ClassItem | 'new', date?: string) => { setClassOrigin(current); setClassForm(item); setClassDate(date); };
@@ -103,7 +105,7 @@ function AppShell() {
       {panel === 'preview' && <PreviewPanel onClose={() => setPanel(null)} onLoad={loadPreview} onGuide={() => setPanel('guide')} />}
       {panel === 'guide' && <Sheet title="Bắt đầu cùng FocusYourStudy" onClose={() => setPanel('preview')}><T style={S.small}>1. Tạo học kỳ → 2. Thêm môn → 3. Ghi bài tập và lịch học. Các thay đổi chỉ giữ trong phiên thử này.</T><Button label="Đến Môn & học kỳ" onPress={() => { setPanel(null); setScheduleMode('Môn & học kỳ'); }} /><Button label="Quay lại bản xem trước" secondary onPress={() => setPanel('preview')} /></Sheet>}
       {panel === 'profile' && <Account onClose={() => setPanel(null)} />}
-      {panel === 'notifications' && <Sheet title="Góc nhắc nhở" onClose={() => setPanel(null)}><T style={S.small}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T>{tasks.filter(t => t.status !== 'Hoàn thành').slice(0,2).map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={'Mở nhắc bài ' + task.title} onPress={() => openTask(task)}><Card><Row><Icon name="notifications-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{task.title}</T><T style={S.small}>{dueLabel(task.deadline)} · Đừng quên dành một phiên để hoàn thành.</T></View><Icon name="chevron-forward" size={16} /></Row></Card></Pressable>)}{exams[0] && <Card><T style={{ fontFamily: F.bold }}>Chuẩn bị cho {exams[0].course}</T><T style={S.small}>{dueLabel(exams[0].date)}</T><Button label="Xem lịch thi" secondary onPress={() => setNotificationExam(exams[0]!.id)} /></Card>}<T style={S.small}>Danh sách nhắc trong ứng dụng; chưa gửi thông báo trên thiết bị.</T></Sheet>}
+      {panel === 'notifications' && <Sheet title="Góc nhắc nhở" onClose={() => setPanel(null)}><T style={S.small}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T>{tasks.filter(t => t.status !== 'Hoàn thành').sort(compareTaskDeadlines).slice(0,2).map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={'Mở nhắc bài ' + task.title} onPress={() => openTask(task)}><Card><Row><Icon name="notifications-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{task.title}</T><T style={S.small}>{taskDueLabel(task,date)} · Hạn {taskDeadlineLabel(task)} · Đừng quên dành một phiên để hoàn thành.</T></View><Icon name="chevron-forward" size={16} /></Row></Card></Pressable>)}{exams[0] && <Card><T style={{ fontFamily: F.bold }}>Chuẩn bị cho {exams[0].course}</T><T style={S.small}>{dueLabel(exams[0].date)}</T><Button label="Xem lịch thi" secondary onPress={() => setNotificationExam(exams[0]!.id)} /></Card>}<T style={S.small}>Danh sách nhắc trong ứng dụng; chưa gửi thông báo trên thiết bị.</T></Sheet>}
     </FlowScope></NavigationScope>
     <NavigationScope active={current === panelOrigin}><FlowScope onClose={() => { setNotificationExam(null); setPanel(null); }}>{notificationExam && <ExamDialog id={notificationExam} onClose={() => setNotificationExam(null)} />}</FlowScope></NavigationScope>
   </View></View>;

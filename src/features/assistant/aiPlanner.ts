@@ -3,6 +3,7 @@ import type { Task } from '../../store/model';
 import { CalendarEvent, ClassException, ClassItem, Exam, calendarEvents, findConflicts } from '../schedule/calendar';
 import { StudySession, endTime, timeMinutes } from '../study/learning';
 import { addDays, dateKey, isValidDate, parseDay } from '../../shared/utils/dates';
+import {deadlineTimestamp,sessionExceedsDeadline} from '../assignments/assignments';
 
 export type PlanInput = { courseId: string; taskId?: string; examId?: string; goal: string; from: string; to: string; start: string; end: string; duration: number; count: number; original?: StudySession };
 export type PlanDraft = { id: string; title: string; courseId: string; taskId?: string; date: string; start: string; duration: number; notes: string; selected: boolean; replaceId?: string };
@@ -22,6 +23,7 @@ export function validatePlanInput(input: PlanInput, context: PlanContext, now = 
   if (input.taskId && (!task || task.courseId !== input.courseId || task.status === 'Hoàn thành')) return 'Bài tập không còn phù hợp. Chọn bài chưa hoàn thành thuộc môn này.';
   if (input.examId && (!exam || exam.courseId !== input.courseId)) return 'Lịch thi không còn phù hợp với môn đang chọn.';
   if (task && input.from > task.deadline || exam && input.from > exam.date) return 'Khoảng học bắt đầu sau deadline. Chọn mục tiêu hoặc khoảng ngày khác.';
+  if(task&&deadlineTimestamp(task)<now.getTime())return 'Bài tập đã quá hạn theo ngày và giờ. Chọn bài khác hoặc điều chỉnh deadline trước khi lập kế hoạch.';
   if (input.original) {
     const current = context.studySessions.find(s => s.id === input.original!.id);
     if (!current || JSON.stringify(current) !== JSON.stringify(input.original) || current.status !== 'Đã lên lịch' || current.focusedSeconds > 0) return 'Buổi gốc đã thay đổi hoặc đã bắt đầu. Đóng đề xuất và chọn lại buổi chưa học.';
@@ -38,6 +40,7 @@ export function generateProposal(id: string, input: PlanInput, context: PlanCont
     for (let start = timeMinutes(input.start); start + input.duration <= timeMinutes(input.end) && drafts.length < input.count; start += 15) {
       const time = `${String(Math.floor(start / 60)).padStart(2, '0')}:${String(start % 60).padStart(2, '0')}`, ending = endTime(time, input.duration);
       if (start + input.duration >= 1440 || date === dateKey(now) && start < now.getHours() * 60 + now.getMinutes() || exam && date === exam.date && ending > exam.time) continue;
+      if(task&&sessionExceedsDeadline(task,{date,start:time,duration:input.duration}))continue;
       const draftEvents: CalendarEvent[] = drafts.map(d => ({ id: d.id, kind: 'Tự học', title: d.title, date: d.date, start: d.start, end: endTime(d.start, d.duration + 10) }));
       if (findConflicts(date, time, ending, [...events, ...draftEvents]).length) continue;
       drafts.push({ id: `${id}-${drafts.length + 1}`, title: input.original?.title ?? `${input.goal.trim()} · Buổi ${drafts.length + 1}`, courseId: input.courseId, taskId: input.taskId, date, start: time, duration: input.duration, selected: true, replaceId: input.original?.id, notes: input.original?.notes ?? `Kế hoạch mẫu đã duyệt. ${exam ? `Ôn thi ${exam.course}. ` : ''}${input.goal.trim()}` });
@@ -61,7 +64,7 @@ export function validateProposal(proposal: AiProposal, context: PlanContext, now
     const ending = endTime(d.start, d.duration);
     if (d.start < proposal.input.start || ending > proposal.input.end || d.date === dateKey(now) && timeMinutes(d.start) < now.getHours() * 60 + now.getMinutes()) { fail('Buổi học ngoài giờ rảnh hoặc thời điểm bắt đầu đã qua.'); continue; }
     const task = context.tasks.find(t => t.id === d.taskId), exam = context.exams.find(e => e.id === proposal.input.examId);
-    if (task && d.date > task.deadline || exam && (d.date > exam.date || d.date === exam.date && ending > exam.time)) { fail('Buổi học cần kết thúc trước lịch thi hoặc không sau ngày hạn nộp bài.'); continue; }
+    if (task && sessionExceedsDeadline(task,d) || exam && (d.date > exam.date || d.date === exam.date && ending > exam.time)) { fail('Buổi học cần kết thúc không sau ngày/giờ hạn nộp bài hoặc trước lịch thi.'); continue; }
     if (!d.replaceId && context.studySessions.some(s => s.id === d.id)) { fail('Buổi đề xuất này đã được thêm.'); continue; }
     const events = calendarEvents(d.date, context.classes, context.classExceptions, context.exams, context.studySessions).filter(e => !(originalId && e.kind === 'Tự học' && e.id === originalId));
     const peers: CalendarEvent[] = selected.filter(p => p.id !== d.id && isValidDate(p.date) && validTime(p.start) && Number.isInteger(p.duration) && p.duration > 0).map(p => ({ id: p.id, kind: 'Tự học', title: p.title, date: p.date, start: p.start, end: endTime(p.start, p.duration) }));
