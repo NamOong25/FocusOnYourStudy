@@ -6,6 +6,8 @@ Cập nhật: người dùng xác nhận chỉ có 9 nhóm chức năng; AI (m�
 
 Cập nhật sau đợt 2D: đã có UI chi tiết bài tập/tự học (2B), lịch thi/ngoại lệ/trùng lịch (2C), bảng điểm/trọng số/GPA/học lại và mục tiêu (2D). Bảng đối chiếu phía dưới ghi nhận những gì thiếu trong template ban đầu; trạng thái hiện tại xem `UI-BACKLOG.md` và các tài liệu từng đợt. GPA cố định 3,82 của đợt đầu đã được thay bằng kết quả tính từ điểm trong bộ nhớ. Dữ liệu vẫn là prototype, chưa theo quy chế trường hoặc lưu backend.
 
+Cập nhật sau đợt 2E: đã có khu vực hồ sơ/cài đặt, chỉnh hồ sơ dùng chung trang chủ, các luồng tài khoản/khôi phục mật khẩu minh họa, tùy chọn nhắc và thẻ preview theme/ngôn ngữ. Auth/email/thông báo thật và theme/i18n toàn app vẫn còn thiếu; xem `UI-PHASE-2E.md`.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |

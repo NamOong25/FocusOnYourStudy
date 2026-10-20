@@ -18,3 +18,4 @@
 - Đợt 2C đã bổ sung phạm vi chuỗi, nhiều thứ, ngoại lệ một buổi và lịch thi dùng chung kiểm tra trùng. Mô tả lịch đơn giản phía trên chỉ ghi lại trạng thái đợt đầu.
 - Đợt 2D thay hằng GPA 3,82 và tín chỉ 68/135 bằng điểm thành phần và GPA theo tín chỉ trong Context. Quy tắc mẫu có hai thang quy đổi, làm tròn trước quy đổi và liên kết học lại rõ; xem `UI-PHASE-2D.md`. Chưa chốt quy chế trường, không dùng dữ liệu này làm bảng điểm chính thức.
 - Từ đợt 2D, mỗi đợt kèm tên commit tiếng Việt/lệnh push trong `GIT-COMMITS.md` và câu trả lời hoàn thành. Người dùng tự chạy commit/push.
+- Đợt 2E dùng một modal toàn màn hình cho khu vực tài khoản, có chuyển màn/quay lại cục bộ. Không chặn năm tab hiện có bằng màn đăng nhập, vì chưa có auth thật. Hồ sơ/tùy chọn ở Context; mật khẩu chỉ ở state form và không được lưu/gửi. Sáng/tối/ngôn ngữ là thẻ preview, không giả là đã có theme/i18n toàn app. Xem `UI-PHASE-2E.md`.

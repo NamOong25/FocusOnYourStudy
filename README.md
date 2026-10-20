@@ -29,7 +29,7 @@ npm run build:web
 - Thống kê: bộ lọc tuần/tháng/học kỳ và biểu đồ có thể chạm; dữ liệu giờ học là mẫu. Tỷ lệ hoàn thành/trễ hạn lấy từ bài tập hiện tại. Từ đợt 2D, GPA/tín chỉ tính từ bảng điểm trong bộ nhớ; mô phỏng dùng kết quả đó với giả định được ghi rõ.
 - Lịch thi: danh sách, thêm lịch, bật/tắt tùy chọn nhắc mẫu.
 - Trợ lý AI: 5 công cụ, xem đề xuất mẫu, chấp nhận/để sau, trắc nghiệm mẫu có giải thích, tóm tắt mẫu kèm nguồn minh họa. Đề xuất khung giờ đối chiếu lịch học mẫu và chỉ thêm vào danh sách tự học khi chấp nhận.
-- Hộp thoại hồ sơ và nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
+- Hồ sơ/cài đặt với các luồng tài khoản minh họa (bổ sung ở 2E), hộp nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
 
 **Dữ liệu nằm trong bộ nhớ. Tải lại ứng dụng sẽ trở về mẫu.** Không có đăng nhập thật, thông báo hệ thống, đồng bộ, upload PDF hoặc gọi AI thật. Pomodoro không phát chuông khi app bị đóng; chưa lưu phiên khi process bị hủy. Không coi kiểm tra bằng trình duyệt/Mobile View là đã kiểm tra chạy nền trên điện thoại thật.
 
@@ -76,3 +76,11 @@ Mở **Thống kê → Điểm & GPA** để chọn học kỳ, tìm/lọc môn,
 Có quy tắc mẫu về thang quy đổi, làm tròn và học lại, dự báo điểm còn thiếu và mô phỏng mục tiêu GPA tích lũy. Ô chưa nhập hiển thị chưa đủ dữ liệu; điểm 0 vẫn tính là điểm đã có. Trang chủ và thống kê lấy GPA cùng nguồn với bảng điểm. Quy tắc hiện tại cần đối chiếu quy chế trường trước khi dùng thật; dữ liệu vẫn đặt lại khi tải lại app.
 
 Xem `docs/UI-PHASE-2D.md` để biết phạm vi và kiểm tra. **Tên commit tiếng Việt và lệnh push mỗi đợt** được ghi trong `docs/GIT-COMMITS.md`, kèm tên dự kiến cho các đợt giao diện tiếp theo. Checklist phần hoãn vẫn ở `docs/UI-BACKLOG.md`.
+
+## Cập nhật đợt 2E: Tài khoản, hồ sơ & cài đặt
+
+Bấm **Hồ sơ** góc phải trên cùng hoặc avatar trang chủ để mở khu vực mới. Có sửa hồ sơ/ảnh mẫu (đồng bộ với trang chủ trong phiên), đăng nhập/đăng ký, quên/đặt lại/đổi mật khẩu và xác nhận đăng xuất minh họa. Có tùy chọn nhắc bài tập/lịch học/lịch thi, mốc nhắc và giờ yên lặng, cùng thẻ xem trước sáng/tối và tiếng Việt/English.
+
+**Các luồng tài khoản chỉ là bản dùng thử giao diện**: không gửi/lưu/xác thực mật khẩu, không gửi email, các hồ sơ dùng chung dữ liệu học tập mẫu. Theme và ngôn ngữ mới đổi trên thẻ xem trước; chưa áp dụng toàn app. Tùy chọn nhắc chưa gửi thông báo thiết bị. Tải lại app vẫn đặt lại dữ liệu.
+
+Xem `docs/UI-PHASE-2E.md` và `docs/qa-account.cjs` để biết phạm vi/kiểm tra. Tên commit: **Thêm giao diện tài khoản, hồ sơ và cài đặt**; lệnh push được cập nhật trong `docs/GIT-COMMITS.md`. Tiếp theo là UI 2F — các luồng con AI.

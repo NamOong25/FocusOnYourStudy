@@ -17,11 +17,19 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 - [x] UI 2B: Chi tiết bài tập, checklist, tài liệu mẫu; kế hoạch tự học ngày/tuần, nhiều buổi cho một bài và liên kết Pomodoro. Xem `UI-PHASE-2B.md`.
 - [x] UI 2C: Chi tiết/tạo/sửa/xóa lịch thi, tùy chọn nhắc mẫu; chuỗi lịch học nhiều thứ/có phạm vi, nghỉ/đổi/khôi phục một buổi và cảnh báo lịch bị trùng. Xem `UI-PHASE-2C.md`.
 - [x] UI 2D: Bảng điểm theo học kỳ; nhập/sửa điểm thành phần và trọng số; GPA kỳ/tích lũy, liên kết học lại, quy tắc mẫu và dự báo mục tiêu. Chi tiết môn, trang chủ và thống kê dùng chung điểm. Xem `UI-PHASE-2D.md`.
-- [ ] UI 2E: Giao diện tài khoản, hồ sơ và cài đặt; chưa nối auth/backend.
+- [x] UI 2E: Hồ sơ chỉnh sửa/ảnh mẫu dùng chung trang chủ; đăng nhập/đăng ký/khôi phục/đổi mật khẩu và đăng xuất minh họa; tùy chọn nhắc, giờ yên lặng; thẻ xem trước sáng/tối và ngôn ngữ. Xem `UI-PHASE-2E.md`. Chưa có auth/email/thông báo thật hoặc theme/i18n toàn app.
 - [ ] UI 2F: Hoàn thiện các luồng con AI, tài liệu và bước xem trước/sửa/duyệt đề xuất mẫu.
 - [ ] Sau khi các màn chính được duyệt, nhắc lại bốn nhóm cải thiện đã hoãn ở trên.
 
 Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu trong bộ nhớ. Các yêu cầu nghiệp vụ thật, lưu/đồng bộ, tệp và chạy nền bên dưới vẫn để mở.
+
+### Phần nền tảng vẫn cần triển khai thật
+
+- [ ] Auth Spring Boot, đăng ký/xác minh email, đăng nhập/đăng xuất, phiên/token và khôi phục/đổi mật khẩu.
+- [ ] Mỗi tài khoản chỉ đọc/ghi dữ liệu của mình; không dùng trạng thái tài khoản minh họa để phân quyền.
+- [ ] Lưu/đồng bộ hồ sơ và tùy chọn; chọn/tải avatar thật và xử lý quyền truy cập ảnh.
+- [ ] Áp dụng sáng/tối và bản dịch xuyên suốt app; hiện tại UI 2E chỉ có thẻ xem trước.
+- [ ] Nối tùy chọn nhắc/giờ yên lặng với lời nhắc từng sự kiện, quyền hệ điều hành và lịch thông báo thật.
 
 Tên commit tiếng Việt và lệnh push cho đợt vừa hoàn thành, cùng tên dự kiến cho các đợt sau, nằm trong `GIT-COMMITS.md`. Sau mỗi đợt sẽ cập nhật tên theo phạm vi thực tế.
 

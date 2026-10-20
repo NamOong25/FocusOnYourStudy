@@ -4,10 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Icon, IconTile, Progress, Row, Section, T, Empty } from '../components';
 import { C, F, S } from '../theme';
 import { formatGpa, summarizeGrades } from '../grades';
+import { StudentAvatar } from '../accountUI';
 import { Task, dateKey, dateLabel, dueLabel, useApp } from '../model';
 
 export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void; onProfile: () => void }) {
-  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan, courseCatalog, gradeBook, gradeRules } = useApp();
+  const { tasks, getClassesOn, exams, completed, focusCourse, setTab, studyPlan, courseCatalog, gradeBook, gradeRules, profile, previewSignedIn } = useApp();
   const gradeSummary = summarizeGrades(courseCatalog, gradeBook, gradeRules, true);
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
   const todayClasses = getClassesOn(dateKey(new Date())).filter(c => !c.cancelled);
@@ -18,8 +19,8 @@ export default function Home({ onTask, onProfile }: { onTask: (t: Task) => void;
   return <>
     <Row between>
       <Pressable accessibilityRole="button" accessibilityLabel="Xem hồ sơ" onPress={onProfile} style={[S.row, S.grow, { gap: 11 }]}>
-        <View><Image source={require('../../assets/avatar.png')} style={{ width: 46, height: 46, borderRadius: 23 }} /><View style={{ width: 10, height: 10, backgroundColor: '#00B894', borderRadius: 5, borderWidth: 2, borderColor: C.canvas, position: 'absolute', bottom: 1, right: 0 }} /></View>
-        <View style={S.grow}><T style={S.small}>{hour < 12 ? 'Chào buổi sáng' : hour < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'} ☀️</T><T style={{ fontFamily: F.bold, fontSize: 17, letterSpacing: -0.5 }}>Nguyễn Hoàng Nam</T></View>
+        <View><StudentAvatar profile={profile} size={46} /><View style={{ width: 10, height: 10, backgroundColor: '#00B894', borderRadius: 5, borderWidth: 2, borderColor: C.canvas, position: 'absolute', bottom: 1, right: 0 }} /></View>
+        <View style={S.grow}><T style={S.small}>{hour < 12 ? 'Chào buổi sáng' : hour < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'} ☀️</T><T style={{ fontFamily: F.bold, fontSize: 17, letterSpacing: -0.5 }}>{previewSignedIn ? profile.name : 'Bạn học'}</T></View>
       </Pressable><Badge label="Học kỳ 5" bg={C.track} icon="ribbon-outline" />
     </Row>
     <LinearGradient colors={['#6C5CE7', '#8875E9', '#A69AFC']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 21, borderRadius: 24, gap: 19, boxShadow: '0px 12px 24px rgba(108,92,231,0.18)' }}>

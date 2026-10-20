@@ -5,6 +5,7 @@ import { StudySession, TaskExtras, initialTaskExtras } from './learning';
 import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from './calendar';
 import { addDays, dateKey, today } from './dates';
 import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook } from './grades';
+import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from './account';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from './dates';
 
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
@@ -38,6 +39,9 @@ const initialStudySessions: StudySession[] = [
   { id: 'study-4', title: 'Phác thảo ERD cho báo cáo', courseId: 'course-db', taskId: 't2', date: dateKey(addDays(today, 1)), start: '19:00', duration: 45, notes: '', status: 'Đã lên lịch', focusedSeconds: 0 },
 ];
 function usePrototype() {
+  const [profile, saveProfile] = useState<StudentProfile>(initialProfile);
+  const [accountPreferences, setAccountPreferences] = useState<AccountPreferences>(initialPreferences);
+  const [previewSignedIn, setPreviewSignedIn] = useState(true);
   const [semesters, setSemesters] = useState(initialSemesters);
   const [courseCatalog, setCourseCatalog] = useState(initialCourses);
   const [gradeBook, setGradeBook] = useState<GradeBook>(initialGradeBook);
@@ -140,7 +144,7 @@ function usePrototype() {
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
+  return { profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, studyPlan, setStudyPlan, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }

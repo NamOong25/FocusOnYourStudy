@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
@@ -21,6 +21,7 @@ import Academics from './src/screens/Academics';
 import TaskDialog from './src/TaskDialog';
 import StudyPlan from './src/screens/StudyPlan';
 import ClassDialog from './src/ClassDialog';
+import Account from './src/screens/Account';
 
 const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] = [
   { id: 'home', label: 'Trang chủ', icon: 'home-outline', activeIcon: 'home' },
@@ -59,7 +60,7 @@ function AppShell() {
     {taskForm && taskForm !== 'new' && <TaskDialog key={taskForm.id} taskId={taskForm.id} onClose={() => setTaskForm(null)} />}
     {classForm === 'new' && <ClassForm onClose={() => setClassForm(null)} />}
     {classForm && classForm !== 'new' && <ClassDialog key={classForm.id + (classDate ?? '')} id={classForm.id} date={classDate} onClose={() => setClassForm(null)} />}
-    {panel === 'profile' && <Sheet title="Hồ sơ học tập" onClose={() => setPanel(null)}><Row style={{ gap: 15 }}><Image source={require('./assets/avatar.png')} style={{ width: 64, height: 64, borderRadius: 23 }} /><View><T style={{ fontFamily: F.bold, fontSize: 18 }}>Nguyễn Hoàng Nam</T><T style={S.small}>Sinh viên Công nghệ thông tin</T><Badge label="Học kỳ 5 · 2026 – 2027" /></View></Row><Card style={{ backgroundColor: C.canvas, gap: 12 }}><T style={{ fontFamily: F.bold }}>Góc học tập của bạn</T><T style={S.small}>Một nơi để sắp xếp lịch học, quản lý bài tập và tập trung vào điều quan trọng.</T></Card><Badge label="Bản giao diện · Dữ liệu mẫu" /><T style={S.small}>Bạn đang thử giao diện. Dữ liệu thay đổi trong phiên này sẽ trở về mẫu khi tải lại ứng dụng. Đăng nhập, hồ sơ thật và đồng bộ sẽ được bổ sung ở giai đoạn backend.</T><Button label="Quay lại học thôi" icon="school-outline" onPress={() => setPanel(null)} /></Sheet>}
+    {panel === 'profile' && <Account onClose={() => setPanel(null)} />}
     {panel === 'notifications' && <Sheet title="Góc nhắc nhở" onClose={() => setPanel(null)}><T style={S.small}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T>{tasks.filter(t => t.status !== 'Hoàn thành').slice(0,2).map(task => <Pressable key={task.id} onPress={() => { setPanel(null); setTaskForm(task); }}><Card><Row><Icon name="notifications-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{task.title}</T><T style={S.small}>{dueLabel(task.deadline)} · Đừng quên dành một phiên để hoàn thành.</T></View><Icon name="chevron-forward" size={16} /></Row></Card></Pressable>)}{exams[0] && <Card><T style={{ fontFamily: F.bold }}>Chuẩn bị cho {exams[0].course}</T><T style={S.small}>{dueLabel(exams[0].date)} · Bạn có thể xem chi tiết ở mục Thống kê.</T><Button label="Xem lịch thi" secondary onPress={() => { setPanel(null); setTab('stats'); }} /></Card>}<T style={S.small}>Đây là danh sách nhắc nhở trong ứng dụng. Thông báo trên thiết bị sẽ được triển khai ở giai đoạn sau.</T></Sheet>}
   </View></View>;
 }
