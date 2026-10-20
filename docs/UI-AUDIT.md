@@ -12,6 +12,8 @@ Cập nhật sau đợt 2F: các công cụ AI có form, duyệt/sửa/bỏ ch�
 
 Cập nhật sau đợt 3A: các form đã dùng lịch/đồng hồ thay gõ chuỗi ngày giờ, gồm cả AI và giờ yên lặng. Có xác nhận/hủy và giữ dữ liệu form; giới hạn/trùng lịch/deadline vẫn kiểm tra khi lưu. Xem `UI-POLISH-3A.md`. Còn ba đợt hoàn thiện: điều hướng, trạng thái và Dashboard.
 
+Cập nhật sau đợt 3B: quay lại một bước/đóng cả luồng tách rõ; giữ màn/bộ lọc/cuộn và quay về nguồn từ Pomodoro, lịch tự học, thông báo và AI. Browser Back/Escape có kiểm tra; Android đã nối handler nhưng cần máy thật. Deep link/Forward replay/gesture iOS chưa có. Xem `UI-POLISH-3B.md`; còn 3C và 3D.
+
 ## 5 file đang có gì?
 
 | File | Nội dung |

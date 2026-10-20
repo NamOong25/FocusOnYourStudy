@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import { Badge, Button, Card, Field, Icon, IconTile, Progress, Row, Section, Segments, Sheet, T } from '../components';
+import { NavigationScope } from '../Navigation';
 import ExamList from '../Exams';
 import Grades, { GpaForecast } from './Grades';
 import { formatGpa, summarizeGrades } from '../grades';
@@ -12,7 +13,7 @@ import { dateLabel, dueLabel, useApp } from '../model';
 const charts: Record<string, number[]> = { Tuần: [3.5, 2.6, 4.2, 5.2, 4.8, 4.4, 3.9], Tháng: [19, 25, 28, 22], 'Học kỳ': [52, 68, 85, 72, 94] };
 export default function Stats() {
   const [view, setView] = useState('Tổng quan');
-  return <><Segments values={['Tổng quan', 'Điểm & GPA']} value={view} onChange={setView} />{view === 'Điểm & GPA' ? <Grades /> : <StudyStats />}</>;
+  return <><Segments values={['Tổng quan', 'Điểm & GPA']} value={view} onChange={setView} /><NavigationScope active={view === 'Tổng quan'}><View style={{display:view === 'Tổng quan'?'flex':'none',gap:16}}><StudyStats /></View></NavigationScope><NavigationScope active={view === 'Điểm & GPA'}><View style={{display:view === 'Điểm & GPA'?'flex':'none',gap:16}}><Grades /></View></NavigationScope></>;
 }
 function StudyStats() {
   const { tasks, courseCatalog, gradeBook, gradeRules } = useApp(); const [period, setPeriod] = useState('Tuần'); const [forecast, setForecast] = useState(false); const [selectedBar, setSelectedBar] = useState(3);

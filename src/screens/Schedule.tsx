@@ -1,3 +1,4 @@
+import { FlowScope, NavigationScope } from '../Navigation';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Empty, Icon, IconButton, IconTile, Row, Section, Segments, Sheet, T } from '../components';
@@ -12,9 +13,11 @@ export default function Schedule({ onTask, onNewTask, onClass, onNewClass }: { o
   const list = tasks.filter(t => t.status === status && (filter === 'Tất cả môn' || t.courseId === filter)).sort((a,b) => a.deadline.localeCompare(b.deadline));
   const classList = (date: Date) => getClassesOn(dateKey(date));
   const go = (direction: number) => { if (view === 'Theo tháng') setSelected(new Date(selected.getFullYear(), selected.getMonth() + direction, 1)); else setSelected(addDays(selected, direction * 7)); };
-  if (calendarPage === 'Kỳ thi') return <><Segments values={['Thời khóa biểu', 'Kỳ thi']} value={calendarPage} onChange={setCalendarPage} /><ExamList /></>;
-  return <>
+
+  return <FlowScope onClose={() => { setExamId(null); setChoose(false); }}>
     <Segments values={['Thời khóa biểu', 'Kỳ thi']} value={calendarPage} onChange={setCalendarPage} />
+    <NavigationScope active={calendarPage === 'Kỳ thi'}><View style={{display:calendarPage === 'Kỳ thi'?'flex':'none',gap:16}}><ExamList /></View></NavigationScope>
+    <NavigationScope active={calendarPage === 'Thời khóa biểu'}><View style={{display:calendarPage === 'Thời khóa biểu'?'flex':'none',gap:16}}>
     <Row><View style={S.grow}><Segments values={['Theo ngày', 'Theo tuần', 'Theo tháng']} value={view} onChange={setView} /></View><IconButton name="add" label="Thêm lịch học" onPress={onNewClass} /></Row>
     <Card style={{ gap: 13, padding: 16 }}>
       <Row between><T style={{ fontFamily: F.bold, fontSize: 16 }}>Tháng {String(selected.getMonth() + 1).padStart(2, '0')}, {selected.getFullYear()}</T><Row><IconButton name="chevron-back" bg="#fff" label="Khoảng trước" onPress={() => go(-1)} /><IconButton name="chevron-forward" bg="#fff" label="Khoảng sau" onPress={() => go(1)} /></Row></Row>
@@ -36,5 +39,6 @@ export default function Schedule({ onTask, onNewTask, onClass, onNewClass }: { o
     {list.length === 0 && <Empty title="Chưa có bài tập ở mục này" message="Thêm bài tập mới hoặc thử đổi bộ lọc." onAdd={onNewTask} />}
     <Button label="Thêm bài tập mới" icon="add-circle-outline" onPress={onNewTask} />
     {choose && <Sheet title="Lọc theo môn học" onClose={() => setChoose(false)}>{[{ id: 'Tất cả môn', name: 'Tất cả môn' }, ...courseCatalog].map(c => <Button key={c.id} label={c.name} secondary={filter !== c.id} onPress={() => { setFilter(c.id); setChoose(false); }} />)}</Sheet>}
-  </>;
+    </View></NavigationScope>
+  </FlowScope>;
 }

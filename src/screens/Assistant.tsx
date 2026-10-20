@@ -1,3 +1,4 @@
+import { FlowScope } from '../Navigation';
 import React, { useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,7 +21,7 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: () => void }) 
   const pending = tasks.filter(t => t.status !== 'Hoàn thành').sort((a, b) => a.deadline.localeCompare(b.deadline));
   const firstTask = pending[0];
   const send = () => { if (!prompt.trim()) return; setSent(prompt.trim()); setPrompt(''); setFeature(0); };
-  return <>
+  return <FlowScope onClose={() => setFeature(null)}>
     <LinearGradient colors={['#7862EA', '#5341CD', '#7865DE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 23, borderRadius: 32, gap: 20, boxShadow: '0px 12px 24px rgba(108,92,231,0.18)' }}>
       <Badge label="Trợ lý học tập • Bản xem trước" bg="#FFFFFF26" color="#fff" icon="sparkles" />
       <Row style={{ gap: 12 }}><View style={S.grow}><T style={{ color: '#fff', fontFamily: F.extra, fontSize: 24, lineHeight: 34, letterSpacing: -0.8 }}>Hôm nay, mình cùng học gì nhé?</T><T style={{ color: '#E9E2FF', fontSize: 12, lineHeight: 21, marginTop: 8 }}>Một kế hoạch vừa sức. Một chút tập trung. Thêm nhiều tiến bộ mỗi ngày.</T></View><Image source={require('../../assets/mentor.png')} style={{ width: 84, height: 95, borderRadius: 23 }} /></Row>
@@ -35,5 +36,5 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: () => void }) 
     <T style={{ textAlign: 'center', fontSize: 11, lineHeight: 18, color: C.muted }}>Đang dùng đề xuất mẫu để bạn trải nghiệm giao diện.{"\n"}Bạn luôn xem và chọn trước khi thêm vào kế hoạch.</T>
     {(feature === 0 || feature === 1 || feature === 4) && <AIPlanFlow variant={feature === 4 ? 'adjust' : feature === 1 ? 'free' : 'deadline'} request={sent} onClose={() => setFeature(null)} onStudyPlan={onStudyPlan} />}
     {(feature === 2 || feature === 3) && <AIDocumentFlow initialMode={feature === 2 ? 'summary' : 'quiz'} onClose={() => setFeature(null)} />}
-  </>;
+  </FlowScope>;
 }

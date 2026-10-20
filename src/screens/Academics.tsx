@@ -1,3 +1,4 @@
+import { FlowScope } from '../Navigation';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,6 +19,7 @@ type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edi
 export default function Academics() {
   const { semesters, courseCatalog, tasks, classes } = useApp();
   const [semesterId, setSemesterId] = useState('sem-5'); const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
+  const [detailSection, setDetailSection] = useState('Tổng quan');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
@@ -29,8 +31,8 @@ export default function Academics() {
   const list = semesterCourses.filter(c => (filter === 'Tất cả' || c.status === filter) && `${c.name} ${c.code} ${c.teacher}`.toLocaleLowerCase().includes(normalizedQuery));
   const openedCourse = courseCatalog.find(c => c.id === courseId);
   const selectSemester = (id: string) => { setSemesterId(id); setFilter('Tất cả'); setQuery(''); };
-  const openCourse = (course: Course) => { setCourseId(course.id); setSheet('detail'); };
-  return <>
+  const openCourse = (course: Course) => { setCourseId(course.id); setDetailSection('Tổng quan'); setSheet('detail'); };
+  return <FlowScope onClose={() => setSheet(null)}>
     <View style={{ gap: 5, marginTop: 5 }}><T style={{ fontFamily: F.bold, fontSize: 10, color: C.primary, letterSpacing: 1.4 }}>HÀNH TRÌNH HỌC TẬP</T><T style={{ fontFamily: F.extra, fontSize: 25, lineHeight: 36, letterSpacing: -0.8 }}>Môn học & học kỳ</T><T style={{ fontSize: 12, color: C.muted }}>Hiểu rõ từng môn. Tiến bộ qua từng học kỳ.</T></View>
     <Section title="Học kỳ của bạn" action="+ Thêm" onAction={() => setSheet('new-semester')} />
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingVertical: 3 }}>
@@ -54,19 +56,19 @@ export default function Academics() {
     })}
     {list.length === 0 && <Card style={{ alignItems: 'center', gap: 11, paddingVertical: 29 }}><IconTile name={semesterCourses.length ? 'search-outline' : 'library-outline'} size={58} /><T style={{ fontFamily: F.bold, fontSize: 16, textAlign: 'center' }}>{semesterCourses.length ? 'Chưa tìm thấy môn phù hợp' : 'Học kỳ mới đang chờ bạn'}</T><T style={[S.small, { textAlign: 'center' }]}>{semesterCourses.length ? 'Thử một từ khóa khác hoặc xem tất cả trạng thái.' : 'Thêm môn học đầu tiên để bắt đầu sắp xếp hành trình của mình.'}</T><Button label={semesterCourses.length ? 'Xem tất cả môn' : 'Thêm môn đầu tiên'} icon={semesterCourses.length ? 'refresh-outline' : 'add'} onPress={() => { if (semesterCourses.length) { setFilter('Tất cả'); setQuery(''); } else setSheet('new-course'); }} /></Card>}
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
-    {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { selectSemester(id); setSheet(null); }} />}
-    {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { selectSemester(targetSemesterId); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
-    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" onClose={() => setSheet(null)}><CourseDetail course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onGrades={() => setSheet('grades')} /></Sheet>}
+    {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} />}
+    {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { if (targetSemesterId !== semester.id) selectSemester(targetSemesterId); if (sheet === 'new-course') setDetailSection('Tổng quan'); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
+    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onGrades={() => setSheet('grades')} /></Sheet>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && (classItem ? <ClassDialog id={classItem.id} onClose={() => setSheet('detail')} /> : <ClassForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'exam' && examId && <ExamDialog id={examId} onClose={() => setSheet('detail')} />}
     {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} onClose={() => setSheet('detail')} />}
-  </>;
+  </FlowScope>;
 }
 
-function CourseDetail({ course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
+function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
   const { tasks, classes, exams, semesters, prepareFocus } = useApp();
-  const [section, setSection] = useState('Tổng quan'); const colors = courseColors[course.color];
+  const colors = courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
   const linkedTasks = tasks.filter(t => t.courseId === course.id).sort((a,b) => a.deadline.localeCompare(b.deadline));
   const linkedClasses = classes.filter(c => c.courseId === course.id).sort((a,b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7) || a.start.localeCompare(b.start));
@@ -79,7 +81,7 @@ function CourseDetail({ course, onEdit, onClose, onTask, onClass, onExam, onGrad
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Về môn học này</T><T style={{ fontSize: 13, lineHeight: 23, color: C.muted }}>{course.description || 'Bạn có thể thêm nội dung và mục tiêu môn học trong phần chỉnh sửa.'}</T>
       <Row style={{ alignItems: 'stretch' }}><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="calendar-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedClasses.reduce((sum,c) => sum + c.weekdays.length, 0)}</T><T style={S.small}>ca học mỗi tuần</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="clipboard-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedTasks.filter(t => t.status !== 'Hoàn thành').length}</T><T style={S.small}>bài tập cần làm</T></Card></Row>
       {linkedExams.map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi môn ${exam.course}`} onPress={() => onExam(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
-      <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { onClose(); prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
+      <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
     </>}
     {section === 'Lịch học' && <>
       <Row between><T style={{ fontFamily: F.bold }}>Các ca học trong tuần</T><IconButton name="add" label="Thêm ca học cho môn" onPress={() => onClass()} /></Row>

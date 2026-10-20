@@ -7,9 +7,10 @@ import { addDays, dateKey, today } from './dates';
 import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook } from './grades';
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from './account';
 import { AiProposal, proposalSessions, validateProposal } from './aiPlanner';
+import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from './navigationState';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from './dates';
 
-export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
+export type { Tab } from './navigationState';
 export type TaskStatus = 'Chưa làm' | 'Đang làm' | 'Hoàn thành';
 export type Task = { id: string; title: string; courseId: string; course: string; deadline: string; priority: 'Cao' | 'Trung bình'; status: TaskStatus; notes: string };
 export type { ClassItem, ClassException, Exam } from './calendar';
@@ -52,7 +53,11 @@ function usePrototype() {
   const [classes, setClasses] = useState(initialClasses);
   const [classExceptions, setClassExceptions] = useState<ClassException[]>([]);
   const [exams, setExams] = useState(initialExams);
-  const [tab, setTab] = useState<Tab>('home');
+  const [routeTrail, setRouteTrail] = useState<AppRoute[]>([homeRoute]);
+  const route = routeTrail[routeTrail.length - 1]!; const tab = route.tab; const scheduleMode = route.scheduleMode;
+  const setTab = (next: Tab) => setRouteTrail(v => next === 'home' ? [{ ...v[v.length - 1]!, tab: 'home' }] : pushRoute(v, { ...v[v.length - 1]!, tab: next }));
+  const setScheduleMode = (next: ScheduleMode) => setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: next }));
+  const goBackRoute = () => setRouteTrail(previousRoute);
   const [focusCourseId, setFocusCourseId] = useState('course-dsa');
   const focusCourse = courseCatalog.find(c => c.id === focusCourseId)?.name ?? 'Chọn môn học';
   const [mode, setModeState] = useState(0);
@@ -156,7 +161,7 @@ function usePrototype() {
     if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
+  return { route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children }: { children: ReactNode }) { const state = usePrototype(); return <Context.Provider value={state}>{children}</Context.Provider>; }

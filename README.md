@@ -37,7 +37,7 @@ npm run build:web
 
 `App.tsx` chứa khung ứng dụng, header, dock và điều hướng 5 tab của prototype. `src/components.tsx` và `src/theme.ts` là thành phần dùng chung. `src/model.tsx` quản lý dữ liệu mẫu và timer. `src/forms.tsx` chứa form bài tập/lịch học/lịch thi. `src/screens/` chứa 5 màn riêng.
 
-Không dùng HTML trong WebView, không đưa Tailwind CDN vào React Native, không dùng SQLite cho bản UI này. Khi mở rộng luồng chi tiết và tài khoản ở đợt tiếp theo, thay điều hướng tab nội bộ bằng navigation stack có deep link/back gesture và tách API service khỏi state giao diện.
+Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. Từ 3B, `src/Navigation.tsx` và `src/navigationState.ts` quản lý quay lại/phạm vi luồng và giữ màn trong phiên. URL deep link, Forward replay và gesture iOS chưa được triển khai; API service sẽ tách khỏi state khi nối backend.
 
 ## Tài liệu tiếp theo
 
@@ -100,3 +100,11 @@ Bấm các ô lịch/đồng hồ trong form để chọn, thay cho gõ chuỗi.
 Đã áp dụng cho bài tập, chuỗi lịch học/ngoại lệ một buổi, lịch thi, tự học, form/preview AI và giờ yên lặng. Nội dung đang sửa được giữ khi mở bộ chọn. Kiểm tra trùng lịch, giờ kết thúc và deadline vẫn thực hiện khi lưu. Không thêm dependency; dữ liệu vẫn là mẫu trong bộ nhớ.
 
 Xem `docs/UI-POLISH-3A.md`, `docs/qa-picker-unit.cjs` và `docs/qa-picker.cjs`. Tên commit: **Thêm bộ chọn ngày giờ cho các biểu mẫu**; lệnh push ở `docs/GIT-COMMITS.md`. Ba mục tiếp theo còn trong checklist: điều hướng, trạng thái giao diện và Dashboard.
+
+## Cập nhật đợt 3B: Điều hướng & quay lại
+
+Mũi tên trong chi tiết quay lại một bước; X đóng cả luồng. Màn đã mở được giữ khi đổi tab, gồm học kỳ, tìm kiếm/bộ lọc, tab chi tiết và vị trí cuộn. Từ bài/buổi học mở Pomodoro rồi **Quay lại màn trước** sẽ về đúng nguồn; từ AI đã duyệt sang lịch tự học cũng quay lại đúng bước trước đó. Thông báo mở bài/kỳ thi rồi trở lại hộp nhắc ban đầu.
+
+Browser Back/Escape và Back Android dùng cùng nguyên tắc (picker → chi tiết → màn chính). Web ở gốc vẫn Back ra trang trước bình thường. Chưa có deep link/Forward replay hoặc gesture iOS; chưa thử Back/cảm ứng trên thiết bị thật. Dữ liệu/navigation vẫn chỉ giữ trong phiên.
+
+Xem `docs/UI-POLISH-3B.md`, `docs/qa-navigation-unit.cjs`, `docs/qa-navigation.cjs`. Tên commit: **Hoàn thiện điều hướng và luồng quay lại**; lệnh push ở `docs/GIT-COMMITS.md`. Tiếp theo là 3C — trạng thái giao diện, rồi 3D — Dashboard.

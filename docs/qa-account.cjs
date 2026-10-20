@@ -1,3 +1,4 @@
+const { visibleText, backDialog } = require('./qa-navigation-helpers.cjs');
 const { chooseDate, chooseTime } = require('./qa-picker-helpers.cjs');
 // Optional UI check. Use PLAYWRIGHT_MODULE and CHROME_PATH for an existing runtime/browser.
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
@@ -11,7 +12,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
   const button = name => page.getByRole('button', { name, exact: true });
   const tab = name => page.getByRole('tab', { name, exact: true });
   const field = name => page.getByLabel(name, { exact: true });
-  const text = name => page.getByText(name, { exact: true }).last();
+  const text = name => visibleText(page,name, { exact: true }).last();
   const back = () => button('Quay lại tài khoản').click();
   const shot = async name => { if (await button('Đóng tài khoản').count()) await button('Đóng tài khoản').hover(); await page.screenshot({ path: path.join(out, `${name}.png`) }); };
   try {
