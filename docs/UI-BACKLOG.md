@@ -1,11 +1,11 @@
 # Checklist giao diện và chức năng để bổ sung sau
 
-Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F đã làm bộ chọn ngày/giờ (3A) và điều hướng (3B) theo yêu cầu. Đã làm trạng thái (3C); Dashboard (3D) còn để sau. Đây là checklist trong project, không phải lịch nhắc tự động.
+Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F đã làm bộ chọn ngày/giờ (3A) và điều hướng (3B) theo yêu cầu. Đã hoàn thành các đợt trạng thái (3C) và Dashboard theo học kỳ (3D). Đây là checklist trong project, không phải lịch nhắc tự động.
 
 - [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.
 - [x] UI 3B: Mũi tên quay lại một bước/X đóng cả luồng; giữ các màn đã mở, học kỳ/bộ lọc/tab chi tiết và cuộn; quay về nguồn từ Pomodoro/lịch tự học; Back/Escape trên web và handler Android. Xem `UI-POLISH-3B.md`. Chưa có deep link, Forward replay, gesture iOS hoặc nghiệm thu Back trên điện thoại thật.
 - [x] UI 3C: Màn bắt đầu mẫu/trống; hướng dẫn tạo học kỳ/môn/bài; trạng thái tải/lỗi/thử lại giữ dữ liệu và bộ lọc; form có chờ, khóa thao tác lặp, lỗi giữ bản nháp, retry và hủy; thông báo kết quả dùng chung trong Modal. Xem `UI-POLISH-3C.md`. Chờ/lỗi là mô phỏng; chưa nghiệm thu API hoặc máy thật.
-- [ ] Dashboard: thẻ lịch thi gần nhất đầy đủ hơn và bộ chọn học kỳ rõ ràng. Bộ chọn học kỳ trong màn quản lý môn chỉ thay danh sách của màn đó, không đổi ngữ cảnh Dashboard.
+- [x] UI 3D Dashboard: chọn kỳ/năm, GPA và tiến độ theo dữ liệu trong phiên, thẻ thi gần nhất, lịch hôm nay/ngoại lệ, việc quá hạn/sắp hạn, tự học và cảnh báo điểm; mở đúng chi tiết. Xem `UI-POLISH-3D.md` và `DASHBOARD-TEST.md`. Chưa nghiệm thu backend, lưu/đồng bộ hoặc thiết bị thật.
 
 ## Số thứ tự chức năng đã thống nhất
 
@@ -32,7 +32,7 @@ Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thà
 - [x] UI 2F: Form mục tiêu/giờ rảnh; preview, sửa/bỏ chọn/duyệt vào buổi tự học dùng chung; điều chỉnh một buổi chưa bắt đầu; tóm tắt và quiz 3/5 câu từ hai bộ nguồn theo trang có sẵn. Xem `UI-PHASE-2F.md`. Chưa gọi AI, upload/đọc PDF thật hoặc lưu lịch sử quiz.
 - [x] Sau UI 2F đã nhắc lại bốn nhóm đã hoãn; người dùng yêu cầu làm bộ chọn ngày/giờ trước và đã thực hiện ở 3A.
 
-Sau 2F, các nhóm màn chính đã có prototype. Hiện đã hoàn thành **3A Bộ chọn**, **3B Điều hướng** và **3C Trạng thái**. Còn **3D Dashboard**; chưa chuyển sang backend.
+Sau 2F, các nhóm màn chính đã có prototype. Hiện đã hoàn thành **3A Bộ chọn**, **3B Điều hướng**, **3C Trạng thái** và **3D Dashboard** ở mức frontend. Kiểm tra một vòng theo `DASHBOARD-TEST.md` trước khi chốt phạm vi backend.
 
 Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu trong bộ nhớ. Các yêu cầu nghiệp vụ thật, lưu/đồng bộ, tệp và chạy nền bên dưới vẫn để mở.
 

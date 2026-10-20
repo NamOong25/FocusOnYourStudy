@@ -21,12 +21,13 @@ import { C, F, S } from '../../shared/theme';
 
 type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
-  const { semesters, courseCatalog, tasks, classes, gradeBook, gradeRules } = useApp();
-  const [semesterId, setSemesterId] = useState('sem-5'); const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
+  const { semesters, courseCatalog, tasks, classes, gradeBook, gradeRules, academicSemesterId:semesterId, setAcademicSemesterId:setSemesterId } = useApp();
+  const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
   const [detailSection, setDetailSection] = useState('Tổng quan');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
+  React.useEffect(() => { setFilter('Tất cả'); setQuery(''); }, [semesterId]);
   if (!semesters.length) return <FlowScope onClose={() => setSheet(null)}><StateView title="Chưa có học kỳ" message="Tạo học kỳ đầu tiên, rồi thêm môn học và tín chỉ của bạn." actionLabel="Tạo học kỳ đầu tiên" onAction={() => setSheet('new-semester')} />{sheet === 'new-semester' && <SemesterForm onClose={() => setSheet(null)} onSaved={id => { setSemesterId(id); setSheet(null); }} />}</FlowScope>;
   const semester = semesters.find(s => s.id === semesterId) ?? semesters[0]!;
   const semesterCourses = courseCatalog.filter(c => c.semesterId === semester.id);

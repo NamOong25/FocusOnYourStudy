@@ -70,7 +70,7 @@ function AppShell() {
   const closeTaskFlow = () => { setTaskForm(null); if (panel === 'notifications') setPanel(null); };
   const study = () => setScheduleMode('Tự học');
   const renderPage = (key: string) => {
-    if (key === 'home') return <Home onTask={openTask} onProfile={() => openPanel('profile')} onStudyPlan={study} />;
+    if (key === 'home') return <Home onTask={openTask} onClass={openClass} onProfile={() => openPanel('profile')} onStudyPlan={study} />;
     if (key === 'focus') return <Focus onStudyPlan={study} />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant onStudyPlan={study} />;

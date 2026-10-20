@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: Điểm IUH và tự nhận diện học lại
+## Đợt vừa hoàn thành: UI 3D — Dashboard theo học kỳ
 
-Đã thêm bộ chọn loại điểm/học phần, xét đạt/không đạt, cảnh báo đỏ, bảng quy đổi IUH và tự ghép các lần học theo mã môn/tín chỉ/học kỳ. Nguồn và giới hạn: `IUH-GRADING.md`. Chạy tại thư mục project, xem `git status` để kiểm tra các file trước khi thêm:
+Dashboard có bộ chọn học kỳ/năm, GPA và tiến độ từ dữ liệu trong phiên, lịch thi gần nhất, lịch hôm nay, bài quá hạn/sắp hạn, tự học và cảnh báo điểm. Hướng dẫn kiểm tra một vòng: `DASHBOARD-TEST.md`. Chạy tại thư mục project và kiểm tra các file trước khi thêm:
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Bổ sung quy tắc điểm IUH và tự xác định môn cần học lại"
+git commit -m "Hoàn thiện Dashboard theo học kỳ và lịch thi gần nhất"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Điểm IUH và tự nhận diện học lại | `Bổ sung quy tắc điểm IUH và tự xác định môn cần học lại` |
 | UI 3C và bộ chọn học kỳ | `Hoàn thiện trạng thái giao diện và bộ chọn học kỳ` |
 | UI 2D — Điểm số & GPA | `Thêm giao diện điểm số, GPA và mục tiêu học tập` |
 | UI 2E — Tài khoản, hồ sơ và cài đặt | `Thêm giao diện tài khoản, hồ sơ và cài đặt` |
@@ -34,6 +35,6 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| UI 3D | Dashboard, học kỳ và kỳ thi gần nhất | `Hoàn thiện Dashboard và bộ chọn học kỳ` |
+| Backend — cần chốt phạm vi riêng | Thiết kế dữ liệu, tài khoản và nối API theo từng giai đoạn | Chốt tên khi triển khai thực tế |
 
 Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Chưa tự chuyển sang backend Spring Boot ở các đợt này.

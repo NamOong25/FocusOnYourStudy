@@ -8,9 +8,9 @@ import ConflictPanel from '../schedule/ConflictPanel';
 import { addDays, dateKey, isValidDate, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 
-export function ExamForm({ item, onClose, onDeleted, onSaved }: { item?: Exam; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void }) {
+export function ExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }: { item?: Exam; initialCourseId?: string; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void }) {
   const { courseCatalog, classes, classExceptions, exams, studySessions, saveExam, deleteExam, setToast } = useApp();
-  const [courseId, setCourseId] = useState(item?.courseId ?? courseCatalog[0]?.id ?? '');
+  const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const [date, setDate] = useState(item?.date ?? dateKey(addDays(today, 7))); const [time, setTime] = useState(item?.time ?? '08:00'); const [end, setEnd] = useState(item?.end ?? '10:00');
   const [room, setRoom] = useState(item?.room ?? ''); const [kind, setKind] = useState<Exam['kind']>(item?.kind ?? 'Giữa kỳ'); const [format, setFormat] = useState<Exam['format']>(item?.format ?? 'Tự luận');
   const [reminder, setReminder] = useState(item?.reminder ?? true); const [minutes, setMinutes] = useState(item?.reminderMinutes ?? [1440, 180]); const [notes, setNotes] = useState(item?.notes ?? '');
