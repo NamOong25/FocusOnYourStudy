@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: Cột điểm đề xuất có thể chỉnh sửa và điểm bài tập lớn
+## Đợt vừa hoàn thành: UI 4A — Điều hướng Lịch học và Bài tập riêng
 
-Cột đề xuất có thể thêm/xóa/sửa tên/đổi loại và khôi phục; tự chia trọng số theo nhóm, lưu bản thiếu cột mà chưa tính GPA. Giữ hai loại Lý thuyết/Thực hành và cách quy BTL thay một cột hoặc toàn bộ/một phần cuối kỳ; bộ cột thực hành tùy chỉnh được ghi rõ. Xem `GRADE-COLUMNS.md` và `GRADES-PROJECTS.md`. Chạy tại thư mục project và kiểm tra các file trước khi thêm:
+Tách Bài tập ra màn riêng, một hàng lối vào Lịch học/Bài tập/Lịch thi/Tự học và nút Môn & học kỳ. Giữ ngữ cảnh/bộ lọc khi quay lại, nút thêm bài ở phía trên. Ghi đợt 2 (giờ deadline/tìm kiếm/lọc thời hạn) và các đề xuất còn lại vào `UI-BACKLOG.md` để làm sau. Xem `UI-POLISH-4A.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Cho phép thêm xóa sửa cột điểm và quy đổi bài tập lớn"
+git commit -m "Đơn giản hóa điều hướng lịch học và tách màn bài tập"
 git push
 ```
 
@@ -20,6 +20,8 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Checklist backend | `Bổ sung lộ trình backend 5 đợt vào checklist` |
+| Cột điểm đề xuất và BTL | `Cho phép thêm xóa sửa cột điểm và quy đổi bài tập lớn` |
 | UI 3D — Dashboard | `Hoàn thiện Dashboard theo học kỳ và lịch thi gần nhất` |
 | Điểm IUH và tự nhận diện học lại | `Bổ sung quy tắc điểm IUH và tự xác định môn cần học lại` |
 | UI 3C và bộ chọn học kỳ | `Hoàn thiện trạng thái giao diện và bộ chọn học kỳ` |
@@ -36,6 +38,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
+| UI 4B — Bài tập và deadline | Chọn giờ hạn nộp, tìm kiếm và bộ lọc thời hạn | `Bổ sung giờ deadline tìm kiếm và lọc bài tập` |
 | Backend — cần chốt phạm vi riêng | Thiết kế dữ liệu, tài khoản và nối API theo từng giai đoạn | Chốt tên khi triển khai thực tế |
 
 Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Chưa tự chuyển sang backend Spring Boot ở các đợt này.

@@ -1,7 +1,7 @@
 export type Tab = 'home' | 'schedule' | 'focus' | 'stats' | 'ai';
-export type ScheduleMode = 'Lịch & bài tập' | 'Môn & học kỳ' | 'Tự học';
+export type ScheduleMode = 'Thời khóa biểu' | 'Bài tập' | 'Kỳ thi' | 'Môn & học kỳ' | 'Tự học';
 export type AppRoute = { tab: Tab; scheduleMode: ScheduleMode };
-export const homeRoute: AppRoute = { tab: 'home', scheduleMode: 'Lịch & bài tập' };
+export const homeRoute: AppRoute = { tab: 'home', scheduleMode: 'Thời khóa biểu' };
 export function pushRoute(trail: AppRoute[], next: AppRoute) {
   const current = trail[trail.length - 1] ?? homeRoute;
   if (current.tab === next.tab && current.scheduleMode === next.scheduleMode) return trail;

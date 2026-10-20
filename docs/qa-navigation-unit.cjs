@@ -5,4 +5,9 @@ let trail=[homeRoute];trail=pushRoute(trail,{tab:'schedule',scheduleMode:'Môn &
 for(let i=0;i<60;i++)trail=pushRoute(trail,{...homeRoute,tab:i%2?'stats':'ai'});eq(trail.length,40);eq(trail[0],homeRoute);
 const registry=createBackRegistry();const seen=[];eq(registry.back(),false);const root=registry.register(Symbol(),0,()=>seen.push('route'));const modal=registry.register(Symbol(),20,()=>seen.push('detail'));const picker=registry.register(Symbol(),1000,()=>seen.push('picker'));eq(registry.size(),3);eq(registry.back(),true);eq(seen.at(-1),'picker');picker();registry.back();eq(seen.at(-1),'detail');modal();registry.back();eq(seen.at(-1),'route');root();eq(registry.size(),0);eq(registry.back(),false);
 const first=registry.register(Symbol(),20,()=>seen.push('old'));const last=registry.register(Symbol(),20,()=>seen.push('new'));registry.back();eq(seen.at(-1),'new');last();registry.back();eq(seen.at(-1),'old');first();eq(registry.size(),0);
+// Each learning destination is a separate remembered page and back-stack entry.
+let learning=[homeRoute];for(const mode of ['Thời khóa biểu','Bài tập','Kỳ thi','Tự học','Môn & học kỳ']){learning=pushRoute(learning,{tab:'schedule',scheduleMode:mode});eq(viewKey(learning.at(-1)),mode);}
+eq(homeRoute.scheduleMode,'Thời khóa biểu');eq(learning.length,6);
+learning=previousRoute(learning);eq(learning.at(-1).scheduleMode,'Tự học');learning=previousRoute(learning);eq(learning.at(-1).scheduleMode,'Kỳ thi');learning=previousRoute(learning);eq(learning.at(-1).scheduleMode,'Bài tập');
+learning=pushRoute(learning,{...learning.at(-1),tab:'focus'});eq(viewKey(previousRoute(learning).at(-1)),'Bài tập');
 console.log(JSON.stringify({passed:true,assertions,checks:['route return includes schedule context','duplicate route and bounded trail','picker before detail before route','last equal-priority handler wins','unsubscribe and empty registry']}));

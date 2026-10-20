@@ -2,6 +2,63 @@
 
 Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F đã làm bộ chọn ngày/giờ (3A) và điều hướng (3B) theo yêu cầu. Đã hoàn thành các đợt trạng thái (3C) và Dashboard theo học kỳ (3D). Đây là checklist trong project, không phải lịch nhắc tự động.
 
+## Hoàn thiện giao diện sau đợt rà soát — làm từng đợt
+
+Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài tập trước; các đề xuất còn lại ghi dưới đây để làm khi có thời gian. Chưa chuyển sang backend trong đợt này.
+
+### Đợt 1 — Điều hướng Lịch học và lối vào Bài tập
+
+- [x] Tách Bài tập thành màn riêng, mở trực tiếp từ khu vực Lịch học; nút thêm bài nằm trên danh sách, không phải cuộn qua lịch.
+- [x] Một hàng bốn lối vào Lịch học/Bài tập/Lịch thi/Tự học và nút Môn & học kỳ; lịch giữ bộ chọn ngày/tuần/tháng, bỏ tầng tab Lịch & bài tập → Thời khóa biểu/Kỳ thi.
+- [x] Giữ trang, bộ lọc và ngữ cảnh khi đổi mục/quay lại. Bài tập mặc định hiển thị Tất cả; vẫn lọc được trạng thái và môn, bộ chọn môn có mã môn/học kỳ/năm.
+- [x] Hướng dẫn bắt đầu và nút đến danh sách bài tập trên Dashboard dẫn tới màn Bài tập riêng. Xem `UI-POLISH-4A.md` để kiểm tra bản mẫu/trống và phạm vi đã làm.
+
+### Đợt 2 — Giờ deadline, tìm kiếm và lọc bài tập (chưa làm)
+
+- [ ] Chọn cả ngày và giờ hạn nộp bằng lịch/đồng hồ; hiển thị nhất quán trên danh sách, chi tiết, Dashboard và nhắc bài.
+- [ ] Tìm kiếm bài theo tên hoặc môn học; có xóa tìm kiếm và trạng thái không có kết quả.
+- [ ] Lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn, kết hợp trạng thái và môn; nêu rõ phạm vi “sắp hạn”. Lối xem Tất cả theo trạng thái đã có ở đợt 1, bộ lọc theo thời hạn chưa làm.
+- [ ] Xử lý đúng bài đến hạn trong ngày và qua mốc giờ; sửa deadline cập nhật các nơi liên quan và kiểm tra buổi tự học theo hạn mới.
+
+### Các đề xuất lưu để làm sau
+
+- [ ] Pomodoro: lịch sử theo ngày, hiện môn/bài và thời lượng từng phiên; điều chỉnh mục tiêu số phiên trong ngày.
+- [ ] Pomodoro: bổ sung chuỗi ngày học và quy tắc tính chuỗi; thời gian ngày/tuần phải lấy từ phiên đã ghi nhận. Nghiệm thu chạy nền/khôi phục nằm trong checklist nghiệp vụ bên dưới.
+- [ ] Thống kê: chọn khoảng ngày/học kỳ; so sánh GPA qua các học kỳ và xử lý kỳ chưa có điểm.
+- [ ] Thống kê: biểu đồ thời gian/phân bổ môn lấy từ dữ liệu phiên học trong app, thay các dãy số và tỷ lệ mẫu đang cố định.
+- [ ] Thông báo: trạng thái rỗng, đã đọc/chưa đọc từng mục; huy hiệu đúng số mục chưa đọc.
+- [ ] Thông báo: giao diện quyền bị từ chối/thu hồi và hướng dẫn bật lại; phần xin quyền/lên lịch nhắc thật triển khai cùng thông báo trên thiết bị.
+- [ ] Biểu mẫu: cảnh báo khi đóng/quay lại với nội dung đã thay đổi chưa lưu; có lựa chọn tiếp tục sửa hoặc bỏ thay đổi.
+- [ ] Biểu mẫu dài: nút lưu dễ tiếp cận, đặc biệt bảng điểm nhiều cột; thử với bàn phím điện thoại để tránh che ô/nút.
+- [ ] Giao diện: áp dụng sáng/tối xuyên suốt app, không chỉ thẻ xem trước trong cài đặt.
+- [ ] Ngôn ngữ: áp dụng tiếng Việt/English xuyên suốt app, gồm thông báo lỗi, lịch, ngày giờ và trạng thái trống.
+
+Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn thành chỉ vì có bản xem trước. Mỗi đợt hoàn thành sẽ cập nhật tiêu chí kiểm tra và tên commit tiếng Việt.
+
+## Lộ trình backend — 5 đợt lõi
+
+Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend dự kiến Java Spring Boot + PostgreSQL. Các đợt dưới đây **chưa triển khai**, chỉ ghi kế hoạch và tiêu chí kiểm tra để theo dõi. Hoàn thiện giao diện theo từng đợt trước khi bắt đầu backend.
+
+| Đợt | Làm gì | Kết quả cần kiểm tra được |
+| --- | --- | --- |
+| 1. Nền tảng backend | Spring Boot + PostgreSQL; thiết kế bảng, quan hệ dữ liệu và API; chuẩn hóa lỗi | Chạy được backend và kết nối database. |
+| 2. Tài khoản thật | Đăng ký, đăng nhập, phiên đăng nhập; nối frontend React Native với API | Hai tài khoản có dữ liệu riêng, không đọc/ghi chéo dữ liệu; lỗi mạng không làm app treo. |
+| 3. Học kỳ và môn học | API thêm/sửa/xóa học kỳ, môn học; chọn học kỳ | Tạo môn rồi tải lại app vẫn còn; chuyển học kỳ hiển thị đúng môn. |
+| 4. Bài tập và lịch | Deadline, kế hoạch tự học, lịch học lặp, ngoại lệ và lịch thi | Dữ liệu được lưu và liên kết đúng môn/học kỳ; sửa một buổi không làm thay đổi cả chuỗi. |
+| 5. Điểm và Dashboard | Lưu cột điểm tùy chỉnh, cấu hình BTL; tính tổng kết/GPA ở backend; nối dữ liệu Dashboard | Kết quả thống nhất giữa bảng điểm và Dashboard; xử lý đúng điểm thiếu và cách quy BTL, không tính trùng. |
+
+### Checklist nghiệm thu
+
+- [ ] Backend 1 — Nền tảng backend chạy được, kết nối PostgreSQL; có thiết kế bảng/API và định dạng lỗi.
+- [ ] Backend 2 — Đăng ký/đăng nhập và phiên đăng nhập hoạt động trên frontend; dữ liệu hai tài khoản được tách riêng.
+- [ ] Backend 3 — Thêm/sửa/xóa học kỳ và môn học; mở lại app vẫn có dữ liệu, chọn đúng học kỳ.
+- [ ] Backend 4 — Bài tập, kế hoạch tự học, lịch lặp/ngoại lệ và lịch thi được lưu đúng liên kết; kiểm tra một buổi và cả chuỗi.
+- [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.
+
+Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Lộ trình chức năng thật đầy đủ ở cuối checklist vẫn giữ các giai đoạn Pomodoro, thống kê, tài liệu/AI và hoàn thiện để sử dụng; chưa coi các phần đó đã hoàn thành sau 5 đợt này. Chỉ đánh dấu từng đợt khi đã kiểm tra chức năng thật, không dựa vào giao diện mẫu.
+
+## Các đợt giao diện đã hoàn thành
+
 - [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.
 - [x] UI 3B: Mũi tên quay lại một bước/X đóng cả luồng; giữ các màn đã mở, học kỳ/bộ lọc/tab chi tiết và cuộn; quay về nguồn từ Pomodoro/lịch tự học; Back/Escape trên web và handler Android. Xem `UI-POLISH-3B.md`. Chưa có deep link, Forward replay, gesture iOS hoặc nghiệm thu Back trên điện thoại thật.
 - [x] UI 3C: Màn bắt đầu mẫu/trống; hướng dẫn tạo học kỳ/môn/bài; trạng thái tải/lỗi/thử lại giữ dữ liệu và bộ lọc; form có chờ, khóa thao tác lặp, lỗi giữ bản nháp, retry và hủy; thông báo kết quả dùng chung trong Modal. Xem `UI-POLISH-3C.md`. Chờ/lỗi là mô phỏng; chưa nghiệm thu API hoặc máy thật.

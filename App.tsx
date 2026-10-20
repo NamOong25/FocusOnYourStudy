@@ -6,7 +6,9 @@ import WelcomeScreen from './src/features/onboarding/WelcomeScreen';
 import PreviewPanel from './src/features/preview/PreviewPanel';
 import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, useBackAction } from './src/navigation/Navigation';
 import { ScheduleMode, routeLabel, viewKey } from './src/navigation/navigationState';
-import { ExamDialog } from './src/features/exams/Exams';
+import ExamList, { ExamDialog } from './src/features/exams/Exams';
+import LearningNavigation from './src/navigation/components/LearningNavigation';
+import AssignmentsScreen from './src/features/assignments/AssignmentsScreen';
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -74,7 +76,7 @@ function AppShell() {
     if (key === 'focus') return <Focus onStudyPlan={study} />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant onStudyPlan={study} />;
-    return <><Segments values={['Lịch & bài tập', 'Môn & học kỳ', 'Tự học']} value={scheduleMode} onChange={v => setScheduleMode(v as ScheduleMode)} />{key === 'Lịch & bài tập' ? <Schedule onTask={openTask} onNewTask={() => openTask('new')} onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}</>;
+    return <><LearningNavigation value={key as ScheduleMode} onChange={setScheduleMode} />{key === 'Thời khóa biểu' ? <Schedule onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Bài tập' ? <AssignmentsScreen onTask={openTask} onNewTask={() => openTask('new')} /> : key === 'Kỳ thi' ? <ExamList /> : key === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}</>;
   };
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
     <Row between style={styles.header}>

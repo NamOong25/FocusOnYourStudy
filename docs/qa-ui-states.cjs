@@ -50,7 +50,7 @@ const { enterDemo } = require('./qa-onboarding-helpers.cjs');
     await text('Đã thêm môn học mới').waitFor();
     assert.equal(await text('Đã thêm môn học mới').count(), 1); await shot('success-in-detail');
     await button('Đóng thông báo kết quả').click(); await button('Đóng').click();
-    await tab('Lịch & bài tập').click(); await button('Thêm bài tập mới').click();
+    await tab('Bài tập').click(); await button('Thêm bài tập mới').click();
     await page.getByLabel('Tên bài tập', { exact: true }).fill('Bài không bị lưu lặp');
     await button('Tạo bài tập').click(); await button('Hủy chờ xử lý').click();
     await page.waitForTimeout(800);
