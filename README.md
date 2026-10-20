@@ -35,9 +35,19 @@ npm run build:web
 
 ## Cấu trúc
 
-`App.tsx` chứa khung ứng dụng, header, dock và điều hướng 5 tab của prototype. `src/components.tsx` và `src/theme.ts` là thành phần dùng chung. `src/model.tsx` quản lý dữ liệu mẫu và timer. `src/forms.tsx` chứa form bài tập/lịch học/lịch thi. `src/screens/` chứa 5 màn riêng.
+`App.tsx` chứa khung ứng dụng, header và dock. Mã nguồn được chia theo chức năng:
 
-Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. Từ 3B, `src/Navigation.tsx` và `src/navigationState.ts` quản lý quay lại/phạm vi luồng và giữ màn trong phiên. URL deep link, Forward replay và gesture iOS chưa được triển khai; API service sẽ tách khỏi state khi nối backend.
+```text
+src/
+├── features/     # Màn hình, form và xử lý của từng chức năng
+├── navigation/   # Điều hướng, quay lại và giữ vị trí cuộn
+├── shared/       # Thành phần giao diện, theme, tiện ích dùng chung
+└── store/        # Provider và trạng thái mẫu dùng chung toàn app
+```
+
+Ví dụ: `src/features/assignments/TaskForm.tsx` là form bài tập; `src/features/grades/GradesScreen.tsx` là màn điểm; `src/shared/components/` chứa các file riêng như `Button.tsx`, `Card.tsx`, `Sheet.tsx` và `Typography.tsx`; `index.ts` chỉ xuất các component để import gọn. Xem **[sơ đồ đầy đủ và quy tắc đặt file](docs/FRONTEND-STRUCTURE.md)**.
+
+Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. Điều hướng nằm trong `src/navigation/`; URL deep link, Forward replay và gesture iOS chưa được triển khai. State mẫu/timer vẫn ở `src/store/model.tsx`; lớp gọi API sẽ được bổ sung khi nối Spring Boot.
 
 ## Tài liệu tiếp theo
 

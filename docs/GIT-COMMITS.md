@@ -2,7 +2,7 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 3B — Điều hướng và quay lại
+## Đợt vừa hoàn thành: Cấu trúc frontend và component dùng chung
 
 Chạy tại thư mục project, xem `git status` để kiểm tra các file trước khi thêm:
 
@@ -10,7 +10,7 @@ Chạy tại thư mục project, xem `git status` để kiểm tra các file tr�
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện điều hướng và luồng quay lại"
+git commit -m "Tổ chức thư mục frontend và tách component dùng chung"
 git push
 ```
 
@@ -24,6 +24,7 @@ git push
 | UI 2E — Tài khoản, hồ sơ và cài đặt | `Thêm giao diện tài khoản, hồ sơ và cài đặt` |
 | UI 2F — Trợ lý AI và duyệt kế hoạch học | `Hoàn thiện giao diện trợ lý AI và duyệt kế hoạch học` |
 | UI 3A — Bộ chọn ngày giờ | `Thêm bộ chọn ngày giờ cho các biểu mẫu` |
+| UI 3B — Điều hướng và quay lại | `Hoàn thiện điều hướng và luồng quay lại` |
 
 ## Tên dự kiến cho các đợt tiếp theo
 

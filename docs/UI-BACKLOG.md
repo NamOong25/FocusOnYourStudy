@@ -11,6 +11,11 @@ Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước,
 
 Không có nhóm thứ 9 riêng. Chuyển nhóm 10 cũ (AI Study Assistant) thành **nhóm 9**. Phạm vi hiện gồm 9 nhóm: Dashboard; Thời khóa biểu; Bài tập; Điểm/GPA; Môn học/học kỳ; Lịch thi; Pomodoro; Thống kê; Trợ lý AI. Không có nhóm còn thiếu cần người dùng bổ sung.
 
+## Tổ chức mã nguồn
+
+- [x] Tách UI dùng chung thành 15 file component theo tên, giữ bộ chọn ngày giờ riêng, thêm `index.ts` chỉ để export và cập nhật các màn sử dụng.
+- [x] Chia `src` theo chức năng trong `features/`; tách `shared/`, `navigation/` và `store/`. Cập nhật import, đường dẫn tài nguyên và script kiểm tra. Xem `FRONTEND-STRUCTURE.md`. Đợt này giữ nguyên giao diện, chưa triển khai UI 3C/3D hoặc backend.
+
 ## Tiến độ các đợt giao diện
 
 - [x] UI 2A: Môn học & học kỳ, chi tiết môn và liên kết dữ liệu mẫu.

@@ -1,6 +1,6 @@
-import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, useBackAction } from './src/Navigation';
-import { ScheduleMode, routeLabel, viewKey } from './src/navigationState';
-import { ExamDialog } from './src/Exams';
+import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, useBackAction } from './src/navigation/Navigation';
+import { ScheduleMode, routeLabel, viewKey } from './src/navigation/navigationState';
+import { ExamDialog } from './src/features/exams/Exams';
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -11,20 +11,21 @@ import { PlusJakartaSans_500Medium } from '@expo-google-fonts/plus-jakarta-sans/
 import { PlusJakartaSans_600SemiBold } from '@expo-google-fonts/plus-jakarta-sans/600SemiBold';
 import { PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans/700Bold';
 import { PlusJakartaSans_800ExtraBold } from '@expo-google-fonts/plus-jakarta-sans/800ExtraBold';
-import { Badge, Button, Card, Icon, IconButton, IconName, Row, Segments, Sheet, T } from './src/components';
-import { C, F, S } from './src/theme';
-import { ClassItem, PrototypeProvider, Tab, Task, dueLabel, useApp } from './src/model';
-import { ClassForm, TaskForm } from './src/forms';
-import Home from './src/screens/Home';
-import Schedule from './src/screens/Schedule';
-import Focus from './src/screens/Focus';
-import Stats from './src/screens/Stats';
-import Assistant from './src/screens/Assistant';
-import Academics from './src/screens/Academics';
-import TaskDialog from './src/TaskDialog';
-import StudyPlan from './src/screens/StudyPlan';
-import ClassDialog from './src/ClassDialog';
-import Account from './src/screens/Account';
+import { Badge, Button, Card, Icon, IconButton, IconName, Row, Segments, Sheet, T } from './src/shared/components';
+import { C, F, S } from './src/shared/theme';
+import { ClassItem, PrototypeProvider, Tab, Task, dueLabel, useApp } from './src/store/model';
+import { ClassForm } from './src/features/schedule/ClassForm';
+import { TaskForm } from './src/features/assignments/TaskForm';
+import Home from './src/features/dashboard/HomeScreen';
+import Schedule from './src/features/schedule/ScheduleScreen';
+import Focus from './src/features/focus/FocusScreen';
+import Stats from './src/features/statistics/StatsScreen';
+import Assistant from './src/features/assistant/AssistantScreen';
+import Academics from './src/features/academics/AcademicsScreen';
+import TaskDialog from './src/features/assignments/TaskDialog';
+import StudyPlan from './src/features/study/StudyPlanScreen';
+import ClassDialog from './src/features/schedule/ClassDialog';
+import Account from './src/features/account/AccountScreen';
 
 const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] = [
   { id: 'home', label: 'Trang chủ', icon: 'home-outline', activeIcon: 'home' },

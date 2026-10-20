@@ -1,0 +1,44 @@
+import { FlowScope, NavigationScope } from '../../navigation/Navigation';
+import React, { useState } from 'react';
+import { Pressable, View } from 'react-native';
+import { Badge, Button, Card, Empty, Icon, IconButton, IconTile, Row, Section, Segments, Sheet, T } from '../../shared/components';
+import { C, F, S } from '../../shared/theme';
+import ExamList, { ExamDialog } from '../exams/Exams';
+import { ClassItem, Task, TaskStatus, addDays, dateKey, dateLabel, dueLabel, today, useApp } from '../../store/model';
+
+export default function Schedule({ onTask, onNewTask, onClass, onNewClass }: { onTask: (t: Task) => void; onNewTask: () => void; onClass: (c: ClassItem, date?: string) => void; onNewClass: () => void }) {
+  const { tasks, getClassesOn, exams, courseCatalog } = useApp(); const [calendarPage, setCalendarPage] = useState('Thời khóa biểu'); const [examId, setExamId] = useState<string | null>(null); const [view, setView] = useState('Theo ngày'); const [selected, setSelected] = useState(new Date(today)); const [status, setStatus] = useState<TaskStatus>('Đang làm'); const [filter, setFilter] = useState('Tất cả môn'); const [choose, setChoose] = useState(false);
+  const monday = addDays(selected, -((selected.getDay() + 6) % 7)); const week = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  const first = new Date(selected.getFullYear(), selected.getMonth(), 1); const monthStart = addDays(first, -((first.getDay() + 6) % 7)); const month = Array.from({ length: 42 }, (_, i) => addDays(monthStart, i));
+  const list = tasks.filter(t => t.status === status && (filter === 'Tất cả môn' || t.courseId === filter)).sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const classList = (date: Date) => getClassesOn(dateKey(date));
+  const go = (direction: number) => { if (view === 'Theo tháng') setSelected(new Date(selected.getFullYear(), selected.getMonth() + direction, 1)); else setSelected(addDays(selected, direction * 7)); };
+
+  return <FlowScope onClose={() => { setExamId(null); setChoose(false); }}>
+    <Segments values={['Thời khóa biểu', 'Kỳ thi']} value={calendarPage} onChange={setCalendarPage} />
+    <NavigationScope active={calendarPage === 'Kỳ thi'}><View style={{display:calendarPage === 'Kỳ thi'?'flex':'none',gap:16}}><ExamList /></View></NavigationScope>
+    <NavigationScope active={calendarPage === 'Thời khóa biểu'}><View style={{display:calendarPage === 'Thời khóa biểu'?'flex':'none',gap:16}}>
+    <Row><View style={S.grow}><Segments values={['Theo ngày', 'Theo tuần', 'Theo tháng']} value={view} onChange={setView} /></View><IconButton name="add" label="Thêm lịch học" onPress={onNewClass} /></Row>
+    <Card style={{ gap: 13, padding: 16 }}>
+      <Row between><T style={{ fontFamily: F.bold, fontSize: 16 }}>Tháng {String(selected.getMonth() + 1).padStart(2, '0')}, {selected.getFullYear()}</T><Row><IconButton name="chevron-back" bg="#fff" label="Khoảng trước" onPress={() => go(-1)} /><IconButton name="chevron-forward" bg="#fff" label="Khoảng sau" onPress={() => go(1)} /></Row></Row>
+      <View style={{ flexDirection: 'row' }}>{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(d => <T key={d} style={{ width: `${100/7}%`, textAlign: 'center', fontSize: 11, color: C.muted }}>{d}</T>)}</View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 6 }}>{(view === 'Theo tháng' ? month : week).map(date => { const active = dateKey(date) === dateKey(selected); const hasClass = classList(date).length > 0 || exams.some(e => e.date === dateKey(date)); return <Pressable key={dateKey(date)} accessibilityRole="button" accessibilityLabel={date.toLocaleDateString('vi-VN')} accessibilityState={{ selected: active }} onPress={() => setSelected(date)} style={{ width: `${100/7}%`, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}><View style={{ alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: active ? C.primary : 'transparent', width: 37, minHeight: 47, borderRadius: 13 }}><T style={{ fontFamily: active ? F.bold : F.medium, fontSize: 14, color: active ? '#fff' : date.getMonth() !== selected.getMonth() ? '#B7B7C4' : C.ink }}>{date.getDate()}</T><View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: hasClass ? active ? '#fff' : C.lavender : 'transparent' }} /></View></Pressable>; })}</View>
+      {dateKey(selected) !== dateKey(today) && <Button label="Về hôm nay" secondary onPress={() => setSelected(new Date(today))} />}
+    </Card>
+    <Section title={view === 'Theo tuần' ? 'Lịch học trong tuần' : dateKey(selected) === dateKey(today) ? 'Lịch học hôm nay' : `Lịch học ${dateLabel(dateKey(selected))}`} icon="calendar-outline" action="+ Thêm ca" onAction={onNewClass} />
+    {(view === 'Theo tuần' ? week : [selected]).map(date => <View key={dateKey(date)} style={{ gap: 12 }}>
+      {view === 'Theo tuần' && <T style={{ fontFamily: F.bold, color: C.primary, marginTop: 5 }}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}</T>}
+      {classList(date).length === 0 ? <Card><T style={S.small}>Chưa có ca học. Một khoảng trống để tự học hoặc nghỉ ngơi.</T></Card> : classList(date).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Xem buổi học ${item.title}`} onPress={() => onClass(item, dateKey(date))}><Card style={{ gap: 13, backgroundColor: item.cancelled ? '#FFF6F4' : C.card }}><Row style={{ gap: 12 }}><IconTile name={item.courseId === 'course-dsa' ? 'git-network-outline' : 'code-slash-outline'} /><View style={S.grow}><Badge label={item.cancelled ? 'Đã nghỉ' : item.changed ? 'Đã điều chỉnh' : item.start < '12:00' ? 'Ca sáng' : 'Ca chiều'} bg={item.cancelled ? C.redSoft : item.changed ? C.amberSoft : C.track} color={item.cancelled ? C.red : item.changed ? C.amber : C.muted} /><T style={{ fontFamily: F.bold, fontSize: 15, lineHeight: 23, marginTop: 4, color: item.cancelled ? C.muted : C.ink, textDecorationLine: item.cancelled ? 'line-through' : 'none' }}>{item.title}</T><T style={{ fontSize: 11, color: C.muted }}>GV: {item.teacher}</T></View><Icon name="ellipsis-vertical" color={C.muted} size={18} /></Row><Row between style={{ backgroundColor: C.canvas, padding: 10, borderRadius: 13 }}><Row style={{ gap: 5 }}><Icon name="time-outline" size={15} /><T style={{ fontSize: 12 }}>{item.start} – {item.end}</T></Row><Row style={{ gap: 5 }}><Icon name="business-outline" size={15} /><T style={{ fontSize: 12 }}>{item.room}</T></Row></Row></Card></Pressable>)}
+      {exams.filter(e => e.date === dateKey(date)).map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi ${exam.course}`} onPress={() => setExamId(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="reader-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Thi: {exam.course}</T></Row><T style={{ fontSize: 12 }}>{exam.time} – {exam.end} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
+    </View>)}
+    {examId && <ExamDialog id={examId} onClose={() => setExamId(null)} />}
+    <Section title="Bài tập & Deadline" icon="clipboard-outline" action="Lọc môn" onAction={() => setChoose(true)} />
+    {filter !== 'Tất cả môn' && <Badge label={courseCatalog.find(c => c.id === filter)?.name ?? 'Môn đã xóa'} />}
+    <Segments values={['Chưa làm', 'Đang làm', 'Hoàn thành']} value={status} onChange={v => setStatus(v as TaskStatus)} />
+    {list.map(task => <Pressable key={task.id} accessibilityRole="button" onPress={() => onTask(task)}><Card style={{ gap: 11 }}><Row between><Badge label={`Ưu tiên ${task.priority.toLowerCase()}`} bg={task.priority === 'Cao' ? C.redSoft : C.soft} color={task.priority === 'Cao' ? C.red : C.primary} icon="flag-outline" /><T style={{ color: task.status === 'Hoàn thành' ? C.green : C.red, fontFamily: F.semi, fontSize: 11 }}>{task.status === 'Hoàn thành' ? 'Đã hoàn thành' : dueLabel(task.deadline)}</T></Row><T style={{ fontFamily: F.bold, fontSize: 17, lineHeight: 25 }}>{task.title}</T><T style={{ fontSize: 11, color: C.primary }}>{task.course}</T><T numberOfLines={2} style={{ fontSize: 12, lineHeight: 20, color: C.muted }}>{task.notes || 'Chưa có ghi chú'}</T><Row between><Row><Icon name="calendar-outline" size={14} /><T style={S.small}>Hạn nộp: {dateLabel(task.deadline)}</T></Row><Badge label="Chi tiết →" /></Row></Card></Pressable>)}
+    {list.length === 0 && <Empty title="Chưa có bài tập ở mục này" message="Thêm bài tập mới hoặc thử đổi bộ lọc." onAdd={onNewTask} />}
+    <Button label="Thêm bài tập mới" icon="add-circle-outline" onPress={onNewTask} />
+    {choose && <Sheet title="Lọc theo môn học" onClose={() => setChoose(false)}>{[{ id: 'Tất cả môn', name: 'Tất cả môn' }, ...courseCatalog].map(c => <Button key={c.id} label={c.name} secondary={filter !== c.id} onPress={() => { setFilter(c.id); setChoose(false); }} />)}</Sheet>}
+    </View></NavigationScope>
+  </FlowScope>;
+}

@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),ts=require('typescript');
-const out=path.resolve(__dirname,'../.expo/qa-grades/unit');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'grades.js'),ts.transpileModule(fs.readFileSync(path.resolve(__dirname,'../src/grades.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText);
+const out=path.resolve(__dirname,'../.expo/qa-grades/unit');fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'grades.js'),ts.transpileModule(fs.readFileSync(path.resolve(__dirname,'../src/features/grades/grades.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText);
 const {courseResult,emptyGrades,defaultRules,validateGrades,summarizeGrades,validateRetake,requiredRemaining}=require(path.join(out,'grades.js'));
 let assertions=0;const equal=(a,b)=>{assert.equal(a,b);assertions++;};const near=(a,b)=>{assert.ok(Math.abs(a-b)<1e-9,`${a} != ${b}`);assertions++;};
 const record=(scores,weights=[20,30,50])=>({parts:weights.map((w,i)=>({id:`p${i}`,name:`P${i}`,weight:w,score:scores[i]??null}))});

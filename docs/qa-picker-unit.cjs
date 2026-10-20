@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),ts=require('typescript');
 const out=path.resolve(__dirname,'../.expo/qa-picker/unit');fs.mkdirSync(out,{recursive:true});
-for(const name of ['dates','pickerDates'])fs.writeFileSync(path.join(out,`${name}.js`),ts.transpileModule(fs.readFileSync(path.resolve(__dirname,`../src/${name}.ts`),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText);
-const {dateInMonth,displayDate,initialPickerDate,isTime,monthCells,moveMonth}=require(path.join(out,'pickerDates.js'));
+for(const name of ['shared/utils/dates','shared/utils/pickerDates']){fs.mkdirSync(path.dirname(path.join(out,`${name}.js`)),{recursive:true});fs.writeFileSync(path.join(out,`${name}.js`),ts.transpileModule(fs.readFileSync(path.resolve(__dirname,`../src/${name}.ts`),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText); }
+const {dateInMonth,displayDate,initialPickerDate,isTime,monthCells,moveMonth}=require(path.join(out,'shared/utils/pickerDates.js'));
 let assertions=0;const eq=(a,b)=>{assert.deepEqual(a,b);assertions++;};
 eq(displayDate('2028-02-29'),'29/02/2028');eq(displayDate('2026-02-30'),'Chọn ngày');
 eq(dateInMonth(2026,1,31),'2026-02-28');eq(dateInMonth(2028,1,31),'2028-02-29');eq(dateInMonth(1900,1,29),'1900-02-28');eq(dateInMonth(2000,1,29),'2000-02-29');eq(dateInMonth(2100,1,29),'2100-02-28');

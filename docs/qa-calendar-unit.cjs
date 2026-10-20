@@ -1,8 +1,8 @@
 // Calendar logic checks; requires only the project's TypeScript dev dependency.
 const fs = require('node:fs'); const path = require('node:path'); const assert = require('node:assert/strict'); const ts = require('typescript');
 const out = path.resolve(__dirname, '../.expo/qa-calendar/unit'); fs.mkdirSync(out, { recursive: true });
-for (const name of ['dates','learning','calendar']) { const source = fs.readFileSync(path.resolve(__dirname, `../src/${name}.ts`),'utf8'); fs.writeFileSync(path.join(out, `${name}.js`), ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText); }
-const { classOccurrences, calendarEvents, findConflicts, seriesConflicts } = require(path.join(out,'calendar.js'));
+for (const name of ['shared/utils/dates','features/study/learning','features/schedule/calendar']) { fs.mkdirSync(path.dirname(path.join(out, `${name}.js`)), {recursive:true}); const source = fs.readFileSync(path.resolve(__dirname, `../src/${name}.ts`),'utf8'); fs.writeFileSync(path.join(out, `${name}.js`), ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText); }
+const { classOccurrences, calendarEvents, findConflicts, seriesConflicts } = require(path.join(out,'features/schedule/calendar.js'));
 const base = { id: 'class', courseId: 'c', title: 'Môn A', weekday: 1, weekdays: [1,3], startsOn: '2026-10-19', endsOn: '2026-11-01', start: '08:00', end: '09:00', room: 'A1', teacher: 'GV A', reminderMinutes: 15 };
 const cancelled = { id: 'x1', seriesId: 'class', date: '2026-10-19', kind: 'cancelled', start: '08:00', end: '09:00', room: 'A1', teacher: 'GV A', reason: 'Nghỉ một buổi' };
 const changed = { ...cancelled, kind: 'changed', start: '10:00', end: '11:00', room: 'B2' };
