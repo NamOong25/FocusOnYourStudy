@@ -6,7 +6,7 @@ import WelcomeScreen from './src/features/onboarding/WelcomeScreen';
 import PreviewPanel from './src/features/preview/PreviewPanel';
 import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, useBackAction } from './src/navigation/Navigation';
 import { ScheduleMode, routeLabel, viewKey } from './src/navigation/navigationState';
-import ExamList, { ExamDialog } from './src/features/exams/Exams';
+import ExamList from './src/features/exams/Exams';
 import LearningNavigation from './src/navigation/components/LearningNavigation';
 import AssignmentsScreen from './src/features/assignments/AssignmentsScreen';
 import React, { useRef, useState } from 'react';
@@ -19,12 +19,11 @@ import { PlusJakartaSans_500Medium } from '@expo-google-fonts/plus-jakarta-sans/
 import { PlusJakartaSans_600SemiBold } from '@expo-google-fonts/plus-jakarta-sans/600SemiBold';
 import { PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans/700Bold';
 import { PlusJakartaSans_800ExtraBold } from '@expo-google-fonts/plus-jakarta-sans/800ExtraBold';
-import { Badge, Button, Card, Icon, IconButton, IconName, Row, Segments, Sheet, T } from './src/shared/components';
+import { Button, Icon, IconButton, IconName, Row, Sheet, T } from './src/shared/components';
 import { C, F, S } from './src/shared/theme';
-import { ClassItem, PrototypeProvider, Tab, Task, dueLabel, useApp } from './src/store/model';
+import { ClassItem, PrototypeProvider, Tab, Task, useApp } from './src/store/model';
 import { ClassForm } from './src/features/schedule/ClassForm';
 import { TaskForm } from './src/features/assignments/TaskForm';
-import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from './src/features/assignments/assignments';
 import useCurrentTime from './src/shared/hooks/useCurrentTime';
 import Home from './src/features/dashboard/HomeScreen';
 import Schedule from './src/features/schedule/ScheduleScreen';
@@ -36,6 +35,9 @@ import TaskDialog from './src/features/assignments/TaskDialog';
 import StudyPlan from './src/features/study/StudyPlanScreen';
 import ClassDialog from './src/features/schedule/ClassDialog';
 import Account from './src/features/account/AccountScreen';
+import NotificationsCenter from './src/features/notifications/NotificationsCenter';
+import NotificationBell from './src/features/notifications/components/NotificationBell';
+import useInAppNotifications from './src/features/notifications/useInAppNotifications';
 
 const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] = [
   { id: 'home', label: 'Trang chủ', icon: 'home-outline', activeIcon: 'home' },
@@ -45,12 +47,12 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
   { id: 'ai', label: 'Trợ lý AI', icon: 'sparkles-outline', activeIcon: 'sparkles' },
 ];
 function AppShell() {
-  const { tab, setTab, scheduleMode, setScheduleMode, route, routeTrail, goBackRoute, toast, tasks, exams } = useApp(); const inset = useSafeAreaInsets();
+  const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute } = useApp(); const inset = useSafeAreaInsets();
   const current = viewKey(route); const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
-  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(null); const [notificationExam, setNotificationExam] = useState<string | null>(null);
-  const [read, setRead] = useState(false); const [classDate, setClassDate] = useState<string | undefined>();
+  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(null);
+  const [classDate, setClassDate] = useState<string | undefined>();
   const action = useActionState();
   const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading');
   const loadTimer = useRef<ReturnType<typeof setTimeout> | null>(null), previousPage = useRef(current);
@@ -67,11 +69,12 @@ function AppShell() {
     setLoadState('ready'); action?.cancel();
   }, [current, action?.cancel]);
   const date = useCurrentTime(); const canBack = routeTrail.length > 1;
+  const notifications = useInAppNotifications(date);
   useBackAction(canBack, goBackRoute, 0);
   const openTask = (task: Task | 'new') => { setTaskOrigin(current); setTaskForm(task); };
   const openClass = (item: ClassItem | 'new', date?: string) => { setClassOrigin(current); setClassForm(item); setClassDate(date); };
   const openPanel = (value: 'profile' | 'notifications' | 'preview' | 'guide') => { setPanelOrigin(current); setPanel(value); };
-  const closeTaskFlow = () => { setTaskForm(null); if (panel === 'notifications') setPanel(null); };
+  const closeTaskFlow = () => setTaskForm(null);
   const study = () => setScheduleMode('Tự học');
   const renderPage = (key: string) => {
     if (key === 'home') return <Home onTask={openTask} onClass={openClass} onProfile={() => openPanel('profile')} onStudyPlan={study} />;
@@ -83,7 +86,7 @@ function AppShell() {
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
     <Row between style={styles.header}>
       <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T><T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'home' ? 'Không ngừng tiến bộ mỗi ngày' : tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T></View></Pressable>
-      <View><IconButton name="notifications-outline" label="Thông báo" onPress={() => { openPanel('notifications'); setRead(true); }} bg={C.canvas} color={C.ink} />{!read && <View style={{ position: 'absolute', top: 7, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: C.red, borderWidth: 1, borderColor: C.canvas }} />}</View><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
+      <NotificationBell unread={notifications.unread} onPress={() => openPanel('notifications')} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
     </Row>
 
     <Pressable accessibilityRole="button" accessibilityLabel="Thử trạng thái giao diện" onPress={() => openPanel('preview')} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 36, gap: 6 }]}><Icon name="flask-outline" size={15} /><T style={{ color: C.primary, fontSize: 11 }}>Bản xem trước · Thử trạng thái</T></Pressable>
@@ -101,13 +104,12 @@ function AppShell() {
       {classForm === 'new' && <ClassForm onClose={() => setClassForm(null)} />}
       {classForm && classForm !== 'new' && <ClassDialog key={classForm.id + (classDate ?? '')} id={classForm.id} date={classDate} onClose={() => setClassForm(null)} />}
     </FlowScope></NavigationScope>
-    <NavigationScope active={current === panelOrigin && !taskForm && !notificationExam}><FlowScope onClose={() => setPanel(null)}>
+    <NavigationScope active={current === panelOrigin && !taskForm}><FlowScope onClose={() => setPanel(null)}>
       {panel === 'preview' && <PreviewPanel onClose={() => setPanel(null)} onLoad={loadPreview} onGuide={() => setPanel('guide')} />}
       {panel === 'guide' && <Sheet title="Bắt đầu cùng FocusYourStudy" onClose={() => setPanel('preview')}><T style={S.small}>1. Tạo học kỳ → 2. Thêm môn → 3. Ghi bài tập và lịch học. Các thay đổi chỉ giữ trong phiên thử này.</T><Button label="Đến Môn & học kỳ" onPress={() => { setPanel(null); setScheduleMode('Môn & học kỳ'); }} /><Button label="Quay lại bản xem trước" secondary onPress={() => setPanel('preview')} /></Sheet>}
       {panel === 'profile' && <Account onClose={() => setPanel(null)} />}
-      {panel === 'notifications' && <Sheet title="Góc nhắc nhở" onClose={() => setPanel(null)}><T style={S.small}>{date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T>{tasks.filter(t => t.status !== 'Hoàn thành').sort(compareTaskDeadlines).slice(0,2).map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={'Mở nhắc bài ' + task.title} onPress={() => openTask(task)}><Card><Row><Icon name="notifications-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{task.title}</T><T style={S.small}>{taskDueLabel(task,date)} · Hạn {taskDeadlineLabel(task)} · Đừng quên dành một phiên để hoàn thành.</T></View><Icon name="chevron-forward" size={16} /></Row></Card></Pressable>)}{exams[0] && <Card><T style={{ fontFamily: F.bold }}>Chuẩn bị cho {exams[0].course}</T><T style={S.small}>{dueLabel(exams[0].date)}</T><Button label="Xem lịch thi" secondary onPress={() => setNotificationExam(exams[0]!.id)} /></Card>}<T style={S.small}>Danh sách nhắc trong ứng dụng; chưa gửi thông báo trên thiết bị.</T></Sheet>}
+      {panel === 'notifications' && <NotificationsCenter items={notifications.items} unread={notifications.unread} sources={notifications.sources} now={date} onRead={notifications.markRead} onReadAll={notifications.markAllRead} onClose={() => setPanel(null)} />}
     </FlowScope></NavigationScope>
-    <NavigationScope active={current === panelOrigin}><FlowScope onClose={() => { setNotificationExam(null); setPanel(null); }}>{notificationExam && <ExamDialog id={notificationExam} onClose={() => setNotificationExam(null)} />}</FlowScope></NavigationScope>
   </View></View>;
 }
 export default function App() {

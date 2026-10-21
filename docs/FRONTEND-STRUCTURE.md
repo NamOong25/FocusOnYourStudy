@@ -18,6 +18,8 @@ src/
 │   ├── focus/                   FocusScreen và focus.ts (timer, lịch sử, số liệu)
 │   │   └── components/          FocusGoalCard/Sheet, FocusStreakCard, FocusHistorySheet
 │   ├── onboarding/              Màn bắt đầu và hướng dẫn thiết lập
+│   ├── notifications/           NotificationsCenter, nguồn nhắc việc và trạng thái đọc
+│   │   └── components/          NotificationBell và ReminderCard
 │   ├── preview/                 Bảng thử trạng thái UI
 │   ├── grades/                  Bảng điểm, editor, quy tắc, gpaComparison.ts và SemesterGradesSheet
 │   ├── schedule/                Lịch học, chuỗi/ngoại lệ và kiểm tra trùng
@@ -75,6 +77,7 @@ docs/                            Thiết kế, checklist, lệnh Git và script 
 | Pomodoro | `src/features/focus/FocusScreen.tsx`, `focus.ts` và `components/`; store giữ state timer xuyên các tab |
 | Thống kê | `src/features/statistics/StatsScreen.tsx`, `statistics.ts` và `components/`; nhận phiên Pomodoro và bài tập từ store |
 | So sánh GPA | `src/features/statistics/components/GpaComparisonScreen.tsx` và các thẻ/biểu đồ GPA; xử lý trong `src/features/grades/gpaComparison.ts`, bảng điểm học kỳ ở `SemesterGradesSheet.tsx` |
+| Thông báo trong app | `src/features/notifications/NotificationsCenter.tsx`, `notifications.ts`, `useInAppNotifications.ts` và `components/`; AppShell giữ hook xuyên các tab |
 | AI, tài liệu, trắc nghiệm | `src/features/assistant/` |
 | Hồ sơ và cài đặt | `src/features/account/` |
 | Nút, thẻ, hộp thoại toàn app | Các file `Button.tsx`, `Card.tsx`, `Sheet.tsx`… trong `src/shared/components/` |
