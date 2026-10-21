@@ -20,10 +20,16 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn, kết hợp trạng thái và môn. Sắp hạn là bài chưa hoàn thành từ hiện tại đến cùng giờ sau 7 ngày; Quá hạn không tính bài đã hoàn thành.
 - [x] Xét hạn bằng ngày và giờ; cập nhật đầu mỗi phút và khi trở lại màn/ứng dụng. Sửa deadline kiểm tra giờ kết thúc các buổi tự học đã liên kết; tạo/sửa buổi học và duyệt kế hoạch AI dùng cùng mốc hạn. Xem `UI-POLISH-4B.md` để kiểm tra và xem giới hạn frontend.
 
+### Đợt 3 — Pomodoro, lịch sử và nhịp học mỗi ngày
+
+- [x] UI 4C: Lịch sử nhóm theo ngày kết thúc, có môn/bài/buổi tự học, giờ bắt đầu/kết thúc, phút học và thời gian tạm dừng được loại trừ. Lọc Hôm nay/7 ngày/Tất cả; trạng thái trống và nhãn phiên mẫu rõ ràng.
+- [x] Mục tiêu ngày chọn 1–12 phiên, mặc định 4; có lưu/hủy. Số phiên, số phút hôm nay/7 ngày và tiến độ tính từ các phiên hoàn tất; đổi mục tiêu không xóa lịch sử.
+- [x] Chuỗi ngày học và lịch 7 ngày: tối thiểu một phiên/ngày; chưa học hôm nay giữ chuỗi đến hết ngày, bỏ lỡ một ngày sẽ đặt lại. Phiên qua nửa đêm tính vào ngày kết thúc.
+- [x] Timer giữ mã phiên và ngữ cảnh ban đầu qua tạm dừng/đổi tab; loại trừ giờ nghỉ và phiên bỏ dở, không ghi trùng khi nhận callback muộn. Chỉ cộng phút cho buổi tự học đã chọn, không tự hoàn thành bài tập. Xem `UI-POLISH-4C.md`.
+- [ ] Lưu/khôi phục khi tắt ứng dụng, đồng bộ và nghiệm thu chạy nền/khóa màn hình trên điện thoại thật: vẫn thuộc đợt nghiệp vụ Pomodoro, chưa hoàn thành trong giao diện này.
+
 ### Các đề xuất lưu để làm sau
 
-- [ ] Pomodoro: lịch sử theo ngày, hiện môn/bài và thời lượng từng phiên; điều chỉnh mục tiêu số phiên trong ngày.
-- [ ] Pomodoro: bổ sung chuỗi ngày học và quy tắc tính chuỗi; thời gian ngày/tuần phải lấy từ phiên đã ghi nhận. Nghiệm thu chạy nền/khôi phục nằm trong checklist nghiệp vụ bên dưới.
 - [ ] Thống kê: chọn khoảng ngày/học kỳ; so sánh GPA qua các học kỳ và xử lý kỳ chưa có điểm.
 - [ ] Thống kê: biểu đồ thời gian/phân bổ môn lấy từ dữ liệu phiên học trong app, thay các dãy số và tỷ lệ mẫu đang cố định.
 - [ ] Thông báo: trạng thái rỗng, đã đọc/chưa đọc từng mục; huy hiệu đúng số mục chưa đọc.

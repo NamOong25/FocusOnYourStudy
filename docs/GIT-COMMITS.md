@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 4B — Giờ deadline, tìm kiếm và lọc bài tập
+## Đợt vừa hoàn thành: UI 4C — Pomodoro, lịch sử và mục tiêu ngày
 
-Chọn ngày và giờ hạn nộp, tìm kiếm không dấu theo tên bài/môn/mã môn, lọc Tất cả/Hôm nay/Quá hạn/Sắp hạn kết hợp trạng thái và môn. Dashboard/chi tiết/nhắc bài dùng cùng mốc hạn; kiểm tra giờ kết thúc buổi tự học và kế hoạch AI khi liên kết bài. Xem `UI-POLISH-4B.md`. Dữ liệu vẫn trong bộ nhớ phiên, chưa nối backend/thông báo thiết bị.
+Lịch sử theo ngày với ngữ cảnh môn/bài/buổi học, thời gian bắt đầu/kết thúc và phút học thực tế. Mục tiêu ngày chọn 1–12 phiên, chuỗi ngày học và số phút hôm nay/7 ngày tính từ các phiên hoàn tất. Timer loại trừ tạm dừng, nghỉ và phiên bỏ dở; chống ghi trùng và giữ trạng thái bài tập độc lập. Xem `UI-POLISH-4C.md`. Dữ liệu vẫn trong bộ nhớ phiên; chưa nghiệm thu chạy nền hay khôi phục sau khi tắt app trên điện thoại thật.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Bổ sung giờ deadline tìm kiếm và lọc bài tập"
+git commit -m "Hoàn thiện Pomodoro lịch sử phiên học và mục tiêu ngày"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 4B — Giờ deadline và lọc bài tập | `Bổ sung giờ deadline tìm kiếm và lọc bài tập` |
 | UI 4A — Điều hướng và Bài tập riêng | `Đơn giản hóa điều hướng lịch học và tách màn bài tập` |
 | Checklist backend | `Bổ sung lộ trình backend 5 đợt vào checklist` |
 | Cột điểm đề xuất và BTL | `Cho phép thêm xóa sửa cột điểm và quy đổi bài tập lớn` |

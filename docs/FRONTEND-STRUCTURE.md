@@ -15,7 +15,8 @@ src/
 │   ├── assistant/               Trợ lý AI, đề xuất lịch, tài liệu/quiz mẫu
 │   ├── dashboard/               HomeScreen
 │   ├── exams/                   Danh sách/chi tiết và form lịch thi
-│   ├── focus/                   FocusScreen (Pomodoro)
+│   ├── focus/                   FocusScreen và focus.ts (timer, lịch sử, số liệu)
+│   │   └── components/          FocusGoalCard/Sheet, FocusStreakCard, FocusHistorySheet
 │   ├── onboarding/              Màn bắt đầu và hướng dẫn thiết lập
 │   ├── preview/                 Bảng thử trạng thái UI
 │   ├── grades/                  Bảng điểm, editor, quy tắc và tính GPA
@@ -70,7 +71,7 @@ docs/                            Thiết kế, checklist, lệnh Git và script 
 | Lịch thi | `src/features/exams/Exams.tsx` và `ExamForm.tsx` |
 | Tự học | `src/features/study/StudyPlanScreen.tsx`, `StudyForm.tsx`, `StudyDialog.tsx` |
 | Điểm và công thức GPA | `src/features/grades/GradesScreen.tsx`, `GradeEditor.tsx`, `grades.ts` |
-| Pomodoro | `src/features/focus/FocusScreen.tsx`; timer dùng chung ở `store/model.tsx` |
+| Pomodoro | `src/features/focus/FocusScreen.tsx`, `focus.ts` và `components/`; store giữ state timer xuyên các tab |
 | AI, tài liệu, trắc nghiệm | `src/features/assistant/` |
 | Hồ sơ và cài đặt | `src/features/account/` |
 | Nút, thẻ, hộp thoại toàn app | Các file `Button.tsx`, `Card.tsx`, `Sheet.tsx`… trong `src/shared/components/` |
@@ -83,7 +84,7 @@ docs/                            Thiết kế, checklist, lệnh Git và script 
 - Các màn import UI qua `shared/components/index.ts`; file này chỉ liệt kê export. Bên trong component, import trực tiếp từ file lân cận để tránh phụ thuộc vòng qua index.
 - Form bài tập không xuất lại form lịch học/lịch thi hoặc bộ chọn môn.
 - Ưu tiên file cùng chức năng nằm gần nhau. Khi một chức năng lớn hơn mới tách thêm `components/`, `hooks/` hoặc `types/` bên trong; không tạo thư mục rỗng trước.
-- State liên kết nhiều màn hiện vẫn ở `store/model.tsx`. Đây là state prototype, còn gộp dữ liệu mẫu và timer; đợt này chưa tách thành store theo từng lĩnh vực.
+- State liên kết nhiều màn hiện vẫn ở `store/model.tsx`. Đây là state prototype, còn gộp dữ liệu mẫu và timer; UI 4C đã tách reducer timer và các hàm lịch sử/mục tiêu/chuỗi sang `focus/focus.ts`. Chưa tách thành store theo từng lĩnh vực.
 - `study/learning.ts` hiện chứa kiểu buổi học cùng checklist/tài liệu mẫu liên quan bài tập, giữ nguyên logic cũ. Có thể tách tiếp theo mô hình API khi nối backend.
 - Khi làm Spring Boot: thêm lớp gọi HTTP thực tế và API của từng chức năng; xử lý lưu/đồng bộ ở đợt backend. Chưa tạo thư mục services/API rỗng trong đợt này.
 

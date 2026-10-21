@@ -1,5 +1,5 @@
 import { useFeedback } from '../shared/feedback/FeedbackProvider';
-import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useRef, useState, ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { Course, Semester, initialCourses, initialSemesters } from '../features/academics/academic';
 import { StudySession, TaskExtras, initialTaskExtras } from '../features/study/learning';
@@ -9,6 +9,7 @@ import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, au
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from '../features/account/account';
 import { AiProposal, proposalSessions, validateProposal } from '../features/assistant/aiPlanner';
 import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from '../navigation/navigationState';
+import { createFocusState, creditFocusRecords, focusDurations, focusReducer, sampleFocusRecords } from '../features/focus/focus';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from '../shared/utils/dates';
 
 export type { Tab } from '../navigation/navigationState';
@@ -34,7 +35,6 @@ const initialExams: Exam[] = [
   { id: 'e1', courseId: 'course-math', course: courses[4]!, date: dateKey(addDays(today, 6)), time: '08:30', room: 'B202', type: 'Giữa kỳ • Tự luận', end: '10:00', kind: 'Giữa kỳ', format: 'Tự luận', reminder: true, reminderMinutes: [1440, 180], notes: 'Mang theo thẻ sinh viên và máy tính được phép sử dụng.' },
   { id: 'e2', courseId: 'course-oop', course: courses[1]!, date: dateKey(addDays(today, 11)), time: '14:00', room: 'Phòng máy 3', type: 'Cuối kỳ • Thực hành', end: '16:00', kind: 'Cuối kỳ', format: 'Thực hành', reminder: false, reminderMinutes: [1440, 180], notes: 'Kiểm tra tài khoản phòng máy trước ngày thi.' },
 ];
-const durations = [25 * 60, 5 * 60, 15 * 60];
 const initialStudySessions: StudySession[] = [
   { id: 'study-1', title: 'Hoàn thiện bố cục trang chủ', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '18:00', duration: 45, notes: 'Bắt đầu từ thẻ tổng quan, sau đó đến danh sách công việc.', status: 'Đã lên lịch', focusedSeconds: 0 },
   { id: 'study-2', title: 'Kiểm tra luồng và bản trình bày', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '20:00', duration: 25, notes: 'Dành một phiên để rà soát lần cuối trước khi nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
@@ -66,11 +66,11 @@ function usePrototype(empty: boolean) {
   const [focusCourseId, setFocusCourseId] = useState(empty ? '' : 'course-dsa');
   useEffect(() => { if (!courseCatalog.some(c => c.id === focusCourseId) && courseCatalog[0]) setFocusCourseId(courseCatalog[0].id); }, [courseCatalog, focusCourseId]);
   const focusCourse = courseCatalog.find(c => c.id === focusCourseId)?.name ?? 'Chọn môn học';
-  const [mode, setModeState] = useState(0);
-  const [seconds, setSeconds] = useState(durations[0]!);
-  const [endsAt, setEndsAt] = useState<number | null>(null);
-  const [completed, setCompleted] = useState(empty ? 0 : 3);
-  const [history, setHistory] = useState<string[]>([]);
+  const [focusState, dispatchFocus] = useReducer(focusReducer, empty, isEmpty => createFocusState(isEmpty ? [] : sampleFocusRecords({ courseId: 'course-dsa', courseName: courses[0]!, taskId: 't4', taskTitle: initialTasks[3]!.title }, new Date())));
+  const { timer, records: focusRecords, goal: dailyFocusGoal } = focusState;
+  const { mode, endsAt } = timer;
+  const seconds = Math.ceil(timer.remainingMs / 1000);
+  const setDailyFocusGoal = (goal: number) => dispatchFocus({ type: 'goal', goal });
 
   const [aiSessionIds, setAiSessionIds] = useState<string[]>([]);
   const appliedAiProposals = useRef(new Set<string>());
@@ -78,31 +78,38 @@ function usePrototype(empty: boolean) {
   const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(empty ? {} : initialTaskExtras);
   const [focusTaskId, setFocusTaskId] = useState<string | undefined>();
   const [focusSessionId, setFocusSessionId] = useState<string | undefined>();
-  const lastCompletedEnd = useRef<number | null>(null);
-  // Time derives from a timestamp, including after the app/tab returns to foreground.
+  const creditedFocusIds = useRef(new Set<string>());
+  const notifiedCompletion = useRef<string | undefined>(undefined);
+  // The reducer owns run identity, timestamps and history. It stays mounted across tabs.
   useEffect(() => {
-    const tick = () => {
-      if (!endsAt) return;
-      const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
-      setSeconds(remaining);
-      if (remaining === 0 && lastCompletedEnd.current !== endsAt) {
-        lastCompletedEnd.current = endsAt;
-        setEndsAt(null);
-        if (mode === 0) {
-          setCompleted(v => v + 1);
-          const focusedTitle = studySessions.find(s => s.id === focusSessionId)?.title ?? tasks.find(t => t.id === focusTaskId)?.title;
-          setHistory(v => [`${focusedTitle ? focusedTitle + ' · ' : ''}${focusCourse} • 25 phút`, ...v]);
-          if (focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId ? { ...s, focusedSeconds: s.focusedSeconds + 1500, status: s.focusedSeconds + 1500 >= s.duration * 60 ? 'Hoàn thành' : 'Đang học' } : s));
-        }
-        setToast(mode === 0 ? 'Hoàn thành một phiên. Nghỉ một chút nhé!' : 'Hết giờ nghỉ. Sẵn sàng học tiếp!');
-      }
-    };
+    if (endsAt === null) return;
+    const tick = () => dispatchFocus({ type: 'tick', now: Date.now() });
     tick(); const id = setInterval(tick, 500); const listener = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
     return () => { clearInterval(id); listener.remove(); };
-  }, [endsAt, mode, focusCourse, focusSessionId, focusTaskId, studySessions, tasks]);
-  const setMode = (n: number) => { setModeState(n); setEndsAt(null); setSeconds(durations[n]!); };
-  const toggleTimer = () => { if (endsAt) { setSeconds(Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))); setEndsAt(null); } else { const duration = seconds || durations[mode]!; setSeconds(duration); lastCompletedEnd.current = null; setEndsAt(Date.now() + duration * 1000); if (mode === 0 && focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s)); } };
-  const resetTimer = () => { setEndsAt(null); setSeconds(durations[mode]!); };
+  }, [endsAt]);
+  useEffect(() => {
+    const pending = focusRecords.filter(record => record.source === 'timer' && !creditedFocusIds.current.has(record.id));
+    if (!pending.length) return;
+    pending.forEach(record => creditedFocusIds.current.add(record.id));
+    setStudySessions(sessions => creditFocusRecords(sessions, pending));
+  }, [focusRecords]);
+  useEffect(() => {
+    const completion = focusState.lastCompletion;
+    if (!completion || notifiedCompletion.current === completion.id) return;
+    notifiedCompletion.current = completion.id;
+    setToast(completion.mode === 0 ? 'Hoàn thành một phiên. Nghỉ một chút nhé!' : 'Hết giờ nghỉ. Sẵn sàng học tiếp!');
+  }, [focusState.lastCompletion, setToast]);
+  const setMode = (mode: number) => dispatchFocus({ type: 'mode', mode, now: Date.now() });
+  const resetTimer = () => dispatchFocus({ type: 'reset', now: Date.now() });
+  const toggleTimer = () => {
+    if (!focusCourseId) return;
+    dispatchFocus({ type: 'toggle', now: Date.now(), id: uid(), context: {
+      courseId: focusCourseId, courseName: focusCourse, taskId: focusTaskId,
+      taskTitle: tasks.find(task => task.id === focusTaskId)?.title,
+      studySessionId: focusSessionId, studyTitle: studySessions.find(session => session.id === focusSessionId)?.title,
+    } });
+    if (endsAt === null && mode === 0 && focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s));
+  };
   const saveTask = (task: Task) => setTasks(v => v.some(t => t.id === task.id) ? v.map(t => t.id === task.id ? task : t) : [...v, task]);
   const deleteTask = (id: string) => {
     setTasks(v => v.filter(t => t.id !== id));
@@ -114,7 +121,7 @@ function usePrototype(empty: boolean) {
   const saveStudySession = (session: StudySession) => {
     setStudySessions(v => v.some(s => s.id === session.id) ? v.map(s => s.id === session.id ? session : s) : [...v, session]);
     if (focusSessionId === session.id && (session.status === 'Hoàn thành' || session.courseId !== focusCourseId || session.taskId !== focusTaskId)) {
-      setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(session.courseId); setFocusTaskId(session.taskId);
+      resetTimer(); setFocusCourseId(session.courseId); setFocusTaskId(session.taskId);
     }
   };
   const applyAiProposal = (proposal: AiProposal) => {
@@ -129,15 +136,15 @@ function usePrototype(empty: boolean) {
   };
   const deleteStudySession = (id: string) => {
     setStudySessions(v => v.filter(s => s.id !== id));
-    if (focusSessionId === id) { setFocusSessionId(undefined); setFocusTaskId(undefined); setEndsAt(null); setSeconds(durations[mode]!); }
+    if (focusSessionId === id) { setFocusSessionId(undefined); setFocusTaskId(undefined); resetTimer(); }
   };
   const completeStudySession = (id: string) => {
     setStudySessions(v => v.map(s => s.id === id ? { ...s, status: s.status === 'Hoàn thành' ? 'Đã lên lịch' : 'Hoàn thành' } : s));
-    if (focusSessionId === id) { setEndsAt(null); setSeconds(durations[mode]!); }
+    if (focusSessionId === id) resetTimer();
   };
   const prepareFocus = ({ courseId, taskId, sessionId }: { courseId: string; taskId?: string; sessionId?: string }) => {
     setFocusCourseId(courseId); setFocusTaskId(taskId); setFocusSessionId(sessionId);
-    setEndsAt(null); setModeState(0); setSeconds(durations[0]!); setTab('focus');
+    setMode(0); setTab('focus');
   };
   const saveClass = (item: ClassItem) => {
     setClasses(v => v.some(c => c.id === item.id) ? v.map(c => c.id === item.id ? item : c) : [...v, item]);
@@ -163,10 +170,10 @@ function usePrototype(empty: boolean) {
     if (tasks.some(t => t.courseId === id) || classes.some(c => c.courseId === id) || exams.some(e => e.courseId === id) || studySessions.some(s => s.courseId === id)) return false;
     setCourseCatalog(v => v.filter(c => c.id !== id));
     setGradeBook(v => { const next = { ...v }; delete next[id]; return next; });
-    if (focusCourseId === id) { setEndsAt(null); setSeconds(durations[mode]!); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
+    if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, completed, history, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / durations[mode]! };
+  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, saveSemester, courseCatalog, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }
