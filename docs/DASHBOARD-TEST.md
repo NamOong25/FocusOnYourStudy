@@ -1,6 +1,6 @@
 # Kiểm tra một vòng từ dữ liệu trống
 
-Project: `D:\Video OBS\QuanLyHocTap`. Đợt UI 3D: Dashboard theo học kỳ.
+Project: `D:\Video OBS\QuanLyHocTap`. Luồng Dashboard theo học kỳ, rà soát lại sau UI 4G. Xem thêm `FRONTEND-REVIEW.md` để chạy trình diễn Chrome trực tiếp.
 
 ## Chuẩn bị
 
@@ -41,7 +41,7 @@ Trong chi tiết môn → tab **Lịch học** → nút **+** có nhãn Thêm ca
 Trong chi tiết môn → **Bài tập** → **+** Thêm bài tập cho môn.
 
 - Tên: **Bài kiểm thử Dashboard**.
-- Môn đã được chọn sẵn; chọn hạn nộp **ngày mai** bằng lịch.
+- Môn đã được chọn sẵn; chọn hạn nộp **ngày mai** bằng lịch, giờ **22:00** bằng đồng hồ.
 - Giữ trạng thái **Chưa làm** → **Tạo bài tập**.
 - Kỳ vọng: bài tập gắn đúng môn, ngày hiển thị khớp ngày vừa chọn.
 
@@ -62,7 +62,7 @@ Quay lại/đóng Chi tiết môn → bấm tab **Trang chủ**. Bấm bộ ch�
 | --- | --- |
 | Học kỳ | Học kỳ 1, năm học 2026 – 2027 |
 | Tổng quan | 1 môn, 3 tín chỉ, 1 bài chưa hoàn thành |
-| GPA học kỳ | **3.50 /4**, mô phỏng từ môn đã nhập |
+| GPA học kỳ | **3.50 /4**, tính từ môn đã nhập |
 | Bài tập hoàn tất | **0%**, **0/1 bài tập** |
 | Lịch học hôm nay | Môn TEST101, 08:00 – 10:00, phòng A101 |
 | Việc cần xử lý / 7 ngày tới | Có Bài kiểm thử Dashboard |
@@ -104,4 +104,4 @@ Từ bộ chọn Dashboard → **Quản lý học kỳ và môn** → **+ Thêm*
 - `node docs/qa-dashboard.cjs`: tạo dữ liệu từ UI, sửa bài/điểm/lịch thi, mở chi tiết và quay lại, chuyển kỳ và bố cục 320/390/430/1280px.
 - Các bài trình duyệt dùng Playwright + Chrome qua biến `PLAYWRIGHT_MODULE`, `CHROME_PATH` giống các đợt trước. Kết quả/ảnh nằm trong `.expo/qa-dashboard/`, không đưa vào Git.
 
-Các thẻ lấy từ dữ liệu đã tạo trong phiên, chưa phải dữ liệu API. GPA là mô phỏng theo quy tắc đang chọn. Chưa nghiệm thu thiết bị thật, thông báo đẩy, đăng nhập/lưu/đồng bộ hoặc biểu đồ thống kê thật; đợt này chỉ hoàn thiện Dashboard.
+Các thẻ lấy từ dữ liệu đã tạo trong phiên, chưa phải dữ liệu API. GPA tính từ điểm đã nhập theo cấu hình IUH đang dùng trong app. Thống kê đã tổng hợp từ các bản ghi phiên học (UI 4D), nhắc việc có trạng thái đã đọc (UI 4F) và form có cảnh báo chưa lưu (UI 4G). Chưa nghiệm thu thiết bị thật, thông báo đẩy, đăng nhập hoặc lưu/đồng bộ backend.

@@ -59,6 +59,14 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Bộ chọn ngày/giờ nhận Back trước form; đang chờ lưu thì hủy chờ trước khi hỏi; lưu thành công/xóa đã xác nhận không hỏi thêm. Có bảo vệ tải lại/đóng tab bằng hộp thoại mặc định của trình duyệt khi có bản nháp.
 - [x] Kiểm tra bản nháp, lưu/lỗi/thử lại, điều hướng và kích thước màn hình. Xem `UI-POLISH-4G.md`. Dữ liệu vẫn trong phiên; chưa lưu nháp bền hoặc nghiệm thu Back/bàn phím trên máy thật.
 
+### Đợt 8 — Rà soát luồng giao diện và trình diễn trực tiếp
+
+- [x] UI 4H: Từ dữ liệu trống tạo học kỳ/môn/lịch/bài/điểm rồi đối chiếu Dashboard; sửa phòng thi, hạn quá hạn, hoàn thành bài và cảnh báo điểm. Cùng mã môn ở kỳ khác không trộn dữ liệu.
+- [x] Đối chiếu một phiên Pomodoro hoàn tất với buổi tự học, lịch sử và Thống kê; kiểm tra nhắc việc đã đọc và bỏ bài hoàn thành; kiểm tra bản nháp chưa lưu.
+- [x] Có runner `qa-frontend-review.cjs --live` mở Chrome riêng để xem thao tác; giữ cửa sổ ở Dashboard sau khi xong. Cập nhật bài test GPA cũ theo hộp xác nhận bỏ thay đổi.
+- [x] Rà soát các màn lịch, điểm, focus, thống kê, nhắc việc, tài khoản/AI mẫu, điều hướng và trạng thái; đối chiếu bộ kiểm tra logic và viewport 320/390/430/1280px. Xem `FRONTEND-REVIEW.md`.
+- [ ] Nghiệm thu trên điện thoại thật, bàn phím, chạy nền, thông báo hệ điều hành và dữ liệu backend; đợt này mới kiểm tra frontend web trong phiên.
+
 ### Các đề xuất lưu để làm sau
 
 - [ ] Thông báo: giao diện quyền bị từ chối/thu hồi và hướng dẫn bật lại; phần xin quyền/lên lịch nhắc thật triển khai cùng thông báo trên thiết bị.

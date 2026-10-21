@@ -43,7 +43,7 @@ const { visibleText } = require('./qa-navigation-helpers.cjs');
     await dialog().getByText(/^3\.35\s*\/4$/).waitFor(); await back(); await text('Tăng 0.20 điểm GPA').waitFor();
     // Cancel a different score draft: no changes to the comparison or stored board.
     await openBoard('Học kỳ 1', '2026 – 2027'); await button('Mở điểm so sánh: Cấu trúc dữ liệu & Giải thuật · IT301').click(); await button('Nhập / chỉnh sửa điểm').click();
-    await page.getByRole('textbox', { name: 'Điểm thành phần 1', exact: true }).fill('10'); await back(); await back(); await back();
+    await page.getByRole('textbox', { name: 'Điểm thành phần 1', exact: true }).fill('10'); await back(); await button('Bỏ thay đổi').click(); await back(); await back();
     await text('Tăng 0.20 điểm GPA').waitFor();
     // The main grade screen shares these results and links back to comparison.
     await tab('Điểm & GPA').click(); await button('Xem điểm Học kỳ 1, 2026 – 2027').click(); await text(/^3\.35\s*\/4\.0$/).waitFor();

@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 4G — Cảnh báo biểu mẫu chưa lưu
+## Đợt vừa hoàn thành: UI 4H — Rà soát và trình diễn giao diện
 
-Cảnh báo khi Back/X/Escape/Back trình duyệt hoặc bấm nền để rời form dữ liệu học tập đã thay đổi. Tiếp tục sửa giữ bản nháp; bỏ thay đổi thực hiện đúng thao tác thoát ban đầu. Sửa rồi trả về nội dung cũ không hỏi, lưu thành công không hỏi, bộ chọn ngày/giờ nhận Back trước. Xem `UI-POLISH-4G.md`. Chưa lưu nháp lâu dài hoặc bổ sung cảnh báo cho tài khoản/AI.
+Thêm runner kiểm tra xuyên suốt từ dữ liệu trống tới Dashboard, Pomodoro/Thống kê và dữ liệu giữa các học kỳ; có chế độ mở Chrome để xem thao tác. Cập nhật test GPA theo bước Bỏ thay đổi và ghi kết quả/giới hạn kiểm tra trong `FRONTEND-REVIEW.md`. Đợt này không đổi mã giao diện sản phẩm.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Cảnh báo khi rời biểu mẫu có thay đổi chưa lưu"
+git commit -m "Bổ sung kiểm thử tổng thể giao diện và trình diễn trực tiếp"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 4G — Cảnh báo biểu mẫu chưa lưu | `Cảnh báo khi rời biểu mẫu có thay đổi chưa lưu` |
 | UI 4F — Thông báo trong app và trạng thái đã đọc | `Hoàn thiện giao diện thông báo và trạng thái đã đọc` |
 | UI 4E — So sánh GPA giữa các học kỳ | `Hoàn thiện giao diện so sánh GPA giữa các học kỳ` |
 | UI 4D — Thống kê từ phiên học và bài tập | `Hoàn thiện thống kê từ phiên học và bài tập` |
