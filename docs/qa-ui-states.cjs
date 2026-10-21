@@ -26,7 +26,7 @@ const { enterDemo } = require('./qa-onboarding-helpers.cjs');
     await text('Đang chuẩn bị góc học tập').waitFor();
     await text('Góc học tập đang chờ bạn').waitFor(); await shot('empty-home');
     await tab('Tập trung').click(); await text('Chọn một môn để bắt đầu tập trung').waitFor();
-    await tab('Thống kê').click(); await text('Chưa có thống kê tổng hợp').waitFor();
+    await tab('Thống kê').click(); await text('Bắt đầu thống kê từ học kỳ đầu tiên').waitFor();
     await tab('Điểm & GPA').click(); await text('Chưa có bảng điểm').waitFor();
     await tab('Trợ lý AI').click(); await button('Tạo lộ trình').click();
     await text('Cần một môn học để lập kế hoạch').waitFor(); await button('Đóng').click();

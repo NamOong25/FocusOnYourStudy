@@ -66,7 +66,7 @@ function usePrototype(empty: boolean) {
   const [focusCourseId, setFocusCourseId] = useState(empty ? '' : 'course-dsa');
   useEffect(() => { if (!courseCatalog.some(c => c.id === focusCourseId) && courseCatalog[0]) setFocusCourseId(courseCatalog[0].id); }, [courseCatalog, focusCourseId]);
   const focusCourse = courseCatalog.find(c => c.id === focusCourseId)?.name ?? 'Chọn môn học';
-  const [focusState, dispatchFocus] = useReducer(focusReducer, empty, isEmpty => createFocusState(isEmpty ? [] : sampleFocusRecords({ courseId: 'course-dsa', courseName: courses[0]!, taskId: 't4', taskTitle: initialTasks[3]!.title }, new Date())));
+  const [focusState, dispatchFocus] = useReducer(focusReducer, empty, isEmpty => createFocusState(isEmpty ? [] : sampleFocusRecords({ courseId: 'course-dsa', courseName: courses[0]!, semesterId: 'sem-5', taskId: 't4', taskTitle: initialTasks[3]!.title }, new Date())));
   const { timer, records: focusRecords, goal: dailyFocusGoal } = focusState;
   const { mode, endsAt } = timer;
   const seconds = Math.ceil(timer.remainingMs / 1000);
@@ -104,7 +104,7 @@ function usePrototype(empty: boolean) {
   const toggleTimer = () => {
     if (!focusCourseId) return;
     dispatchFocus({ type: 'toggle', now: Date.now(), id: uid(), context: {
-      courseId: focusCourseId, courseName: focusCourse, taskId: focusTaskId,
+      courseId: focusCourseId, courseName: focusCourse, semesterId: courseCatalog.find(course => course.id === focusCourseId)?.semesterId, taskId: focusTaskId,
       taskTitle: tasks.find(task => task.id === focusTaskId)?.title,
       studySessionId: focusSessionId, studyTitle: studySessions.find(session => session.id === focusSessionId)?.title,
     } });

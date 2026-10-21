@@ -28,10 +28,17 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Timer giữ mã phiên và ngữ cảnh ban đầu qua tạm dừng/đổi tab; loại trừ giờ nghỉ và phiên bỏ dở, không ghi trùng khi nhận callback muộn. Chỉ cộng phút cho buổi tự học đã chọn, không tự hoàn thành bài tập. Xem `UI-POLISH-4C.md`.
 - [ ] Lưu/khôi phục khi tắt ứng dụng, đồng bộ và nghiệm thu chạy nền/khóa màn hình trên điện thoại thật: vẫn thuộc đợt nghiệp vụ Pomodoro, chưa hoàn thành trong giao diện này.
 
+### Đợt 4 — Thống kê từ phiên học và bài tập
+
+- [x] UI 4D: Dựng Tổng quan theo ảnh đã duyệt: chọn học kỳ, 7 ngày/30 ngày/khoảng ngày tùy chọn, thẻ thời gian và chuỗi ngày, biểu đồ, phân bổ môn và tiến độ bài tập.
+- [x] Biểu đồ và phân bổ môn cộng từ bản ghi Pomodoro hoàn tất; cùng tổng phút, không dùng dãy giờ/tỷ lệ cố định. Có nhãn phiên mẫu, ngày không học, xem chi tiết cột, khoảng dài gộp tối đa 7 cột.
+- [x] Lọc phiên theo học kỳ đã lưu lúc bắt đầu; giữ lịch sử khi môn bị đổi học kỳ/xóa. Bản ghi cũ chưa có mã học kỳ tra theo mã môn trong danh sách hiện tại.
+- [x] Bài tập tính toàn bộ học kỳ, tách hoàn thành/chưa xong còn hạn/chưa xong quá hạn; cập nhật theo trạng thái và hạn ngày/giờ. Chú thích rõ khoảng ngày chỉ lọc thời gian học/phân bổ môn; chuỗi học kỳ tính đến hôm nay.
+- [x] Có lịch chọn ngày, báo lỗi khoảng đảo ngược, áp dụng/hủy, trạng thái chưa có học kỳ/phiên/bài tập. Workspace trống có thể thêm dữ liệu rồi xem thống kê. Giữ tab Điểm & GPA. Xem `UI-POLISH-4D.md` để test và xem giới hạn frontend.
+
 ### Các đề xuất lưu để làm sau
 
-- [ ] Thống kê: chọn khoảng ngày/học kỳ; so sánh GPA qua các học kỳ và xử lý kỳ chưa có điểm.
-- [ ] Thống kê: biểu đồ thời gian/phân bổ môn lấy từ dữ liệu phiên học trong app, thay các dãy số và tỷ lệ mẫu đang cố định.
+- [ ] Thống kê: hoàn thiện so sánh GPA qua các học kỳ và cách trình bày kỳ chưa có điểm thành một đợt riêng; chưa triển khai thêm trong UI 4D.
 - [ ] Thông báo: trạng thái rỗng, đã đọc/chưa đọc từng mục; huy hiệu đúng số mục chưa đọc.
 - [ ] Thông báo: giao diện quyền bị từ chối/thu hồi và hướng dẫn bật lại; phần xin quyền/lên lịch nhắc thật triển khai cùng thông báo trên thiết bị.
 - [ ] Biểu mẫu: cảnh báo khi đóng/quay lại với nội dung đã thay đổi chưa lưu; có lựa chọn tiếp tục sửa hoặc bỏ thay đổi.

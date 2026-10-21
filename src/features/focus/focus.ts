@@ -9,6 +9,7 @@ export const maxFocusGoal = 12;
 export type FocusContext = {
   courseId: string;
   courseName: string;
+  semesterId?: string;
   taskId?: string;
   taskTitle?: string;
   studySessionId?: string;

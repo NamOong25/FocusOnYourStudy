@@ -21,7 +21,8 @@ src/
 │   ├── preview/                 Bảng thử trạng thái UI
 │   ├── grades/                  Bảng điểm, editor, quy tắc và tính GPA
 │   ├── schedule/                Lịch học, chuỗi/ngoại lệ và kiểm tra trùng
-│   ├── statistics/              StatsScreen
+│   ├── statistics/              StatsScreen và statistics.ts (tổng hợp dữ liệu)
+│   │   └── components/          Bộ lọc, StudyTimeChart, CourseDistribution, TaskProgressCard
 │   └── study/                   Kế hoạch tự học, form và chi tiết buổi học
 ├── navigation/
 │   ├── Navigation.tsx           Provider, scope, cuộn và xử lý Back
@@ -72,6 +73,7 @@ docs/                            Thiết kế, checklist, lệnh Git và script 
 | Tự học | `src/features/study/StudyPlanScreen.tsx`, `StudyForm.tsx`, `StudyDialog.tsx` |
 | Điểm và công thức GPA | `src/features/grades/GradesScreen.tsx`, `GradeEditor.tsx`, `grades.ts` |
 | Pomodoro | `src/features/focus/FocusScreen.tsx`, `focus.ts` và `components/`; store giữ state timer xuyên các tab |
+| Thống kê | `src/features/statistics/StatsScreen.tsx`, `statistics.ts` và `components/`; nhận phiên Pomodoro và bài tập từ store |
 | AI, tài liệu, trắc nghiệm | `src/features/assistant/` |
 | Hồ sơ và cài đặt | `src/features/account/` |
 | Nút, thẻ, hộp thoại toàn app | Các file `Button.tsx`, `Card.tsx`, `Sheet.tsx`… trong `src/shared/components/` |
