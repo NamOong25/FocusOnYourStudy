@@ -30,6 +30,7 @@ src/
 │   ├── Navigation.tsx           Provider, scope, cuộn và xử lý Back
 │   └── navigationState.ts       Route và quy tắc quay lại thuần TypeScript
 ├── shared/
+│   ├── forms/                   useFormChanges (so bản nháp) và UnsavedChanges (hộp xác nhận)
 │   ├── feedback/                Thông báo và phạm vi thao tác chờ/lỗi/hủy
 │   ├── components/
 │   │   ├── ActionStatus.tsx         Đang xử lý, lỗi, thử lại và hủy

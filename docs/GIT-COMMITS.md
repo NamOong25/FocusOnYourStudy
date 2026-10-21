@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 4F — Thông báo trong app và trạng thái đã đọc
+## Đợt vừa hoàn thành: UI 4G — Cảnh báo biểu mẫu chưa lưu
 
-Góc nhắc nhở tổng hợp bài tập, lịch học và lịch thi từ dữ liệu trong app; đọc từng mục/tất cả, lọc chưa đọc và huy hiệu số mục chưa đọc. Đổi deadline/giờ/phòng làm đúng mục thành chưa đọc; bỏ nguồn đã xong/hủy/xóa và mở đúng chi tiết. Xem `UI-POLISH-4F.md`. Trạng thái đọc giữ trong phiên; chưa lưu bền hoặc gửi thông báo trên thiết bị.
+Cảnh báo khi Back/X/Escape/Back trình duyệt hoặc bấm nền để rời form dữ liệu học tập đã thay đổi. Tiếp tục sửa giữ bản nháp; bỏ thay đổi thực hiện đúng thao tác thoát ban đầu. Sửa rồi trả về nội dung cũ không hỏi, lưu thành công không hỏi, bộ chọn ngày/giờ nhận Back trước. Xem `UI-POLISH-4G.md`. Chưa lưu nháp lâu dài hoặc bổ sung cảnh báo cho tài khoản/AI.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện giao diện thông báo và trạng thái đã đọc"
+git commit -m "Cảnh báo khi rời biểu mẫu có thay đổi chưa lưu"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 4F — Thông báo trong app và trạng thái đã đọc | `Hoàn thiện giao diện thông báo và trạng thái đã đọc` |
 | UI 4E — So sánh GPA giữa các học kỳ | `Hoàn thiện giao diện so sánh GPA giữa các học kỳ` |
 | UI 4D — Thống kê từ phiên học và bài tập | `Hoàn thiện thống kê từ phiên học và bài tập` |
 | UI 4C — Pomodoro và mục tiêu ngày | `Hoàn thiện Pomodoro lịch sử phiên học và mục tiêu ngày` |

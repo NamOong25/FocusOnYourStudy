@@ -9,6 +9,7 @@ import ConflictPanel from '../schedule/ConflictPanel';
 import { dateKey, isValidDate, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import {sessionExceedsDeadline,taskDeadlineLabel} from '../assignments/assignments';
+import { useFormChanges } from '../../shared/forms/useFormChanges';
 
 export function StudySessionForm({ item, initialTaskId, initialCourseId, initialDate, onClose, onSaved, onDeleted }: { item?: StudySession; initialTaskId?: string; initialCourseId?: string; initialDate?: string; onClose: () => void; onSaved?: (id: string) => void; onDeleted?: () => void }) {
   const { tasks, courseCatalog, classes, classExceptions, exams, studySessions, saveStudySession, deleteStudySession, setToast } = useApp();
@@ -20,6 +21,7 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
   const [start, setStart] = useState(item?.start ?? '19:00'); const [duration, setDuration] = useState(String(item?.duration ?? 45));
   const [notes, setNotes] = useState(item?.notes ?? ''); const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
   const [status, setStatus] = useState<StudyStatus>(item?.status ?? 'Đã lên lịch');
+  const dirty = useFormChanges({ title, courseId, taskId, date, start, duration, notes, status });
   const [conflicts, setConflicts] = useState<CalendarEvent[]>([]);
   const availableTasks = tasks.filter(t => t.courseId === courseId);
   const save = () => {
@@ -39,7 +41,7 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     saveStudySession(session);
     setToast(item ? 'Đã cập nhật buổi tự học' : 'Đã thêm buổi tự học'); if (onSaved) onSaved(session.id); else onClose();
   };
-  return <Sheet title={item ? 'Chỉnh sửa buổi tự học' : 'Buổi tự học mới'} onClose={onClose}>
+  return <Sheet title={item ? 'Chỉnh sửa buổi tự học' : 'Buổi tự học mới'} onClose={onClose} dirty={dirty}>
     <Badge label="Một việc nhỏ, một khoảng tập trung" icon="leaf-outline" />
     <Field label="Nội dung tự học" value={title} onChange={setTitle} placeholder="Ví dụ: Viết phần giới thiệu báo cáo" />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Môn học</T><CourseChoices value={courseId} onChange={id => { setCourseId(id); setTaskId(''); }} />

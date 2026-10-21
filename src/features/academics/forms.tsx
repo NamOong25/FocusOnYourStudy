@@ -7,6 +7,7 @@ import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, T } from '../..
 import { Course, CourseColor, CourseStatus, Semester, SemesterStatus, SemesterTerm, semesterName, courseColors } from './academic';
 import { uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import { useFormChanges } from '../../shared/forms/useFormChanges';
 
 export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onClose: () => void; onSaved: (id: string) => void }) {
   const { semesters, saveSemester, setToast } = useApp();
@@ -14,6 +15,7 @@ export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onCl
   const [yearStart, setYearStart] = useState(() => Number((item?.academicYear ?? semesters.find(s => s.status === 'Đang học')?.academicYear ?? String(new Date().getFullYear())).slice(0, 4)));
   const [status, setStatus] = useState<SemesterStatus>(item?.status ?? 'Sắp tới');
   const [note, setNote] = useState(item?.note ?? ''); const [error, setError] = useState('');
+  const dirty = useFormChanges({ term, yearStart, status, note });
   const save = () => {
     if (![1, 2, 3].includes(term) || !Number.isInteger(yearStart) || yearStart < 1900 || yearStart > 2099) { setError('Hãy chọn học kỳ và năm học hợp lệ.'); return; }
     const academicYear = `${yearStart} – ${yearStart + 1}`;
@@ -21,7 +23,7 @@ export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onCl
     const semester: Semester = { id: item?.id ?? uid(), term, name: semesterName(term), academicYear, status, note: note.trim() };
     saveSemester(semester); setToast(item ? 'Đã cập nhật học kỳ' : 'Đã tạo học kỳ mới'); onSaved(semester.id);
   };
-  return <Sheet title={item ? 'Chỉnh sửa học kỳ' : 'Học kỳ mới'} onClose={onClose}>
+  return <Sheet title={item ? 'Chỉnh sửa học kỳ' : 'Học kỳ mới'} onClose={onClose} dirty={dirty}>
     <Badge label="Mỗi học kỳ, một chặng đường" icon="school-outline" />
     <AcademicYearPicker value={yearStart} onChange={year => { setYearStart(year); setError(''); }} />
     <SemesterPicker value={term} onChange={value => { setTerm(value); setError(''); }} />
@@ -43,6 +45,7 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
   const [color, setColor] = useState<CourseColor>(item?.color ?? 'lavender');
   const [description, setDescription] = useState(item?.description ?? '');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
+  const dirty = useFormChanges({ name, code, credits, teacher, room, semester, status, color, description });
   const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length + studySessions.filter(s => s.courseId === item.id).length : 0;
   const gradeLinked = !!item && (hasGradeData(gradeBook[item.id]) || !!gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id));
   const save = () => {
@@ -56,7 +59,7 @@ export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
     const course: Course = { id: item?.id ?? uid(), name: name.trim(), code: code.trim().toUpperCase(), credits: Number(credits), teacher: teacher.trim(), room: room.trim(), semesterId: semester, status, color, description: description.trim() };
     saveCourse(course); setToast(item ? 'Đã cập nhật môn học' : 'Đã thêm môn học mới'); onSaved(course.id, course.semesterId);
   };
-  return <Sheet title={item ? 'Chỉnh sửa môn học' : 'Môn học mới'} onClose={onClose}>
+  return <Sheet title={item ? 'Chỉnh sửa môn học' : 'Môn học mới'} onClose={onClose} dirty={dirty}>
     <Field label="Tên môn học" value={name} onChange={setName} placeholder="Ví dụ: Công nghệ phần mềm" />
     <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><Field label="Mã môn học" value={code} onChange={setCode} placeholder="SE301" /></View><View style={{ width: 105 }}><Field label="Số tín chỉ" value={credits} onChange={setCredits} numeric /></View></Row>
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Thuộc học kỳ</T>

@@ -52,10 +52,17 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Mở đúng bài, đúng ngày của buổi học hoặc đúng lịch thi; Back/Escape/Back trình duyệt quay lại danh sách và giữ bộ lọc, X đóng luồng. Trạng thái đọc giữ qua các tab trong phiên.
 - [x] Tách `features/notifications/`, kiểm tra 320/390/430/1280px, trạng thái trống và hồi quy điều hướng. Xem `UI-POLISH-4F.md`. Đây là danh sách nhắc việc trong app; lưu bền/đồng bộ và thông báo thiết bị vẫn làm sau.
 
+### Đợt 7 — Cảnh báo thay đổi chưa lưu
+
+- [x] UI 4G: Học kỳ, môn học, bài tập, lịch học lặp/ngoại lệ, lịch thi, điểm và buổi tự học có cảnh báo khi rời form đã thay đổi. Có Tiếp tục chỉnh sửa/Bỏ thay đổi; Back bỏ bản nháp về màn trước, X bỏ bản nháp đóng luồng.
+- [x] Form mới so với giá trị mặc định khi mở; form sửa so với dữ liệu lúc mở. Sửa rồi trả lại đúng nội dung ban đầu không hỏi; lỗi/xác nhận xóa/bộ chọn đang mở không tự tính là thay đổi dữ liệu.
+- [x] Bộ chọn ngày/giờ nhận Back trước form; đang chờ lưu thì hủy chờ trước khi hỏi; lưu thành công/xóa đã xác nhận không hỏi thêm. Có bảo vệ tải lại/đóng tab bằng hộp thoại mặc định của trình duyệt khi có bản nháp.
+- [x] Kiểm tra bản nháp, lưu/lỗi/thử lại, điều hướng và kích thước màn hình. Xem `UI-POLISH-4G.md`. Dữ liệu vẫn trong phiên; chưa lưu nháp bền hoặc nghiệm thu Back/bàn phím trên máy thật.
+
 ### Các đề xuất lưu để làm sau
 
 - [ ] Thông báo: giao diện quyền bị từ chối/thu hồi và hướng dẫn bật lại; phần xin quyền/lên lịch nhắc thật triển khai cùng thông báo trên thiết bị.
-- [ ] Biểu mẫu: cảnh báo khi đóng/quay lại với nội dung đã thay đổi chưa lưu; có lựa chọn tiếp tục sửa hoặc bỏ thay đổi.
+- [ ] Mở rộng cảnh báo chưa lưu sang hồ sơ/tài khoản, form AI và các tùy chọn khác; đợt UI 4G ưu tiên các biểu mẫu dữ liệu học tập đã thống nhất.
 - [ ] Biểu mẫu dài: nút lưu dễ tiếp cận, đặc biệt bảng điểm nhiều cột; thử với bàn phím điện thoại để tránh che ô/nút.
 - [ ] Giao diện: áp dụng sáng/tối xuyên suốt app, không chỉ thẻ xem trước trong cài đặt.
 - [ ] Ngôn ngữ: áp dụng tiếng Việt/English xuyên suốt app, gồm thông báo lỗi, lịch, ngày giờ và trạng thái trống.

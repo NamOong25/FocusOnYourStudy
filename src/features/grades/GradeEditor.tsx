@@ -6,6 +6,7 @@ import GradeColumnCard,{DraftPart} from './GradeColumnCard';
 import GradeStatus from './GradeStatus';
 import {useApp} from '../../store/model';
 import {C,F,S} from '../../shared/theme';
+import {useFormChanges} from '../../shared/forms/useFormChanges';
 
 const number=(s:string)=>/^\d+(?:[.,]\d+)?$/.test(s.trim())?Number(s.trim().replace(',','.')):NaN;
 const parsePart=(p:DraftPart):GradePart=>({...p,score:p.score.trim()===''?null:number(p.score),project:p.project?{target:p.project.target,share:p.project.share.trim()===''?null:number(p.project.share),remainderScore:p.project.remainderScore.trim()===''?null:number(p.project.remainderScore)}:undefined});
@@ -18,6 +19,7 @@ export function GradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void
   const [parts,setParts]=useState(()=>record.parts.map(toDraft)),[assessment,setAssessment]=useState<Assessment>(record.assessment??'custom');
   const [pendingMode,setPendingMode]=useState<'theory'|'practical'|null>(null),[error,setError]=useState(''),[clearing,setClearing]=useState(false),[splitConfirm,setSplitConfirm]=useState(false);
   const [resetConfirm,setResetConfirm]=useState(false),sequence=useRef(0);
+  const dirty=useFormChanges({assessment,parts:parts.map(({id,...part})=>part)});
   const newId=()=>`column-${Date.now()}-${++sequence.current}`;
   if(!course)return null;
   const supported=assessment==='theory'||assessment==='practical';
@@ -40,7 +42,7 @@ export function GradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void
   };
   const splitRegular=()=>{if(parts.length-regular.length+columnCount>10){setError('Tối đa 10 cột điểm. Xóa bớt cột trước khi tách nhóm thường kỳ.');setSplitConfirm(false);return;}setParts(items=>[...Array.from({length:columnCount},(_,i)=>({id:newId(),name:`Điểm thường kỳ ${i+1}`,kind:'Điểm thường kỳ' as const,weight:20/columnCount,score:''})),...items.filter(p=>!regularKind(p))]);setSplitConfirm(false);setError('');};
   const mergeRegular=()=>{const complete=regular.length>0&&regular.every(p=>p.score.trim()!==''&&Number.isFinite(number(p.score)));const mean=complete?regular.reduce((s,p)=>s+number(p.score),0)/regular.length:null;setParts(items=>[{id:newId(),name:'Điểm thường kỳ',kind:'Điểm thường kỳ',weight:20,score:mean===null?'':String(Math.round((mean+Number.EPSILON)*10)/10)},...items.filter(p=>!regularKind(p))]);setError('');};
-  return <Sheet title="Nhập điểm môn học" onClose={onClose}>
+  return <Sheet title="Nhập điểm môn học" onClose={onClose} dirty={dirty}>
     <Card style={{backgroundColor:C.soft,gap:6}}><Badge label={`${course.code} · ${course.credits} tín chỉ`} bg="#FFFFFFAA"/><T style={{fontFamily:F.extra,fontSize:21,lineHeight:30}}>{course.name}</T><T style={{fontSize:11,color:C.primary}}>Quy đổi IUH · Thang 10 · Để trống khi chưa có điểm</T></Card>
     <T style={{fontFamily:F.bold}}>Loại học phần</T><Segments values={['Lý thuyết','Thực hành']} value={assessment==='theory'?'Lý thuyết':assessment==='practical'?'Thực hành':''} onChange={v=>{const mode=v==='Lý thuyết'?'theory':'practical';if(mode!==assessment){setPendingMode(mode);setError('');}}}/>
     {pendingMode&&<Card style={{backgroundColor:C.amberSoft,gap:12}}><T style={{fontFamily:F.bold}}>Đổi sang {pendingMode==='theory'?'Lý thuyết':'Thực hành'}</T><T style={S.small}>Tạo lại bộ cột sẽ xóa điểm trong bản nháp này. Điểm đã lưu chỉ thay đổi khi bạn bấm Lưu điểm môn học.</T><Button label="Áp dụng bộ cột mới" onPress={()=>{setAssessment(pendingMode);setParts(assessmentTemplate(pendingMode,course.credits).parts.map(toDraft));setPendingMode(null);setError('');setSplitConfirm(false);}}/><Button label="Giữ bộ cột hiện tại" secondary onPress={()=>setPendingMode(null)}/></Card>}

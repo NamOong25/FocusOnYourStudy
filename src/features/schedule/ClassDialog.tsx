@@ -7,6 +7,7 @@ import { ClassForm } from './ClassForm';
 import ConflictPanel from './ConflictPanel';
 import { addDays, dateKey, dateLabel, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import { useFormChanges } from '../../shared/forms/useFormChanges';
 
 export default function ClassDialog({ id, date, onClose }: { id: string; date?: string; onClose: () => void }) {
   const { classes, classExceptions, getClassesOn, restoreClassOccurrence, exams, studySessions, setToast } = useApp();
@@ -50,6 +51,7 @@ function ExceptionForm({ series, date, kind, onClose }: { series: ClassItem; dat
   const current = classExceptions.find(e => e.seriesId === series.id && e.date === date);
   const [start, setStart] = useState(occurrence.start); const [end, setEnd] = useState(occurrence.end); const [room, setRoom] = useState(occurrence.room); const [teacher, setTeacher] = useState(occurrence.teacher);
   const [reason, setReason] = useState(current?.reason ?? ''); const [error, setError] = useState(''); const [conflicts, setConflicts] = useState<CalendarEvent[]>([]);
+  const dirty = useFormChanges({ start, end, room, teacher, reason });
   const save = () => {
     setError(''); setConflicts([]);
     if (!isClassDate(series, date)) { setError('Ngày này không thuộc chuỗi lịch học.'); return; }
@@ -61,5 +63,5 @@ function ExceptionForm({ series, date, kind, onClose }: { series: ClassItem; dat
     saveClassException({ id: current?.id ?? uid(), seriesId: series.id, date, kind, start, end, room: room.trim() || series.room, teacher: teacher.trim() || series.teacher, reason: reason.trim() });
     setToast(kind === 'cancelled' ? 'Đã ghi nghỉ đúng một buổi' : 'Đã điều chỉnh đúng một buổi'); onClose();
   };
-  return <Sheet title={kind === 'cancelled' ? 'Nghỉ một buổi học' : 'Điều chỉnh một buổi'} onClose={onClose}><Badge label={`Chỉ ngày ${dateLabel(date)}/${date.slice(0,4)}`} icon="calendar-outline" /><T style={{ fontFamily: F.bold }}>{series.title}</T>{kind === 'changed' && <><Row><View style={S.grow}><TimeField label="Bắt đầu mới" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Kết thúc mới" value={end} onChange={setEnd} /></View></Row><Field label="Phòng học buổi này" value={room} onChange={setRoom} /><Field label="Giảng viên buổi này" value={teacher} onChange={setTeacher} /></>}<Field label="Lý do / ghi chú" value={reason} onChange={setReason} multiline placeholder={kind === 'cancelled' ? 'Ví dụ: Giảng viên báo nghỉ' : 'Ví dụ: Đổi phòng theo thông báo của lớp'} />{!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${series.title} · ${start} – ${end}`} /><Button label={kind === 'cancelled' ? 'Xác nhận nghỉ buổi này' : 'Lưu thay đổi buổi này'} icon="checkmark" onPress={save} actionLabel="Đang lưu" /><T style={S.small}>Các buổi còn lại giữ nguyên theo chuỗi gốc.</T></Sheet>;
+  return <Sheet title={kind === 'cancelled' ? 'Nghỉ một buổi học' : 'Điều chỉnh một buổi'} onClose={onClose} dirty={dirty}><Badge label={`Chỉ ngày ${dateLabel(date)}/${date.slice(0,4)}`} icon="calendar-outline" /><T style={{ fontFamily: F.bold }}>{series.title}</T>{kind === 'changed' && <><Row><View style={S.grow}><TimeField label="Bắt đầu mới" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Kết thúc mới" value={end} onChange={setEnd} /></View></Row><Field label="Phòng học buổi này" value={room} onChange={setRoom} /><Field label="Giảng viên buổi này" value={teacher} onChange={setTeacher} /></>}<Field label="Lý do / ghi chú" value={reason} onChange={setReason} multiline placeholder={kind === 'cancelled' ? 'Ví dụ: Giảng viên báo nghỉ' : 'Ví dụ: Đổi phòng theo thông báo của lớp'} />{!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${series.title} · ${start} – ${end}`} /><Button label={kind === 'cancelled' ? 'Xác nhận nghỉ buổi này' : 'Lưu thay đổi buổi này'} icon="checkmark" onPress={save} actionLabel="Đang lưu" /><T style={S.small}>Các buổi còn lại giữ nguyên theo chuỗi gốc.</T></Sheet>;
 }

@@ -1,8 +1,8 @@
 import { ActionScope, InteractionBlock, useActionState } from '../feedback/ActionScope';
 import { ActionStatus } from './ActionStatus';
 import { NoticeToast } from './NoticeToast';
-import React, { type ReactNode } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native';
+import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, S } from '../theme';
 import { RememberedScrollView, useBackAction, useNavigationScope } from '../../navigation/Navigation';
@@ -10,6 +10,7 @@ import { DateTimePanel, DateTimeProvider, useDateTimePicker } from './DateTimePi
 import { IconButton } from './IconButton';
 import { Row } from './Row';
 import { T } from './Typography';
+import { UnsavedChanges } from '../forms/UnsavedChanges';
 
 type SheetProps = {
     title: string;
@@ -17,6 +18,7 @@ type SheetProps = {
     onClose: () => void;
     onBack?: () => void;
     scrollKey?: string;
+    dirty?: boolean;
 };
 
 export function Sheet(props: SheetProps) {
@@ -27,12 +29,30 @@ export function Sheet(props: SheetProps) {
     );
 }
 
-function SheetContent({ title, children, onClose, onBack, scrollKey }: SheetProps) {
+function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
     const action = useActionState();
-    const back = () => { action?.cancel(); (picker.active ? picker.cancel : onBack ?? onClose)(); };
-    const dismiss = () => { action?.cancel(); (picker.active ? picker.cancel : scope.closeFlow ?? onClose)(); };
+    const [confirming, setConfirming] = useState(false);
+    const pendingExit = useRef<(() => void) | null>(null);
+    const keepEditing = () => { pendingExit.current = null; setConfirming(false); };
+    const requestExit = (exit: () => void) => {
+        // Stop a delayed prototype save before showing a discard decision.
+        action?.cancel();
+        if (confirming) { keepEditing(); return; }
+        if (picker.active) { picker.cancel(); return; }
+        if (!dirty) { exit(); return; }
+        Keyboard.dismiss(); pendingExit.current = exit; setConfirming(true);
+    };
+    const back = () => requestExit(onBack ?? onClose);
+    const dismiss = () => requestExit(scope.closeFlow ?? onClose);
+    const discard = () => { const exit = pendingExit.current; keepEditing(); action?.cancel(); exit?.(); };
+    useEffect(() => {
+        if (Platform.OS !== 'web' || typeof window === 'undefined' || !scope.active || !dirty) return;
+        const leave = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+        window.addEventListener('beforeunload', leave);
+        return () => window.removeEventListener('beforeunload', leave);
+    }, [scope.active, dirty]);
     useBackAction(true, back, picker.active ? 1000 + scope.depth : undefined);
     return (
         <Modal visible={scope.active} transparent animationType="slide" onRequestClose={back}>
@@ -65,7 +85,7 @@ function SheetContent({ title, children, onClose, onBack, scrollKey }: SheetProp
                     <Row between style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 10, gap: 6 }}>
                         <IconButton name="arrow-back" label="Quay lại" onPress={back} bg="transparent" />
                         <T style={[S.title, S.grow]}>
-                            {picker.active ? `Chọn ${picker.active.label.toLocaleLowerCase()}` : title}
+                            {confirming ? 'Thay đổi chưa lưu' : picker.active ? `Chọn ${picker.active.label.toLocaleLowerCase()}` : title}
                         </T>
                         <IconButton
                             name="close"
@@ -77,19 +97,19 @@ function SheetContent({ title, children, onClose, onBack, scrollKey }: SheetProp
                     <RememberedScrollView
                         key={scrollKey}
                         memoryKey={`${title}:${scrollKey ?? ''}`}
-                        active={!picker.active}
-                        style={picker.active ? { display: 'none' } : undefined}
+                        active={!picker.active && !confirming}
+                        style={picker.active || confirming ? { display: 'none' } : undefined}
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={{ padding: 22, paddingTop: 4, gap: 16 }}
                     >
                         <InteractionBlock>{children}</InteractionBlock>
                     </RememberedScrollView>
-                    {picker.active && (
+                    {picker.active && !confirming && (
                         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 22, paddingTop: 4 }}>
                             <DateTimePanel />
                         </ScrollView>
                     )}
-                    <ActionStatus />
+                    {confirming ? <UnsavedChanges onContinue={keepEditing} onDiscard={discard} /> : <ActionStatus />}
                 </View>
                 <NoticeToast modal bottom={Math.max(22, inset.bottom)} />
             </KeyboardAvoidingView>

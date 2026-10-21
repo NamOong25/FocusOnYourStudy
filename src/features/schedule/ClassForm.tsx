@@ -7,6 +7,7 @@ import { CalendarEvent, ClassItem, dayNames, seriesConflicts } from './calendar'
 import ConflictPanel from './ConflictPanel';
 import { addDays, dateKey, isValidDate, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import { useFormChanges } from '../../shared/forms/useFormChanges';
 
 export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
   const { saveClass, deleteClass, classes, classExceptions, exams, studySessions, courseCatalog, setToast } = useApp();
@@ -18,6 +19,7 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
   const [room, setRoom] = useState(item?.room ?? course?.room ?? ''); const [teacher, setTeacher] = useState(item?.teacher ?? course?.teacher ?? '');
   const [reminder, setReminder] = useState(item?.reminderMinutes ?? 15); const [error, setError] = useState('');
   const [conflicts, setConflicts] = useState<CalendarEvent[]>([]); const [confirmDelete, setConfirmDelete] = useState(false);
+  const dirty = useFormChanges({ courseId, weekdays: [...weekdays].sort(), startsOn, endsOn, start, end, room, teacher, reminder });
   const save = () => {
     setError(''); setConflicts([]);
     if (!course) { setError('Hãy chọn môn học.'); return; }
@@ -32,7 +34,7 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     if (clashes.length) { setConflicts(clashes); return; }
     saveClass(candidate); setToast(item ? 'Đã cập nhật chuỗi lịch học' : 'Đã thêm lịch học lặp'); onClose();
   };
-  return <Sheet title={item ? 'Sửa cả chuỗi lịch học' : 'Thêm lịch học'} onClose={onClose}>
+  return <Sheet title={item ? 'Sửa cả chuỗi lịch học' : 'Thêm lịch học'} onClose={onClose} dirty={dirty}>
     <Badge label="Lặp theo tuần · Trong khoảng ngày đã chọn" icon="repeat-outline" />
     <CourseChoices value={courseId} onChange={id => { setCourseId(id); const next = courseCatalog.find(c => c.id === id); setRoom(next?.room ?? ''); setTeacher(next?.teacher ?? ''); }} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Các thứ trong tuần</T>

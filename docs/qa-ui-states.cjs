@@ -62,7 +62,7 @@ const { enterDemo } = require('./qa-onboarding-helpers.cjs');
     await button('Đóng thông báo kết quả').click();
     await button('Thêm bài tập mới').click();
     await page.getByLabel('Tên bài tập', { exact: true }).fill('Bài đã hủy trước khi lưu');
-    await button('Tạo bài tập').click(); await button('Đóng').click();
+    await button('Tạo bài tập').click(); await button('Đóng').click(); await button('Bỏ thay đổi').click();
     await page.waitForTimeout(800);
     assert.equal(await text('Bài đã hủy trước khi lưu').count(), 0);
     await button('Thử trạng thái giao diện').click(); await button('Thử trạng thái lỗi tải').click();

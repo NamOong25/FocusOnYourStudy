@@ -7,6 +7,7 @@ import { CalendarEvent, Exam, calendarEvents, findConflicts, reminderLabel } fro
 import ConflictPanel from '../schedule/ConflictPanel';
 import { addDays, dateKey, isValidDate, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import { useFormChanges } from '../../shared/forms/useFormChanges';
 
 export function ExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }: { item?: Exam; initialCourseId?: string; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void }) {
   const { courseCatalog, classes, classExceptions, exams, studySessions, saveExam, deleteExam, setToast } = useApp();
@@ -15,6 +16,7 @@ export function ExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }:
   const [room, setRoom] = useState(item?.room ?? ''); const [kind, setKind] = useState<Exam['kind']>(item?.kind ?? 'Giữa kỳ'); const [format, setFormat] = useState<Exam['format']>(item?.format ?? 'Tự luận');
   const [reminder, setReminder] = useState(item?.reminder ?? true); const [minutes, setMinutes] = useState(item?.reminderMinutes ?? [1440, 180]); const [notes, setNotes] = useState(item?.notes ?? '');
   const [error, setError] = useState(''); const [conflicts, setConflicts] = useState<CalendarEvent[]>([]); const [confirmDelete, setConfirmDelete] = useState(false);
+  const dirty = useFormChanges({ courseId, date, time, end, room, kind, format, reminder, minutes: [...minutes].sort((a, b) => a - b), notes });
   const save = () => {
     setError(''); setConflicts([]); const course = courseCatalog.find(c => c.id === courseId);
     if (!course) { setError('Hãy chọn môn học.'); return; }
@@ -25,7 +27,7 @@ export function ExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }:
     const exam: Exam = { id: item?.id ?? uid(), courseId, course: course.name, date, time, end, room: room.trim() || 'Chưa cập nhật', kind, format, type: `${kind} • ${format}`, reminder, reminderMinutes: [...minutes].sort((a,b) => b-a), notes: notes.trim() };
     saveExam(exam); setToast(item ? 'Đã cập nhật lịch thi' : 'Đã thêm lịch thi'); if (onSaved) onSaved(exam.id); else onClose();
   };
-  return <Sheet title={item ? 'Chỉnh sửa lịch thi' : 'Lịch thi mới'} onClose={onClose}>
+  return <Sheet title={item ? 'Chỉnh sửa lịch thi' : 'Lịch thi mới'} onClose={onClose} dirty={dirty}>
     <CourseChoices value={courseId} onChange={setCourseId} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Loại kỳ thi</T><Segments values={['Giữa kỳ', 'Cuối kỳ', 'Khác']} value={kind} onChange={v => setKind(v as Exam['kind'])} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Hình thức thi</T>
