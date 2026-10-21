@@ -36,9 +36,16 @@ Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài
 - [x] Bài tập tính toàn bộ học kỳ, tách hoàn thành/chưa xong còn hạn/chưa xong quá hạn; cập nhật theo trạng thái và hạn ngày/giờ. Chú thích rõ khoảng ngày chỉ lọc thời gian học/phân bổ môn; chuỗi học kỳ tính đến hôm nay.
 - [x] Có lịch chọn ngày, báo lỗi khoảng đảo ngược, áp dụng/hủy, trạng thái chưa có học kỳ/phiên/bài tập. Workspace trống có thể thêm dữ liệu rồi xem thống kê. Giữ tab Điểm & GPA. Xem `UI-POLISH-4D.md` để test và xem giới hạn frontend.
 
+### Đợt 5 — So sánh GPA giữa các học kỳ
+
+- [x] UI 4E: Mục So sánh GPA trong Thống kê; chọn hai học kỳ A/B kèm năm học, không cho chọn trùng; có đổi chiều và mặc định kỳ trước/kỳ đang học.
+- [x] GPA, tín chỉ GPA đạt/tính GPA và số môn đủ kết quả lấy cùng `summarizeGrades` với bảng điểm; GPA tạm tính có nhãn và số môn còn thiếu kết quả. GPA học kỳ giữ lần học của kỳ đó, không dùng quy tắc chọn lần học lại của GPA tích lũy.
+- [x] Chênh lệch B − A tăng/giảm/không đổi theo hai giá trị GPA hiển thị 2 chữ số; thiếu GPA ở một kỳ thì không tự tính chênh lệch. Điểm thiếu và GPA 0.00 thật được hiển thị khác nhau, kỳ chưa có GPA không vẽ thanh 0.
+- [x] Chạm thẻ/thanh học kỳ mở đúng bảng điểm, dùng lại editor môn hiện có; lưu cập nhật GPA/thẻ/biểu đồ/chênh lệch, hủy bản nháp giữ dữ liệu cũ. Back quay lại từng bước; X đóng luồng, giữ lựa chọn so sánh.
+- [x] Trạng thái chưa có/chỉ có một học kỳ, kỳ chưa có môn, môn đạt/không đạt; kiểm tra 320/390/430/1280px. Giữ mục Điểm & GPA và thêm lối sang so sánh từ bảng điểm. Xem `UI-POLISH-4E.md`.
+
 ### Các đề xuất lưu để làm sau
 
-- [ ] Thống kê: hoàn thiện so sánh GPA qua các học kỳ và cách trình bày kỳ chưa có điểm thành một đợt riêng; chưa triển khai thêm trong UI 4D.
 - [ ] Thông báo: trạng thái rỗng, đã đọc/chưa đọc từng mục; huy hiệu đúng số mục chưa đọc.
 - [ ] Thông báo: giao diện quyền bị từ chối/thu hồi và hướng dẫn bật lại; phần xin quyền/lên lịch nhắc thật triển khai cùng thông báo trên thiết bị.
 - [ ] Biểu mẫu: cảnh báo khi đóng/quay lại với nội dung đã thay đổi chưa lưu; có lựa chọn tiếp tục sửa hoặc bỏ thay đổi.

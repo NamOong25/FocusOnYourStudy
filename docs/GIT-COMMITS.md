@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: UI 4D — Thống kê từ phiên học và bài tập
+## Đợt vừa hoàn thành: UI 4E — So sánh GPA giữa các học kỳ
 
-Tổng quan thống kê theo ảnh đã duyệt: chọn học kỳ và 7/30 ngày hoặc khoảng ngày tùy chọn; biểu đồ thời gian và phân bổ môn từ các phiên Pomodoro hoàn tất. Tiến độ bài tập theo học kỳ, quá hạn xét ngày/giờ; có trạng thái trống và nhãn phiên mẫu. Giữ tab Điểm & GPA. Xem `UI-POLISH-4D.md`. Dữ liệu vẫn trong bộ nhớ phiên; chưa nối backend/lưu bền và chưa bổ sung phần so sánh GPA trong đợt này.
+Chọn hai học kỳ A/B và đổi chiều; GPA, tín chỉ và số môn lấy cùng hàm với bảng điểm. Có chênh lệch tăng/giảm, nhãn tạm tính và trạng thái chưa đủ dữ liệu; phân biệt GPA 0.00 thật. Mở bảng điểm học kỳ từ thẻ/biểu đồ và sửa điểm bằng editor hiện có; kết quả cập nhật đồng nhất. Xem `UI-POLISH-4E.md`. Dữ liệu vẫn trong bộ nhớ phiên, chưa nối backend/lưu bền; không thay công thức điểm.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Hoàn thiện thống kê từ phiên học và bài tập"
+git commit -m "Hoàn thiện giao diện so sánh GPA giữa các học kỳ"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| UI 4D — Thống kê từ phiên học và bài tập | `Hoàn thiện thống kê từ phiên học và bài tập` |
 | UI 4C — Pomodoro và mục tiêu ngày | `Hoàn thiện Pomodoro lịch sử phiên học và mục tiêu ngày` |
 | UI 4B — Giờ deadline và lọc bài tập | `Bổ sung giờ deadline tìm kiếm và lọc bài tập` |
 | UI 4A — Điều hướng và Bài tập riêng | `Đơn giản hóa điều hướng lịch học và tách màn bài tập` |
