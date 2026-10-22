@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend dự kiến Java Spring Boot + PostgreSQL. Các đợt dưới đây **chưa triển khai**, chỉ ghi kế hoạch và tiêu chí kiểm tra để theo dõi. Hoàn thiện giao diện theo từng đợt trước khi bắt đầu backend.
+Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend Java Spring Boot + PostgreSQL. Ngày 22/10/2026 bắt đầu triển khai backend đợt 1 sau khi rà soát luồng giao diện. Đợt 2–5 vẫn chưa triển khai; frontend chưa nối API.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -91,13 +91,15 @@ Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backen
 
 ### Checklist nghiệm thu
 
-- [ ] Backend 1 — Nền tảng backend chạy được, kết nối PostgreSQL; có thiết kế bảng/API và định dạng lỗi.
+- [x] Backend 1 — Spring Boot 4.1.1/Java 21, Maven Wrapper, PostgreSQL portable cục bộ; Flyway V1 tạo bảng tài khoản/học kỳ/môn, JPA validate schema. Có API health, ProblemDetail, request ID, CORS và khóa endpoint nghiệp vụ trước auth. Xem `../backend/README.md`, `../backend/docs/SCHEMA.md` và `../backend/docs/API.md`.
+- [x] Backend 1 — Kiểm tra trên PostgreSQL thật: chạy lại migration không tạo trùng; chặn email/kỳ/mã môn trùng, kỳ ngoài 1–3, tín chỉ sai và liên kết môn khác chủ sở hữu; kiểm tra health/lỗi/401/405/CORS. Chưa coi đây là phân quyền hai tài khoản hoàn chỉnh.
+- [x] Backend 1 — 17 tests qua; app chạy trên `focus_study/public`, health chuyển 200 → 503 khi dừng DB → 200 khi bật lại. Hướng dẫn tổng hợp ở `BACKEND-PHASE-1.md`; frontend chưa nối API.
 - [ ] Backend 2 — Đăng ký/đăng nhập và phiên đăng nhập hoạt động trên frontend; dữ liệu hai tài khoản được tách riêng.
 - [ ] Backend 3 — Thêm/sửa/xóa học kỳ và môn học; mở lại app vẫn có dữ liệu, chọn đúng học kỳ.
 - [ ] Backend 4 — Bài tập, kế hoạch tự học, lịch lặp/ngoại lệ và lịch thi được lưu đúng liên kết; kiểm tra một buổi và cả chuỗi.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.
 
-Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Lộ trình chức năng thật đầy đủ ở cuối checklist vẫn giữ các giai đoạn Pomodoro, thống kê, tài liệu/AI và hoàn thiện để sử dụng; chưa coi các phần đó đã hoàn thành sau 5 đợt này. Chỉ đánh dấu từng đợt khi đã kiểm tra chức năng thật, không dựa vào giao diện mẫu.
+Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Lộ trình đầy đủ ở cuối checklist vẫn giữ các giai đoạn Pomodoro, thống kê, tài liệu/AI và hoàn thiện để sử dụng. Đợt 1 mới có nền tảng; đăng ký/đăng nhập, phiên và nối React Native thuộc đợt 2. Chỉ đánh dấu từng đợt khi đã kiểm tra chức năng thật.
 
 ## Các đợt giao diện đã hoàn thành
 

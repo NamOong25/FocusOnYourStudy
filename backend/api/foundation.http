@@ -1,0 +1,21 @@
+@baseUrl = http://localhost:8080
+
+### Kết nối thật tới PostgreSQL: 200 UP, hoặc 503 khi DB mất kết nối lúc app đang chạy
+GET {{baseUrl}}/api/v1/health
+Accept: application/json
+X-Request-ID: manual-health-1
+
+### Health Spring không hiện chi tiết database
+GET {{baseUrl}}/actuator/health
+
+### Sai method: 405 ProblemDetail và Allow header
+POST {{baseUrl}}/api/v1/health
+X-Request-ID: manual-method-1
+
+### API nghiệp vụ chưa mở ở đợt 1: 401
+GET {{baseUrl}}/api/v1/semesters
+
+### Preflight cho web Expo cục bộ
+OPTIONS {{baseUrl}}/api/v1/health
+Origin: http://localhost:8092
+Access-Control-Request-Method: GET

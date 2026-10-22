@@ -1,6 +1,17 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ 5 màn Stitch và DESIGN.md do bạn cung cấp. Project độc lập với StudyPlanner cũ. Giai đoạn hiện tại chỉ làm giao diện tương tác với dữ liệu mẫu; chưa có backend Spring Boot.
+Frontend React Native + Expo SDK 56, dựng từ 5 màn Stitch và DESIGN.md do bạn cung cấp. Project độc lập với StudyPlanner cũ. Đã thêm nền tảng backend Spring Boot + PostgreSQL ở `backend/`; frontend hiện vẫn tương tác với dữ liệu trong bộ nhớ, chưa nối API.
+
+## Backend đợt 1
+
+Java 21 + Spring Boot 4.1.1; Maven Wrapper, PostgreSQL cục bộ, Flyway tạo bảng tài khoản/học kỳ/môn và API health. Chưa có đăng nhập hoặc CRUD thật trên app.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap\backend'
+.\scripts\Run-Local.ps1
+```
+
+Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
 ## Chạy ứng dụng
 
