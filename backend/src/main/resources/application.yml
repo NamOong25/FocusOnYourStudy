@@ -1,6 +1,9 @@
 spring:
   application:
     name: focus-study-backend
+  jackson:
+    deserialization:
+      accept-float-as-int: false
   datasource:
     url: ${DB_URL:jdbc:postgresql://127.0.0.1:55432/focus_study}
     username: ${DB_USER:focus_study}

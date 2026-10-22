@@ -3,6 +3,7 @@ package com.focusstudy.common.api;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import com.focusstudy.auth.AuthApiException;
+import com.focusstudy.academics.semesters.SemesterApiException;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -22,6 +23,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+    @ExceptionHandler(SemesterApiException.class)
+    ResponseEntity<ProblemDetail> semesterProblem(SemesterApiException ex, HttpServletRequest request) {
+        return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore())
+                .body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));
+    }
 
     @ExceptionHandler(AuthApiException.class)
     ResponseEntity<ProblemDetail> authProblem(AuthApiException ex, HttpServletRequest request) {

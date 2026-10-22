@@ -24,7 +24,7 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
-## Backend hiện tại — đợt 2B
+## Backend hiện tại — đợt 3A
 
 Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend đã nối khôi phục/refresh/logout ở 2C.2; nghiệm thu thiết bị thật ở 2C.3.
 
@@ -35,7 +35,9 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
-Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Đợt kế tiếp 2C.3B nghiệm thu thiết bị thật sau 2C.3A kiểm tra web.
+Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Theo lựa chọn người dùng, **2C.3B kiểm tra thiết bị thật để làm sau**; **3A — API học kỳ đã hoàn thành**, tiếp theo 3B — API môn học rồi 3C — nối giao diện từng phần với dữ liệu thật. Hướng dẫn test học kỳ ở [BACKEND-PHASE-3A.md](docs/BACKEND-PHASE-3A.md); UI học kỳ vẫn chưa gọi API.
+
+API học kỳ hiện có GET/POST/PUT/DELETE theo tài khoản, lưu PostgreSQL, chặn trùng và xóa kỳ còn môn, dùng version chống ghi đè. 72 tests/Maven verify qua. Xem [hướng dẫn 3A](docs/BACKEND-PHASE-3A.md).
 
 ## Chạy ứng dụng
 

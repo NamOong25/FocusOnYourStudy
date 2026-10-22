@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:8080
+@email = sinhvien@example.com
+@password = MatKhauThu123!
+
+### Chỉ dùng thông tin thử; không commit mật khẩu/token thật.
+### Đăng ký tài khoản bằng auth.http trước nếu cần.
+# @name semesterLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Danh sách học kỳ của người đang đăng nhập
+GET {{baseUrl}}/api/v1/semesters
+Authorization: Bearer {{semesterLogin.response.body.$.data.accessToken}}
+
+### Tạo: kỳ 3 là kỳ hè tùy chọn; không tự tạo kỳ còn lại
+# @name createdSemester
+POST {{baseUrl}}/api/v1/semesters
+Authorization: Bearer {{semesterLogin.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{ "term": 1, "startYear": 2026, "status": "UPCOMING", "note": "Học kỳ thử API" }
+
+### Xem lại đúng bản ghi đã lưu
+GET {{baseUrl}}/api/v1/semesters/{{createdSemester.response.body.$.data.id}}
+Authorization: Bearer {{semesterLogin.response.body.$.data.accessToken}}
+
+### Chuyển sang CURRENT sẽ hoàn tất kỳ CURRENT cũ trong cùng tài khoản
+# @name updatedSemester
+PUT {{baseUrl}}/api/v1/semesters/{{createdSemester.response.body.$.data.id}}
+Authorization: Bearer {{semesterLogin.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{ "term": 1, "startYear": 2026, "status": "CURRENT", "note": "Đã sửa", "version": {{createdSemester.response.body.$.data.version}} }
+
+### Xóa kỳ trống: dùng version MỚI NHẤT sau PUT
+DELETE {{baseUrl}}/api/v1/semesters/{{updatedSemester.response.body.$.data.id}}?version={{updatedSemester.response.body.$.data.version}}
+Authorization: Bearer {{semesterLogin.response.body.$.data.accessToken}}
+
+### Đóng phiên thử; không ảnh hưởng phiên đăng nhập khác
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "refreshToken": "{{semesterLogin.response.body.$.data.refreshToken}}" }

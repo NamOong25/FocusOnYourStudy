@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua**, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. Frontend học kỳ chưa nối API; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
+
 Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối 2C.1/2C.2: đăng ký/đăng nhập/hồ sơ, khôi phục/refresh/logout**; nghiệm thu thiết bị thật ở 2C.3. Dữ liệu học tập frontend vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C2.md`.
 
 ## Chạy trên máy Windows hiện tại
@@ -111,7 +113,7 @@ backend/
 └── src/test/java/com/focusstudy/ Kiểm thử API và PostgreSQL
 ```
 
-POST đăng ký/đăng nhập/refresh/logout, GET CSRF và hai health endpoint không yêu cầu access token. Cookie auth bắt buộc CSRF và origin được phép. GET `/api/v1/users/me` cần Bearer token gắn phiên còn hiệu lực; các endpoint học tập khác vẫn khóa. CORS cho localhost 8092/8081 và cho credentials với origin cụ thể, không wildcard. API mặc định chỉ nghe localhost; cấu hình điện thoại sẽ làm ở 2C.
+GET/POST/PUT/DELETE học kỳ đã mở ở 3A và cần Bearer/phiên hoạt động. POST đăng ký/đăng nhập/refresh/logout, GET CSRF và hai health endpoint không yêu cầu access token. Cookie auth bắt buộc CSRF và origin được phép. GET `/api/v1/users/me` cần Bearer token gắn phiên còn hiệu lực; các endpoint học tập khác vẫn khóa. CORS cho localhost 8092/8081 và cho credentials với origin cụ thể, không wildcard. API mặc định chỉ nghe localhost; cấu hình điện thoại sẽ làm ở 2C.
 
 Mật khẩu PBKDF2-HMAC-SHA256 với salt 16 byte, 600.000 vòng, hash 256 bit; nhận 8–128 ký tự và giữ nguyên khoảng trắng. JWT RS256 chỉ nhận qua Authorization, có `sid`; mỗi request kiểm tra phiên chưa bị thu hồi/hết hạn trong DB. Refresh token là bí mật ngẫu nhiên 256 bit, chỉ lưu SHA-256, dùng một lần. Phiên tối đa 30 ngày; mỗi refresh token tối đa 7 ngày và không vượt hạn phiên. Dùng lại token đã tiêu thụ sẽ thu hồi cả phiên; client 2C cần gộp refresh đồng thời và không tự gửi lại token cũ sau lỗi mạng không rõ kết quả.
 
@@ -127,4 +129,4 @@ Khóa `.local/auth`, thông tin DB và `target/` ngoài Git. Môi trường khá
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-Tiếp theo: **2C.3 nghiệm thu tài khoản/thiết bị thật** sau UI 2C.1/2C.2 đã nối tài khoản và phiên → đợt 3 API học kỳ/môn. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.
+Tiếp theo: **3B API môn học → 3C nối giao diện học kỳ/môn**; 3A học kỳ đã xong, 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.

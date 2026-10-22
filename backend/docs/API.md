@@ -1,6 +1,6 @@
 # API — v1
 
-Base URL cục bộ: `http://localhost:8080`. Đợt 2B có đăng ký/đăng nhập/hồ sơ, refresh và logout; **frontend 2C.1/2C.2 đã gọi tài khoản và khôi phục/refresh/logout**. Chưa mở CRUD học tập; nghiệm thu thiết bị thật thuộc 2C.3.
+Base URL cục bộ: `http://localhost:8080`. **3A đã mở CRUD học kỳ theo tài khoản**, xem [hợp đồng học kỳ](SEMESTERS.md). Tài khoản/phiên có từ 2A/2B, frontend đã nối và kiểm tra web đến 2C.3A. UI học kỳ chưa nối API; thiết bị thật 2C.3B để làm sau.
 
 ## Endpoint hiện có
 
@@ -14,6 +14,10 @@ Base URL cục bộ: `http://localhost:8080`. Đợt 2B có đăng ký/đăng nh
 | POST `/api/v1/auth/logout` | Refresh token; web có CSRF | 204, thu hồi đúng phiên; lặp lại không lỗi. |
 | GET `/api/v1/auth/csrf` | Công khai | 200, mã/header CSRF và cookie CSRF HttpOnly; không có phiên tài khoản/JSESSIONID. |
 | GET `/api/v1/users/me` | Bearer access token và phiên hoạt động | 200, hồ sơ đúng chủ thể của token. |
+| GET `/api/v1/semesters` và `/{id}` | Bearer và phiên hoạt động | 200, danh sách/chi tiết của chủ token; ID khác chủ trả 404. |
+| POST `/api/v1/semesters` | Bearer và phiên hoạt động | 201, tạo kỳ 1/2/3; chặn trùng kỳ/năm và chuyển CURRENT trong transaction. |
+| PUT `/api/v1/semesters/{id}` | Bearer và version mới nhất | 200, cập nhật; 409 nếu trùng hoặc version cũ. |
+| DELETE `/api/v1/semesters/{id}?version=...` | Bearer và version mới nhất | 204, xóa kỳ trống; 409 nếu còn môn. |
 | Các đường dẫn nghiệp vụ còn lại | Chưa mở | 401 khi chưa xác thực; 403 khi có token hợp lệ. |
 
 Flyway/JPA phải thành công trước khi app lắng nghe HTTP. DB chưa chạy từ đầu sẽ làm backend không khởi động.

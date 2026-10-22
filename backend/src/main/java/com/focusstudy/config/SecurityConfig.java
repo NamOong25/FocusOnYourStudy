@@ -58,7 +58,10 @@ public class SecurityConfig {
         csrfRepository.setCookieCustomizer(cookie -> cookie.path(AuthTransport.COOKIE_PATH)
                 .httpOnly(true).sameSite("Strict").secure(sessionProperties.cookieSecure()));
         return http.cors(cors -> cors.configurationSource(corsSource))
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfRepository).requireCsrfProtectionMatcher(AuthTransport::needsCsrf))
+                // Only auth endpoints authenticate via ambient cookies. Academic
+                // requests require an explicit Bearer and never authenticate by cookie.
+                .csrf(csrf -> csrf.csrfTokenRepository(csrfRepository).requireCsrfProtectionMatcher(request ->
+                        request.getServletPath().startsWith("/api/v1/auth/") && AuthTransport.needsCsrf(request)))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
@@ -69,6 +72,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/semesters", "/api/v1/semesters/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/semesters").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/semesters/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/semesters/*").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> { }).authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))

@@ -55,7 +55,7 @@ Access token RS256 hạn 15 phút chứa UUID tài khoản `sub`, UUID phiên `s
 - `term`: 1/2 là kỳ chính; 3 là kỳ hè tùy chọn, không tự tạo kỳ hè.
 - `start_year`: 2026 biểu diễn năm học 2026–2027; không lưu chuỗi tên kỳ/năm để tránh nhập sai.
 - Duy nhất `(user_id, start_year, term)`; hai người có thể có cùng kỳ/năm.
-- Tối đa một kỳ `CURRENT` mỗi tài khoản. API đổi kỳ hiện tại ở đợt 3 phải cập nhật các kỳ trong cùng transaction, chuyển kỳ cũ trước khi đánh dấu kỳ mới.
+- Tối đa một kỳ `CURRENT` mỗi tài khoản. API 3A đã cập nhật trong cùng transaction: khóa hàng chủ tài khoản, chuyển kỳ CURRENT cũ thành COMPLETED/flush trước khi đánh dấu kỳ mới. PUT/DELETE kiểm tra version; xóa kỳ có môn bị chặn. Không sửa V1/V2; hợp đồng ở `SEMESTERS.md`.
 - `CURRENT / UPCOMING / COMPLETED` ánh xạ `Đang học / Sắp tới / Đã kết thúc`.
 
 ### Môn học

@@ -38,25 +38,39 @@ class SessionRestartTests {
         assertThat(response.statusCode()).isEqualTo(200);
         return (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(response.body(), Map.class).get("data");
     }
+    HttpResponse<String> semester(ConfigurableApplicationContext app, String method, String path, String token, Object payload) throws Exception {
+        int port = app.getEnvironment().getRequiredProperty("local.server.port", Integer.class);
+        var request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).timeout(Duration.ofSeconds(10))
+                .header("Content-Type", "application/json").header("Authorization", "Bearer " + token);
+        return client.send(request.method(method, payload == null ? HttpRequest.BodyPublishers.noBody() :
+                HttpRequest.BodyPublishers.ofString(app.getBean(ObjectMapper.class).writeValueAsString(payload))).build(), HttpResponse.BodyHandlers.ofString());
+    }
 
     @Test void refreshAndRevocationSurviveClosingAndRecreatingTheEntireBackend() throws Exception {
         String schema = "backend_it_" + UUID.randomUUID().toString().replace("-", "");
         String email = "restart-" + UUID.randomUUID() + "@example.test", password = "RestartTest123!";
-        String first, independent, rotated;
+        String first, independent, rotated, semesterId;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
-                first = data(app, post(app, "/api/v1/auth/login", Map.of("email", email, "password", password))).get("refreshToken").toString();
+                var pair = data(app, post(app, "/api/v1/auth/login", Map.of("email", email, "password", password)));
+                first = pair.get("refreshToken").toString();
                 independent = data(app, post(app, "/api/v1/auth/login", Map.of("email", email, "password", password))).get("refreshToken").toString();
+                var created = semester(app, "POST", "/api/v1/semesters", pair.get("accessToken").toString(), Map.of("term", 1, "startYear", 2026, "status", "CURRENT", "note", "Persist across restart"));
+                assertThat(created.statusCode()).isEqualTo(201);
+                semesterId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(created.body(), Map.class).get("data")).get("id").toString();
             }
             try (var app = start(schema)) {
-                rotated = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first))).get("refreshToken").toString();
+                var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
+                rotated = pair.get("refreshToken").toString();
+                assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("note")).isEqualTo("Persist across restart");
                 assertThat(post(app, "/api/v1/auth/logout", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(204);
             }
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
-                assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)).statusCode()).isEqualTo(200);
+                var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
+                assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("status")).isEqualTo("CURRENT");
             }
         } finally {
             if (!schema.matches("backend_it_[a-f0-9]{32}")) throw new IllegalStateException("Unsafe schema");
