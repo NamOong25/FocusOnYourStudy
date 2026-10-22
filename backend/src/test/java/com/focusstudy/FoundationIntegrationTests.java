@@ -44,6 +44,7 @@ class FoundationIntegrationTests {
 
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {
+        TestJwtResources.configure(registry);
         registry.add("spring.datasource.url", () -> URL + (URL.contains("?") ? "&" : "?") + "currentSchema=" + SCHEMA);
         registry.add("spring.datasource.username", () -> USER);
         registry.add("spring.datasource.password", () -> PASSWORD);

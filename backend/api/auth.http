@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:8080
+@email = sinhvien@example.com
+@password = MatKhauThu123!
+
+### Chỉ là dữ liệu thử; không ghi mật khẩu/token thật vào file được commit.
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}",
+  "fullName": "Nguyễn Văn An",
+  "school": "Đại học Công nghiệp TP.HCM",
+  "major": "Công nghệ thông tin"
+}
+
+### Đăng nhập (VS Code REST Client giữ kết quả tên login trong phiên extension)
+# @name login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Chạy request login phía trên trước
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+### Thiếu token: mong đợi 401 AUTHENTICATION_REQUIRED
+GET {{baseUrl}}/api/v1/users/me

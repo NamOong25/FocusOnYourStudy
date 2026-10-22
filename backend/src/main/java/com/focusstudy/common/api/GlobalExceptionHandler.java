@@ -2,6 +2,7 @@ package com.focusstudy.common.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import com.focusstudy.auth.AuthApiException;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -21,6 +22,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+
+    @ExceptionHandler(AuthApiException.class)
+    ResponseEntity<ProblemDetail> authProblem(AuthApiException ex, HttpServletRequest request) {
+        var response = ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore());
+        if (ex.status() == HttpStatus.UNAUTHORIZED) response.header(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
+        return response.body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));
+    }
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,

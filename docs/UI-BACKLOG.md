@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend Java Spring Boot + PostgreSQL. Ngày 22/10/2026 bắt đầu triển khai backend đợt 1 sau khi rà soát luồng giao diện. Đợt 2–5 vẫn chưa triển khai; frontend chưa nối API.
+Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend Java Spring Boot + PostgreSQL. Ngày 22/10/2026 đã hoàn thành nền tảng backend 1 và API tài khoản 2A. Đợt 2B/2C và 3–5 chưa triển khai; frontend chưa nối API.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -95,11 +95,14 @@ Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backen
 - [x] Backend 1 — Kiểm tra trên PostgreSQL thật: chạy lại migration không tạo trùng; chặn email/kỳ/mã môn trùng, kỳ ngoài 1–3, tín chỉ sai và liên kết môn khác chủ sở hữu; kiểm tra health/lỗi/401/405/CORS. Chưa coi đây là phân quyền hai tài khoản hoàn chỉnh.
 - [x] Backend 1 — 17 tests qua; app chạy trên `focus_study/public`, health chuyển 200 → 503 khi dừng DB → 200 khi bật lại. Hướng dẫn tổng hợp ở `BACKEND-PHASE-1.md`; frontend chưa nối API.
 - [ ] Backend 2 — Đăng ký/đăng nhập và phiên đăng nhập hoạt động trên frontend; dữ liệu hai tài khoản được tách riêng.
+- [x] Backend 2A — POST đăng ký/đăng nhập, GET hồ sơ hiện tại; mật khẩu băm, email chuẩn hóa/duy nhất, lỗi validation/trùng/sai thông tin, giới hạn thử; access token ký RS256 15 phút để bảo vệ hồ sơ. 34 tests qua trên PostgreSQL thật (gồm 17 tests nền tảng). Hồ sơ hai tài khoản độc lập; không coi là đã kiểm tra phân quyền dữ liệu học tập. Xem `BACKEND-PHASE-2A.md`.
+- [ ] Backend 2B — Refresh token, luân chuyển/thu hồi phiên, đăng xuất, xử lý hết hạn và phiên không hợp lệ; kiểm tra token cũ/phát lại/đăng xuất và khởi động lại backend.
+- [ ] Backend 2C — Nối đăng ký/đăng nhập/hồ sơ React Native; lưu phiên phù hợp web/native, tự refresh, lỗi mạng có timeout/thử lại, đăng xuất dọn dữ liệu tài khoản; thử hai tài khoản không lẫn trạng thái frontend.
 - [ ] Backend 3 — Thêm/sửa/xóa học kỳ và môn học; mở lại app vẫn có dữ liệu, chọn đúng học kỳ.
 - [ ] Backend 4 — Bài tập, kế hoạch tự học, lịch lặp/ngoại lệ và lịch thi được lưu đúng liên kết; kiểm tra một buổi và cả chuỗi.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.
 
-Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Lộ trình đầy đủ ở cuối checklist vẫn giữ các giai đoạn Pomodoro, thống kê, tài liệu/AI và hoàn thiện để sử dụng. Đợt 1 mới có nền tảng; đăng ký/đăng nhập, phiên và nối React Native thuộc đợt 2. Chỉ đánh dấu từng đợt khi đã kiểm tra chức năng thật.
+Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Đợt 2 tiếp tục chia 2A → 2B → 2C; không làm hết trong một lần. 2A cần access token ngắn hạn để thử hồ sơ có bảo vệ; giữ phiên/refresh/đăng xuất vẫn thuộc 2B. Lộ trình đầy đủ phía dưới giữ Pomodoro, thống kê, tài liệu/AI và hoàn thiện. Chỉ đánh dấu toàn đợt khi đã kiểm tra đầy đủ chức năng thật.
 
 ## Các đợt giao diện đã hoàn thành
 
@@ -145,7 +148,8 @@ Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu tron
 
 ### Phần nền tảng vẫn cần triển khai thật
 
-- [ ] Auth Spring Boot, đăng ký/xác minh email, đăng nhập/đăng xuất, phiên/token và khôi phục/đổi mật khẩu.
+- [x] Auth Spring Boot 2A: API đăng ký/đăng nhập/hồ sơ, băm mật khẩu và access token ngắn hạn (chưa nối UI).
+- [ ] Auth tiếp theo: refresh/đăng xuất, nối UI, xác minh email và khôi phục/đổi mật khẩu; không coi các phần này đã xong chỉ vì có API đăng nhập.
 - [ ] Mỗi tài khoản chỉ đọc/ghi dữ liệu của mình; không dùng trạng thái tài khoản minh họa để phân quyền.
 - [ ] Lưu/đồng bộ hồ sơ và tùy chọn; chọn/tải avatar thật và xử lý quyền truy cập ảnh.
 - [ ] Áp dụng sáng/tối và bản dịch xuyên suốt app; hiện tại UI 2E chỉ có thẻ xem trước.
@@ -196,7 +200,7 @@ Bổ sung từ hai ảnh người dùng gửi ngày 20/10/2026. Lưu để tri�
 
 ## Lộ trình triển khai chức năng thật — lưu để làm sau
 
-Lộ trình dưới đây ghi lại thứ tự trong ảnh. Hiện vẫn ưu tiên hoàn thiện các giao diện theo đợt UI; chưa chuyển sang backend. Số giai đoạn ở đây khác với số nhóm chức năng và tên đợt UI (ví dụ UI 2A). Chưa đánh dấu nghiệm thu hoàn chỉnh giai đoạn nào chỉ dựa vào prototype.
+Lộ trình dưới đây ghi lại thứ tự trong ảnh. Đã chuyển sang backend sau UI 4H, hiện xong nền tảng và tài khoản 2A theo checklist 5 đợt ở trên. Số giai đoạn ở đây khác số nhóm chức năng và tên đợt UI (ví dụ UI 2A). Chưa đánh dấu nghiệm thu hoàn chỉnh giai đoạn nào chỉ dựa vào prototype.
 
 | Giai đoạn | Phạm vi | Kết quả cần kiểm tra được |
 | --- | --- | --- |

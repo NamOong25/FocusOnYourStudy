@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: Backend 1 — Nền tảng Spring Boot và PostgreSQL
+## Đợt vừa hoàn thành: Backend 2A — API tài khoản
 
-Tạo thư mục backend với Java 21/Spring Boot 4.1.1, Maven Wrapper, script PostgreSQL cục bộ và Flyway V1 cho tài khoản/học kỳ/môn. Có health API, định dạng lỗi, request ID, cấu hình CORS/security và test PostgreSQL thật. Thiết kế các quan hệ còn lại theo từng đợt; frontend chưa nối API. Xem `../backend/README.md`.
+Thêm API đăng ký/đăng nhập/hồ sơ, băm mật khẩu, access token RS256 15 phút, giới hạn thử và khóa cục bộ ngoài Git. Có hướng dẫn/script thử API; 34 tests qua trên PostgreSQL thật. Refresh/đăng xuất ở 2B, nối frontend ở 2C. Xem `BACKEND-PHASE-2A.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Khởi tạo backend Spring Boot và kết nối PostgreSQL"
+git commit -m "Triển khai API đăng ký đăng nhập và hồ sơ tài khoản"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Backend 1 — Nền tảng | `Khởi tạo backend Spring Boot và kết nối PostgreSQL` |
 | UI 4H — Rà soát và trình diễn giao diện | `Bổ sung kiểm thử tổng thể giao diện và trình diễn trực tiếp` |
 | UI 4G — Cảnh báo biểu mẫu chưa lưu | `Cảnh báo khi rời biểu mẫu có thay đổi chưa lưu` |
 | UI 4F — Thông báo trong app và trạng thái đã đọc | `Hoàn thiện giao diện thông báo và trạng thái đã đọc` |
@@ -46,6 +47,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| Backend 2 — Tài khoản thật | Đăng ký/đăng nhập/phiên, phân quyền và nối frontend | Triển khai đăng ký đăng nhập và phiên tài khoản |
+| Backend 2B — Phiên | Refresh, luân chuyển/thu hồi và đăng xuất | Bổ sung làm mới phiên đăng nhập và đăng xuất |
+| Backend 2C — Nối frontend | Gọi API tài khoản từ React Native, giữ phiên và xử lý lỗi mạng | Kết nối giao diện tài khoản với backend |
 
-Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Backend đợt 1 đã được người dùng đồng ý triển khai; các đợt tiếp theo làm theo yêu cầu `next`/`go`.
+Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Backend 1/2A đã hoàn thành; đợt tiếp theo theo `next`/`go`.

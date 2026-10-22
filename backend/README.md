@@ -1,6 +1,6 @@
-# Backend đợt 1 — FocusYourStudy
+# Backend — FocusYourStudy
 
-Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. Khởi tạo từ Spring Initializr chính thức ngày 22/10/2026. Frontend ở thư mục cha vẫn dùng dữ liệu trong bộ nhớ; đợt này chưa nối API hoặc triển khai đăng ký/đăng nhập.
+Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. Khởi tạo từ Spring Initializr chính thức ngày 22/10/2026. **Đợt 2A** đã có API đăng ký/đăng nhập/hồ sơ và access token 15 phút. Frontend ở thư mục cha vẫn dùng dữ liệu trong bộ nhớ, chưa nối API. Refresh token/giữ phiên/đăng xuất thuộc đợt 2B; nối React Native thuộc 2C.
 
 ## Chạy trên máy Windows hiện tại
 
@@ -16,7 +16,7 @@ Script sẽ:
 1. Tải PostgreSQL portable và driver JDBC từ Maven Central, đối chiếu SHA-256 đã ghim trong script.
 2. Tạo cluster riêng ở `.local/data`, mật khẩu ngẫu nhiên trong `.local/database.json`, chỉ nghe `127.0.0.1:55432`.
 3. Tạo database `focus_study` nếu chưa có; không xóa hoặc tạo lại data khi chạy lần tiếp theo.
-4. Nạp các biến kết nối vào process và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
+4. Tạo cặp khóa RSA ở `.local/auth` nếu chưa có, giữ nguyên khóa ở các lần chạy sau; nạp biến kết nối và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
 5. Flyway tạo ba bảng nền; Hibernate chỉ `validate`, không tự sửa schema.
 
 Mở **http://localhost:8080/api/v1/health**. Kết quả đúng:
@@ -57,7 +57,16 @@ Chạy test API, Bean Validation và migration trên PostgreSQL thật. Test tí
 
 Test xác nhận: Flyway chạy lại không tạo trùng; JPA khớp schema; term chỉ 1–3; kỳ/mã môn không trùng trong cùng phạm vi; chỉ một kỳ hiện tại/tài khoản; môn không thể tham chiếu học kỳ của tài khoản khác; số tín chỉ hợp lệ; API health/401/405/CORS/request ID và thông báo lỗi không lộ nội dung SQL/stack trace.
 
-Đã chạy từ đúng thư mục project ngày 22/10/2026: **17 tests qua**, Maven verify/đóng gói thành công. Kiểm tra app đang chạy cũng cho kết quả **200 → dừng database nhận 503 → bật lại nhận 200**. Xem thêm `../docs/BACKEND-PHASE-1.md`.
+Đã chạy ngày 22/10/2026: **34 tests qua**, Maven verify/đóng gói thành công (17 nền tảng + 13 tích hợp auth + 4 giới hạn tần suất). Có kiểm tra mật khẩu băm riêng theo salt, đăng ký trùng đồng thời, token giả/hết hạn/sai claim, mật khẩu Unicode dài và hai hồ sơ riêng. Test tự sinh khóa thử trong `target/`. Kết quả health 200 → 503 → 200 đã kiểm tra ở đợt 1. Xem `../docs/BACKEND-PHASE-1.md` và `../docs/BACKEND-PHASE-2A.md`.
+
+Thử API thủ công khi backend đang chạy, tại terminal thứ hai:
+
+```powershell
+.\scripts\Try-Auth.ps1 -Mode Register
+.\scripts\Try-Auth.ps1 -Mode Login
+```
+
+Script đăng ký yêu cầu email, họ tên, mật khẩu và xác nhận; sau đó tự đăng nhập và lấy hồ sơ. Chế độ Login dùng lại tài khoản đã tạo. Mật khẩu nhập ẩn, token chỉ giữ trong biến của lần chạy, không in ra hoặc lưu file. Không cần mở Expo để thử API này. API mẫu cho REST Client nằm trong `api/auth.http`.
 
 ## Dùng PostgreSQL đã cài hoặc môi trường CI
 
@@ -67,6 +76,7 @@ Tạo trước database và quyền tạo schema/migration cho role của môi t
 $env:DB_URL='jdbc:postgresql://127.0.0.1:5432/focus_study'
 $env:DB_USER='your_database_role'
 $env:DB_PASSWORD='your_local_password'
+.\scripts\Setup-LocalAuth.ps1
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -80,7 +90,7 @@ Maven dùng `.mvn/settings.xml` riêng của project để tải các dependency
 backend/
 ├── .mvn/                         Maven Wrapper và repository của project
 ├── scripts/                      Khởi tạo/chạy/dừng database, chạy app/test
-├── api/foundation.http           Ví dụ gọi API hiện có
+├── api/                          foundation.http và auth.http
 ├── docs/SCHEMA.md                Quan hệ dữ liệu đã tạo và thiết kế đợt sau
 ├── docs/API.md                   Phản hồi thành công/lỗi và phạm vi API
 ├── src/main/java/com/focusstudy/
@@ -88,7 +98,10 @@ backend/
 │   ├── common/api/              Response, ProblemDetail, request ID
 │   ├── common/persistence/      UUID, timestamp và optimistic version
 │   ├── health/                  API kiểm tra database
-│   ├── users/                   Entity tài khoản (chưa có API auth)
+│   ├── auth/                    Đăng ký/đăng nhập, JWT, băm mật khẩu, giới hạn thử
+│   │   ├── dto/                 Request/response; không log mật khẩu hoặc token
+│   │   └── validation/          Kiểm tra xác nhận mật khẩu
+│   ├── users/                   Entity, repository, DTO hồ sơ và GET /users/me
 │   └── academics/               Entity học kỳ/môn (chưa có API CRUD)
 ├── src/main/resources/
 │   ├── application.yml
@@ -96,7 +109,9 @@ backend/
 └── src/test/java/com/focusstudy/ Kiểm thử API và PostgreSQL
 ```
 
-Các endpoint nghiệp vụ đang bị khóa. Không có tài khoản demo, JWT hoặc mật khẩu đăng nhập tự sinh. `/api/v1/health` và `/actuator/health` là hai đường dẫn công khai; chưa mở quản lý tài khoản/học kỳ/môn chỉ vì bảng đã có. CORS cho localhost 8092/8081, có thể đổi bằng `CORS_ALLOWED_ORIGINS` phân cách dấu phẩy. API mặc định chỉ nghe localhost; cấu hình truy cập điện thoại/môi trường triển khai sẽ làm khi nối frontend.
+POST đăng ký/đăng nhập và hai health endpoint công khai. GET `/api/v1/users/me` bắt buộc Bearer token, lấy danh tính từ token; các endpoint nghiệp vụ khác vẫn khóa. Không tạo tài khoản demo hoặc mật khẩu đăng nhập tự sinh. CORS cho localhost 8092/8081, có thể đổi bằng `CORS_ALLOWED_ORIGINS` phân cách dấu phẩy. API mặc định chỉ nghe localhost; cấu hình truy cập điện thoại sẽ làm khi nối frontend.
+
+Mật khẩu được băm PBKDF2-HMAC-SHA256 với salt ngẫu nhiên 16 byte, 600.000 vòng, hash 256 bit; nhận 8–128 ký tự và giữ nguyên khoảng trắng. JWT ký RS256, kiểm tra chữ ký/issuer/audience/hạn dùng/mục đích/UUID chủ thể; chỉ nhận qua Authorization header. Khóa `.local/auth/private.pem`, thông tin database và `target/` nằm ngoài Git. Với môi trường khác, cấp khóa riêng bằng `JWT_PRIVATE_KEY_LOCATION` và `JWT_PUBLIC_KEY_LOCATION`; không phát hành khóa phát triển lên server. Refresh/thu hồi token và email xác minh/khôi phục mật khẩu chưa được triển khai. Giới hạn thử hiện nằm trong bộ nhớ theo IP của một process, chưa dùng cho nhiều instance/proxy production.
 
 ## Nguồn phiên bản và quy ước
 
@@ -106,4 +121,4 @@ Các endpoint nghiệp vụ đang bị khóa. Không có tài khoản demo, JWT 
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-Tiếp theo là backend đợt 2: đăng ký/đăng nhập và phiên thật; sau đó đợt 3 mới mở API học kỳ/môn và nối frontend. Hai tài khoản có dữ liệu riêng phải được nghiệm thu ở các đợt đó, không suy từ ràng buộc database của đợt 1.
+Tiếp theo: 2B refresh/giữ phiên/đăng xuất → 2C nối giao diện tài khoản → đợt 3 API học kỳ/môn. Hai tài khoản hiện có hồ sơ riêng; phân quyền toàn bộ dữ liệu học tập phải được kiểm tra khi mở từng API tương ứng.

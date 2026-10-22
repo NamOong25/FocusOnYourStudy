@@ -46,7 +46,9 @@ Cả ba bảng có UUID, thời điểm tạo/cập nhật và `version`. Dùng 
 
 ### Tài khoản
 
-Email lưu dạng trim/lowercase và duy nhất; API auth sau này cần chuẩn hóa/kiểm tra email trước khi ghi. `password_hash` bắt buộc, không có cột mật khẩu rõ. Chưa tạo tài khoản mẫu hoặc endpoint đăng ký. Thuật toán băm, xác minh email và token sẽ triển khai ở đợt 2.
+Email lưu dạng trim/lowercase và duy nhất; API đăng ký 2A chuẩn hóa/kiểm tra trước khi ghi, constraint `uq_user_email` chặn cả đăng ký đồng thời. `password_hash` lưu PBKDF2-HMAC-SHA256 với salt riêng và tiền tố phiên bản `{pbkdf2-sha256-v1}`, không có cột mật khẩu rõ. API chỉ trả DTO hồ sơ; không xuất hash. Không tạo tài khoản mẫu. Đợt 2A dùng lại bảng V1, không sửa migration đã áp dụng.
+
+Access token RS256 hạn 15 phút chứa UUID tài khoản, issuer, audience, mốc thời gian, jti và `token_use=access`; không chứa email/mật khẩu. Không lưu token vào bảng tài khoản. `/users/me` lấy UUID từ token đã xác thực, không nhận ID chủ sở hữu từ client. Khóa ký bền vững theo môi trường, ngoài Git. Refresh session thuộc 2B; xác minh email/khôi phục mật khẩu là các phần sau.
 
 ### Học kỳ
 

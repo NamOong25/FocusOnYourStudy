@@ -1,6 +1,7 @@
 ﻿$ErrorActionPreference = 'Stop'
 $backendRoot = Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'Setup-LocalDatabase.ps1')
+& (Join-Path $PSScriptRoot 'Setup-LocalAuth.ps1')
 . (Join-Path $PSScriptRoot 'Use-LocalDatabase.ps1')
 $env:TEST_DB_URL = $env:DB_URL
 $env:TEST_DB_USER = $env:DB_USER

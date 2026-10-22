@@ -44,6 +44,16 @@ management:
     health:
       show-details: never
 app:
+  auth:
+    jwt:
+      issuer: ${JWT_ISSUER:urn:focus-study:local}
+      audience: focus-study-api
+      access-token-ttl: 15m
+      private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:.local/auth/private.pem}
+      public-key-location: ${JWT_PUBLIC_KEY_LOCATION:file:.local/auth/public.pem}
+    rate-limit:
+      login-per-minute: 30
+      register-per-minute: 10
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8092,http://127.0.0.1:8092,http://localhost:8081,http://127.0.0.1:8081}
 logging:
