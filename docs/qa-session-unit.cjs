@@ -138,5 +138,29 @@ function fixture() {
     assert.ok(operations.every(op => /^[\w.-]+$/.test(op.key) && op.options.keychainAccessible === 'device-only'));
     await exports.sessionStore.write({ kind: 'signed-out' }); assert.equal(stored, null); assert.equal(await exports.sessionStore.read(), null);
   });
+  await test('refresh sees another-tab identity before its storage event; never retains old profile', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m);
+    const other = { ...f.user, id: 'b', email: 'b@example.test', fullName: 'B' };
+    await f.store.write({ kind: 'active', userId: 'b', refreshToken: 'refresh-b' });
+    f.api.refresh = async (token, before) => { await before(); f.calls.refresh.push(token); return { ...f.pair(), user: other }; };
+    f.api.profile = async () => other;
+    f.advance(); await m.tick(); assert.equal(m.state.profile.id, 'b'); assert.equal(m.state.email, other.email);
+  });
+  await test('another-tab identity with unavailable refresh hides old workspace and allows retry', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m);
+    await f.store.write({ kind: 'active', userId: 'b', refreshToken: 'refresh-b' });
+    f.api.refresh = async () => { throw offline(); }; f.advance(); await m.tick();
+    assert.equal(m.state.profile, null); assert.equal(m.state.hasSession, false); assert.equal(m.state.phase, 'unavailable'); assert.equal(m.state.canRestore, true);
+    const other = { ...f.user, id: 'b' }; f.api.refresh = async (token, before) => { await before(); return { ...f.pair(), user: other }; };
+    f.api.profile = async () => other; await m.restore(); assert.equal(m.state.profile.id, 'b');
+  });
+  await test('late A profile cannot overwrite B after switching account', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m); const started = deferred(), release = deferred();
+    const other = { ...f.user, id: 'b', email: 'b@example.test' };
+    f.api.profile = async token => { if (token === 'access-1') { started.resolve(); await release.promise; return f.user; } return other; };
+    const old = assert.rejects(m.reloadProfile(signal()), e => e.code === 'REQUEST_CANCELLED'); await started.promise;
+    f.api.login = async (input, s, before) => { await before(); return { ...f.pair(), user: other }; };
+    await f.login(m); release.resolve(); await old; assert.equal(m.state.profile.id, 'b'); assert.equal(m.state.email, other.email);
+  });
   console.log(JSON.stringify({ passed: true, checks: passed.length, cases: passed }));
 })().catch(error => { console.error(error); process.exitCode = 1; });

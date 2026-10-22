@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: 2C.2 — Giữ phiên và đăng xuất
+## Đợt vừa hoàn thành: 2C.3A — Tách tài khoản và kiểm tra phiên trên web
 
-Khôi phục khi tải lại, tự refresh, phối hợp nhiều tab và đăng xuất thật; web có cookie HttpOnly/CSRF, native có adapter SecureStore. Dọn dữ liệu thử khi đổi danh tính, có trạng thái đăng xuất chưa xác nhận khi lỗi mạng. Đã kiểm tra logic/web với PostgreSQL thật; máy thật thuộc 2C.3. Xem `FRONTEND-AUTH-2C2.md`.
+Kiểm tra hai tài khoản với môn/bài tập/buổi tự học thử, form chưa lưu và Pomodoro đang chạy; đổi tài khoản/đăng xuất liên tab, hồ sơ/đăng nhập về muộn và lỗi mạng. Sửa việc giữ thông báo/chế độ thử lỗi qua tài khoản khác và trường hợp refresh đọc phiên người khác trước storage event. Có hướng dẫn tự test; dữ liệu học tập chưa lưu backend, máy thật thuộc 2C.3B. Xem `FRONTEND-AUTH-2C3A.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Bổ sung giữ phiên làm mới token và đăng xuất trên ứng dụng"
+git commit -m "Kiểm tra tách dữ liệu tài khoản và xử lý phiên trên web"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Frontend 2C.2 — Giữ phiên | `Bổ sung giữ phiên làm mới token và đăng xuất trên ứng dụng` |
 | Frontend 2C.1 — Nối tài khoản | `Kết nối giao diện đăng ký đăng nhập và hồ sơ với backend` |
 | Backend 2B — Phiên và đăng xuất | `Bổ sung làm mới phiên đăng nhập và đăng xuất` |
 | Backend 2A — API tài khoản | `Triển khai API đăng ký đăng nhập và hồ sơ tài khoản` |
@@ -51,6 +52,6 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
 
-| 2C.3 — Nghiệm thu tài khoản | Đổi tài khoản, lỗi mạng và kiểm tra native | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
+| 2C.3B — Nghiệm thu thiết bị | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B và UI tài khoản 2C.1/2C.2; tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B và UI tài khoản 2C.1/2C.2/2C.3A; tiếp theo theo `next`/`go`.

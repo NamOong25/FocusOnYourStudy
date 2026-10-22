@@ -118,13 +118,13 @@ function AppShell() {
 function Workspace() {
   const auth = useAuth();
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
-  return <SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
-    : <PrototypeProvider key={auth.revision} empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</SessionGate>;
+  return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
+    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
 }
 export default function App() {
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: C.canvas, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color={C.primary} /></View>;
-  return <SafeAreaProvider><AuthProvider><FeedbackProvider><Workspace /></FeedbackProvider></AuthProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><AuthProvider><Workspace /></AuthProvider></SafeAreaProvider>;
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#EDEDF8', alignItems: 'center' },

@@ -110,6 +110,16 @@ export class SessionManager {
         this.clear('Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.', record?.kind === 'logout-pending');
         throw new ApiError('Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.', 'INVALID_ACCESS_TOKEN', 401);
       }
+      if (record.userId && record.userId !== this.owner) {
+        // Another tab can finish switching accounts before its storage event is
+        // delivered here. Drop the old workspace and invalidate its requests now.
+        this.clear('', false, 'restoring');
+        try { return await this.rotate(record, true); }
+        catch (error) {
+          if (this.state.phase === 'restoring') this.publish({ phase: 'unavailable', profileError: asApiError(error), canRestore: true });
+          throw error;
+        }
+      }
       return this.rotate(record);
     });
     this.refreshFlight = work.finally(() => { this.refreshFlight = null; }); return this.refreshFlight;

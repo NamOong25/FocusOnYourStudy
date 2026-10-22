@@ -2,7 +2,7 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 2C.2: tài khoản thật, giữ phiên khi F5, tự làm mới token và đăng xuất**; các màn học tập vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Tài khoản trên giao diện — 2C.2
+## Tài khoản trên giao diện — 2C.2 và kiểm tra web 2C.3A
 
 Chạy hai terminal (PowerShell trong IntelliJ/VS Code đều được):
 
@@ -20,6 +20,8 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 **F5 khôi phục phiên khi còn hiệu lực.** Hồ sơ → Đăng xuất → Xác nhận đăng xuất thu hồi phiên và dọn nội dung thử; các tab cùng origin cũng thoát. Mất mạng khi đăng xuất có nút Hoàn tất đăng xuất, không tự khôi phục phiên đã thoát. Sau nâng cấp từ 2C.1 cần đăng nhập một lần. Chưa lưu dữ liệu học tập (đợt 3 trở đi), chưa có API sửa hồ sơ/quên mật khẩu.
 
+**2C.3A** kiểm tra A/B với dữ liệu thử, bản nháp và đồng hồ đang chạy; không giữ thông báo hoặc chế độ thử lỗi từ tài khoản cũ. Có kiểm tra liên tab, phản hồi về muộn, offline/kết nối lại. Xem [hướng dẫn tự test](docs/FRONTEND-AUTH-2C3A.md). Thiết bị thật còn ở 2C.3B; học kỳ/môn/bài vẫn chưa lưu vào tài khoản backend.
+
 URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
 ## Backend hiện tại — đợt 2B
@@ -33,7 +35,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
-Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Đợt kế tiếp 2C.3 nghiệm thu tài khoản và thiết bị.
+Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Đợt kế tiếp 2C.3B nghiệm thu thiết bị thật sau 2C.3A kiểm tra web.
 
 ## Chạy ứng dụng
 
