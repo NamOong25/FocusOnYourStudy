@@ -19,4 +19,13 @@ public class AuthApiException extends RuntimeException {
     public static AuthApiException invalidToken() {
         return new AuthApiException(HttpStatus.UNAUTHORIZED, "INVALID_ACCESS_TOKEN", "Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.");
     }
+    public static AuthApiException invalidRefresh() {
+        return new AuthApiException(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.");
+    }
+    public static AuthApiException refreshReused() {
+        return new AuthApiException(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_REUSED", "Phiên đã bị thu hồi do token cũ được sử dụng lại. Hãy đăng nhập lại.");
+    }
+    public static AuthApiException sessionExpired() {
+        return new AuthApiException(HttpStatus.UNAUTHORIZED, "SESSION_EXPIRED", "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.");
+    }
 }

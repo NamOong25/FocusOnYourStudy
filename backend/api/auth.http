@@ -28,3 +28,26 @@ Authorization: Bearer {{login.response.body.$.data.accessToken}}
 
 ### Thiếu token: mong đợi 401 AUTHENTICATION_REQUIRED
 GET {{baseUrl}}/api/v1/users/me
+
+### Native/terminal: làm mới không kèm Authorization. Token cũ chỉ dùng một lần.
+# @name refreshed
+POST {{baseUrl}}/api/v1/auth/refresh
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "refreshToken": "{{login.response.body.$.data.refreshToken}}" }
+
+### Đọc hồ sơ với access token mới
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{refreshed.response.body.$.data.accessToken}}
+
+### Đăng xuất phiên hiện tại, không kèm Authorization; mong đợi 204
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "refreshToken": "{{refreshed.response.body.$.data.refreshToken}}" }
+
+### Sau logout: token mới cũng phải nhận 401
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{refreshed.response.body.$.data.accessToken}}

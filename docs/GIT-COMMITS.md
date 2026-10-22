@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: Backend 2A — API tài khoản
+## Đợt vừa hoàn thành: Backend 2B — Phiên và đăng xuất
 
-Thêm API đăng ký/đăng nhập/hồ sơ, băm mật khẩu, access token RS256 15 phút, giới hạn thử và khóa cục bộ ngoài Git. Có hướng dẫn/script thử API; 34 tests qua trên PostgreSQL thật. Refresh/đăng xuất ở 2B, nối frontend ở 2C. Xem `BACKEND-PHASE-2A.md`.
+Thêm V2 lưu phiên/hash refresh token, refresh luân chuyển, phát hiện replay, logout thu hồi cả access token của phiên. Web có cookie HttpOnly và CSRF, native dùng body. Có script thử phiên; 51 tests qua trên PostgreSQL thật, gồm restart và Windows PowerShell 5.1. Nối frontend ở 2C. Xem `BACKEND-PHASE-2B.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Triển khai API đăng ký đăng nhập và hồ sơ tài khoản"
+git commit -m "Bổ sung làm mới phiên đăng nhập và đăng xuất"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Backend 2A — API tài khoản | `Triển khai API đăng ký đăng nhập và hồ sơ tài khoản` |
 | Backend 1 — Nền tảng | `Khởi tạo backend Spring Boot và kết nối PostgreSQL` |
 | UI 4H — Rà soát và trình diễn giao diện | `Bổ sung kiểm thử tổng thể giao diện và trình diễn trực tiếp` |
 | UI 4G — Cảnh báo biểu mẫu chưa lưu | `Cảnh báo khi rời biểu mẫu có thay đổi chưa lưu` |
@@ -47,7 +48,6 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| Backend 2B — Phiên | Refresh, luân chuyển/thu hồi và đăng xuất | Bổ sung làm mới phiên đăng nhập và đăng xuất |
 | Backend 2C — Nối frontend | Gọi API tài khoản từ React Native, giữ phiên và xử lý lỗi mạng | Kết nối giao diện tài khoản với backend |
 
-Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Backend 1/2A đã hoàn thành; đợt tiếp theo theo `next`/`go`.
+Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Backend 1/2A/2B đã hoàn thành; đợt tiếp theo theo `next`/`go`.

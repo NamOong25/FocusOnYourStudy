@@ -85,7 +85,7 @@ class FoundationIntegrationTests {
 
     @Test void runsOnRealPostgresAndAppliesMigrationExactlyOnce() {
         assertThat(jdbc.queryForObject("SELECT version()", String.class)).contains("PostgreSQL");
-        assertThat(flyway.info().current().getVersion().toString()).isEqualTo("1");
+        assertThat(flyway.info().current().getVersion().toString()).isEqualTo("2");
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         flyway.validate();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema=? AND table_name IN ('app_users','semesters','courses')", Integer.class, SCHEMA)).isEqualTo(3);

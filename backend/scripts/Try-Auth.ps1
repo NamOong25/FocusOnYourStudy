@@ -44,6 +44,9 @@ try {
     }
     throw 'Lần thử API chưa hoàn thành. Xem thông báo phía trên; không cần xóa database.'
 } finally {
+    if ($login -and $login.data.refreshToken) {
+        try { [void](Invoke-AuthJson '/api/v1/auth/logout' @{ refreshToken = $login.data.refreshToken }) } catch { }
+    }
     $password = $null; $confirmation = $null; $login = $null
     $registered = $null; $bytes = $null
     if ($secret) { $secret.Dispose() }

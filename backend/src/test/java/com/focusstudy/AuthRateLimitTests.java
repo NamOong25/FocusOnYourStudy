@@ -53,4 +53,24 @@ class AuthRateLimitTests {
         filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> passed.incrementAndGet());
         assertThat(passed.get()).isEqualTo(1);
     }
+    @Test void refreshAndLogoutHaveSeparateLimitsAndTheFilterCoversBothRoutes() throws Exception {
+        var clock = new TestClock();
+        var limiter = new AuthRateLimiter(clock, 1, 1, 1, 2, 10);
+        assertThat(limiter.acquire("refresh", "a").allowed()).isTrue();
+        assertThat(limiter.acquire("refresh", "a").allowed()).isFalse();
+        assertThat(limiter.acquire("logout", "a").allowed()).isTrue();
+        assertThat(limiter.acquire("logout", "a").allowed()).isTrue();
+        assertThat(limiter.acquire("logout", "a").allowed()).isFalse();
+        assertThat(limiter.acquire("login", "a").allowed()).isTrue();
+        for (String route : java.util.List.of("refresh", "logout")) {
+            var filter = new AuthRateLimitFilter(new AuthRateLimiter(clock, 1, 1, 1, 1, 10), JsonMapper.builder().build());
+            for (int i = 0; i < 2; i++) {
+                var request = new MockHttpServletRequest("POST", "/api/v1/auth/" + route);
+                request.setServletPath("/api/v1/auth/" + route);
+                var response = new MockHttpServletResponse();
+                filter.doFilter(request, response, (req, res) -> { });
+                assertThat(response.getStatus()).isEqualTo(i == 0 ? 200 : 429);
+            }
+        }
+    }
 }

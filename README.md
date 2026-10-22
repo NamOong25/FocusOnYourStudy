@@ -2,9 +2,9 @@
 
 Frontend React Native + Expo SDK 56, dựng từ 5 màn Stitch và DESIGN.md do bạn cung cấp. Project độc lập với StudyPlanner cũ. Đã thêm nền tảng backend Spring Boot + PostgreSQL ở `backend/`; frontend hiện vẫn tương tác với dữ liệu trong bộ nhớ, chưa nối API.
 
-## Backend hiện tại — đợt 2A
+## Backend hiện tại — đợt 2B
 
-Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có API đăng ký, đăng nhập, hồ sơ tài khoản với access token 15 phút. Frontend chưa gọi các API này; học kỳ/môn/bài vẫn là bản thử trong bộ nhớ.
+Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend chưa gọi các API này; học kỳ/môn/bài vẫn là bản thử trong bộ nhớ.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap\backend'
@@ -13,7 +13,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
-Để thử đăng ký → đăng nhập → xem hồ sơ ở terminal thứ hai, chạy `./backend/scripts/Try-Auth.ps1 -Mode Register` từ thư mục project. Script hỏi thông tin, ẩn mật khẩu và không in token. Xem [hướng dẫn backend 2A](docs/BACKEND-PHASE-2A.md). Đợt 2B sẽ làm refresh/đăng xuất; 2C nối giao diện React Native.
+Để thử đăng ký → đăng nhập → xem hồ sơ ở terminal thứ hai, chạy `./backend/scripts/Try-Auth.ps1 -Mode Register` từ thư mục project. Có tài khoản rồi thì chạy `./backend/scripts/Try-Session.ps1` để kiểm tra đăng nhập → refresh → đăng xuất → token bị từ chối. Script hỏi thông tin, ẩn mật khẩu và không in/lưu token. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Tiếp theo 2C mới nối giao diện React Native.
 
 ## Chạy ứng dụng
 

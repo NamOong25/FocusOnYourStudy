@@ -1,0 +1,43 @@
+@baseUrl = http://localhost:8080
+@origin = http://localhost:8092
+@email = sinhvien@example.com
+@password = MatKhauThu123!
+
+### Chỉ dùng dữ liệu thử; REST Client cần bật cookie jar cho các request tiếp theo.
+### Frontend 2C sẽ fetch với credentials: include; không đọc/lưu refresh token bằng JavaScript.
+# @name csrf
+GET {{baseUrl}}/api/v1/auth/csrf
+Origin: {{origin}}
+
+### Cookie HttpOnly được server đặt, JSON không chứa refreshToken
+# @name browserLogin
+POST {{baseUrl}}/api/v1/auth/login
+Origin: {{origin}}
+Content-Type: application/json
+X-Auth-Transport: cookie
+X-XSRF-TOKEN: {{csrf.response.body.$.data.token}}
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Browser gửi cookie phiên tự động, không kèm access token hết hạn
+# @name browserRefresh
+POST {{baseUrl}}/api/v1/auth/refresh
+Origin: {{origin}}
+Content-Type: application/json
+X-Auth-Transport: cookie
+X-XSRF-TOKEN: {{csrf.response.body.$.data.token}}
+
+{}
+
+### API hồ sơ vẫn dùng Bearer, cookie không đủ để đọc hồ sơ
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{browserRefresh.response.body.$.data.accessToken}}
+
+### Logout có CSRF; cookie phiên bị xóa, access token của phiên cũng bị từ chối
+POST {{baseUrl}}/api/v1/auth/logout
+Origin: {{origin}}
+Content-Type: application/json
+X-Auth-Transport: cookie
+X-XSRF-TOKEN: {{csrf.response.body.$.data.token}}
+
+{}

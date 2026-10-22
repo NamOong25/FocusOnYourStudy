@@ -3,6 +3,7 @@ package com.focusstudy.config;
 import com.focusstudy.common.api.ApiProblems;
 import com.focusstudy.auth.AuthRateLimiter;
 import com.focusstudy.auth.AuthRateLimitFilter;
+import com.focusstudy.auth.session.*;
 import java.time.Clock;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.*;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,7 +35,8 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain security(HttpSecurity http, ObjectMapper json,
                                  @Qualifier("corsConfigurationSource") CorsConfigurationSource corsSource,
-                                 AuthRateLimitFilter rateLimit) throws Exception {
+                                 AuthRateLimitFilter rateLimit, SessionValidationFilter sessionValidation,
+                                 SessionProperties sessionProperties) throws Exception {
         AuthenticationEntryPoint unauthorized = (request, response, ex) -> {
             boolean supplied = request.getHeader(HttpHeaders.AUTHORIZATION) != null;
             response.setStatus(401); response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
@@ -43,24 +46,34 @@ public class SecurityConfig {
                     supplied ? "Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại." : "Cần đăng nhập để truy cập chức năng này.", request));
         };
         AccessDeniedHandler forbidden = (request, response, ex) -> {
+            boolean csrfFailure = ex instanceof CsrfException;
             response.setStatus(403); response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+            response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
             json.writeValue(response.getOutputStream(), ApiProblems.of(HttpStatus.FORBIDDEN,
-                    "ACCESS_DENIED", "Bạn chưa được phép thực hiện thao tác này.", request));
+                    csrfFailure ? "CSRF_INVALID" : "ACCESS_DENIED",
+                    csrfFailure ? "Yêu cầu web thiếu hoặc sai mã bảo vệ CSRF. Hãy lấy mã mới rồi thử lại." : "Bạn chưa được phép thực hiện thao tác này.", request));
         };
+        var csrfRepository = new CookieCsrfTokenRepository();
+        csrfRepository.setCookieName(AuthTransport.CSRF_COOKIE);
+        csrfRepository.setCookieCustomizer(cookie -> cookie.path(AuthTransport.COOKIE_PATH)
+                .httpOnly(true).sameSite("Strict").secure(sessionProperties.cookieSecure()));
         return http.cors(cors -> cors.configurationSource(corsSource))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.csrfTokenRepository(csrfRepository).requireCsrfProtectionMatcher(AuthTransport::needsCsrf))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/health", "/actuator/health").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
+                                "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> { }).authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .addFilterBefore(rateLimit, BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(sessionValidation, BearerTokenAuthenticationFilter.class)
                 .build();
     }
 
@@ -70,11 +83,19 @@ public class SecurityConfig {
 
     @Bean AuthRateLimitFilter authRateLimit(ObjectMapper json, Clock clock,
             @Value("${app.auth.rate-limit.login-per-minute}") int loginLimit,
-            @Value("${app.auth.rate-limit.register-per-minute}") int registerLimit) {
-        return new AuthRateLimitFilter(new AuthRateLimiter(clock, loginLimit, registerLimit, 10_000), json);
+            @Value("${app.auth.rate-limit.register-per-minute}") int registerLimit,
+            @Value("${app.auth.rate-limit.refresh-per-minute}") int refreshLimit,
+            @Value("${app.auth.rate-limit.logout-per-minute}") int logoutLimit) {
+        return new AuthRateLimitFilter(new AuthRateLimiter(clock, loginLimit, registerLimit, refreshLimit, logoutLimit, 10_000), json);
     }
 
     @Bean FilterRegistrationBean<AuthRateLimitFilter> preventDuplicateRateFilter(AuthRateLimitFilter filter) {
+        var registration = new FilterRegistrationBean<>(filter); registration.setEnabled(false); return registration;
+    }
+    @Bean SessionValidationFilter sessionValidation(RefreshSessionRepository sessions, Clock clock, ObjectMapper json) {
+        return new SessionValidationFilter(sessions, clock, json);
+    }
+    @Bean FilterRegistrationBean<SessionValidationFilter> preventDuplicateSessionFilter(SessionValidationFilter filter) {
         var registration = new FilterRegistrationBean<>(filter); registration.setEnabled(false); return registration;
     }
 
@@ -83,9 +104,9 @@ public class SecurityConfig {
         var config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Content-Type", "Accept", "Authorization", "X-Request-ID"));
+        config.setAllowedHeaders(List.of("Content-Type", "Accept", "Authorization", "X-Request-ID", "X-Auth-Transport", "X-XSRF-TOKEN"));
         config.setExposedHeaders(List.of("X-Request-ID", "Retry-After", "WWW-Authenticate"));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
         var source = new UrlBasedCorsConfigurationSource(); source.registerCorsConfiguration("/**", config);
         return source;
     }

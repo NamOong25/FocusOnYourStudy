@@ -192,12 +192,14 @@ class AuthIntegrationTests {
 
     @Test void validSignatureDoesNotBypassIssuerAudienceExpiryOrTokenType() throws Exception {
         String email = email(); String id = data(register(email)).get("id").toString();
+        String sessionId = decoder.decode(token(email)).getClaimAsString("sid");
         for (String fault : List.of("issuer", "audience", "expired", "no-expiry", "refresh", "subject")) {
             var now = Instant.now();
             var claims = JwtClaimsSet.builder().issuer(fault.equals("issuer") ? "urn:untrusted" : jwtProperties.issuer())
                     .audience(List.of(fault.equals("audience") ? "wrong-api" : jwtProperties.audience()))
                     .subject(fault.equals("subject") ? "not-a-uuid" : id).issuedAt(now.minusSeconds(600))
-                    .notBefore(now.minusSeconds(600)).claim("token_use", fault.equals("refresh") ? "refresh" : "access");
+                    .notBefore(now.minusSeconds(600)).claim("token_use", fault.equals("refresh") ? "refresh" : "access")
+                    .claim("sid", sessionId);
             if (!fault.equals("no-expiry")) claims.expiresAt(fault.equals("expired") ? now.minusSeconds(120) : now.plusSeconds(900));
             String token = encoder.encode(JwtEncoderParameters.from(JwsHeader.with(SignatureAlgorithm.RS256).build(), claims.build())).getTokenValue();
             assertThat(me(token).statusCode()).as(fault).isEqualTo(401);

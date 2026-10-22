@@ -1,6 +1,7 @@
 package com.focusstudy.auth;
 
 import com.focusstudy.auth.dto.*;
+import com.focusstudy.auth.session.*;
 import com.focusstudy.users.*;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     private final UserRepository users;
     private final PasswordEncoder passwords;
-    private final AccessTokenService tokens;
+    private final RefreshSessionService sessions;
     private final String dummyHash;
-    public AuthService(UserRepository users, PasswordEncoder passwords, AccessTokenService tokens) {
-        this.users = users; this.passwords = passwords; this.tokens = tokens;
+    public AuthService(UserRepository users, PasswordEncoder passwords, RefreshSessionService sessions) {
+        this.users = users; this.passwords = passwords; this.sessions = sessions;
         this.dummyHash = passwords.encode(UUID.randomUUID().toString());
     }
 
@@ -33,13 +34,13 @@ public class AuthService {
         }
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, SessionTransport transport) {
         var user = users.findByEmail(request.email());
         boolean matches;
         try { matches = passwords.matches(request.password(), user.map(UserEntity::getPasswordHash).orElse(dummyHash)); }
         catch (IllegalArgumentException ex) { passwords.matches(request.password(), dummyHash); matches = false; }
         if (user.isEmpty() || !matches) throw AuthApiException.invalidCredentials();
-        return new LoginResponse(tokens.issue(user.get().getId()), "Bearer", tokens.expiresIn(), UserProfile.from(user.get()));
+        return sessions.start(user.get().getId(), transport);
     }
 
     @Transactional(readOnly = true)

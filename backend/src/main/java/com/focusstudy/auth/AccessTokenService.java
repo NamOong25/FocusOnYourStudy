@@ -15,11 +15,12 @@ public class AccessTokenService {
     public AccessTokenService(JwtEncoder encoder, JwtProperties properties, Clock clock) {
         this.encoder = encoder; this.properties = properties; this.clock = clock;
     }
-    public String issue(UUID userId) {
+    public String issue(UUID userId, UUID sessionId) {
         var now = clock.instant();
         var claims = JwtClaimsSet.builder().issuer(properties.issuer()).audience(List.of(properties.audience()))
                 .subject(userId.toString()).id(UUID.randomUUID().toString()).issuedAt(now).notBefore(now)
-                .expiresAt(now.plus(properties.accessTokenTtl())).claim("token_use", "access").build();
+                .expiresAt(now.plus(properties.accessTokenTtl())).claim("token_use", "access")
+                .claim("sid", sessionId.toString()).build();
         return encoder.encode(JwtEncoderParameters.from(JwsHeader.with(SignatureAlgorithm.RS256).build(), claims)).getTokenValue();
     }
     public long expiresIn() { return properties.accessTokenTtl().toSeconds(); }

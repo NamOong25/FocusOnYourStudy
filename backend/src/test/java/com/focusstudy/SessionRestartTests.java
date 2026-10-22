@@ -1,0 +1,68 @@
+package com.focusstudy;
+
+import static org.assertj.core.api.Assertions.*;
+
+import java.net.URI;
+import java.net.http.*;
+import java.sql.DriverManager;
+import java.time.Duration;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import tools.jackson.databind.ObjectMapper;
+
+class SessionRestartTests {
+    private static final String URL = Objects.requireNonNull(System.getenv("TEST_DB_URL"), "Run Test-Local.ps1");
+    private static final String USER = System.getenv("TEST_DB_USER"), PASSWORD = System.getenv("TEST_DB_PASSWORD");
+    private final HttpClient client = HttpClient.newHttpClient();
+
+    ConfigurableApplicationContext start(String schema) {
+        var settings = new LinkedHashMap<String, Object>();
+        TestJwtResources.configure((name, supplier) -> settings.put(name, supplier.get()));
+        settings.put("server.port", "0"); settings.put("server.address", "127.0.0.1");
+        settings.put("spring.main.banner-mode", "off"); settings.put("logging.level.root", "WARN");
+        settings.put("spring.datasource.url", URL + (URL.contains("?") ? "&" : "?") + "currentSchema=" + schema);
+        settings.put("spring.datasource.username", USER); settings.put("spring.datasource.password", PASSWORD);
+        settings.put("spring.flyway.schemas", schema); settings.put("spring.flyway.default-schema", schema);
+        String[] args = settings.entrySet().stream().map(entry -> "--" + entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
+        return SpringApplication.run(FocusStudyBackendApplication.class, args);
+    }
+    HttpResponse<String> post(ConfigurableApplicationContext app, String path, Object payload) throws Exception {
+        int port = app.getEnvironment().getRequiredProperty("local.server.port", Integer.class);
+        var request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).timeout(Duration.ofSeconds(10))
+                .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(app.getBean(ObjectMapper.class).writeValueAsString(payload))).build();
+        return client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+    Map<?, ?> data(ConfigurableApplicationContext app, HttpResponse<String> response) {
+        assertThat(response.statusCode()).isEqualTo(200);
+        return (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(response.body(), Map.class).get("data");
+    }
+
+    @Test void refreshAndRevocationSurviveClosingAndRecreatingTheEntireBackend() throws Exception {
+        String schema = "backend_it_" + UUID.randomUUID().toString().replace("-", "");
+        String email = "restart-" + UUID.randomUUID() + "@example.test", password = "RestartTest123!";
+        String first, independent, rotated;
+        try {
+            try (var app = start(schema)) {
+                assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
+                first = data(app, post(app, "/api/v1/auth/login", Map.of("email", email, "password", password))).get("refreshToken").toString();
+                independent = data(app, post(app, "/api/v1/auth/login", Map.of("email", email, "password", password))).get("refreshToken").toString();
+            }
+            try (var app = start(schema)) {
+                rotated = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first))).get("refreshToken").toString();
+                assertThat(post(app, "/api/v1/auth/logout", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(204);
+            }
+            try (var app = start(schema)) {
+                assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
+                assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
+                assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)).statusCode()).isEqualTo(200);
+            }
+        } finally {
+            if (!schema.matches("backend_it_[a-f0-9]{32}")) throw new IllegalStateException("Unsafe schema");
+            try (var connection = DriverManager.getConnection(URL, USER, PASSWORD); var statement = connection.createStatement()) {
+                statement.execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
+            }
+        }
+    }
+}

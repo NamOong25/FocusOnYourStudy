@@ -2,6 +2,7 @@ package com.focusstudy.auth;
 
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.focusstudy.auth.session.SessionProperties;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -17,7 +18,7 @@ import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 
-@Configuration @EnableConfigurationProperties(JwtProperties.class)
+@Configuration @EnableConfigurationProperties({JwtProperties.class, SessionProperties.class})
 public class AuthConfig {
     @Bean Clock authClock() { return Clock.systemUTC(); }
 
@@ -59,9 +60,10 @@ public class AuthConfig {
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
                 new JwtTimestampValidator(Duration.ofSeconds(30)), new JwtIssuerValidator(properties.issuer()),
                 new JwtClaimValidator<List<String>>("aud", audience -> audience != null && audience.contains(properties.audience())),
-                new JwtClaimValidator<String>("token_use", "access"::equals),
+                new JwtClaimValidator<Object>("token_use", "access"::equals),
                 new JwtClaimValidator<Instant>("exp", Objects::nonNull),
-                new JwtClaimValidator<String>("sub", AuthConfig::validUserId)));
+                new JwtClaimValidator<Object>("sub", value -> value instanceof String id && validUserId(id)),
+                new JwtClaimValidator<Object>("sid", value -> value instanceof String id && validUserId(id))));
         return decoder;
     }
 

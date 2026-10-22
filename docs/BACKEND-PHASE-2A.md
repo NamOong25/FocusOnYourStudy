@@ -2,6 +2,8 @@
 
 Ngày 22/10/2026. Đợt tài khoản chia **2A API → 2B phiên → 2C nối React Native**. Tài liệu này chỉ nghiệm thu 2A; không sửa giao diện hoặc lưu dữ liệu học tập ở đợt này.
 
+**Cập nhật sau 2B:** phần “chưa refresh/thu hồi” bên dưới mô tả thời điểm nghiệm thu 2A. Hiện đã có phiên/refresh/logout, access token yêu cầu sid và script Try-Auth tự đóng phiên thử. Xem `BACKEND-PHASE-2B.md` và hợp đồng hiện tại trong `../backend/docs/API.md`.
+
 ## Đã làm
 
 - POST `/api/v1/auth/register`: chuẩn hóa email/hồ sơ, xác nhận mật khẩu, lưu tài khoản và hash vào PostgreSQL; trả 201, trùng email trả 409 kể cả hai yêu cầu đồng thời.
