@@ -47,7 +47,7 @@ const base = process.env.QA_APP_URL || process.argv[2] || 'http://localhost:8092
     assert.ok(refresh && refresh.httpOnly && refresh.sameSite === 'Strict');
     const storage = await page.evaluate(() => [...Object.values(localStorage), ...Object.values(sessionStorage)].join('|'));
     assert.ok(!storage.includes(password) && !storage.includes(refresh.value));
-    await button('Đóng tài khoản').click(); await visibleText('Bạn học kiểm thử A').waitFor(); await button('Hồ sơ').click();
+    await button('Đóng tài khoản').click(); await button('Hồ sơ').click();
     for (const width of [320, 390, 430, 1280]) { await page.setViewportSize({ width, height: 900 }); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false); await shot('profile-' + width); }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.route('**/api/v1/users/me', route => route.fulfill({ status: 503, contentType: 'application/problem+json', body: JSON.stringify({ code: 'DATABASE_UNAVAILABLE' }) }));
@@ -64,17 +64,14 @@ const base = process.env.QA_APP_URL || process.argv[2] || 'http://localhost:8092
     await visibleText('Không thể kết nối. Kiểm tra mạng và thử lại.').waitFor(); assert.equal(await button('Đăng nhập').isDisabled(), false); assert.equal(await field('Email tài khoản').inputValue(), a);
     await page.context().setOffline(false);
     await page.route('**/api/v1/auth/login', async route => { await page.waitForTimeout(11_000); try { await route.abort(); } catch {} });
-    await button('Đăng nhập').click(); await visibleText('Phản hồi quá lâu. Kiểm tra kết nối và thử lại.').waitFor({ timeout: 15_000 });
-    assert.equal(await button('Đăng nhập').isDisabled(), false); await page.unroute('**/api/v1/auth/login');
-    await button('Đăng nhập').click(); await page.getByTestId('account-full-name').waitFor(); assert.equal(await page.getByTestId('account-full-name').innerText(), 'Bạn học kiểm thử A');
-    await button('Đăng nhập tài khoản khác').click();
-    await page.route('**/api/v1/auth/login', async route => { await page.waitForTimeout(700); try { await route.continue(); } catch {} });
-    await field('Email tài khoản').fill(b); await field('Mật khẩu').fill(password); await button('Đăng nhập').click(); await button('Đóng tài khoản').click();
-    await page.waitForTimeout(1000); await button('Hồ sơ').click(); await page.getByTestId('account-full-name').waitFor();
-    assert.equal(await page.getByTestId('account-full-name').innerText(), 'Bạn học kiểm thử A'); await page.unroute('**/api/v1/auth/login');
-    await page.reload({ waitUntil: 'networkidle' }); await enter(); assert.equal(await page.getByTestId('account-full-name').count(), 0);
+    await button('Đăng nhập').click(); await button('Hoàn tất đăng xuất').waitFor({ timeout: 15_000 });
+    assert.equal(await page.getByTestId('account-full-name').count(), 0); await page.unroute('**/api/v1/auth/login');
+    await button('Hoàn tất đăng xuất').click(); await button('Đăng nhập').click(); await login(a);
+    await page.getByTestId('account-full-name').waitFor(); assert.equal(await page.getByTestId('account-full-name').innerText(), 'Bạn học kiểm thử A');
+    await page.reload({ waitUntil: 'networkidle' }); await page.getByTestId('account-full-name').waitFor();
+    assert.equal(await page.getByTestId('account-full-name').innerText(), 'Bạn học kiểm thử A');
     assert.deepEqual(errors, []); assert.ok(!logs.join('|').includes(password));
-    const result = { passed: true, scope: 'real API with isolated backend schema', checks: ['validation', 'pending and duplicate submit guard', 'register and login prefill', 'duplicate email', 'wrong password', 'GET profile and home name', 'cookie HttpOnly and no storage tokens', 'profile failure/retry', 'two profiles', 'offline retry', '10-second timeout', 'close cancels stale login', 'reload requires login in 2C.1', '320/390/430/1280 layouts'], requests: requests.length };
+    const result = { passed: true, scope: 'real API with isolated backend schema', checks: ['validation', 'pending and duplicate submit guard', 'register and login prefill', 'duplicate email', 'wrong password', 'GET profile and home name', 'cookie HttpOnly and no storage tokens', 'profile failure/retry', 'two profiles', 'offline retry', '10-second timeout blocks uncertain session', 'reload restores login in 2C.2', '320/390/430/1280 layouts'], requests: requests.length };
     fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));
   } finally { await shot('last-state'); await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

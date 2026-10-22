@@ -7,8 +7,18 @@
     "userInterfaceStyle": "light",
     "scheme": "focusyourstudy",
     "backgroundColor": "#F4FAFD",
-    "ios": { "supportsTablet": true },
-    "android": { "package": "com.focusyourstudy.app" },
-    "web": { "bundler": "metro", "name": "FocusYourStudy" }
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.focusyourstudy.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "name": "FocusYourStudy"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

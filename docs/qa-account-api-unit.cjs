@@ -43,5 +43,19 @@ const reply = (data, status = 200, headers = {}) => new Response(JSON.stringify(
   let attempts = 0;
   await assert.rejects(createHttpClient('http://test', { fetcher: async () => { attempts++; return reply({ code: 'INVALID_CREDENTIALS' }, 401); } })('/login'));
   assert.equal(attempts, 1); checks++;
+  const mutations = [];
+  for (const transport of ['cookie', 'body']) {
+    const api = createAccountApi('http://test', transport, { fetcher: async (url, options) => {
+      mutations.push({ url, ...options });
+      if (url.endsWith('/csrf')) return reply({ headerName: 'X-XSRF-TOKEN', token: 'proof' });
+      if (url.endsWith('/logout')) return new Response(null, { status: 204 });
+      return reply(transport === 'cookie' ? { ...pair, refreshToken: undefined } : pair);
+    } });
+    let journaled = false; await api.refresh('old-refresh', async () => { journaled = true; }); assert.equal(journaled, true);
+    await api.logout('old-refresh');
+    const posts = mutations.filter(call => call.method === 'POST').slice(-2);
+    assert.ok(posts.every(call => call.headers.Authorization === undefined && call.headers['X-Auth-Transport'] === transport));
+    assert.ok(posts.every(call => call.body === (transport === 'cookie' ? '{}' : JSON.stringify({ refreshToken: 'old-refresh' })))); checks++;
+  }
   console.log(JSON.stringify({ passed: true, checks, scope: 'transport, CSRF, bearer, errors, bounded timeout/body read, cancel, invalid profile and no automatic retry' }));
 })().catch(e => { console.error(e); process.exitCode = 1; });

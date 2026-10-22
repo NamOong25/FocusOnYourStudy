@@ -1,8 +1,8 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đợt 2C.1 đã nối đăng ký, đăng nhập và hồ sơ với API thật**; các màn học tập vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 2C.2: tài khoản thật, giữ phiên khi F5, tự làm mới token và đăng xuất**; các màn học tập vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Tài khoản trên giao diện — 2C.1
+## Tài khoản trên giao diện — 2C.2
 
 Chạy hai terminal (PowerShell trong IntelliJ/VS Code đều được):
 
@@ -18,13 +18,13 @@ npx expo start --web --port 8092
 
 Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **Hồ sơ** góc phải → **Tạo tài khoản** → nhập thông tin → đăng nhập. Hồ sơ lấy từ `/users/me`; tên Trang chủ dùng cùng hồ sơ nếu màn có học kỳ. Có chờ/khóa nút, lỗi theo trường, email trùng/sai mật khẩu, mất mạng, timeout 10 giây mỗi request, hủy khi đóng form và thử tải lại hồ sơ.
 
-**2C.1 chỉ giữ phiên frontend trong bộ nhớ**; tải lại trang cần đăng nhập lại, tài khoản PostgreSQL vẫn còn. Chưa tự refresh/khôi phục phiên hoặc nối nút đăng xuất (2C.2), chưa lưu dữ liệu học tập (đợt 3 trở đi), chưa có API sửa hồ sơ/quên mật khẩu. Các thao tác hồ sơ/cài đặt mẫu còn lại được ghi rõ là mẫu.
+**F5 khôi phục phiên khi còn hiệu lực.** Hồ sơ → Đăng xuất → Xác nhận đăng xuất thu hồi phiên và dọn nội dung thử; các tab cùng origin cũng thoát. Mất mạng khi đăng xuất có nút Hoàn tất đăng xuất, không tự khôi phục phiên đã thoát. Sau nâng cấp từ 2C.1 cần đăng nhập một lần. Chưa lưu dữ liệu học tập (đợt 3 trở đi), chưa có API sửa hồ sơ/quên mật khẩu.
 
-URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn đầy đủ và giới hạn native tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
+URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
 ## Backend hiện tại — đợt 2B
 
-Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend hiện gọi đăng ký/đăng nhập/hồ sơ; refresh và logout trên UI làm ở 2C.2.
+Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend đã nối khôi phục/refresh/logout ở 2C.2; nghiệm thu thiết bị thật ở 2C.3.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap\backend'
@@ -33,7 +33,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
-Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Đợt kế tiếp 2C.2 nối giữ phiên/refresh/logout trên app.
+Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Đợt kế tiếp 2C.3 nghiệm thu tài khoản và thiết bị.
 
 ## Chạy ứng dụng
 
@@ -45,7 +45,7 @@ npm install
 npx expo start
 ```
 
-Khi mở app, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Tải lại sẽ trở về màn chọn ban đầu.
+Khi mở app, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Khi có phiên hợp lệ, app khôi phục hồ sơ và mở vùng học tập trống; chưa tải dữ liệu học tập từ backend.
 
 Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 56 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
 
@@ -66,7 +66,7 @@ npm run build:web
 - Trợ lý AI: 5 công cụ với form đầu vào; sửa/bỏ chọn/duyệt kế hoạch mẫu thành buổi tự học dùng chung sau khi kiểm tra lịch/deadline; điều chỉnh buổi chưa học; tóm tắt và quiz 3/5 câu có trang nguồn minh họa đọc được (bổ sung ở 2F).
 - Hồ sơ/cài đặt với các luồng tài khoản minh họa (bổ sung ở 2E), hộp nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
 
-**Dữ liệu học tập nằm trong bộ nhớ; tải lại sẽ xóa thay đổi học tập trong phiên.** Tài khoản đăng ký/đăng nhập/hồ sơ đã nối API từ 2C.1, chưa khôi phục phiên frontend khi tải lại. Chưa có thông báo hệ thống, đồng bộ học tập, upload PDF hoặc gọi AI thật. Pomodoro chưa phát chuông khi app đóng/lưu phiên khi process bị hủy; chưa nghiệm thu chạy nền trên điện thoại thật.
+**Dữ liệu học tập nằm trong bộ nhớ; tải lại sẽ xóa thay đổi học tập trong phiên.** Tài khoản đăng ký/đăng nhập/hồ sơ nối API từ 2C.1, khôi phục/refresh/logout từ 2C.2. Chưa có thông báo hệ thống, đồng bộ học tập, upload PDF hoặc gọi AI thật. Pomodoro chưa phát chuông khi app đóng/lưu phiên khi process bị hủy; chưa nghiệm thu chạy nền trên điện thoại thật.
 
 ## Cấu trúc
 

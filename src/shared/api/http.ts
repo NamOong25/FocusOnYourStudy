@@ -20,6 +20,9 @@ const messages: Record<string, string> = {
   AUTH_ORIGIN_REJECTED: 'Chưa thể đăng nhập từ địa chỉ ứng dụng này.',
   COOKIE_TRANSPORT_REQUIRED: 'Chưa thể xác nhận phiên trình duyệt. Hãy tải lại và thử lại.',
   DATABASE_UNAVAILABLE: 'Dịch vụ đang tạm gián đoạn. Hãy thử lại sau.',
+  INVALID_REFRESH_TOKEN: 'Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.',
+  REFRESH_TOKEN_REUSED: 'Phiên đã bị thu hồi. Hãy đăng nhập lại.',
+  SESSION_EXPIRED: 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function errorFromResponse(status: number, value: unknown, retryAfter: string | null) {
@@ -35,7 +38,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   return new ApiError(message, code, status, fields);
 }
 
-type RequestOptions = { method?: 'GET' | 'POST'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials };
+type RequestOptions = { method?: 'GET' | 'POST'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean };
 export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher = fetch }: { timeoutMs?: number; fetcher?: typeof fetch } = {}) {
   return async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     assertNotCancelled(options.signal);
@@ -64,6 +67,7 @@ export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher 
       let payload: unknown;
       try { payload = text ? JSON.parse(text) : null; } catch { payload = null; }
       if (!response.ok) throw errorFromResponse(response.status, payload, response.headers.get('Retry-After'));
+      if (options.empty && response.status === 204 && !text) return undefined as T;
       if (!object(payload) || !('data' in payload)) throw new ApiError('Phản hồi chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
       return payload.data as T;
     })();

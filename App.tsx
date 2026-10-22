@@ -35,7 +35,8 @@ import TaskDialog from './src/features/assignments/TaskDialog';
 import StudyPlan from './src/features/study/StudyPlanScreen';
 import ClassDialog from './src/features/schedule/ClassDialog';
 import Account from './src/features/account/AccountScreen';
-import { AuthProvider } from './src/features/account/auth/AuthProvider';
+import { AuthProvider, useAuth } from './src/features/account/auth/AuthProvider';
+import SessionGate from './src/features/account/components/SessionGate';
 import NotificationsCenter from './src/features/notifications/NotificationsCenter';
 import NotificationBell from './src/features/notifications/components/NotificationBell';
 import useInAppNotifications from './src/features/notifications/useInAppNotifications';
@@ -48,11 +49,12 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
   { id: 'ai', label: 'Trợ lý AI', icon: 'sparkles-outline', activeIcon: 'sparkles' },
 ];
 function AppShell() {
+  const auth = useAuth();
   const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute } = useApp(); const inset = useSafeAreaInsets();
   const current = viewKey(route); const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
-  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(null);
+  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(auth.hasSession || auth.notice ? 'profile' : null);
   const [classDate, setClassDate] = useState<string | undefined>();
   const action = useActionState();
   const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading');
@@ -62,7 +64,7 @@ function AppShell() {
     setPanel(null); setLoadState('loading');
     loadTimer.current = setTimeout(() => { setLoadState(fail ? 'error' : 'ready'); loadTimer.current = null; }, 850);
   };
-  useEffect(() => { loadPreview(false); return () => { if (loadTimer.current) clearTimeout(loadTimer.current); }; }, []);
+  useEffect(() => { loadTimer.current = setTimeout(() => { setLoadState('ready'); loadTimer.current = null; }, 850); return () => { if (loadTimer.current) clearTimeout(loadTimer.current); }; }, []);
   useEffect(() => {
     if (previousPage.current === current) return;
     previousPage.current = current;
@@ -113,11 +115,16 @@ function AppShell() {
     </FlowScope></NavigationScope>
   </View></View>;
 }
-export default function App() {
+function Workspace() {
+  const auth = useAuth();
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
+  return <SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
+    : <PrototypeProvider key={auth.revision} empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</SessionGate>;
+}
+export default function App() {
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: C.canvas, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color={C.primary} /></View>;
-  return <SafeAreaProvider><AuthProvider><FeedbackProvider>{workspace === 'welcome' ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} /> : <PrototypeProvider empty={workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</FeedbackProvider></AuthProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><AuthProvider><FeedbackProvider><Workspace /></FeedbackProvider></AuthProvider></SafeAreaProvider>;
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#EDEDF8', alignItems: 'center' },

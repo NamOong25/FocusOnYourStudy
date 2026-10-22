@@ -1,3 +1,5 @@
+> Tài liệu lịch sử đợt 2C.1. Hiện đã có giữ phiên/refresh/logout ở [2C.2](FRONTEND-AUTH-2C2.md); mô tả phải đăng nhập lại khi F5 bên dưới chỉ đúng tại thời điểm 2C.1.
+
 # 2C.1 — Đăng ký, đăng nhập và hồ sơ thật
 
 Ngày 22/10/2026. Dùng React Native/Expo SDK 56 hiện có, không thêm thư viện. Đã đối chiếu tài liệu Expo SDK 56 và React Native 0.85 trước khi viết code.

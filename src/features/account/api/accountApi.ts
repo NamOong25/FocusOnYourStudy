@@ -7,6 +7,7 @@ const isProfile = (p: unknown): p is AccountProfile => {
   return ['id', 'email', 'fullName', 'school', 'major', 'timeZone'].every(key => typeof v[key] === 'string') && !!v.id && !!v.email && !!v.fullName;
 };
 const invalidResponse = () => new ApiError('Phản hồi tài khoản chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
+type BeforeSend = () => Promise<void>;
 
 export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', options?: Parameters<typeof createHttpClient>[1]) {
   const request = createHttpClient(baseUrl, options);
@@ -18,6 +19,12 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
     if (!proof || proof.headerName !== 'X-XSRF-TOKEN' || typeof proof.token !== 'string' || !proof.token) throw invalidResponse();
     return { 'X-Auth-Transport': 'cookie', 'X-XSRF-TOKEN': proof.token };
   }
+  function tokens(value: LoginResult): LoginResult {
+    if (!value || typeof value.accessToken !== 'string' || !value.accessToken || value.tokenType !== 'Bearer'
+      || !Number.isFinite(value.expiresIn) || value.expiresIn <= 0 || !isProfile(value.user)
+      || (transport === 'body' && typeof value.refreshToken !== 'string')) throw invalidResponse();
+    return value;
+  }
   return {
     async register(input: RegisterInput, signal?: AbortSignal) {
       const headers = await authHeaders(signal);
@@ -25,13 +32,22 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
       if (!isProfile(profile)) throw invalidResponse();
       return profile;
     },
-    async login(input: LoginInput, signal?: AbortSignal): Promise<LoginResult> {
+    async login(input: LoginInput, signal?: AbortSignal, beforeSend?: BeforeSend): Promise<LoginResult> {
       const headers = await authHeaders(signal);
+      await beforeSend?.();
       const value = await request<LoginResult>('/api/v1/auth/login', { method: 'POST', body: input, signal, credentials, headers });
-      if (!value || typeof value.accessToken !== 'string' || !value.accessToken || value.tokenType !== 'Bearer'
-        || !Number.isFinite(value.expiresIn) || value.expiresIn <= 0 || !isProfile(value.user)
-        || (transport === 'body' && typeof value.refreshToken !== 'string')) throw invalidResponse();
-      return value;
+      return tokens(value);
+    },
+    async refresh(refreshToken?: string, beforeSend?: BeforeSend): Promise<LoginResult> {
+      const headers = await authHeaders();
+      await beforeSend?.();
+      return tokens(await request<LoginResult>('/api/v1/auth/refresh', { method: 'POST',
+        body: transport === 'cookie' ? {} : { refreshToken }, credentials, headers }));
+    },
+    async logout(refreshToken?: string): Promise<void> {
+      const headers = await authHeaders();
+      await request<void>('/api/v1/auth/logout', { method: 'POST', body: transport === 'cookie' ? {} : { refreshToken },
+        credentials, headers, empty: true });
     },
     async profile(accessToken: string, signal?: AbortSignal) {
       const profile = await request<unknown>('/api/v1/users/me', { signal, credentials,

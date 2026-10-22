@@ -1,6 +1,6 @@
 # Backend — FocusYourStudy
 
-Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend 2C.1 đã nối đăng ký/đăng nhập/hồ sơ**; giữ phiên/refresh/logout trên app làm ở 2C.2. Dữ liệu học tập frontend vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C1.md`.
+Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối 2C.1/2C.2: đăng ký/đăng nhập/hồ sơ, khôi phục/refresh/logout**; nghiệm thu thiết bị thật ở 2C.3. Dữ liệu học tập frontend vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C2.md`.
 
 ## Chạy trên máy Windows hiện tại
 
@@ -127,4 +127,4 @@ Khóa `.local/auth`, thông tin DB và `target/` ngoài Git. Môi trường khá
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-Tiếp theo: **2C nối giao diện tài khoản**, lưu/khôi phục phiên phù hợp web/native, xử lý refresh một lần khi hết access token, timeout/lỗi mạng và dọn dữ liệu khi đổi tài khoản → đợt 3 API học kỳ/môn. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.
+Tiếp theo: **2C.3 nghiệm thu tài khoản/thiết bị thật** sau UI 2C.1/2C.2 đã nối tài khoản và phiên → đợt 3 API học kỳ/môn. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.

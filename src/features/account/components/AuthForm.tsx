@@ -54,6 +54,6 @@ export default function AuthForm({ mode, initialEmail, message, onRegistered, on
     <Button label={register ? 'Tạo tài khoản' : 'Đăng nhập'} onPress={submit} loading={action.busy} icon={register ? 'person-add-outline' : 'log-in-outline'} />
     <Button label={register ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'} secondary disabled={action.busy} onPress={() => onMode(register ? 'login' : 'register')} />
     {!register && <Button label="Quên mật khẩu?" secondary disabled={action.busy} onPress={onForgot} />}
-    <T style={[S.small, { textAlign: 'center' }]}>Tài khoản được lưu trực tuyến. Phiên đăng nhập hiện chỉ giữ trong lần mở ứng dụng này.</T>
+    <T style={[S.small, { textAlign: 'center' }]}>Tài khoản được lưu trực tuyến. Ứng dụng giữ đăng nhập khi phiên còn hiệu lực.</T>
   </>;
 }

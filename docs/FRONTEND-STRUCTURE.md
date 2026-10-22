@@ -140,3 +140,12 @@ Từ UI 3C, xem `UI-POLISH-3C.md` cho luồng khởi tạo trống và các file
 
 
 Quy ước kỳ 1/2 chính, kỳ 3 hè tùy chọn theo từng năm ở `SEMESTERS.md`. Hai bộ chọn thuộc chức năng academics; không đặt vào thư mục UI dùng chung.
+
+## Cập nhật phiên đăng nhập — 2C.2
+
+- `features/account/auth/SessionManager.ts`: trạng thái phiên, khôi phục, gộp refresh, logout và chống hồi sinh hồ sơ cũ.
+- `sessionTypes.ts`: hợp đồng store/coordinator/state; `sessionPlatform.web.ts`: dấu localStorage và Web Locks/BroadcastChannel; `sessionPlatform.ts`: SecureStore và hàng đợi native.
+- `AuthProvider.tsx`: nối manager với React, lifecycle/foreground; không lưu token trong prototype store.
+- `components/SessionGate.tsx`: khôi phục/lỗi/thử lại; `LogoutForm.tsx`: xác nhận đăng xuất; `AccountScreen.tsx`/Welcome hiển thị bước hoàn tất khi mất mạng.
+- `App.tsx`: remount vùng prototype/navigation khi danh tính đổi; vùng học tập tài khoản vẫn chưa nối backend. API refresh/logout ở `api/accountApi.ts`, HTTP hỗ trợ 204 ở `shared/api/http.ts`.
+- Có Expo SecureStore dependency/plugin mới. Hướng dẫn và kiểm tra: `FRONTEND-AUTH-2C2.md`. Native chưa nghiệm thu máy thật.
