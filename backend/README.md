@@ -1,6 +1,6 @@
 # Backend — FocusYourStudy
 
-Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. Frontend ở thư mục cha vẫn dùng dữ liệu trong bộ nhớ, chưa nối API; nối React Native thuộc 2C.
+Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend 2C.1 đã nối đăng ký/đăng nhập/hồ sơ**; giữ phiên/refresh/logout trên app làm ở 2C.2. Dữ liệu học tập frontend vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C1.md`.
 
 ## Chạy trên máy Windows hiện tại
 

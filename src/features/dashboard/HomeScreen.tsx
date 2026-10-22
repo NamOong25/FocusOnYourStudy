@@ -8,6 +8,8 @@ import {courseResult} from '../grades/grades';
 import {CourseGradeDialog} from '../grades/GradesScreen';
 import GradeStatus from '../grades/GradeStatus';
 import {StudentAvatar} from '../account/components';
+import {useAuth} from '../account/auth/AuthProvider';
+import {accountDisplayProfile} from '../account/auth/displayProfile';
 import {ExamDialog} from '../exams/Exams';
 import {ExamForm} from '../exams/ExamForm';
 import SetupCard from '../onboarding/SetupCard';
@@ -22,6 +24,8 @@ import {taskDeadlineLabel,taskIsOverdue} from '../assignments/assignments';
 type Panel={kind:'semester'|'grades'|'new-exam'}|{kind:'exam'|'grade';id:string}|null;
 export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void;onProfile:()=>void;onStudyPlan:()=>void}){
   const {tasks,getClassesOn,exams,setTab,aiSessionIds,studySessions,courseCatalog,gradeBook,gradeRules,profile,previewSignedIn,setScheduleMode,semesters,prepareFocus,setAcademicSemesterId}=useApp();
+  const auth=useAuth(),displayProfile=auth.hasSession?accountDisplayProfile(auth.profile):profile;
+  const displayName=auth.hasSession?displayProfile.name:previewSignedIn?profile.name:'Bạn học';
   const [selectedId,setSelectedId]=useState<string|null>(null),[filter,setFilter]=useState('Cần làm'),[panel,setPanel]=useState<Panel>(null),now=useDashboardClock();
   const semester=semesters.find(s=>s.id===selectedId)??semesters.find(s=>s.status==='Đang học')??semesters[0];
   const data=dashboardData({semesterId:semester?.id??'',catalog:courseCatalog,tasks,exams,sessions:studySessions,classes:getClassesOn(dateKey(now)),book:gradeBook,rules:gradeRules,now});
@@ -31,7 +35,7 @@ export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:T
   const manage=()=>{setPanel(null);if(semester)setAcademicSemesterId(semester.id);setScheduleMode('Môn & học kỳ');};
   if(!semester)return <SetupCard/>;
   return <FlowScope onClose={()=>setPanel(null)}>
-    <Pressable accessibilityRole="button" accessibilityLabel="Xem hồ sơ" onPress={onProfile} style={[S.row,{gap:11}]}><StudentAvatar profile={profile} size={46}/><View style={S.grow}><T style={S.small}>{hour<12?'Chào buổi sáng':hour<18?'Chào buổi chiều':'Chào buổi tối'} ☀️</T><T style={{fontFamily:F.bold,fontSize:18}}>{previewSignedIn?profile.name:'Bạn học'}</T></View><T style={{fontSize:11,color:C.muted}}>{dateLabel(data.today)}</T></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel="Xem hồ sơ" onPress={onProfile} style={[S.row,{gap:11}]}><StudentAvatar profile={displayProfile} size={46}/><View style={S.grow}><T style={S.small}>{hour<12?'Chào buổi sáng':hour<18?'Chào buổi chiều':'Chào buổi tối'} ☀️</T><T style={{fontFamily:F.bold,fontSize:18}}>{displayName}</T></View><T style={{fontSize:11,color:C.muted}}>{dateLabel(data.today)}</T></Pressable>
     <Pressable testID="dashboard-semester" accessibilityRole="button" accessibilityLabel="Đổi học kỳ trên Trang chủ" onPress={()=>setPanel({kind:'semester'})} style={{backgroundColor:'#fff',borderWidth:1,borderColor:C.line,borderRadius:20,padding:15}}><Row><IconTile name="calendar-outline" size={39}/><View style={[S.grow,{gap:4}]}><T style={{fontSize:10,color:C.muted}}>BẠN ĐANG XEM</T><T style={{fontFamily:F.bold,fontSize:16}}>{semester.name}</T><T style={{fontSize:12,color:C.muted}}>Năm học {semester.academicYear}</T></View><Icon name="chevron-down" size={19}/></Row></Pressable>
     {!data.courses.length?<Empty title="Học kỳ này chưa có môn học" message="Thêm môn vào học kỳ vừa chọn để bắt đầu xem lịch, công việc và điểm." actionLabel="Thêm môn cho học kỳ" onAdd={manage}/>:<>
     <LinearGradient colors={['#6650DF','#8A76ED','#A89AF7']} start={{x:0,y:0}} end={{x:1,y:1}} style={{padding:21,borderRadius:25,gap:16}}><Row between><Badge label="NHỊP HỌC CỦA BẠN" color="#fff" bg="#FFFFFF25"/><Image source={require('../../../assets/books.png')} style={{width:46,height:46,borderRadius:15}}/></Row><T style={{fontFamily:F.extra,fontSize:23,lineHeight:33,color:'#fff'}}>{data.overdue.length?`${data.overdue.length} bài đang chờ bạn xử lý`:data.pending.length?'Mỗi việc nhỏ, một bước tiến':'Một khoảng thảnh thơi để học tốt hơn'}</T><T style={{fontSize:12,lineHeight:20,color:'#F3EFFF'}}>{data.courses.length} môn · {data.courses.reduce((s,c)=>s+c.credits,0)} tín chỉ · {data.pending.length} bài chưa hoàn thành</T><View style={{gap:8}}><Row between><T style={{fontSize:11,color:'#F5F0FF'}}>Tiến độ bài tập trong học kỳ</T><T style={{fontFamily:F.bold,color:'#fff',fontSize:12}}>{data.done}/{data.tasks.length}</T></Row><Progress value={data.percent} white/></View><Button label="Tiếp tục học ngay" icon="play" secondary style={{backgroundColor:'#fff'}} onPress={()=>{const session=data.todaySessions.find(s=>s.status!=='Hoàn thành'),courseId=session?.courseId??data.pending[0]?.courseId??data.courses[0]!.id;prepareFocus({courseId,sessionId:session?.id,taskId:session?.taskId});}}/></LinearGradient>

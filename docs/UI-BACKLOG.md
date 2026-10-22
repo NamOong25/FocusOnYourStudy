@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backend Java Spring Boot + PostgreSQL. Ngày 22/10/2026 đã hoàn thành nền tảng 1, API tài khoản 2A và phiên 2B. Đợt 2C và 3–5 chưa triển khai; frontend chưa nối API.
+Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 22/10/2026 đã hoàn thành nền tảng 1, API tài khoản 2A, phiên 2B và **2C.1 nối đăng ký/đăng nhập/hồ sơ trên UI**. 2C.2/2C.3 và 3–5 chưa hoàn thành; dữ liệu học tập chưa nối API.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -98,6 +98,9 @@ Theo yêu cầu lưu lại ngày 20/10/2026. Frontend dùng React Native; backen
 - [x] Backend 2A — POST đăng ký/đăng nhập, GET hồ sơ hiện tại; mật khẩu băm, email chuẩn hóa/duy nhất, lỗi validation/trùng/sai thông tin, giới hạn thử; access token ký RS256 15 phút để bảo vệ hồ sơ. 34 tests qua trên PostgreSQL thật (gồm 17 tests nền tảng). Hồ sơ hai tài khoản độc lập; không coi là đã kiểm tra phân quyền dữ liệu học tập. Xem `BACKEND-PHASE-2A.md`.
 - [x] Backend 2B — V2 lưu phiên/hash refresh token, luân chuyển một lần, hạn refresh 7 ngày/phiên tối đa 30 ngày; replay thu hồi cả phiên, logout chặn ngay access token. Web có cookie HttpOnly/CSRF/origin, native dùng body; 51 tests qua, gồm đóng/mở backend ba lần và script PowerShell 5.1. Xem `BACKEND-PHASE-2B.md`.
 - [ ] Backend 2C — Nối đăng ký/đăng nhập/hồ sơ React Native; lưu phiên phù hợp web/native, tự refresh, lỗi mạng có timeout/thử lại, đăng xuất dọn dữ liệu tài khoản; thử hai tài khoản không lẫn trạng thái frontend.
+- [x] 2C.1 — Form đăng ký/đăng nhập gọi API thật; GET hồ sơ, tên trên Trang chủ, API/Provider riêng, loading/khóa gửi lặp, lỗi trường/409/401/mạng/timeout 10 giây, thử lại hồ sơ và hủy khi đóng. Web có cookie/CSRF; token frontend chỉ trong bộ nhớ. TypeScript/export web, 13 nhóm kiểm tra API client và kiểm tra web với PostgreSQL thật/schema riêng, hai tài khoản, 4 kích thước màn hình. Xem `FRONTEND-AUTH-2C1.md`.
+- [ ] 2C.2 — Khôi phục phiên khi mở/tải lại app, lưu native bằng kho bảo mật, tự refresh một yêu cầu duy nhất, logout thật và dọn trạng thái. Web không đọc/lưu refresh token bằng JS.
+- [ ] 2C.3 — Nghiệm thu đổi tài khoản/dọn dữ liệu frontend, mạng chập chờn và kết nối trên Android/iOS/điện thoại thật; không suy từ test web là đã kiểm tra native.
 - [ ] Backend 2C — Web lấy CSRF/credentials cookie, native lưu refresh token bằng kho bảo mật; gộp refresh đồng thời, không gắn access token hết hạn vào auth request hoặc gửi lại token đã xoay khi không rõ kết quả; thử tải lại app và lỗi mạng.
 - [ ] Vận hành auth sau bản lõi — job dọn phiên/hash token hết hạn, quản lý/thu hồi mọi thiết bị, giới hạn thử chia sẻ nhiều instance/proxy; production HTTPS bật Secure cookie và chốt origin/cùng site.
 - [ ] Backend 3 — Thêm/sửa/xóa học kỳ và môn học; mở lại app vẫn có dữ liệu, chọn đúng học kỳ.
@@ -152,7 +155,8 @@ Các mục UI đánh dấu x chỉ nghiệm thu prototype với dữ liệu tron
 
 - [x] Auth Spring Boot 2A: API đăng ký/đăng nhập/hồ sơ, băm mật khẩu và access token ngắn hạn (chưa nối UI).
 - [x] Auth Spring Boot 2B: refresh/đăng xuất, hash token trong DB, phiên bền vững, cookie web/CSRF và thu hồi access token.
-- [ ] Auth tiếp theo: nối UI, xác minh email và khôi phục/đổi mật khẩu; không coi các phần này đã xong chỉ vì API auth đã chạy.
+- [x] Auth UI 2C.1: đăng ký/đăng nhập/hồ sơ thật trên web; đọc hồ sơ, chưa cập nhật hồ sơ.
+- [ ] Auth tiếp theo: giữ phiên/refresh/logout trên UI, native và xác minh email/khôi phục/đổi mật khẩu. Hồ sơ mẫu chỉ sửa dữ liệu thử; không thay hồ sơ tài khoản đã lưu.
 - [ ] Mỗi tài khoản chỉ đọc/ghi dữ liệu của mình; không dùng trạng thái tài khoản minh họa để phân quyền.
 - [ ] Lưu/đồng bộ hồ sơ và tùy chọn; chọn/tải avatar thật và xử lý quyền truy cập ảnh.
 - [ ] Áp dụng sáng/tối và bản dịch xuyên suốt app; hiện tại UI 2E chỉ có thẻ xem trước.

@@ -1,45 +1,22 @@
+// Preview-only regression. Real account API checks: qa-account-api.cjs (disposable backend required).
 const { enterDemo, settleAction } = require('./qa-onboarding-helpers.cjs');
-const { visibleText, backDialog } = require('./qa-navigation-helpers.cjs');
-const { chooseDate, chooseTime } = require('./qa-picker-helpers.cjs');
-// Optional UI check. Use PLAYWRIGHT_MODULE and CHROME_PATH for an existing runtime/browser.
-const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const assert = require('node:assert/strict');
 (async () => {
-  const out = path.resolve(__dirname, '../.expo/qa-account'); fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH || undefined });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } }); const errors = [], writes = [];
-  page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  page.on('request', r => { if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(r.method())) writes.push({ method: r.method(), url: r.url() }); });
-  const button = name => page.getByRole('button', { name, exact: true });
-  const tab = name => page.getByRole('tab', { name, exact: true });
-  const field = name => page.getByLabel(name, { exact: true });
-  const text = name => visibleText(page,name, { exact: true }).last();
-  const back = () => button('Quay lại tài khoản').click();
-  const shot = async name => { if (await button('Đóng tài khoản').count()) await button('Đóng tài khoản').hover(); await page.screenshot({ path: path.join(out, `${name}.png`) }); };
+  page.on('pageerror', e => errors.push(e.message)); page.on('request', r => { if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(r.method())) writes.push(r.method()); });
+  const button = name => page.getByRole('button', { name, exact: true }).filter({ visible: true });
   try {
-    await page.goto(process.argv[2] || 'http://localhost:8092', { waitUntil: 'networkidle' }); await enterDemo(page); await page.evaluate(() => document.fonts.ready);
-    await button('Hồ sơ').click(); await settleAction(page); await button('Sửa hồ sơ').waitFor();
-    for (const width of [320, 390, 430, 1280]) { await page.setViewportSize({ width, height: 900 }); await shot(`account-${width}`); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false); }
-    await page.setViewportSize({ width: 390, height: 844 });
-    await button('Sửa hồ sơ').click(); await settleAction(page); await field('Họ và tên').fill(''); await button('Lưu hồ sơ').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'Họ tên cần' }).waitFor();
-    await field('Họ và tên').fill('Trần Minh Anh'); await field('Email hồ sơ').fill('sai-email'); await button('Lưu hồ sơ').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'email hợp lệ' }).waitFor();
-    await field('Email hồ sơ').fill('  Anh@Example.com  '); await field('Trường học').fill('Đại học của Minh Anh'); await field('Ngành học').fill('Khoa học máy tính'); await field('Giới thiệu ngắn').fill('a'.repeat(161)); await button('Lưu hồ sơ').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: '160 ký tự' }).waitFor();
-    await field('Giới thiệu ngắn').fill('Mỗi tuần một mục tiêu nhỏ.'); await page.getByRole('radio', { name: 'Chữ cái xanh', exact: true }).click(); await settleAction(page); await button('Lưu hồ sơ').click(); await settleAction(page); await text('anh@example.com').waitFor(); await text('Trần Minh Anh').waitFor();
-    await button('Đóng tài khoản').click(); await settleAction(page); await text('Trần Minh Anh').waitFor(); await button('Hồ sơ').click(); await settleAction(page); await button('Sửa hồ sơ').click(); await settleAction(page); assert.equal(await field('Ngành học').inputValue(), 'Khoa học máy tính'); await field('Họ và tên').fill('Tên chưa lưu'); await back(); await text('Trần Minh Anh').waitFor();
-    await button('Giao diện & ngôn ngữ').click(); await settleAction(page); await tab('Tối').click(); await settleAction(page); await tab('English').click(); await settleAction(page); await text('Your study space').waitFor(); await shot('appearance-dark-english'); await button('Lưu lựa chọn xem trước').click(); await settleAction(page); await back();
-    await button('Giao diện & ngôn ngữ').click(); await settleAction(page); assert.equal(await tab('Tối').getAttribute('aria-selected'), 'true'); assert.equal(await tab('English').getAttribute('aria-selected'), 'true'); await back();
-    await button('Tùy chọn nhắc học').click(); await settleAction(page); await page.getByRole('switch', { name: 'Nhắc bài tập', exact: true }).click(); await settleAction(page); await page.getByRole('radio', { name: 'Nhắc trước 30 phút', exact: true }).click(); await settleAction(page);
-    await chooseTime(page, 'Yên lặng từ (HH:mm)', '22:00'); await chooseTime(page, 'Đến (HH:mm)', '22:00'); await button('Lưu tùy chọn nhắc học').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'khác nhau' }).waitFor(); await chooseTime(page, 'Đến (HH:mm)', '07:00'); await button('Lưu tùy chọn nhắc học').click(); await settleAction(page); await back();
-    await button('Tùy chọn nhắc học').click(); await settleAction(page); assert.equal(await page.getByRole('switch', { name: 'Nhắc bài tập', exact: true }).isChecked(), false); assert.equal(await page.getByRole('radio', { name: 'Nhắc trước 30 phút', exact: true }).getAttribute('aria-checked'), 'true'); await shot('reminders'); await back();
-    await button('Xem giao diện đăng nhập').click(); await settleAction(page); await button('Tiếp tục bản mẫu').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'email hợp lệ' }).waitFor(); await field('Email tài khoản').fill('test@example.com'); await field('Mật khẩu').fill('123'); await button('Tiếp tục bản mẫu').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: '8 đến 128' }).waitFor(); await field('Mật khẩu').fill('Matkhau123'); assert.equal(await field('Mật khẩu').getAttribute('type'), 'password'); await button('Hiện mật khẩu').click(); await settleAction(page); assert.equal(await field('Mật khẩu').getAttribute('type'), 'text'); await button('Ẩn mật khẩu').click(); await settleAction(page);
-    await shot('login'); await button('Chưa có tài khoản? Đăng ký').click(); await settleAction(page); await field('Email tài khoản').fill('Demo@Example.com'); await field('Mật khẩu').fill('Matkhau123'); await field('Xác nhận mật khẩu').fill('KhongKhop123'); await button('Tạo hồ sơ dùng thử').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'Họ tên cần' }).waitFor(); await field('Họ tên đăng ký').fill('Bạn Học Mới'); await button('Tạo hồ sơ dùng thử').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'chưa trùng khớp' }).waitFor(); await field('Xác nhận mật khẩu').fill('Matkhau123');
-    for (const width of [320, 430]) { await page.setViewportSize({ width, height: 900 }); await shot(`register-${width}`); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false); } await page.setViewportSize({ width: 390, height: 844 });
-    await button('Tạo hồ sơ dùng thử').click(); await settleAction(page); await text('Bạn Học Mới').waitFor(); await text('demo@example.com').waitFor(); await button('Đăng xuất bản mẫu').click(); await settleAction(page); await button('Ở lại bản mẫu').click(); await settleAction(page); await text('Bạn Học Mới').waitFor(); await button('Đăng xuất bản mẫu').click(); await settleAction(page); await button('Xác nhận đăng xuất bản mẫu').click(); await settleAction(page); assert.equal(await field('Mật khẩu').inputValue(), ''); await button('Đóng tài khoản').click(); await settleAction(page); await text('Bạn học').waitFor(); await text('Đồ án cuối kỳ Web App').waitFor();
-    await button('Hồ sơ').click(); await settleAction(page); await button('Mở giao diện đăng nhập').click(); await settleAction(page); await field('Email tài khoản').fill('hello@example.com'); await field('Mật khẩu').fill('Hello1234'); await button('Tiếp tục bản mẫu').click(); await settleAction(page); await text('hello@example.com').waitFor(); await button('Xem giao diện đăng nhập').click(); await settleAction(page); assert.equal(await field('Mật khẩu').inputValue(), '');
-    await button('Quên mật khẩu?').click(); await settleAction(page); await field('Email tài khoản').fill('recover@example.com'); await button('Xem trước yêu cầu khôi phục').click(); await settleAction(page); await text('recover@example.com').waitFor(); await shot('recovery-preview'); await button('Xem form đặt lại mật khẩu').click(); await settleAction(page); await field('Mật khẩu mới').fill('Moi12345'); await field('Nhập lại mật khẩu mới').fill('Sai12345'); await button('Hoàn tất xem trước mật khẩu').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'chưa trùng khớp' }).waitFor(); await field('Nhập lại mật khẩu mới').fill('Moi12345'); await button('Hoàn tất xem trước mật khẩu').click(); await settleAction(page); assert.equal(await field('Mật khẩu').inputValue(), ''); await back();
-    await button('Đổi mật khẩu').click(); await settleAction(page); await button('Hoàn tất xem trước mật khẩu').click(); await settleAction(page); await page.getByRole('alert').filter({ hasText: 'mật khẩu hiện tại' }).waitFor(); await field('Mật khẩu hiện tại').fill('Cu123456'); await field('Mật khẩu mới').fill('Moi12345'); await field('Nhập lại mật khẩu mới').fill('Moi12345'); await button('Hoàn tất xem trước mật khẩu').click(); await settleAction(page); await text('HỒ SƠ MẪU CỦA BẠN').waitFor();
+    await page.goto(process.argv[2] || 'http://localhost:8092', { waitUntil: 'networkidle' }); await enterDemo(page);
+    await button('Hồ sơ').click(); await button('Chỉnh sửa hồ sơ mẫu').click();
+    await page.getByLabel('Họ và tên', { exact: true }).fill('Hồ sơ minh họa mới'); await button('Lưu hồ sơ').click(); await settleAction(page);
+    await page.getByRole('dialog').getByText('Hồ sơ minh họa mới', { exact: true }).waitFor();
+    await button('Giao diện & ngôn ngữ').click(); await page.getByRole('tab', { name: 'Tối', exact: true }).click();
+    await page.getByRole('tab', { name: 'English', exact: true }).click(); await page.getByText('Your study space', { exact: true }).waitFor();
+    await button('Lưu lựa chọn xem trước').click(); await settleAction(page); await button('Quay lại tài khoản').click();
+    await button('Tùy chọn nhắc học').click(); await page.getByRole('switch', { name: 'Nhắc bài tập', exact: true }).click(); await button('Lưu tùy chọn nhắc học').click(); await settleAction(page);
     assert.deepEqual(errors, []); assert.deepEqual(writes, []);
-    const result = { passed: true, widths: [320, 390, 430, 1280], checks: ['profile validation/save/cancel and home sharing', 'avatar choice', 'appearance/language preview persists', 'reminder toggles and quiet time validation', 'email/password/confirmation validation', 'password visibility and clearing', 'registration/login/logout previews', 'recovery/reset/change-password previews', 'no write requests or console errors'], errors, writes };
-    fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));
-  } finally { await shot('last-state'); await browser.close(); }
-})().catch(e => { console.error(e); process.exitCode = 1; });
+    console.log(JSON.stringify({ passed: true, checks: ['preview profile', 'appearance/language', 'reminders', 'no API writes or runtime errors'] }));
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

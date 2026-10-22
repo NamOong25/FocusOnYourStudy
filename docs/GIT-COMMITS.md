@@ -2,15 +2,15 @@
 
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
-## Đợt vừa hoàn thành: Backend 2B — Phiên và đăng xuất
+## Đợt vừa hoàn thành: 2C.1 — Nối giao diện tài khoản
 
-Thêm V2 lưu phiên/hash refresh token, refresh luân chuyển, phát hiện replay, logout thu hồi cả access token của phiên. Web có cookie HttpOnly và CSRF, native dùng body. Có script thử phiên; 51 tests qua trên PostgreSQL thật, gồm restart và Windows PowerShell 5.1. Nối frontend ở 2C. Xem `BACKEND-PHASE-2B.md`.
+Nối form đăng ký/đăng nhập và đọc hồ sơ với API; web dùng cookie/CSRF, access token trong bộ nhớ. Có loading/khóa gửi lặp, lỗi trường, timeout/hủy và thử lại hồ sơ; tên Trang chủ dùng hồ sơ thật. Typecheck/export web, unit API client và kiểm tra trình duyệt với backend/PostgreSQL thật. Giữ phiên/refresh/logout trên UI làm ở 2C.2. Xem `FRONTEND-AUTH-2C1.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Bổ sung làm mới phiên đăng nhập và đăng xuất"
+git commit -m "Kết nối giao diện đăng ký đăng nhập và hồ sơ với backend"
 git push
 ```
 
@@ -20,6 +20,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Backend 2B — Phiên và đăng xuất | `Bổ sung làm mới phiên đăng nhập và đăng xuất` |
 | Backend 2A — API tài khoản | `Triển khai API đăng ký đăng nhập và hồ sơ tài khoản` |
 | Backend 1 — Nền tảng | `Khởi tạo backend Spring Boot và kết nối PostgreSQL` |
 | UI 4H — Rà soát và trình diễn giao diện | `Bổ sung kiểm thử tổng thể giao diện và trình diễn trực tiếp` |
@@ -48,6 +49,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| Backend 2C — Nối frontend | Gọi API tài khoản từ React Native, giữ phiên và xử lý lỗi mạng | Kết nối giao diện tài khoản với backend |
+| 2C.2 — Giữ phiên | Khôi phục, tự refresh và đăng xuất thật | Bổ sung giữ phiên làm mới token và đăng xuất trên ứng dụng |
+| 2C.3 — Nghiệm thu tài khoản | Đổi tài khoản, lỗi mạng và kiểm tra native | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục hoàn thiện làm riêng một đợt để người dùng xem và push. Backend 1/2A/2B đã hoàn thành; đợt tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B và UI nối tài khoản 2C.1; tiếp theo theo `next`/`go`.

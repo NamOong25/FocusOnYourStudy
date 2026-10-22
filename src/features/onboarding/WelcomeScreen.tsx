@@ -12,6 +12,6 @@ export default function WelcomeScreen({ onStart, onDemo }: { onStart: () => void
     <Card style={{ gap: 13 }}>{['Tạo học kỳ và các môn đang học', 'Ghi lịch học, bài tập và hạn nộp', 'Dành một phiên tập trung cho hôm nay'].map((text, index) => <View key={text} style={{ flexDirection: 'row', gap: 11, alignItems: 'center' }}><T style={{ fontFamily: F.extra, color: C.primary }}>{index + 1}.</T><T style={{ flex: 1, fontSize: 13 }}>{text}</T></View>)}</Card>
     <Button label="Bắt đầu với dữ liệu trống" icon="add" onPress={onStart} />
     <Button label="Khám phá dữ liệu mẫu" secondary icon="sparkles-outline" onPress={onDemo} />
-    <T style={[S.small, { textAlign: 'center', fontSize: 11 }]}>Đây là bản thử giao diện. Dữ liệu chỉ giữ trong phiên; tải lại app sẽ trở về màn này. Chưa có tài khoản hay đồng bộ thật.</T>
+    <T style={[S.small, { textAlign: 'center', fontSize: 11 }]}>Các màn học tập đang dùng dữ liệu thử và được đặt lại khi tải lại. Mở Hồ sơ để đăng ký hoặc đăng nhập tài khoản đã lưu.</T>
   </ScrollView></View>;
 }

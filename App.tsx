@@ -35,6 +35,7 @@ import TaskDialog from './src/features/assignments/TaskDialog';
 import StudyPlan from './src/features/study/StudyPlanScreen';
 import ClassDialog from './src/features/schedule/ClassDialog';
 import Account from './src/features/account/AccountScreen';
+import { AuthProvider } from './src/features/account/auth/AuthProvider';
 import NotificationsCenter from './src/features/notifications/NotificationsCenter';
 import NotificationBell from './src/features/notifications/components/NotificationBell';
 import useInAppNotifications from './src/features/notifications/useInAppNotifications';
@@ -116,7 +117,7 @@ export default function App() {
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: C.canvas, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color={C.primary} /></View>;
-  return <SafeAreaProvider><FeedbackProvider>{workspace === 'welcome' ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} /> : <PrototypeProvider empty={workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</FeedbackProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><AuthProvider><FeedbackProvider>{workspace === 'welcome' ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} /> : <PrototypeProvider empty={workspace === 'empty'}><NavigationProvider><ActionScope><AppShell /></ActionScope></NavigationProvider></PrototypeProvider>}</FeedbackProvider></AuthProvider></SafeAreaProvider>;
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#EDEDF8', alignItems: 'center' },

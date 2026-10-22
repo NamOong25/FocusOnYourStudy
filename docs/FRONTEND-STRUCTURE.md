@@ -10,7 +10,10 @@ src/
 ├── features/
 │   ├── academics/               Học kỳ, môn học, form và CourseChoices
 │   │   └── components/          SemesterPicker và AcademicYearPicker
-│   ├── account/                 Tài khoản, hồ sơ, cài đặt và validation mẫu
+│   ├── account/                 AccountScreen; account.ts kiểm tra form/hồ sơ mẫu
+│   │   ├── api/                 Hợp đồng DTO và API đăng ký/đăng nhập/hồ sơ
+│   │   ├── auth/                AuthProvider, useApiAction và ánh xạ hồ sơ hiển thị
+│   │   └── components/          AuthForm, AuthHero, AccountProfile, PreferenceEditors
 │   ├── assignments/             TaskForm và chi tiết bài tập
 │   ├── assistant/               Trợ lý AI, đề xuất lịch, tài liệu/quiz mẫu
 │   ├── dashboard/               HomeScreen
@@ -30,6 +33,7 @@ src/
 │   ├── Navigation.tsx           Provider, scope, cuộn và xử lý Back
 │   └── navigationState.ts       Route và quy tắc quay lại thuần TypeScript
 ├── shared/
+│   ├── api/                     HTTP client, lỗi chuẩn hóa, timeout/hủy và URL môi trường
 │   ├── forms/                   useFormChanges (so bản nháp) và UnsavedChanges (hộp xác nhận)
 │   ├── feedback/                Thông báo và phạm vi thao tác chờ/lỗi/hủy
 │   ├── components/

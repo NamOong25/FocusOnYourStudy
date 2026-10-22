@@ -1,6 +1,6 @@
 # API — v1
 
-Base URL cục bộ: `http://localhost:8080`. Đợt 2B có đăng ký/đăng nhập/hồ sơ, refresh và logout; chưa mở CRUD học tập hoặc nối frontend.
+Base URL cục bộ: `http://localhost:8080`. Đợt 2B có đăng ký/đăng nhập/hồ sơ, refresh và logout; **frontend 2C.1 đã gọi đăng ký/đăng nhập/hồ sơ**. Chưa mở CRUD học tập hoặc khôi phục/refresh/logout trên giao diện.
 
 ## Endpoint hiện có
 
