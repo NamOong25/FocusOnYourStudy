@@ -160,3 +160,13 @@ Quy ước kỳ 1/2 chính, kỳ 3 hè tùy chọn theo từng năm ở `SEMESTE
 - `forms.tsx` chọn form thật hoặc form mẫu. API môn sẽ bổ sung ở 3C.2; các state học tập còn lại chưa lưu backend.
 
 Hướng dẫn kiểm tra: `FRONTEND-SEMESTERS-3C1.md`.
+
+## Cập nhật môn học — 3C.2
+
+- `features/academics/api/coursesApi.ts`: GET toàn danh sách theo tài khoản, POST/PUT/DELETE, trạng thái và version; frontend lọc danh sách dùng chung theo kỳ.
+- `api/CourseManager.ts`, `api/useServerCourses.ts`: quản lý tải/ghi, chặn gửi trùng, gộp đọc, xử lý kết quả không rõ và vòng đời danh tính.
+- `components/CourseApiForm.tsx`: form thật có sửa/chuyển kỳ/xóa và nạp bản mới khi xung đột. `forms.tsx` vẫn chọn form RAM khi chưa đăng nhập.
+- `courseLinks.ts`: giữ liên kết theo ID khi đổi tên, bảo vệ chuỗi học lại đã có điểm và dọn các mục thử khi server xóa/chuyển môn.
+- `store/model.tsx`: dùng cùng nguồn môn thật trên các màn; không tự ghi bản nháp vào danh sách server. AppShell chờ đủ danh sách học kỳ/môn trước khi mở nội dung, vẫn cho mở tài khoản khi lỗi tải.
+
+Hướng dẫn và kiểm tra: `FRONTEND-COURSES-3C2.md`. Bài tập/lịch/điểm/Pomodoro vẫn RAM; 2C.3B máy thật tiếp tục để sau.

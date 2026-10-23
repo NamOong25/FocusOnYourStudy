@@ -31,6 +31,9 @@ export default function Academics() {
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
   React.useEffect(() => { setFilter('Tất cả'); setQuery(''); }, [semesterId]);
+  React.useEffect(() => {
+    if (sheet === 'detail' && courseId && !courseCatalog.some(course => course.id === courseId)) { setSheet(null); setCourseId(null); }
+  }, [courseCatalog, courseId, sheet]);
   if (semesterConnection && !semesterConnection.loaded) return <SemesterSyncStatus />;
   if (!semesters.length) return <FlowScope onClose={() => setSheet(null)}><SemesterSyncStatus /><StateView title="Chưa có học kỳ" message="Tạo học kỳ đầu tiên, rồi thêm môn học và tín chỉ của bạn." actionLabel="Tạo học kỳ đầu tiên" onAction={() => setSheet('new-semester')} />{sheet === 'new-semester' && <SemesterForm key="semester-editor" onClose={() => setSheet(null)} onSaved={id => { setSemesterId(id); setSheet(null); }} />}</FlowScope>;
   const semester = semesters.find(s => s.id === semesterId) ?? semesters[0]!;

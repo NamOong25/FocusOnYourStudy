@@ -1,5 +1,7 @@
 # 3C.1 — Giao diện học kỳ dùng dữ liệu thật
 
+**Cập nhật từ 3C.2:** môn học cũng đã nối API và giữ lại sau F5/đăng nhập lại. Bài/lịch/điểm vẫn thử trong RAM; xem `FRONTEND-COURSES-3C2.md`. Nội dung dưới đây lưu phạm vi ban đầu của 3C.1.
+
 Đăng nhập rồi mở **Lịch học → Môn & học kỳ**. Danh sách, tạo, sửa, xóa học kỳ dùng API Spring Boot và PostgreSQL của tài khoản. Trang chủ và các ô chọn học kỳ dùng chung danh sách này.
 
 **Chỉ học kỳ đã nối API trong đợt này.** Môn học, lịch, bài tập, điểm, Pomodoro và AI trên giao diện vẫn là dữ liệu thử trong RAM. API môn 3B đã có nhưng giao diện môn chờ **3C.2**. Dữ liệu mẫu khi chưa đăng nhập vẫn chỉ để xem; không tự nhập mẫu vào tài khoản. Thiết bị thật 2C.3B tiếp tục để sau.

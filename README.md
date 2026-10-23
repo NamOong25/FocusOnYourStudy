@@ -1,12 +1,18 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 3C.1: tài khoản/phiên và học kỳ dùng dữ liệu thật**. Môn học, lịch, bài tập, điểm và các mục học tập khác trên giao diện vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 3C.2: tài khoản/phiên, học kỳ và môn học dùng dữ liệu thật**. Lịch, bài tập, điểm và các mục học tập khác trên giao diện vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 3C.1: Học kỳ trên giao diện đã lưu vào PostgreSQL
+## Mới nhất — 3C.2: Môn học trên giao diện đã lưu vào PostgreSQL
+
+Đăng nhập → **Lịch học → Môn & học kỳ** → thêm/sửa/xóa môn hoặc chuyển kỳ. F5/đăng nhập lại giữ nguyên môn và thông tin. Dashboard, số tín chỉ và các ô chọn môn dùng cùng danh sách. Có mã trùng/version, tải/lỗi/thử lại, bảo vệ liên kết dữ liệu thử và tách tài khoản.
+
+Xem [hướng dẫn test 3C.2](docs/FRONTEND-COURSES-3C2.md). Không cần tạo lại database. Bài tập/lịch/điểm vẫn chưa lưu; đợt 4 sẽ nối tiếp. Thiết bị thật 2C.3B tiếp tục để sau.
+
+## 3C.1: Học kỳ trên giao diện đã lưu vào PostgreSQL
 
 Đăng nhập → **Lịch học → Môn & học kỳ** → tạo/sửa/xóa học kỳ. F5 hoặc đăng xuất rồi đăng nhập lại cùng tài khoản vẫn giữ học kỳ. Trang chủ và các bộ chọn dùng chung danh sách; kỳ đang học trước được kết thúc khi chọn kỳ khác làm Đang học. Có tải/lỗi/thử lại, chống gửi trùng và xử lý xung đột phiên bản.
 
-Xem [hướng dẫn test từng bước và giới hạn](docs/FRONTEND-SEMESTERS-3C1.md). **3C.2 nối giao diện môn học là bước tiếp theo**; chưa tự đưa dữ liệu mẫu hoặc môn thử lên backend. Backend và database không cần tạo lại.
+Xem [hướng dẫn học kỳ 3C.1](docs/FRONTEND-SEMESTERS-3C1.md). UI môn đã nối ở 3C.2; dữ liệu xem trước không tự đưa vào tài khoản.
 
 ## Tài khoản trên giao diện — 2C.2 và kiểm tra web 2C.3A
 
@@ -26,7 +32,7 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 **F5 khôi phục phiên khi còn hiệu lực.** Hồ sơ → Đăng xuất → Xác nhận đăng xuất thu hồi phiên và dọn nội dung thử; các tab cùng origin cũng thoát. Mất mạng khi đăng xuất có nút Hoàn tất đăng xuất, không tự khôi phục phiên đã thoát. Sau nâng cấp từ 2C.1 cần đăng nhập một lần. Từ 3C.1, học kỳ đã lưu theo tài khoản; chưa có API sửa hồ sơ/quên mật khẩu.
 
-**2C.3A** kiểm tra A/B với dữ liệu thử, bản nháp và đồng hồ đang chạy; không giữ thông báo hoặc chế độ thử lỗi từ tài khoản cũ. Có kiểm tra liên tab, phản hồi về muộn, offline/kết nối lại. Xem [hướng dẫn tự test](docs/FRONTEND-AUTH-2C3A.md). Từ 3C.1, runner giữ kỳ vọng học kỳ thật của A khi trở lại A, nhưng dọn môn/bài/timer thử. Thiết bị thật còn ở 2C.3B.
+**2C.3A** kiểm tra A/B với dữ liệu thử, bản nháp và đồng hồ đang chạy; không giữ thông báo hoặc chế độ thử lỗi từ tài khoản cũ. Có kiểm tra liên tab, phản hồi về muộn, offline/kết nối lại. Xem [hướng dẫn tự test](docs/FRONTEND-AUTH-2C3A.md). Từ 3C.2, runner giữ kỳ vọng học kỳ/môn thật của A khi trở lại A, nhưng dọn bài/lịch/điểm/timer thử. Thiết bị thật còn ở 2C.3B.
 
 URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
@@ -41,11 +47,11 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 Kiểm tra tại `http://localhost:8080/api/v1/health`. Hướng dẫn chạy/test, biến môi trường và cấu trúc nằm trong [backend/README.md](backend/README.md); quan hệ dữ liệu trong [backend/docs/SCHEMA.md](backend/docs/SCHEMA.md).
 
-Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Theo lựa chọn người dùng, **2C.3B kiểm tra thiết bị thật để làm sau**; **3A học kỳ và 3B môn học đã hoàn thành**, UI học kỳ đã nối ở 3C.1, UI môn tiếp theo ở 3C.2. Hướng dẫn test API học kỳ ở [BACKEND-PHASE-3A.md](docs/BACKEND-PHASE-3A.md).
+Các script API cũ vẫn dùng được: `./backend/scripts/Try-Auth.ps1 -Mode Register` và `./backend/scripts/Try-Session.ps1`. Xem [hướng dẫn 2B](docs/BACKEND-PHASE-2B.md). Theo lựa chọn người dùng, **2C.3B kiểm tra thiết bị thật để làm sau**; **3A/3B API và 3C.1/3C.2 UI học kỳ/môn đã hoàn thành**. Hướng dẫn test API học kỳ ở [BACKEND-PHASE-3A.md](docs/BACKEND-PHASE-3A.md).
 
 API học kỳ hiện có GET/POST/PUT/DELETE theo tài khoản, lưu PostgreSQL, chặn trùng và xóa kỳ còn môn, dùng version chống ghi đè. 72 tests/Maven verify qua. Xem [hướng dẫn 3A](docs/BACKEND-PHASE-3A.md).
 
-API môn đã mở ở 3B: CRUD/lọc học kỳ, kiểm tra chủ sở hữu, mã trùng/version và xử lý ghi đồng thời với học kỳ. 92 tests/Maven verify qua. Xem [hướng dẫn test môn học](docs/BACKEND-PHASE-3B.md) và [hợp đồng API](backend/docs/COURSES.md). UI học kỳ đã nối; UI môn chờ 3C.2.
+API môn đã mở ở 3B: CRUD/lọc học kỳ, kiểm tra chủ sở hữu, mã trùng/version và xử lý ghi đồng thời với học kỳ. 92 tests/Maven verify qua tại đợt 3B. Xem [hướng dẫn test API môn học](docs/BACKEND-PHASE-3B.md), [hợp đồng API](backend/docs/COURSES.md) và [UI môn 3C.2](docs/FRONTEND-COURSES-3C2.md).
 
 ## Chạy ứng dụng
 
@@ -57,7 +63,7 @@ npm install
 npx expo start
 ```
 
-Khi mở app chưa đăng nhập, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Khi có phiên hợp lệ, app khôi phục hồ sơ và tải học kỳ từ backend; môn/bài/lịch thử bắt đầu trống.
+Khi mở app chưa đăng nhập, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Khi có phiên hợp lệ, app khôi phục hồ sơ và tải học kỳ/môn từ backend; bài/lịch/điểm thử bắt đầu trống.
 
 Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 56 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
 
@@ -78,7 +84,7 @@ npm run build:web
 - Trợ lý AI: 5 công cụ với form đầu vào; sửa/bỏ chọn/duyệt kế hoạch mẫu thành buổi tự học dùng chung sau khi kiểm tra lịch/deadline; điều chỉnh buổi chưa học; tóm tắt và quiz 3/5 câu có trang nguồn minh họa đọc được (bổ sung ở 2F).
 - Hồ sơ/cài đặt với các luồng tài khoản minh họa (bổ sung ở 2E), hộp nhắc nhở, trạng thái rỗng và thông báo sau thao tác.
 
-**Học kỳ khi đã đăng nhập được lưu trong PostgreSQL.** Các dữ liệu học tập khác trên giao diện nằm trong bộ nhớ; tải lại sẽ xóa các thay đổi thử này. Tài khoản đăng ký/đăng nhập/hồ sơ nối API từ 2C.1, khôi phục/refresh/logout từ 2C.2. Chưa có thông báo hệ thống, đồng bộ môn/bài/lịch/điểm, upload PDF hoặc gọi AI thật. Pomodoro chưa phát chuông khi app đóng/lưu phiên khi process bị hủy; chưa nghiệm thu chạy nền trên điện thoại thật.
+**Học kỳ và môn học khi đã đăng nhập được lưu trong PostgreSQL.** Các dữ liệu học tập khác trên giao diện nằm trong bộ nhớ; tải lại sẽ xóa các thay đổi thử này. Tài khoản đăng ký/đăng nhập/hồ sơ nối API từ 2C.1, khôi phục/refresh/logout từ 2C.2. Chưa có thông báo hệ thống, đồng bộ bài/lịch/điểm, upload PDF hoặc gọi AI thật. Pomodoro chưa phát chuông khi app đóng/lưu phiên khi process bị hủy; chưa nghiệm thu chạy nền trên điện thoại thật.
 
 ## Cấu trúc
 

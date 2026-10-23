@@ -9,6 +9,7 @@ import { uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
 import { SemesterApiForm } from './components/SemesterApiForm';
+import { CourseApiForm } from './components/CourseApiForm';
 
 export function SemesterForm(props: { item?: Semester; onClose: () => void; onSaved: (id: string) => void; onDeleted?: () => void }) {
   const { semesterConnection } = useApp();
@@ -40,7 +41,11 @@ function PreviewSemesterForm({ item, onClose, onSaved }: { item?: Semester; onCl
   </Sheet>;
 }
 
-export function CourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void }) {
+export function CourseForm(props: { item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void }) {
+  const { courseConnection } = useApp();
+  return courseConnection ? <CourseApiForm {...props} /> : <PreviewCourseForm {...props} />;
+}
+function PreviewCourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void }) {
   const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, studySessions, gradeBook, setToast } = useApp();
   const [name, setName] = useState(item?.name ?? ''); const [code, setCode] = useState(item?.code ?? '');
   const [credits, setCredits] = useState(String(item?.credits ?? 3));

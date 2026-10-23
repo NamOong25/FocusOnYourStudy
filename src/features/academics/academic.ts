@@ -9,7 +9,7 @@ export type SemesterStatus = 'Đang học' | 'Sắp tới' | 'Đã kết thúc';
 export type Semester = { id: string; term: SemesterTerm; name: string; academicYear: string; status: SemesterStatus; note: string; version?: number };
 export type CourseStatus = 'Đang học' | 'Hoàn thành' | 'Dự kiến';
 export type CourseColor = 'lavender' | 'mint' | 'peach' | 'blue';
-export type Course = { id: string; semesterId: string; code: string; name: string; credits: number; teacher: string; room: string; status: CourseStatus; color: CourseColor; description: string };
+export type Course = { id: string; semesterId: string; code: string; name: string; credits: number; teacher: string; room: string; status: CourseStatus; color: CourseColor; description: string; version?: number };
 export const courseColors: Record<CourseColor, { bg: string; ink: string; label: string }> = {
   lavender: { bg: '#E8E2FF', ink: '#5341CD', label: 'Tím' },
   mint: { bg: '#DDF9ED', ink: '#008F70', label: 'Xanh lá' },

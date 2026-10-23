@@ -12,13 +12,13 @@ import { SemesterPicker } from './SemesterPicker';
 const draftOf = (s?: Semester, defaultYear = new Date().getFullYear()) => ({ term: s?.term ?? 1 as SemesterTerm,
   startYear: s ? Number(s.academicYear.slice(0, 4)) : defaultYear, status: s?.status ?? 'Sắp tới' as SemesterStatus, note: s?.note ?? '' });
 export function SemesterApiForm({ item, onClose, onSaved, onDeleted }: { item?: Semester; onClose: () => void; onSaved: (id: string) => void; onDeleted?: () => void }) {
-  const { semesters, semesterConnection: c, courseCatalog } = useApp();
+  const { semesters, semesterConnection: c, courseCatalog, courseConnection } = useApp();
   const [basis, setBasis] = useState(item);
   const [draft, setDraft] = useState(() => draftOf(item, Number((semesters.find(s => s.status === 'Đang học')?.academicYear ?? String(new Date().getFullYear())).slice(0, 4))));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [mustRebase, setMustRebase] = useState(false), [confirmDelete, setConfirmDelete] = useState(false);
   const action = useApiAction();
   if (!c) return null;
-  const locked = action.busy || c.busy || c.loading;
+  const locked = action.busy || c.busy || c.loading || !!courseConnection?.busy || !!courseConnection?.loading;
   const update = (value: Partial<typeof draft>) => { if (!locked) { setDraft(v => ({ ...v, ...value })); setError(''); setConfirmDelete(false); } };
   const execute = (operation: () => Promise<Semester | void>, success: (result: Semester | void) => void) => {
     setError('');
@@ -48,7 +48,7 @@ export function SemesterApiForm({ item, onClose, onSaved, onDeleted }: { item?: 
   };
   const remove = () => {
     if (!basis || locked || mustRebase || c.needsReload) return;
-    if (courseCatalog.some(course => course.semesterId === basis.id)) { setError('Học kỳ còn môn thử trong phiên này. Xóa hoặc chuyển các môn thử trước khi xóa học kỳ.'); return; }
+    if (courseCatalog.some(course => course.semesterId === basis.id)) { setError('Học kỳ còn môn học. Xóa hoặc chuyển các môn sang kỳ khác trước khi xóa học kỳ.'); return; }
     if (!confirmDelete) { setConfirmDelete(true); return; }
     execute(() => c.remove(basis), () => { if (onDeleted) onDeleted(); else onClose(); });
   };
@@ -67,7 +67,7 @@ export function SemesterApiForm({ item, onClose, onSaved, onDeleted }: { item?: 
       <T style={S.small}>{basis ? 'Nạp bản mới sẽ thay nội dung đang chỉnh sửa bằng dữ liệu đã lưu.' : 'Kiểm tra danh sách để biết lần lưu trước đã được ghi nhận hay chưa. Thao tác lưu không tự gửi lại.'}</T>
       <Button label={basis ? 'Nạp bản học kỳ mới nhất' : 'Kiểm tra lại danh sách học kỳ'} secondary loading={action.busy} disabled={c.busy || c.loading} onPress={latest} />
     </View>}
-    <Button label="Lưu học kỳ" icon="checkmark" loading={action.busy} disabled={c.busy || c.loading || mustRebase || c.needsReload} onPress={save} />
+    <Button label="Lưu học kỳ" icon="checkmark" loading={action.busy} disabled={locked || mustRebase || c.needsReload} onPress={save} />
     {!!basis && <>
       {confirmDelete && <T accessibilityRole="alert" style={S.small}>Xóa {basis.name}, {basis.academicYear}? Chỉ học kỳ không còn môn mới xóa được.</T>}
       <Button label={confirmDelete ? 'Xác nhận xóa học kỳ' : 'Xóa học kỳ'} secondary={!confirmDelete} danger={confirmDelete} disabled={locked || mustRebase || c.needsReload} onPress={remove} />
