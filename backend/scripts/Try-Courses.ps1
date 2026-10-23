@@ -53,7 +53,7 @@ try {
         }
     }
     if ($Mode -ne 'Delete') { $result | ConvertTo-Json -Depth 6 }
-    Write-Host 'Dữ liệu môn học lấy từ PostgreSQL; giao diện sẽ được nối ở đợt 3C.' -ForegroundColor Cyan
+    Write-Host 'Dữ liệu môn học lấy từ PostgreSQL; giao diện môn đã nối API ở đợt 3C.2.' -ForegroundColor Cyan
 } catch {
     $failure = $_; $problem = $null
     try { $problem = $failure.ErrorDetails.Message | ConvertFrom-Json } catch { }

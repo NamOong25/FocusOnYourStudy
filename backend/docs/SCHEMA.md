@@ -66,7 +66,7 @@ Access token RS256 hạn 15 phút chứa UUID tài khoản `sub`, UUID phiên `s
 - Trạng thái `STUDYING / COMPLETED / PLANNED`; màu `lavender / mint / peach / blue` theo frontend.
 - Chưa có xóa dây chuyền mặc định. Khi thêm bài/lịch/điểm, API phải xử lý liên kết rõ ràng thay vì xóa âm thầm.
 
-API môn 3B đã dùng bảng này: truy vấn theo user_id, kiểm tra học kỳ đích cùng chủ, version khi PUT/DELETE, chuẩn hóa mã/giới hạn trường ở DTO. Ghi môn dùng cùng khóa hàng chủ tài khoản với ghi học kỳ; tạo/chuyển môn không đua với xóa kỳ. Không sửa V1/V2 hoặc tự seed dữ liệu. Xem `COURSES.md`; các liên kết bài/lịch/điểm backend và chặn tương ứng làm ở 4/5.
+API môn 3B đã dùng bảng này: truy vấn theo user_id, kiểm tra học kỳ đích cùng chủ, version khi PUT/DELETE, chuẩn hóa mã/giới hạn trường ở DTO. Ghi môn dùng cùng khóa hàng chủ tài khoản với ghi học kỳ/bài tập; tạo/chuyển môn không đua với xóa kỳ. 4A chặn xóa/chuyển kỳ môn còn bài; lịch/điểm sẽ bổ sung guard khi mở các bảng tương ứng. Không sửa V1/V2 hoặc tự seed dữ liệu; xem `COURSES.md`.
 
 Khóa ngoại này chỉ bảo vệ tính nhất quán quan hệ. Đợt 2/3 vẫn phải lấy user ID từ phiên xác thực, lọc mọi truy vấn theo chủ sở hữu, kiểm tra đọc/ghi chéo hai tài khoản. Chưa có PostgreSQL RLS hoặc API phân quyền hoàn chỉnh ở đợt 1.
 
@@ -105,12 +105,40 @@ erDiagram
 
 Chưa lưu danh sách thiết bị/IP/user-agent hoặc tạo giao diện quản lý phiên. Lưu trữ phiên phía client và refresh tự động trên app thuộc 2C; backend chỉ cung cấp cơ chế đã kiểm thử.
 
+## Đã tạo trong V3 — bài tập
+
+```mermaid
+erDiagram
+    APP_USERS ||--o{ ASSIGNMENTS : owns
+    COURSES ||--o{ ASSIGNMENTS : contains
+    ASSIGNMENTS {
+        uuid id PK
+        uuid user_id FK
+        uuid course_id FK
+        varchar title
+        timestamptz due_at
+        varchar priority
+        varchar status
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+        bigint version
+    }
+```
+
+- FK ghép `(course_id,user_id)` → `courses(id,user_id)` ngăn liên kết khác chủ; `UNIQUE(id,user_id)` sẵn cho bảng con ở đợt sau. Không cascade xóa.
+- `title` tối đa 200, notes tối đa 5000; tên bài có thể trùng. Priority MEDIUM/HIGH; status TODO/IN_PROGRESS/COMPLETED, không dùng status của buổi tự học.
+- `due_at` là thời điểm tuyệt đối có giờ/múi giờ, chuẩn hóa UTC/microsecond, trong khoảng [1900-01-01 UTC, 2100-01-01 UTC). Cho phép deadline quá khứ và không tự đổi status.
+- Index theo `(user_id,due_at,id)` và `(user_id,course_id)`. API lấy chủ từ JWT, lọc dữ liệu theo chủ; truyền UUID không cấp quyền.
+- Bài có version để chống sửa/xóa bản cũ. Môn còn bất kỳ bài nào (kể cả hoàn thành) bị chặn xóa hoặc chuyển kỳ; xóa/chuyển hết bài thì môn cũ được xử lý như 3B.
+- Ghi bài/môn/kỳ cùng khóa hàng chủ tài khoản. Không đổi V1/V2; nâng từ V2 giữ nguyên tài khoản/học kỳ/môn. Xem `ASSIGNMENTS.md`.
+
 ## Thiết kế cốt lõi cho các migration sau — chưa tạo bảng
 
 | Nhóm | Bảng dự kiến | Quy tắc cần giữ |
 | --- | --- | --- |
 | Auth bổ sung | verification_tokens, password_reset_tokens | Lưu hash token, hạn dùng/thu hồi; không lưu token/mật khẩu rõ. refresh_sessions/refresh_tokens đã có trong V2. |
-| Bài tập, đợt 4 | assignments, assignment_checklist | Gắn `course_id + user_id`; deadline là thời điểm có giờ/múi giờ; trạng thái riêng với buổi tự học. |
+| Bài tập bổ sung | assignment_checklist | assignments đã có trong V3; checklist/tệp và liên kết tự học làm ở đợt sau. |
 | Lịch học | class_series, class_series_weekdays, class_exceptions | Chuỗi có ngày bắt đầu/kết thúc và múi giờ; ngoại lệ duy nhất `(series_id, date)` cho đổi/nghỉ một buổi; phát hiện trùng ở service. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
 | Tự học | study_sessions | Gắn môn, liên kết bài tùy chọn; một bài có nhiều buổi; thời điểm/thời lượng/trạng thái độc lập. |
@@ -123,4 +151,4 @@ Các bảng con dùng composite FK `(parent_id, user_id)` khi có chủ sở h�
 
 ## Migration
 
-Flyway là nơi duy nhất tạo/đổi schema, tên `V2__...sql`, `V3__...sql` cho các đợt tiếp theo. Không sửa V1 sau khi đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
+Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên và V3 bài tập; đợt sau thêm V4 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.

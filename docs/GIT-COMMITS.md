@@ -4,15 +4,15 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 3C.2 — Nối giao diện môn học
+## Đợt vừa hoàn thành: 4A — API quản lý bài tập
 
-Giao diện tải/tạo/sửa/xóa/chuyển kỳ môn học bằng API 3B, giữ dữ liệu sau F5/đăng nhập lại. Dùng chung danh sách cho Dashboard/bộ chọn, xử lý mã trùng/version, lỗi/thử lại và tách tài khoản. Bảo vệ các liên kết thử và cập nhật tên môn liên quan; bài/lịch/điểm vẫn thử. Không đổi backend/migration. Xem `FRONTEND-COURSES-3C2.md`.
+V3 thêm bảng bài tập và API CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có múi giờ và version. Chặn xóa/chuyển kỳ môn còn bài, bảo vệ các request chạy đồng thời. 118 tests/Maven verify qua; có script PowerShell 5.1 và kiểm tra nâng V2/khởi động lại. UI bài tập chờ 4B. Xem `BACKEND-PHASE-4A.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Kết nối giao diện môn học với dữ liệu backend"
+git commit -m "Triển khai API quản lý bài tập theo môn học"
 git push
 ```
 
@@ -22,6 +22,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Frontend 3C.2 — Nối môn học | `Kết nối giao diện môn học với dữ liệu backend` |
 | Frontend 3C.1 — Nối học kỳ | `Kết nối giao diện học kỳ với API và lưu dữ liệu thật` |
 | Backend 3B — API môn học | `Triển khai API quản lý môn học theo học kỳ` |
 | Backend 3A — API học kỳ | `Triển khai API quản lý học kỳ theo tài khoản` |
@@ -57,7 +58,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4A — API bài tập, sẽ chốt phạm vi khi `next` | Deadline, trạng thái, ưu tiên và liên kết môn theo tài khoản | Triển khai API quản lý bài tập theo môn học |
+| 4B — Nối giao diện bài tập | Tải/lưu thật, F5, đổi tài khoản và liên kết môn/Dashboard | Kết nối giao diện bài tập với dữ liệu backend |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn 3C.1/3C.2; tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn 3C.1/3C.2; tiếp theo theo `next`/`go`.

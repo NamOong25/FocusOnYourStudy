@@ -180,7 +180,7 @@ class AuthIntegrationTests {
         assertThat(send(request("/api/v1/users/" + data(other).get("id")).header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(403);
         assertThat(send(request("/api/v1/semesters").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(200);
         assertThat(send(request("/api/v1/courses").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(200);
-        assertThat(send(request("/api/v1/assignments").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(403);
+        assertThat(send(request("/api/v1/study-sessions").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(403);
         assertThat(selected.body()).doesNotContain("passwordHash", "password_hash", TEST_PASSWORD);
     }
 

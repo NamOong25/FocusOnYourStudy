@@ -4,6 +4,7 @@ import com.focusstudy.academics.CourseEntity;
 import com.focusstudy.academics.semesters.SemesterRepository;
 import com.focusstudy.academics.semesters.SemesterApiException;
 import com.focusstudy.users.UserRepository;
+import com.focusstudy.assignments.AssignmentRepository;
 import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,9 @@ public class CourseService {
     private final CourseRepository courses;
     private final SemesterRepository semesters;
     private final UserRepository users;
-    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users) {
-        this.courses = courses; this.semesters = semesters; this.users = users;
+    private final AssignmentRepository assignments;
+    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users, AssignmentRepository assignments) {
+        this.courses = courses; this.semesters = semesters; this.users = users; this.assignments = assignments;
     }
     @Transactional(readOnly = true)
     public List<CourseResponse> list(UUID owner, UUID semesterId) {
@@ -35,6 +37,7 @@ public class CourseService {
     @Transactional
     public CourseResponse update(UUID owner, UUID id, CourseRequests.Update input) {
         lockOwner(owner); var course = owned(owner, id); checkVersion(course, input.version()); ownedSemester(owner, input.semesterId());
+        if (!course.getSemesterId().equals(input.semesterId())) requireNoAssignments(owner, id);
         if (courses.existsByUserIdAndSemesterIdAndCodeAndIdNot(owner, input.semesterId(), input.code(), id)) throw duplicate();
         course.change(input.semesterId(), input.code(), input.name(), input.credits(), input.teacher(), input.room(), input.status(), input.color(), input.description());
         courses.flush(); return CourseResponse.from(course);
@@ -42,9 +45,12 @@ public class CourseService {
     @Transactional
     public void delete(UUID owner, UUID id, long version) {
         lockOwner(owner); var course = owned(owner, id); checkVersion(course, version);
-        // No dependent learning tables are exposed yet. Future modules must add
-        // dependency guards; there is deliberately no cascade on this entity.
+        requireNoAssignments(owner, id);
         courses.delete(course); courses.flush();
+    }
+    private void requireNoAssignments(UUID owner, UUID courseId) {
+        if (assignments.existsByUserIdAndCourseId(owner, courseId)) throw new CourseApiException(HttpStatus.CONFLICT,
+                "COURSE_HAS_ASSIGNMENTS", "Môn còn bài tập. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.");
     }
     private void lockOwner(UUID owner) {
         // Same first lock as semester writes: create/move cannot race deletion of

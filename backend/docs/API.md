@@ -1,6 +1,6 @@
 # API — v1
 
-Base URL cục bộ: `http://localhost:8080`. **3A/3B đã mở CRUD học kỳ và môn theo tài khoản**, xem [học kỳ](SEMESTERS.md) và [môn học](COURSES.md). Tài khoản/phiên có từ 2A/2B, frontend đã nối và kiểm tra web đến 2C.3A. UI học kỳ/môn chưa nối API; thiết bị thật 2C.3B để làm sau.
+Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/bài tập theo tài khoản**, xem [học kỳ](SEMESTERS.md), [môn học](COURSES.md) và [bài tập 4A](ASSIGNMENTS.md). Frontend đã nối tài khoản/phiên và học kỳ/môn đến 3C.2; UI bài tập chờ 4B. Thiết bị thật 2C.3B để làm sau.
 
 ## Endpoint hiện có
 
@@ -20,8 +20,12 @@ Base URL cục bộ: `http://localhost:8080`. **3A/3B đã mở CRUD học kỳ 
 | DELETE `/api/v1/semesters/{id}?version=...` | Bearer và version mới nhất | 204, xóa kỳ trống; 409 nếu còn môn. |
 | GET `/api/v1/courses` và `/{id}` | Bearer và phiên hoạt động | 200, danh sách/chi tiết của mình; có query semesterId để lọc kỳ thuộc mình. |
 | POST `/api/v1/courses` | Bearer và học kỳ thuộc mình | 201, tạo môn; chặn trùng mã trong kỳ. |
-| PUT `/api/v1/courses/{id}` | Bearer và version mới nhất | 200, sửa/chuyển sang kỳ của mình; 409 nếu trùng/version cũ. |
-| DELETE `/api/v1/courses/{id}?version=...` | Bearer và version mới nhất | 204, xóa môn, giữ học kỳ và môn khác. |
+| PUT `/api/v1/courses/{id}` | Bearer và version mới nhất | 200, sửa/chuyển sang kỳ của mình; 409 nếu trùng/version cũ hoặc chuyển kỳ khi còn bài. |
+| DELETE `/api/v1/courses/{id}?version=...` | Bearer và version mới nhất | 204, xóa môn trống; từ 4A chặn môn còn bài tập. |
+| GET `/api/v1/assignments` và `/{id}` | Bearer và phiên hoạt động | 200, bài của mình; lọc tùy chọn courseId/semesterId/status. |
+| POST `/api/v1/assignments` | Bearer và môn thuộc mình | 201, bài mới; deadline cần ngày/giờ và offset. |
+| PUT `/api/v1/assignments/{id}` | Bearer và version mới nhất | 200, thay đầy đủ trường; 409 nếu version cũ. |
+| DELETE `/api/v1/assignments/{id}?version=...` | Bearer và version mới nhất | 204, xóa bài, giữ môn/học kỳ. |
 | Các đường dẫn nghiệp vụ còn lại | Chưa mở | 401 khi chưa xác thực; 403 khi có token hợp lệ. |
 
 Flyway/JPA phải thành công trước khi app lắng nghe HTTP. DB chưa chạy từ đầu sẽ làm backend không khởi động.

@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:8080
+@accessToken = REPLACE_WITH_ACCESS_TOKEN
+@courseId = REPLACE_WITH_OWN_COURSE_ID
+@semesterId = REPLACE_WITH_OWN_SEMESTER_ID
+@assignmentId = REPLACE_WITH_OWN_ASSIGNMENT_ID
+@version = 0
+
+### Danh sách của tài khoản
+GET {{baseUrl}}/api/v1/assignments
+Authorization: Bearer {{accessToken}}
+
+### Kết hợp bộ lọc; bỏ query nào không cần dùng
+GET {{baseUrl}}/api/v1/assignments?courseId={{courseId}}&semesterId={{semesterId}}&status=TODO
+Authorization: Bearer {{accessToken}}
+
+### Tạo mới — 23:59 Việt Nam được trả về 16:59 UTC
+POST {{baseUrl}}/api/v1/assignments
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "title": "Báo cáo Web Java",
+  "dueAt": "2026-10-30T23:59:00+07:00",
+  "priority": "HIGH",
+  "status": "TODO",
+  "notes": "Hoàn thiện báo cáo và kiểm tra trước khi nộp"
+}
+
+### Chi tiết — lấy version mới nhất trước khi sửa/xóa
+GET {{baseUrl}}/api/v1/assignments/{{assignmentId}}
+Authorization: Bearer {{accessToken}}
+
+### Sửa đầy đủ; giữ lại các trường muốn giữ
+PUT {{baseUrl}}/api/v1/assignments/{{assignmentId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "title": "Báo cáo Web Java",
+  "dueAt": "2026-10-30T23:59:00+07:00",
+  "priority": "HIGH",
+  "status": "IN_PROGRESS",
+  "notes": "Đã bắt đầu làm",
+  "version": {{version}}
+}
+
+### Xóa — chỉ gửi khi chủ động muốn xóa bài này
+DELETE {{baseUrl}}/api/v1/assignments/{{assignmentId}}?version={{version}}
+Authorization: Bearer {{accessToken}}

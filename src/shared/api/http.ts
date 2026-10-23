@@ -30,6 +30,7 @@ const messages: Record<string, string> = {
   COURSE_ALREADY_EXISTS: 'Mã môn này đã có trong học kỳ đã chọn.',
   COURSE_NOT_FOUND: 'Môn học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
   COURSE_VERSION_CONFLICT: 'Môn học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
+  COURSE_HAS_ASSIGNMENTS: 'Môn còn bài tập đã lưu. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.',
   DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }

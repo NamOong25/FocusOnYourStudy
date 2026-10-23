@@ -191,7 +191,7 @@ class SemesterIntegrationTests {
     @Test void malformedIdAndClosedAssignmentRoutesRemainProtected() throws Exception {
         var a = account(); assertThat(send("GET", PATH + "/not-a-uuid", a.token, null).statusCode()).isEqualTo(400);
         assertThat(send("GET", "/api/v1/courses", a.token, null).statusCode()).isEqualTo(200);
-        assertThat(send("GET", "/api/v1/assignments", a.token, null).statusCode()).isEqualTo(403);
+        assertThat(send("GET", "/api/v1/study-sessions", a.token, null).statusCode()).isEqualTo(403);
         assertThat(send("PATCH", PATH + "/" + UUID.randomUUID(), a.token, Map.of()).statusCode()).isEqualTo(403);
     }
     @Test void concurrentDuplicateCreatesYieldOneSuccessAndOneConflict() throws Exception {

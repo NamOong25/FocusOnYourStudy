@@ -1,5 +1,9 @@
 # Backend — FocusYourStudy
 
+**Đợt 4A — API bài tập:** V3 tạo bảng bài tập, CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có múi giờ và version; chặn xóa/chuyển kỳ môn còn bài. UI bài tập chưa nối API, làm ở 4B. Xem [hướng dẫn test 4A](../docs/BACKEND-PHASE-4A.md), [hợp đồng bài tập](docs/ASSIGNMENTS.md) và `api/assignments.http`. Khởi động lại backend để Flyway thêm bảng; không xóa/tạo lại database.
+
+**Kiểm tra 4A:** 118 tests/Maven verify qua, 26 test bài tập/migration mới; có nâng V2 → V3 giữ dữ liệu cũ, UTC/offset, version, hai tài khoản, race ghi bài với xóa/chuyển môn, restart toàn backend và script Windows PowerShell 5.1. TypeScript và các bộ kiểm tra HTTP/môn frontend cũng qua. Kiểm thử dùng schema riêng, không seed dữ liệu vào schema ứng dụng.
+
 **Đợt 3B đã xong:** API CRUD môn/lọc theo học kỳ, chuẩn hóa mã, version và quyền theo chủ tài khoản; dùng chung khóa với học kỳ. **92 tests/Maven verify qua tại đợt 3B**, có 20 test môn mới, script PowerShell 5.1 và đọc lại môn qua khởi động lại backend. UI học kỳ/môn đã nối ở 3C.1/3C.2; thiết bị thật 2C.3B để làm sau. Xem [hướng dẫn test 3B](../docs/BACKEND-PHASE-3B.md), [hợp đồng môn](docs/COURSES.md), [UI môn 3C.2](../docs/FRONTEND-COURSES-3C2.md).
 
 **Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua** tại đợt 3A, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. UI học kỳ đã nối ở 3C.1; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
@@ -21,7 +25,7 @@ Script sẽ:
 2. Tạo cluster riêng ở `.local/data`, mật khẩu ngẫu nhiên trong `.local/database.json`, chỉ nghe `127.0.0.1:55432`.
 3. Tạo database `focus_study` nếu chưa có; không xóa hoặc tạo lại data khi chạy lần tiếp theo.
 4. Tạo cặp khóa RSA ở `.local/auth` nếu chưa có, giữ nguyên khóa ở các lần chạy sau; nạp biến kết nối và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
-5. Flyway áp dụng V1 (tài khoản/học kỳ/môn) và V2 (phiên/hash refresh token); Hibernate chỉ `validate`, không tự sửa schema. Không sửa V1 hoặc xóa data đã có.
+5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token) và V3 (bài tập); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
 
 Mở **http://localhost:8080/api/v1/health**. Kết quả đúng:
 
@@ -108,10 +112,11 @@ backend/
 │   │   ├── validation/          Kiểm tra xác nhận mật khẩu
 │   │   └── session/             Phiên, hash refresh token, transport và kiểm tra thu hồi
 │   ├── users/                   Entity, repository, DTO hồ sơ và GET /users/me
-│   └── academics/               Entity, service, DTO/API học kỳ và môn theo tài khoản
+│   ├── academics/               Entity, service, DTO/API học kỳ và môn theo tài khoản
+│   └── assignments/             Bài tập, deadline, validation, API và quyền theo tài khoản
 ├── src/main/resources/
 │   ├── application.yml
-│   └── db/migration/             V1 nền tảng; V2 phiên và refresh token
+│   └── db/migration/             V1 nền tảng; V2 phiên; V3 bài tập
 └── src/test/java/com/focusstudy/ Kiểm thử API và PostgreSQL
 ```
 
@@ -131,4 +136,4 @@ Khóa `.local/auth`, thông tin DB và `target/` ngoài Git. Môi trường khá
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-UI học kỳ/môn đã nối ở **3C.1/3C.2**; xem `../docs/FRONTEND-COURSES-3C2.md`. Tiếp theo là đợt 4 bài tập/lịch, sẽ chia nhỏ khi người dùng chọn `next`. 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.
+UI học kỳ/môn đã nối ở **3C.1/3C.2**; **API bài tập 4A** đã có. Tiếp theo là **4B nối UI bài tập**, rồi các phần lịch/tự học theo từng đợt. 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.

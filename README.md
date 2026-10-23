@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 3C.2: tài khoản/phiên, học kỳ và môn học dùng dữ liệu thật**. Lịch, bài tập, điểm và các mục học tập khác trên giao diện vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 3C.2: Môn học trên giao diện đã lưu vào PostgreSQL
+## Mới nhất — 4A: API quản lý bài tập
+
+Backend có bảng bài tập V3 và API CRUD/lọc theo môn, kỳ và trạng thái; deadline kèm múi giờ, version và quyền theo tài khoản. Môn còn bài bị chặn xóa/chuyển kỳ. Flyway tự thêm bảng khi khởi động lại backend; không cần tạo lại database. UI bài tập vẫn RAM, nối ở **4B**.
+
+Xem [hướng dẫn test bằng terminal VS Code/IntelliJ](docs/BACKEND-PHASE-4A.md), [hợp đồng API](backend/docs/ASSIGNMENTS.md), mẫu request `backend/api/assignments.http`. Script mới: `backend/scripts/Try-Assignments.ps1`. Không seed dữ liệu demo vào tài khoản của bạn.
+
+## 3C.2: Môn học trên giao diện đã lưu vào PostgreSQL
 
 Đăng nhập → **Lịch học → Môn & học kỳ** → thêm/sửa/xóa môn hoặc chuyển kỳ. F5/đăng nhập lại giữ nguyên môn và thông tin. Dashboard, số tín chỉ và các ô chọn môn dùng cùng danh sách. Có mã trùng/version, tải/lỗi/thử lại, bảo vệ liên kết dữ liệu thử và tách tài khoản.
 
@@ -36,7 +42,7 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
-## Backend hiện tại — đợt 3B
+## Backend hiện tại — đợt 4A
 
 Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend đã nối khôi phục/refresh/logout ở 2C.2; nghiệm thu thiết bị thật ở 2C.3.
 

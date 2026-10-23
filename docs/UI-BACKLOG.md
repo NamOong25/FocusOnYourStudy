@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Frontend React Native + backend Spring Boot/PostgreSQL. Đã hoàn thành nền tảng 1, API tài khoản 2A, phiên 2B, UI tài khoản 2C.1/2C.2 và kiểm tra web 2C.3A. Ngày 23/10/2026 đã xong backend 3A/3B và **3C.1/3C.2 nối UI học kỳ/môn**. 2C.3B để làm sau; 4–5 chưa hoàn thành. Học kỳ/môn dùng dữ liệu thật; bài/lịch/điểm/Pomodoro vẫn thử trong RAM.
+Frontend React Native + backend Spring Boot/PostgreSQL. Đã hoàn thành nền tảng 1, API tài khoản 2A, phiên 2B, UI tài khoản 2C.1/2C.2 và kiểm tra web 2C.3A. Ngày 23/10/2026 đã xong backend 3A/3B, **3C.1/3C.2 nối UI học kỳ/môn** và **4A API bài tập**. 2C.3B để làm sau; đợt 4 chưa xong toàn bộ, 4B nối UI bài tập làm tiếp. UI bài/lịch/điểm/Pomodoro vẫn thử trong RAM.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -111,6 +111,8 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Đã hoàn thành nền 
 - [x] 3C.1 — Danh sách/tạo/sửa/xóa học kỳ gọi API theo tài khoản; F5/đăng nhập lại vẫn còn, Trang chủ/bộ chọn dùng chung dữ liệu, CURRENT cập nhật theo server. Có loading/lỗi/thử lại, version, xác nhận xóa/chặn kỳ còn môn; giữ bản nháp và nạp bản mới khi xung đột, không tự gửi lại thao tác ghi mất phản hồi. Xem `FRONTEND-SEMESTERS-3C1.md`. Môn/bài/lịch/điểm trên UI vẫn là dữ liệu thử; chưa nghiệm thu máy thật.
 - [x] 3C.2 — API/UI môn đã nối: tải/thêm/sửa/xóa/chuyển kỳ, mã trùng/version, F5 và đổi tài khoản, Dashboard/tín chỉ/bộ chọn chung nguồn. Giữ bản nháp khi xung đột, không gửi lại thao tác mất phản hồi; bảo vệ bài/lịch/điểm thử khi chuyển/xóa, cập nhật tên và dọn mục thử khi server xóa/chuyển môn từ nơi khác. 29 nhóm unit mới, 13 nhóm browser môn trên PostgreSQL/schema QA riêng; hồi quy học kỳ/tài khoản và smoke web 4 kích thước qua. Xem `FRONTEND-COURSES-3C2.md`. Không đổi công thức điểm hoặc backend/migration; 2C.3B vẫn để sau.
 - [ ] Backend 4 — Bài tập, kế hoạch tự học, lịch lặp/ngoại lệ và lịch thi được lưu đúng liên kết; kiểm tra một buổi và cả chuỗi.
+- [x] 4A — V3 thêm bảng bài tập, API CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có ngày/giờ/offset và version. Chặn xóa/chuyển kỳ môn còn bài, dùng chung khóa để chống đua với ghi bài; FK ghép bảo vệ chủ sở hữu. 118 tests/Maven verify qua (26 mới), gồm nâng V2 giữ dữ liệu cũ, restart, hai tài khoản, UTC, request đồng thời và script PowerShell 5.1. UI bài tập chưa nối; xem `BACKEND-PHASE-4A.md`.
+- [ ] 4B — Nối UI bài tập với API 4A: tải/thêm/sửa/xóa, bộ lọc/deadline ngày giờ, F5/đổi tài khoản, version/lỗi mạng và Dashboard dùng cùng nguồn. Giữ rõ giới hạn checklist/tài liệu/buổi tự học còn RAM, kiểm tra liên kết khi đổi môn/xóa bài.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.
 
 Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Đợt 2 tiếp tục chia 2A → 2B → 2C; không làm hết trong một lần. 2A cần access token ngắn hạn để thử hồ sơ có bảo vệ; giữ phiên/refresh/đăng xuất vẫn thuộc 2B. Lộ trình đầy đủ phía dưới giữ Pomodoro, thống kê, tài liệu/AI và hoàn thiện. Chỉ đánh dấu toàn đợt khi đã kiểm tra đầy đủ chức năng thật.
