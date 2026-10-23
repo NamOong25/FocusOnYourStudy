@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:8080
+@email = sinhvien@example.com
+@password = MatKhauThu123!
+@semesterId = THAY_ID_HOC_KY_TU_API_SEMESTERS
+
+### Không commit tài khoản/mật khẩu/token thật. Tạo học kỳ bằng semesters.http trước.
+# @name courseLogin
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Xem học kỳ để lấy ID của chính tài khoản
+GET {{baseUrl}}/api/v1/semesters
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+
+### Danh sách môn theo học kỳ; bỏ query để xem toàn bộ môn của mình
+GET {{baseUrl}}/api/v1/courses?semesterId={{semesterId}}
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+
+### Tạo môn, mã được trim/chuyển chữ hoa
+# @name createdCourse
+POST {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{ "semesterId": "{{semesterId}}", "code": "web101", "name": "Lập trình Web", "credits": 3, "teacher": "Giảng viên A", "room": "A101", "status": "STUDYING", "color": "lavender", "description": "Môn thử API" }
+
+### Chi tiết
+GET {{baseUrl}}/api/v1/courses/{{createdCourse.response.body.$.data.id}}
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+
+### PUT nhận đủ trường; version lấy từ GET mới nhất
+# @name updatedCourse
+PUT {{baseUrl}}/api/v1/courses/{{createdCourse.response.body.$.data.id}}
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{ "semesterId": "{{semesterId}}", "code": "WEB101", "name": "Lập trình Web", "credits": 3, "teacher": "Giảng viên A", "room": "B202", "status": "STUDYING", "color": "mint", "description": "Đã sửa", "version": {{createdCourse.response.body.$.data.version}} }
+
+### Xóa bằng version sau cập nhật; học kỳ vẫn còn
+DELETE {{baseUrl}}/api/v1/courses/{{updatedCourse.response.body.$.data.id}}?version={{updatedCourse.response.body.$.data.version}}
+Authorization: Bearer {{courseLogin.response.body.$.data.accessToken}}
+
+### Đóng riêng phiên thử này
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{ "refreshToken": "{{courseLogin.response.body.$.data.refreshToken}}" }

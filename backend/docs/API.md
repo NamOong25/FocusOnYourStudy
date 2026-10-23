@@ -1,6 +1,6 @@
 # API — v1
 
-Base URL cục bộ: `http://localhost:8080`. **3A đã mở CRUD học kỳ theo tài khoản**, xem [hợp đồng học kỳ](SEMESTERS.md). Tài khoản/phiên có từ 2A/2B, frontend đã nối và kiểm tra web đến 2C.3A. UI học kỳ chưa nối API; thiết bị thật 2C.3B để làm sau.
+Base URL cục bộ: `http://localhost:8080`. **3A/3B đã mở CRUD học kỳ và môn theo tài khoản**, xem [học kỳ](SEMESTERS.md) và [môn học](COURSES.md). Tài khoản/phiên có từ 2A/2B, frontend đã nối và kiểm tra web đến 2C.3A. UI học kỳ/môn chưa nối API; thiết bị thật 2C.3B để làm sau.
 
 ## Endpoint hiện có
 
@@ -18,6 +18,10 @@ Base URL cục bộ: `http://localhost:8080`. **3A đã mở CRUD học kỳ the
 | POST `/api/v1/semesters` | Bearer và phiên hoạt động | 201, tạo kỳ 1/2/3; chặn trùng kỳ/năm và chuyển CURRENT trong transaction. |
 | PUT `/api/v1/semesters/{id}` | Bearer và version mới nhất | 200, cập nhật; 409 nếu trùng hoặc version cũ. |
 | DELETE `/api/v1/semesters/{id}?version=...` | Bearer và version mới nhất | 204, xóa kỳ trống; 409 nếu còn môn. |
+| GET `/api/v1/courses` và `/{id}` | Bearer và phiên hoạt động | 200, danh sách/chi tiết của mình; có query semesterId để lọc kỳ thuộc mình. |
+| POST `/api/v1/courses` | Bearer và học kỳ thuộc mình | 201, tạo môn; chặn trùng mã trong kỳ. |
+| PUT `/api/v1/courses/{id}` | Bearer và version mới nhất | 200, sửa/chuyển sang kỳ của mình; 409 nếu trùng/version cũ. |
+| DELETE `/api/v1/courses/{id}?version=...` | Bearer và version mới nhất | 204, xóa môn, giữ học kỳ và môn khác. |
 | Các đường dẫn nghiệp vụ còn lại | Chưa mở | 401 khi chưa xác thực; 403 khi có token hợp lệ. |
 
 Flyway/JPA phải thành công trước khi app lắng nghe HTTP. DB chưa chạy từ đầu sẽ làm backend không khởi động.

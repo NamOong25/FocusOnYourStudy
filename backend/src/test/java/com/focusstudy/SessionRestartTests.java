@@ -49,7 +49,7 @@ class SessionRestartTests {
     @Test void refreshAndRevocationSurviveClosingAndRecreatingTheEntireBackend() throws Exception {
         String schema = "backend_it_" + UUID.randomUUID().toString().replace("-", "");
         String email = "restart-" + UUID.randomUUID() + "@example.test", password = "RestartTest123!";
-        String first, independent, rotated, semesterId;
+        String first, independent, rotated, semesterId, courseId;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -59,11 +59,15 @@ class SessionRestartTests {
                 var created = semester(app, "POST", "/api/v1/semesters", pair.get("accessToken").toString(), Map.of("term", 1, "startYear", 2026, "status", "CURRENT", "note", "Persist across restart"));
                 assertThat(created.statusCode()).isEqualTo(201);
                 semesterId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(created.body(), Map.class).get("data")).get("id").toString();
+                var course = semester(app, "POST", "/api/v1/courses", pair.get("accessToken").toString(), Map.of("semesterId", semesterId, "code", "RESTART101", "name", "Môn lưu qua khởi động lại", "credits", 3));
+                assertThat(course.statusCode()).isEqualTo(201);
+                courseId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(course.body(), Map.class).get("data")).get("id").toString();
             }
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
                 rotated = pair.get("refreshToken").toString();
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("note")).isEqualTo("Persist across restart");
+                assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("code")).isEqualTo("RESTART101");
                 assertThat(post(app, "/api/v1/auth/logout", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(204);
             }
             try (var app = start(schema)) {
@@ -71,6 +75,7 @@ class SessionRestartTests {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("status")).isEqualTo("CURRENT");
+                assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("semesterId")).isEqualTo(semesterId);
             }
         } finally {
             if (!schema.matches("backend_it_[a-f0-9]{32}")) throw new IllegalStateException("Unsafe schema");

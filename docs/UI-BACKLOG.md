@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 22/10/2026 đã hoàn thành nền tảng 1, API tài khoản 2A, phiên 2B và **2C.1/2C.2 tài khoản, giữ phiên/refresh/logout trên UI**. 2C.3A đã kiểm tra web; 2C.3B và 3–5 chưa hoàn thành; dữ liệu học tập chưa nối API.
+Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 22/10/2026 đã hoàn thành nền tảng 1, API tài khoản 2A, phiên 2B và **2C.1/2C.2 tài khoản, giữ phiên/refresh/logout trên UI**. 2C.3A đã kiểm tra web; backend 3A/3B học kỳ/môn đã xong ngày 23/10/2026. 2C.3B để làm sau; 3C nối UI và 4–5 chưa hoàn thành, dữ liệu trên các màn học tập vẫn chưa nối API.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 22/10/2026 đã ho
 - [ ] Vận hành auth sau bản lõi — job dọn phiên/hash token hết hạn, quản lý/thu hồi mọi thiết bị, giới hạn thử chia sẻ nhiều instance/proxy; production HTTPS bật Secure cookie và chốt origin/cùng site.
 - [ ] Backend 3 — Thêm/sửa/xóa học kỳ và môn học; mở lại app vẫn có dữ liệu, chọn đúng học kỳ.
 - [x] 3A — API tạo/xem/sửa/xóa học kỳ lưu PostgreSQL, kỳ 1/2/hè tùy chọn, chặn trùng kỳ/năm, tối đa một CURRENT theo tài khoản; kiểm tra quyền hai tài khoản, version và chặn xóa kỳ còn môn. Dùng bảng V1, không sửa migration; 72 tests/Maven verify qua, có request đồng thời, restart và script PowerShell 5.1. Chưa nối UI; xem `BACKEND-PHASE-3A.md`.
-- [ ] 3B — API môn học gắn học kỳ/tài khoản, tín chỉ và giảng viên; kiểm tra quyền sở hữu và liên kết. Làm sau 3A.
+- [x] 3B — API CRUD môn/lọc học kỳ, lưu PostgreSQL theo tài khoản, chuẩn hóa mã/chặn trùng trong kỳ, cùng mã được ở kỳ khác; version chống ghi đè, kiểm tra kỳ đích và dùng chung khóa với học kỳ. 92 tests/Maven verify qua, có hai người, request đồng thời, restart và script PowerShell 5.1. Dùng bảng V1, không sửa migration; chưa nối UI. Xem `BACKEND-PHASE-3B.md`.
 - [ ] 3C — Nối giao diện học kỳ rồi môn học với API theo từng phần; tải lại vẫn còn và đổi học kỳ hiện đúng môn. Chỉ nghiệm thu dữ liệu học tập thật khi nối và kiểm tra xong.
 - [ ] Backend 4 — Bài tập, kế hoạch tự học, lịch lặp/ngoại lệ và lịch thi được lưu đúng liên kết; kiểm tra một buổi và cả chuỗi.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.

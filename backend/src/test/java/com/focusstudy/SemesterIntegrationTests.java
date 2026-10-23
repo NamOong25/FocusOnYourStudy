@@ -188,9 +188,10 @@ class SemesterIntegrationTests {
                 .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(input(2, 2026, "CURRENT")))).build();
         error(client.send(cookieOnly, HttpResponse.BodyHandlers.ofString()), 401, "AUTHENTICATION_REQUIRED");
     }
-    @Test void malformedIdAndClosedCourseRoutesRemainProtected() throws Exception {
+    @Test void malformedIdAndClosedAssignmentRoutesRemainProtected() throws Exception {
         var a = account(); assertThat(send("GET", PATH + "/not-a-uuid", a.token, null).statusCode()).isEqualTo(400);
-        assertThat(send("GET", "/api/v1/courses", a.token, null).statusCode()).isEqualTo(403);
+        assertThat(send("GET", "/api/v1/courses", a.token, null).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v1/assignments", a.token, null).statusCode()).isEqualTo(403);
         assertThat(send("PATCH", PATH + "/" + UUID.randomUUID(), a.token, Map.of()).statusCode()).isEqualTo(403);
     }
     @Test void concurrentDuplicateCreatesYieldOneSuccessAndOneConflict() throws Exception {

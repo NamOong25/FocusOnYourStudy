@@ -18,4 +18,23 @@ public class CourseEntity extends BaseEntity {
     @Column(nullable = false, length = 20) private String color = "lavender";
     @Column(nullable = false, columnDefinition = "text") private String description = "";
     protected CourseEntity() { }
+    public static CourseEntity create(UUID owner, UUID semesterId, String code, String name, int credits,
+            String teacher, String room, Status status, String color, String description) {
+        var course = new CourseEntity(); course.userId = owner;
+        course.change(semesterId, code, name, credits, teacher, room, status, color, description); return course;
+    }
+    public void change(UUID semesterId, String code, String name, int credits, String teacher, String room,
+            Status status, String color, String description) {
+        this.semesterId = semesterId; this.code = code; this.name = name; this.credits = credits;
+        this.teacher = teacher; this.room = room; this.status = status; this.color = color; this.description = description;
+    }
+    public UUID getSemesterId() { return semesterId; }
+    public String getCode() { return code; }
+    public String getName() { return name; }
+    public int getCredits() { return credits; }
+    public String getTeacher() { return teacher; }
+    public String getRoom() { return room; }
+    public Status getStatus() { return status; }
+    public String getColor() { return color; }
+    public String getDescription() { return description; }
 }

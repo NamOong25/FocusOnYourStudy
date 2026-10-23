@@ -42,7 +42,7 @@ Thành công có envelope `data/meta` hiện có, timestamp UTC/requestId; `Cach
 - Không trùng `(tài khoản, năm bắt đầu, kỳ)`; tài khoản khác có thể tạo cùng kỳ/năm.
 - Tối đa một CURRENT mỗi tài khoản, có thể chưa có CURRENT. POST/PUT status CURRENT chuyển kỳ CURRENT cũ thành COMPLETED trong cùng transaction. Trường hợp kỳ mới không hợp lệ/trùng/stale thì kỳ cũ không thay đổi. Không tự tạo kỳ 2/hè.
 - PUT/DELETE kiểm tra version trước ghi; thay đổi kỳ cũ khi chuyển CURRENT cũng tăng version kỳ đó. Nếu version cũ, tải lại danh sách rồi để người dùng xem/chọn lại, không tự ghi đè hoặc gửi lại vô hạn. PUT không đổi giá trị thực tế có thể giữ version.
-- Xóa không tự chọn một CURRENT khác. Kỳ có môn bị chặn, không xóa dây chuyền. Course API vẫn khóa cho tới 3B.
+- Xóa không tự chọn một CURRENT khác. Kỳ có môn bị chặn, không xóa dây chuyền. API môn đã mở ở 3B; xem `COURSES.md`.
 - Mọi ghi học kỳ khóa hàng chủ tài khoản bằng PESSIMISTIC_WRITE trong transaction, rồi truy vấn theo `id + user_id`. Kiểm tra trùng trước ghi; flush kỳ cũ trước đánh CURRENT kỳ mới để phù hợp partial unique index. Constraint V1 vẫn là lớp bảo vệ cuối cùng. 3B cần dùng cùng thứ tự khóa khi ghi môn liên quan học kỳ.
 
 ## Lỗi

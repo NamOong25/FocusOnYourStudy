@@ -66,6 +66,8 @@ Access token RS256 hạn 15 phút chứa UUID tài khoản `sub`, UUID phiên `s
 - Trạng thái `STUDYING / COMPLETED / PLANNED`; màu `lavender / mint / peach / blue` theo frontend.
 - Chưa có xóa dây chuyền mặc định. Khi thêm bài/lịch/điểm, API phải xử lý liên kết rõ ràng thay vì xóa âm thầm.
 
+API môn 3B đã dùng bảng này: truy vấn theo user_id, kiểm tra học kỳ đích cùng chủ, version khi PUT/DELETE, chuẩn hóa mã/giới hạn trường ở DTO. Ghi môn dùng cùng khóa hàng chủ tài khoản với ghi học kỳ; tạo/chuyển môn không đua với xóa kỳ. Không sửa V1/V2 hoặc tự seed dữ liệu. Xem `COURSES.md`; các liên kết bài/lịch/điểm backend và chặn tương ứng làm ở 4/5.
+
 Khóa ngoại này chỉ bảo vệ tính nhất quán quan hệ. Đợt 2/3 vẫn phải lấy user ID từ phiên xác thực, lọc mọi truy vấn theo chủ sở hữu, kiểm tra đọc/ghi chéo hai tài khoản. Chưa có PostgreSQL RLS hoặc API phân quyền hoàn chỉnh ở đợt 1.
 
 ## Đã tạo trong V2 — phiên và refresh token
