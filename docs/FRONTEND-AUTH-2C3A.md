@@ -1,5 +1,7 @@
 # 2C.3A — Kiểm tra tách tài khoản và phiên trên web
 
+**Cập nhật từ 3C.1:** học kỳ thật giữ lại khi trở về A, còn môn/bài/bản nháp/timer thử bị xóa. B không thấy học kỳ A. Runner đã cập nhật theo hành vi này; hướng dẫn hiện tại ở `FRONTEND-SEMESTERS-3C1.md`. Nội dung dưới đây lưu phạm vi đợt 2C.3A ban đầu.
+
 Đợt này kiểm tra tài khoản thật với Spring Boot/PostgreSQL, đồng thời kiểm tra dữ liệu học tập thử trong bộ nhớ không đi theo khi đổi danh tính. Chưa mở API lưu học kỳ/môn/bài tập; các dữ liệu này mất khi đổi tài khoản hoặc F5, kể cả đăng nhập lại tài khoản cũ.
 
 ## Đã sửa

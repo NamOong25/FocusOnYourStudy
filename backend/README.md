@@ -1,8 +1,8 @@
 # Backend — FocusYourStudy
 
-**Đợt 3B đã xong:** API CRUD môn/lọc theo học kỳ, chuẩn hóa mã, version và quyền theo chủ tài khoản; dùng chung khóa với học kỳ. **92 tests/Maven verify qua**, có 20 test môn mới, script PowerShell 5.1 và đọc lại môn qua khởi động lại backend. Frontend học kỳ/môn chưa nối API; 2C.3B để làm sau. Xem [hướng dẫn test 3B](../docs/BACKEND-PHASE-3B.md), [hợp đồng môn](docs/COURSES.md).
+**Đợt 3B đã xong:** API CRUD môn/lọc theo học kỳ, chuẩn hóa mã, version và quyền theo chủ tài khoản; dùng chung khóa với học kỳ. **92 tests/Maven verify qua**, có 20 test môn mới, script PowerShell 5.1 và đọc lại môn qua khởi động lại backend. UI học kỳ đã nối ở 3C.1; UI môn chờ 3C.2, thiết bị thật 2C.3B để làm sau. Xem [hướng dẫn test 3B](../docs/BACKEND-PHASE-3B.md), [hợp đồng môn](docs/COURSES.md).
 
-**Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua**, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. Frontend học kỳ chưa nối API; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
+**Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua** tại đợt 3A, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. UI học kỳ đã nối ở 3C.1; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
 
 Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối 2C.1/2C.2: đăng ký/đăng nhập/hồ sơ, khôi phục/refresh/logout**; nghiệm thu thiết bị thật ở 2C.3. Dữ liệu học tập frontend vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C2.md`.
 
@@ -108,7 +108,7 @@ backend/
 │   │   ├── validation/          Kiểm tra xác nhận mật khẩu
 │   │   └── session/             Phiên, hash refresh token, transport và kiểm tra thu hồi
 │   ├── users/                   Entity, repository, DTO hồ sơ và GET /users/me
-│   └── academics/               Entity học kỳ/môn (chưa có API CRUD)
+│   └── academics/               Entity, service, DTO/API học kỳ và môn theo tài khoản
 ├── src/main/resources/
 │   ├── application.yml
 │   └── db/migration/             V1 nền tảng; V2 phiên và refresh token
@@ -131,4 +131,4 @@ Khóa `.local/auth`, thông tin DB và `target/` ngoài Git. Môi trường khá
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-Tiếp theo: **3C nối giao diện học kỳ/môn**; 3B API môn đã xong; 3A học kỳ đã xong, 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.
+UI học kỳ đã nối ở **3C.1**; xem `../docs/FRONTEND-SEMESTERS-3C1.md`. Tiếp theo: **3C.2 nối giao diện môn**; API học kỳ/môn 3A/3B đã có. 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.

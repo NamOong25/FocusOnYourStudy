@@ -187,6 +187,35 @@ export class SessionManager {
       throw error;
     }
   };
+  authorized = async <T,>(operation: (accessToken: string) => Promise<T>, signal?: AbortSignal): Promise<T> => {
+    assertNotCancelled(signal);
+    const version = this.epoch;
+    let current = this.current, renewed = false;
+    const valid = () => { assertNotCancelled(signal); if (version !== this.epoch || !this.current) throw cancelledRequest(); };
+    if (!current) throw new ApiError('Bạn cần đăng nhập để tiếp tục.', 'AUTHENTICATION_REQUIRED', 401);
+    try {
+      if (current.expiresAt <= this.now() + 30_000) { await this.refresh(current.pair.accessToken); current = this.current; renewed = true; }
+      valid();
+      let result: T;
+      try { result = await operation(current!.pair.accessToken); }
+      catch (error) {
+        valid();
+        // A 401 is rejected before a business mutation. Network/timeout/5xx are
+        // never retried: the server may already have committed the operation.
+        if (asApiError(error).status !== 401 || renewed) throw error;
+        const pair = await this.refresh(current!.pair.accessToken); valid();
+        result = await operation(pair.accessToken);
+      }
+      valid(); return result;
+    } catch (error) {
+      if (!signal?.aborted && version === this.epoch && this.current && asApiError(error).status === 401) {
+        await this.coordinator.run(async () => {
+          if (version === this.epoch && this.current) await this.pending(this.record(this.current.pair), 'Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.');
+        });
+      }
+      throw error;
+    }
+  };
   logout = async (): Promise<void> => this.coordinator.run(async () => {
     const record = await this.store.read();
     await this.pending(record ?? { kind: 'logout-pending' }, '');

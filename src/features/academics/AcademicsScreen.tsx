@@ -20,17 +20,19 @@ import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../../store/model'
 import { C, F, S } from '../../shared/theme';
 import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from '../assignments/assignments';
 import useCurrentTime from '../../shared/hooks/useCurrentTime';
+import { SemesterSyncStatus } from './components/SemesterSyncStatus';
 
 type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
-  const { semesters, courseCatalog, tasks, classes, gradeBook, gradeRules, academicSemesterId:semesterId, setAcademicSemesterId:setSemesterId } = useApp();
+  const { semesters, semesterConnection, courseCatalog, tasks, classes, gradeBook, gradeRules, academicSemesterId:semesterId, setAcademicSemesterId:setSemesterId } = useApp();
   const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
   const [detailSection, setDetailSection] = useState('Tổng quan');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
   React.useEffect(() => { setFilter('Tất cả'); setQuery(''); }, [semesterId]);
-  if (!semesters.length) return <FlowScope onClose={() => setSheet(null)}><StateView title="Chưa có học kỳ" message="Tạo học kỳ đầu tiên, rồi thêm môn học và tín chỉ của bạn." actionLabel="Tạo học kỳ đầu tiên" onAction={() => setSheet('new-semester')} />{sheet === 'new-semester' && <SemesterForm onClose={() => setSheet(null)} onSaved={id => { setSemesterId(id); setSheet(null); }} />}</FlowScope>;
+  if (semesterConnection && !semesterConnection.loaded) return <SemesterSyncStatus />;
+  if (!semesters.length) return <FlowScope onClose={() => setSheet(null)}><SemesterSyncStatus /><StateView title="Chưa có học kỳ" message="Tạo học kỳ đầu tiên, rồi thêm môn học và tín chỉ của bạn." actionLabel="Tạo học kỳ đầu tiên" onAction={() => setSheet('new-semester')} />{sheet === 'new-semester' && <SemesterForm key="semester-editor" onClose={() => setSheet(null)} onSaved={id => { setSemesterId(id); setSheet(null); }} />}</FlowScope>;
   const semester = semesters.find(s => s.id === semesterId) ?? semesters[0]!;
   const semesterCourses = courseCatalog.filter(c => c.semesterId === semester.id);
   const credits = semesterCourses.reduce((sum, c) => sum + c.credits, 0);
@@ -42,6 +44,7 @@ export default function Academics() {
   const openCourse = (course: Course) => { setCourseId(course.id); setDetailSection('Tổng quan'); setSheet('detail'); };
   return <FlowScope onClose={() => setSheet(null)}>
     <View style={{ gap: 5, marginTop: 5 }}><T style={{ fontFamily: F.bold, fontSize: 10, color: C.primary, letterSpacing: 1.4 }}>HÀNH TRÌNH HỌC TẬP</T><T style={{ fontFamily: F.extra, fontSize: 25, lineHeight: 36, letterSpacing: -0.8 }}>Môn học & học kỳ</T><T style={{ fontSize: 12, color: C.muted }}>Hiểu rõ từng môn. Tiến bộ qua từng học kỳ.</T></View>
+    <SemesterSyncStatus />
     <Section title="Học kỳ của bạn" action="+ Thêm" onAction={() => setSheet('new-semester')} />
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingVertical: 3 }}>
       {semesters.map(s => { const active = s.id === semester.id; const count = courseCatalog.filter(c => c.semesterId === s.id).length; return <Pressable key={s.id} accessibilityRole="button" accessibilityLabel={`Chọn ${s.name}, ${s.academicYear}`} accessibilityState={{ selected: active }} aria-selected={active} onPress={() => selectSemester(s.id)} style={{ width: 159, minHeight: 108, borderRadius: 21, backgroundColor: active ? C.primary : '#fff', padding: 15, gap: 5, borderWidth: 1, borderColor: active ? C.primary : C.line }}><Row between><Icon name="calendar-outline" size={19} color={active ? '#fff' : C.primary} /><T style={{ color: active ? '#EEE9FF' : C.muted, fontSize: 9 }}>{s.status}</T></Row><T style={{ fontFamily: F.bold, fontSize: 16, color: active ? '#fff' : C.ink }}>{s.name}</T><T style={{ fontSize: 10, color: active ? '#DAD2FF' : C.muted }}>{s.academicYear} · {count} môn</T></Pressable>; })}
@@ -65,7 +68,7 @@ export default function Academics() {
     })}
     {list.length === 0 && <Card style={{ alignItems: 'center', gap: 11, paddingVertical: 29 }}><IconTile name={semesterCourses.length ? 'search-outline' : 'library-outline'} size={58} /><T style={{ fontFamily: F.bold, fontSize: 16, textAlign: 'center' }}>{semesterCourses.length ? 'Chưa tìm thấy môn phù hợp' : 'Học kỳ mới đang chờ bạn'}</T><T style={[S.small, { textAlign: 'center' }]}>{semesterCourses.length ? 'Thử một từ khóa khác hoặc xem tất cả trạng thái.' : 'Thêm môn học đầu tiên để bắt đầu sắp xếp hành trình của mình.'}</T><Button label={semesterCourses.length ? 'Xem tất cả môn' : 'Thêm môn đầu tiên'} icon={semesterCourses.length ? 'refresh-outline' : 'add'} onPress={() => { if (semesterCourses.length) { setFilter('Tất cả'); setQuery(''); } else setSheet('new-course'); }} /></Card>}
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
-    {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} />}
+    {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm key="semester-editor" item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} onDeleted={() => { setSheet(null); setSemesterId(''); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { if (targetSemesterId !== semester.id) selectSemester(targetSemesterId); if (sheet === 'new-course') setDetailSection('Tổng quan'); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
     {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onGrades={() => setSheet('grades')} /></Sheet>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}

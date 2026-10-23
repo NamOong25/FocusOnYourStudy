@@ -162,5 +162,43 @@ function fixture() {
     f.api.login = async (input, s, before) => { await before(); return { ...f.pair(), user: other }; };
     await f.login(m); release.resolve(); await old; assert.equal(m.state.profile.id, 'b'); assert.equal(m.state.email, other.email);
   });
+  await test('business requests refresh once on 401 and share concurrent rotation', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m);
+    const work = async token => { if (token === 'access-1') throw unauthorized(); return token; };
+    assert.deepEqual(await Promise.all([m.authorized(work), m.authorized(work)]), ['access-2', 'access-2']); assert.equal(f.calls.refresh.length, 1);
+  });
+  await test('expired business token refreshes before invoking mutation', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m); f.advance(); const tokens = [];
+    await m.authorized(async token => { tokens.push(token); }); assert.deepEqual(tokens, ['access-2']); assert.equal(f.calls.refresh.length, 1);
+  });
+  await test('business mutation network or server failure is never replayed', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m); let attempts = 0;
+    await assert.rejects(m.authorized(async () => { attempts++; throw offline(); }));
+    await assert.rejects(m.authorized(async () => { attempts++; throw new ApiError('Unavailable', 'SERVER_ERROR', 503); }));
+    assert.equal(attempts, 2); assert.equal(f.calls.refresh.length, 0); assert.equal(m.state.hasSession, true);
+  });
+  await test('business 401 after refresh ends session without a retry loop', async () => {
+    const f = fixture(), m = f.manager(); await f.login(m); let attempts = 0;
+    await assert.rejects(m.authorized(async () => { attempts++; throw unauthorized(); }));
+    assert.equal(attempts, 2); assert.equal(f.calls.refresh.length, 1); assert.equal(m.state.hasSession, false);
+  });
+  await test('late business response after logout cannot restore or return A data', async () => {
+    const f = fixture(), m = f.manager(), held = deferred(), started = deferred(); await f.login(m);
+    const pending = assert.rejects(m.authorized(async () => { started.resolve(); await held.promise; return 'A semester'; }), e => e.code === 'REQUEST_CANCELLED');
+    await started.promise; await m.logout(); held.resolve(); await pending; assert.equal(m.state.hasSession, false);
+  });
+  await test('cancelled business reader does not cancel shared token refresh', async () => {
+    const f = fixture(), m = f.manager(), held = deferred(), started = deferred(); await f.login(m); f.advance();
+    const original = f.api.refresh; f.api.refresh = async (...args) => { started.resolve(); await held.promise; return original(...args); };
+    const controller = new AbortController(); const cancelled = assert.rejects(m.authorized(async () => 'old', controller.signal), e => e.code === 'REQUEST_CANCELLED');
+    const other = m.authorized(async token => token); await started.promise; controller.abort(); held.resolve();
+    await cancelled; assert.equal(await other, 'access-2'); assert.equal(f.calls.refresh.length, 1);
+  });
+  await test('late business 401 after logout does not refresh or replace logout notice', async () => {
+    const f = fixture(), m = f.manager(), held = deferred(), started = deferred(); await f.login(m);
+    const pending = assert.rejects(m.authorized(async () => { started.resolve(); await held.promise; throw unauthorized(); }), e => e.code === 'REQUEST_CANCELLED');
+    await started.promise; await m.logout(); const notice = m.state.notice; held.resolve(); await pending;
+    assert.equal(f.calls.refresh.length, 0); assert.equal(m.state.notice, notice); assert.equal(m.state.hasSession, false);
+  });
   console.log(JSON.stringify({ passed: true, checks: passed.length, cases: passed }));
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -13,6 +13,7 @@ import {accountDisplayProfile} from '../account/auth/displayProfile';
 import {ExamDialog} from '../exams/Exams';
 import {ExamForm} from '../exams/ExamForm';
 import SetupCard from '../onboarding/SetupCard';
+import {SemesterSyncStatus} from '../academics/components/SemesterSyncStatus';
 import {ClassItem,Task,dateKey,dateLabel,useApp} from '../../store/model';
 import {dashboardData} from './dashboard';
 import useDashboardClock from './useDashboardClock';
@@ -23,7 +24,7 @@ import {taskDeadlineLabel,taskIsOverdue} from '../assignments/assignments';
 
 type Panel={kind:'semester'|'grades'|'new-exam'}|{kind:'exam'|'grade';id:string}|null;
 export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void;onProfile:()=>void;onStudyPlan:()=>void}){
-  const {tasks,getClassesOn,exams,setTab,aiSessionIds,studySessions,courseCatalog,gradeBook,gradeRules,profile,previewSignedIn,setScheduleMode,semesters,prepareFocus,setAcademicSemesterId}=useApp();
+  const {tasks,getClassesOn,exams,setTab,aiSessionIds,studySessions,courseCatalog,gradeBook,gradeRules,profile,previewSignedIn,setScheduleMode,semesters,semesterConnection,prepareFocus,setAcademicSemesterId}=useApp();
   const auth=useAuth(),displayProfile=auth.hasSession?accountDisplayProfile(auth.profile):profile;
   const displayName=auth.hasSession?displayProfile.name:previewSignedIn?profile.name:'Bạn học';
   const [selectedId,setSelectedId]=useState<string|null>(null),[filter,setFilter]=useState('Cần làm'),[panel,setPanel]=useState<Panel>(null),now=useDashboardClock();
@@ -33,8 +34,10 @@ export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:T
   const accepted=data.sessions.filter(s=>aiSessionIds.includes(s.id)).sort((a,b)=>`${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`));
   const hour=now.getHours(),time=`${String(hour).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const manage=()=>{setPanel(null);if(semester)setAcademicSemesterId(semester.id);setScheduleMode('Môn & học kỳ');};
-  if(!semester)return <SetupCard/>;
+  if(semesterConnection&&!semesterConnection.loaded)return <SemesterSyncStatus/>;
+  if(!semester)return <><SemesterSyncStatus/><SetupCard/></>;
   return <FlowScope onClose={()=>setPanel(null)}>
+    <SemesterSyncStatus/>
     <Pressable accessibilityRole="button" accessibilityLabel="Xem hồ sơ" onPress={onProfile} style={[S.row,{gap:11}]}><StudentAvatar profile={displayProfile} size={46}/><View style={S.grow}><T style={S.small}>{hour<12?'Chào buổi sáng':hour<18?'Chào buổi chiều':'Chào buổi tối'} ☀️</T><T style={{fontFamily:F.bold,fontSize:18}}>{displayName}</T></View><T style={{fontSize:11,color:C.muted}}>{dateLabel(data.today)}</T></Pressable>
     <Pressable testID="dashboard-semester" accessibilityRole="button" accessibilityLabel="Đổi học kỳ trên Trang chủ" onPress={()=>setPanel({kind:'semester'})} style={{backgroundColor:'#fff',borderWidth:1,borderColor:C.line,borderRadius:20,padding:15}}><Row><IconTile name="calendar-outline" size={39}/><View style={[S.grow,{gap:4}]}><T style={{fontSize:10,color:C.muted}}>BẠN ĐANG XEM</T><T style={{fontFamily:F.bold,fontSize:16}}>{semester.name}</T><T style={{fontSize:12,color:C.muted}}>Năm học {semester.academicYear}</T></View><Icon name="chevron-down" size={19}/></Row></Pressable>
     {!data.courses.length?<Empty title="Học kỳ này chưa có môn học" message="Thêm môn vào học kỳ vừa chọn để bắt đầu xem lịch, công việc và điểm." actionLabel="Thêm môn cho học kỳ" onAdd={manage}/>:<>

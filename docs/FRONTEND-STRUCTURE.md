@@ -149,3 +149,14 @@ Quy ước kỳ 1/2 chính, kỳ 3 hè tùy chọn theo từng năm ở `SEMESTE
 - `components/SessionGate.tsx`: khôi phục/lỗi/thử lại; `LogoutForm.tsx`: xác nhận đăng xuất; `AccountScreen.tsx`/Welcome hiển thị bước hoàn tất khi mất mạng.
 - `App.tsx`: remount vùng prototype/navigation khi danh tính đổi; vùng học tập tài khoản vẫn chưa nối backend. API refresh/logout ở `api/accountApi.ts`, HTTP hỗ trợ 204 ở `shared/api/http.ts`.
 - Có Expo SecureStore dependency/plugin mới. Hướng dẫn và kiểm tra: `FRONTEND-AUTH-2C2.md`. Native chưa nghiệm thu máy thật.
+
+## Cập nhật học kỳ — 3C.1
+
+- `features/academics/api/semestersApi.ts`: GET/POST/PUT/DELETE, chuyển kiểu Việt/API và kiểm tra dữ liệu phản hồi.
+- `api/SemesterManager.ts`: trạng thái tài nguyên, gộp GET, chặn ghi trùng, reload sau ghi và ngăn phản hồi tài khoản cũ.
+- `api/useServerSemesters.ts`: vòng đời React, nối auth và thông báo. `store/model.tsx` dùng nguồn này khi đăng nhập, giữ preview riêng khi là khách.
+- `components/SemesterApiForm.tsx`: form thật, xóa/xung đột và quyết định nạp dữ liệu mới. `SemesterSyncStatus.tsx`: tải/lỗi/thử lại/phạm vi dữ liệu thật.
+- `SessionManager.authorized`: cấp Bearer trong RAM, refresh một lần khi cần, ngăn kết quả phiên cũ. `shared/api/http.ts` hỗ trợ PUT/DELETE; không đặt API học kỳ trong component dùng chung.
+- `forms.tsx` chọn form thật hoặc form mẫu. API môn sẽ bổ sung ở 3C.2; các state học tập còn lại chưa lưu backend.
+
+Hướng dẫn kiểm tra: `FRONTEND-SEMESTERS-3C1.md`.

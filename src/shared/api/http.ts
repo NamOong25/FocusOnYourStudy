@@ -23,6 +23,11 @@ const messages: Record<string, string> = {
   INVALID_REFRESH_TOKEN: 'Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.',
   REFRESH_TOKEN_REUSED: 'Phiên đã bị thu hồi. Hãy đăng nhập lại.',
   SESSION_EXPIRED: 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.',
+  SEMESTER_ALREADY_EXISTS: 'Học kỳ này đã có trong năm học đã chọn.',
+  SEMESTER_NOT_FOUND: 'Học kỳ không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
+  SEMESTER_VERSION_CONFLICT: 'Học kỳ đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
+  SEMESTER_HAS_COURSES: 'Học kỳ còn môn học đã lưu. Hãy xử lý các môn trước khi xóa học kỳ.',
+  DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function errorFromResponse(status: number, value: unknown, retryAfter: string | null) {
@@ -30,7 +35,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
+      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');
@@ -38,7 +43,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   return new ApiError(message, code, status, fields);
 }
 
-type RequestOptions = { method?: 'GET' | 'POST'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean };
+type RequestOptions = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean };
 export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher = fetch }: { timeoutMs?: number; fetcher?: typeof fetch } = {}) {
   return async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     assertNotCancelled(options.signal);

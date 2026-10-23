@@ -5,7 +5,7 @@ import { useActionState } from '../../../shared/feedback/ActionScope';
 import { C, F, S } from '../../../shared/theme';
 import { semesterOptions, type SemesterTerm } from '../academic';
 
-export function SemesterPicker({ value, onChange }: { value: SemesterTerm; onChange: (term: SemesterTerm) => void }) {
+export function SemesterPicker({ value, onChange, disabled = false }: { value: SemesterTerm; onChange: (term: SemesterTerm) => void; disabled?: boolean }) {
   const action = useActionState();
   return <View style={{ gap: 9 }}>
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Học kỳ</T>
@@ -16,9 +16,9 @@ export function SemesterPicker({ value, onChange }: { value: SemesterTerm; onCha
           key={option.value}
           accessibilityRole="radio"
           accessibilityLabel={`${option.label} — ${option.value === 3 ? 'Tùy chọn' : 'Kỳ chính'}`}
-          accessibilityState={{ checked: selected, disabled: !!action?.busy }}
+          accessibilityState={{ checked: selected, disabled: disabled || !!action?.busy }}
           aria-checked={selected}
-          disabled={!!action?.busy}
+          disabled={disabled || !!action?.busy}
           onPress={() => onChange(option.value)}
           style={{ flex: 1, minWidth: 0, minHeight: 109, borderRadius: 17, borderWidth: 1, borderColor: selected ? C.primary : C.line, backgroundColor: selected ? C.soft : C.canvas, padding: 10, gap: 6 }}
         >

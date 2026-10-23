@@ -8,8 +8,13 @@ import { Course, CourseColor, CourseStatus, Semester, SemesterStatus, SemesterTe
 import { uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
+import { SemesterApiForm } from './components/SemesterApiForm';
 
-export function SemesterForm({ item, onClose, onSaved }: { item?: Semester; onClose: () => void; onSaved: (id: string) => void }) {
+export function SemesterForm(props: { item?: Semester; onClose: () => void; onSaved: (id: string) => void; onDeleted?: () => void }) {
+  const { semesterConnection } = useApp();
+  return semesterConnection ? <SemesterApiForm {...props} /> : <PreviewSemesterForm {...props} />;
+}
+function PreviewSemesterForm({ item, onClose, onSaved }: { item?: Semester; onClose: () => void; onSaved: (id: string) => void }) {
   const { semesters, saveSemester, setToast } = useApp();
   const [term, setTerm] = useState<SemesterTerm>(item?.term ?? 1);
   const [yearStart, setYearStart] = useState(() => Number((item?.academicYear ?? semesters.find(s => s.status === 'Đang học')?.academicYear ?? String(new Date().getFullYear())).slice(0, 4)));

@@ -53,7 +53,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               {auth.canRestore && <Button label="Khôi phục đăng nhập" secondary onPress={() => { void auth.restore(); }} />}
               {auth.hasSession ? <>
                 <AccountProfile onLogin={() => { setEmail(auth.email); open('login'); }} />
-                <Card style={{ backgroundColor: C.soft, gap: 8 }}><Row><Icon name="leaf-outline" /><T style={{ fontFamily: F.bold }}>Góc học tập đang được hoàn thiện</T></Row><T style={S.small}>Hồ sơ tài khoản đã được lưu. Học kỳ, môn và bài tập hiện vẫn là dữ liệu thử trong lần mở này, chưa được lưu cùng tài khoản.</T></Card>
+                <Card style={{ backgroundColor: C.soft, gap: 8 }}><Row><Icon name="leaf-outline" /><T style={{ fontFamily: F.bold }}>Góc học tập đang được hoàn thiện</T></Row><T style={S.small}>Hồ sơ và học kỳ đã nối với dữ liệu tài khoản. Môn, lịch và bài tập trên giao diện vẫn là dữ liệu thử trong lần mở này.</T></Card>
               </> : <Card style={{ gap: 16 }}>
                 <Badge label="CÙNG BẮT ĐẦU NHÉ" icon="school-outline" />
                 <AuthHero icon="person-outline" title="Góc học tập của bạn" detail="Đăng nhập hoặc tạo tài khoản để xem hồ sơ đã lưu." />

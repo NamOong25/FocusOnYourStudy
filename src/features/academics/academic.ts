@@ -6,7 +6,7 @@ export const semesterOptions: { value: SemesterTerm; label: string }[] = [
 ];
 export const semesterName = (term: SemesterTerm) => semesterOptions.find(option => option.value === term)!.label;
 export type SemesterStatus = 'Đang học' | 'Sắp tới' | 'Đã kết thúc';
-export type Semester = { id: string; term: SemesterTerm; name: string; academicYear: string; status: SemesterStatus; note: string };
+export type Semester = { id: string; term: SemesterTerm; name: string; academicYear: string; status: SemesterStatus; note: string; version?: number };
 export type CourseStatus = 'Đang học' | 'Hoàn thành' | 'Dự kiến';
 export type CourseColor = 'lavender' | 'mint' | 'peach' | 'blue';
 export type Course = { id: string; semesterId: string; code: string; name: string; credits: number; teacher: string; room: string; status: CourseStatus; color: CourseColor; description: string };
