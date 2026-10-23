@@ -16,13 +16,13 @@ const draftOf = (course?: Course, semesterId = '') => ({ name: course?.name ?? '
 export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }: {
   item?: Course; semesterId: string; onClose: () => void; onSaved: (id: string, semesterId: string) => void; onDeleted: () => void;
 }) {
-  const { semesters, courseCatalog, courseConnection: c, semesterConnection, tasks, classes, exams, studySessions, gradeBook } = useApp();
+  const { semesters, courseCatalog, courseConnection: c, semesterConnection, tasks, classes, exams, studySessions, gradeBook, studyConnection } = useApp();
   const [basis, setBasis] = useState(item), [draft, setDraft] = useState(() => draftOf(item, semesterId));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [mustRebase, setMustRebase] = useState(false), [confirmDelete, setConfirmDelete] = useState(false);
   const action = useApiAction();
   if (!c) return null;
-  const locked = action.busy || c.busy || c.loading || !!semesterConnection?.busy || !!semesterConnection?.loading;
-  const needsReload = c.needsReload || !!semesterConnection?.needsReload;
+  const locked = action.busy || c.busy || c.loading || !!semesterConnection?.busy || !!semesterConnection?.loading || !!studyConnection?.busy || !!studyConnection?.loading;
+  const needsReload = c.needsReload || !!semesterConnection?.needsReload || !!studyConnection?.needsReload;
   const linkCount = basis ? [...tasks, ...classes, ...exams, ...studySessions].filter(value => value.courseId === basis.id).length : 0;
   const { retakeLinked, gradeLinked } = basis ? courseGradeLinks(basis.id, gradeBook) : { retakeLinked: false, gradeLinked: false };
   const update = (value: Partial<typeof draft>) => { if (!locked) { setDraft(v => ({ ...v, ...value })); setError(''); setConfirmDelete(false); } };
@@ -47,7 +47,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
   };
   const latest = () => {
     void action.run(async signal => {
-      const [, courses] = await Promise.all([semesterConnection?.reload(), c.reload()]); assertNotCancelled(signal);
+      const [, courses] = await Promise.all([semesterConnection?.reload(), c.reload(), studyConnection?.reload()]); assertNotCancelled(signal);
       if (basis) {
         const current = courses.find(course => course.id === basis.id);
         if (!current) throw new ApiError('Môn đã bị xóa. Đóng biểu mẫu để xem danh sách mới.', 'COURSE_NOT_FOUND', 404);
@@ -81,7 +81,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
     {(mustRebase || needsReload) && <View style={{ gap: 9 }}><T style={S.small}>{basis ? 'Nạp bản mới sẽ thay nội dung đang chỉnh sửa bằng dữ liệu đã lưu.' : 'Kiểm tra danh sách để biết lần lưu trước đã được ghi nhận hay chưa. App không tự gửi lại thao tác lưu.'}</T><Button label={basis ? 'Nạp bản môn học mới nhất' : 'Kiểm tra lại danh sách môn học'} secondary loading={action.busy} disabled={c.busy || c.loading || !!semesterConnection?.busy || !!semesterConnection?.loading} onPress={latest} /></View>}
     <Button label="Lưu môn học" icon="checkmark" loading={action.busy} disabled={locked || needsReload || mustRebase} onPress={save} />
     {basis && <>
-      {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có bài tập, lịch, điểm hoặc liên kết học lại. Xử lý các mục này trước khi chuyển kỳ hoặc xóa môn. Bài tập đã lưu trong tài khoản; lịch và điểm thử vẫn chỉ giữ trong phiên này.</T></Card>}
+      {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có bài tập, lịch, điểm hoặc liên kết học lại. Xử lý các mục này trước khi chuyển kỳ hoặc xóa môn. Bài tập và buổi tự học đã lưu trong tài khoản; lịch và điểm thử vẫn chỉ giữ trong phiên này.</T></Card>}
       {confirmDelete && <T accessibilityRole="alert" style={S.small}>Xóa môn {basis.name} khỏi tài khoản? Thao tác này không xóa học kỳ.</T>}
       <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={locked || needsReload || mustRebase || linkCount > 0 || gradeLinked} onPress={remove} />
       {confirmDelete && <Button label="Giữ môn học" secondary disabled={locked} onPress={() => setConfirmDelete(false)} />}

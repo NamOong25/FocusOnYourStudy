@@ -4,15 +4,15 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4C — API kế hoạch tự học
+## Đợt vừa hoàn thành: 4D — Nối giao diện tự học
 
-V4 thêm kế hoạch tự học, CRUD/lọc theo tài khoản và liên kết bài/môn; kiểm tra trùng giờ, múi giờ, deadline và version. Giữ buổi độc lập khi xóa bài, bảo vệ các request ghi đồng thời; 155 tests qua, UI nối ở 4D. Xem `BACKEND-PHASE-4C.md`.
+Tự học ngày/tuần gọi API 4C: tạo/sửa/xóa/trạng thái, liên kết bài/môn, F5/đổi tài khoản, lỗi/version giữ bản nháp; xóa bài giữ buổi và nạp version mới. Không đổi backend/migration. Phân biệt kế hoạch đã lưu với Pomodoro còn RAM; AI tài khoản thật chỉ xem trước đến đợt lưu hàng loạt. Xem `FRONTEND-STUDY-4D.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Triển khai API kế hoạch tự học và kiểm tra liên kết bài tập"
+git commit -m "Kết nối giao diện tự học với dữ liệu backend"
 git push
 ```
 
@@ -22,6 +22,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Backend 4C — API tự học | `Triển khai API kế hoạch tự học và kiểm tra liên kết bài tập` |
 | Frontend 4B — Nối bài tập | `Kết nối giao diện bài tập với dữ liệu backend` |
 | Backend 4A — API bài tập | `Triển khai API quản lý bài tập theo môn học` |
 | Frontend 3C.2 — Nối môn học | `Kết nối giao diện môn học với dữ liệu backend` |
@@ -60,7 +61,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4D — Nối giao diện tự học | Tải/lưu thật, ngày/tuần, F5, liên kết bài/môn, version/lỗi mạng | Kết nối giao diện tự học với dữ liệu backend |
+| 4E — API lịch học | Lịch lặp/ngoại lệ, múi giờ, liên kết môn và kiểm tra trùng với tự học | Triển khai API lịch học lặp và ngoại lệ từng buổi |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài 3C.1/3C.2/4B; tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài/tự học 3C.1/3C.2/4B/4D; tiếp theo theo `next`/`go`.

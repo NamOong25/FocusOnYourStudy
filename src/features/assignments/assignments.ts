@@ -25,9 +25,9 @@ export function taskDueLabel(task:Task,now=new Date()){
   if(task.deadline===dateKey(now)){const minutes=Math.ceil(distance/60000);return minutes===0?'Đến hạn':minutes<60?`Còn ${minutes} phút`:`Còn ${Math.floor(minutes/60)} giờ${minutes%60?` ${minutes%60} phút`:''}`;}
   const days=Math.round((parseDay(task.deadline).getTime()-parseDay(dateKey(now)).getTime())/86400000);return days===1?'Ngày mai':`Còn ${days} ngày`;
 }
-export function sessionExceedsDeadline(task:Deadline,session:{date:string;start:string;duration:number}){
+export function sessionExceedsDeadline(task:Deadline,session:{date:string;start:string;duration:number;startsAt?:string}){
   if(!isValidDate(session.date)||!validTime(session.start)||!Number.isFinite(session.duration)||session.duration<=0)return true;
-  const due=deadlineTimestamp(task),end=new Date(`${session.date}T${session.start}:00`).getTime()+session.duration*60000;
+  const due=deadlineTimestamp(task),end=(session.startsAt?Date.parse(session.startsAt):new Date(`${session.date}T${session.start}:00`).getTime())+session.duration*60000;
   return !Number.isFinite(due)||end>due;
 }
 export function compareTaskDeadlines(a:Task,b:Task){

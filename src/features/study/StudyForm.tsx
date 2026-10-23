@@ -1,3 +1,4 @@
+import { StudyApiForm } from './components/StudyApiForm';
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -11,8 +12,8 @@ import { C, F, S } from '../../shared/theme';
 import {sessionExceedsDeadline,taskDeadlineLabel} from '../assignments/assignments';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
 
-export function StudySessionForm({ item, initialTaskId, initialCourseId, initialDate, onClose, onSaved, onDeleted }: { item?: StudySession; initialTaskId?: string; initialCourseId?: string; initialDate?: string; onClose: () => void; onSaved?: (id: string) => void; onDeleted?: () => void }) {
-  const { tasks, courseCatalog, classes, classExceptions, exams, studySessions, saveStudySession, deleteStudySession, setToast } = useApp();
+export function StudySessionForm({ item, initialTaskId, initialCourseId, initialDate, onClose, onSaved, onDeleted }: { item?: StudySession; initialTaskId?: string; initialCourseId?: string; initialDate?: string; onClose: () => void; onSaved?: (id: string, date?: string) => void; onDeleted?: () => void }) {
+  const { tasks, courseCatalog, classes, classExceptions, exams, studySessions, saveStudySession, deleteStudySession, setToast, studyConnection } = useApp();
   const initialTask = tasks.find(t => t.id === initialTaskId);
   const [title, setTitle] = useState(item?.title ?? '');
   const [courseId, setCourseId] = useState(item?.courseId ?? initialTask?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
@@ -41,6 +42,7 @@ export function StudySessionForm({ item, initialTaskId, initialCourseId, initial
     saveStudySession(session);
     setToast(item ? 'Đã cập nhật buổi tự học' : 'Đã thêm buổi tự học'); if (onSaved) onSaved(session.id); else onClose();
   };
+  if (studyConnection) return <StudyApiForm item={item} initialTaskId={initialTaskId} initialCourseId={initialCourseId} initialDate={initialDate} onClose={onClose} onSaved={onSaved} onDeleted={onDeleted ?? onClose}/>;
   return <Sheet title={item ? 'Chỉnh sửa buổi tự học' : 'Buổi tự học mới'} onClose={onClose} dirty={dirty}>
     <Badge label="Một việc nhỏ, một khoảng tập trung" icon="leaf-outline" />
     <Field label="Nội dung tự học" value={title} onChange={setTitle} placeholder="Ví dụ: Viết phần giới thiệu báo cáo" />

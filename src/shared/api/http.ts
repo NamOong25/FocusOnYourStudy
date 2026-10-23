@@ -36,6 +36,12 @@ const messages: Record<string, string> = {
   ASSIGNMENT_HAS_STUDY_SESSIONS: 'Bài tập còn buổi tự học đã lưu. Gỡ liên kết các buổi trước khi đổi môn.',
   ASSIGNMENT_DEADLINE_CONFLICT: 'Hạn nộp mới đang trước lúc kết thúc buổi tự học đã lưu. Điều chỉnh buổi học hoặc gỡ liên kết trước.',
   COURSE_HAS_STUDY_SESSIONS: 'Môn còn buổi tự học đã lưu. Xử lý các buổi trước khi xóa hoặc chuyển học kỳ.',
+  STUDY_SESSION_NOT_FOUND: 'Buổi học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại.',
+  STUDY_SESSION_VERSION_CONFLICT: 'Buổi học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
+  STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',
+  STUDY_ASSIGNMENT_COURSE_MISMATCH: 'Bài tập cần thuộc đúng môn của buổi học. Kiểm tra lại bài đã chọn.',
+  STUDY_AFTER_DEADLINE: 'Buổi học kết thúc sau hạn bài đã lưu. Đổi giờ hoặc gỡ liên kết bài tập.',
+  INVALID_STUDY_RANGE: 'Khoảng thời gian lọc chưa hợp lệ. Chọn lại ngày và giờ.',
   DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
@@ -44,7 +50,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
+      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');

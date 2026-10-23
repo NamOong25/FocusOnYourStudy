@@ -43,7 +43,10 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
       await button('Lưu môn học').click(); await field('Tên môn học').waitFor({ state: 'detached' }); await backDialog(page);
     }
     await tab('Bài tập').click(); await button('Thêm bài tập mới').click(); await field('Tên bài tập').fill('Bài riêng ' + who); await save('Tạo bài tập');
-    await tab('Lịch học').click(); await tab('Tự học').click(); await button('Lên kế hoạch mới').click(); await field('Nội dung tự học').fill('Buổi riêng ' + who); await save('Lưu buổi tự học');
+    await tab('Lịch học').click(); await tab('Tự học').click();
+    if (!await button('Xem buổi Buổi riêng ' + who).count()) {
+      await button('Lên kế hoạch mới').click(); await field('Nội dung tự học').fill('Buổi riêng ' + who); await button('Lưu buổi tự học').click(); await field('Nội dung tự học').waitFor({ state: 'detached' });
+    }
     await button('Tập trung: Buổi riêng ' + who).click(); await button('Bắt đầu').click(); await text('ĐANG HỌC SÂU').waitFor();
     await tab('Lịch học').click(); await tab('Bài tập').click(); await button('Thêm bài tập mới').click(); await field('Tên bài tập').fill('Bản nháp riêng ' + who);
   }
@@ -72,10 +75,13 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
     await switchTo('A'); await button('Đóng tài khoản').click(); await button('Thử trạng thái giao diện').click();
     await button('Bật lỗi cho lần xử lý tới').waitFor(); assert.equal(await button('Đã bật lỗi cho lần xử lý tới').count(), 0); await button('Đóng').click();
     step('feedback notices and simulated save failures reset on identity change');
-    await emptyChecks('A', true); step('returning to A restores server semesters/courses/assignments; trial study/timer are cleared');
+    await emptyChecks('A', true); await tab('Lịch học').click(); await tab('Tự học').click(); await button('Xem buổi Buổi riêng A').waitFor(); step('returning to A restores saved semesters/courses/assignments/study while timer history resets');
     await seed('A', true);
     await button('Đăng xuất', second).waitFor(); await button('Đăng xuất', second).click(); await button('Xác nhận đăng xuất', second).click();
-    await text('Đã đăng xuất.', second).waitFor(); await profile(page).waitFor({ state: 'detached' });
+    await text('Đã đăng xuất.', second).waitFor();
+    // The profile is already closed in the first tab. Wait for its identity-change notice,
+    // not a profile locator that was absent before the storage event arrived.
+    await text('Bạn đã đăng xuất ở một cửa sổ khác.').waitFor(); await field('Tên bài tập').waitFor({ state: 'detached' });
     assert.equal(await field('Tên bài tập').count(), 0); assert.equal(await button('Bỏ thay đổi').count(), 0); await second.close();
     step('logout in other tab closes dirty form without preserving old workspace');
     await page.reload({ waitUntil: 'networkidle' }); await guestLogin(); await login('B'); await button('Đóng tài khoản').click(); await emptyChecks('A');
@@ -109,7 +115,7 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
     await page.waitForTimeout(500);
     for (const width of [320, 390, 430, 1280]) { await page.setViewportSize({ width, height: 900 }); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false); await page.screenshot({ path: path.join(out, `account-${width}.png`) }); }
     step('account layouts at 320/390/430/1280'); assert.deepEqual(errors, []); assert.ok(!logs.join('|').includes(password));
-    assert.ok(requests.every(r => r.method === 'GET' || r.path.startsWith('/api/v1/auth/') || r.path.startsWith('/api/v1/semesters') || r.path.startsWith('/api/v1/courses') || r.path.startsWith('/api/v1/assignments'))); step('only auth/semester/course/assignment writes; study and timer remain prototype; no password logs');
+    assert.ok(requests.every(r => r.method === 'GET' || r.path.startsWith('/api/v1/auth/') || r.path.startsWith('/api/v1/semesters') || r.path.startsWith('/api/v1/courses') || r.path.startsWith('/api/v1/assignments') || r.path.startsWith('/api/v1/study-sessions'))); step('only auth/semester/course/assignment/study writes; timer remains local; no password logs');
     const result = { passed: true, checks: cases.length, cases, errors }; fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));
   } catch (error) { await page.screenshot({ path: path.join(out, 'failure.png') }); fs.writeFileSync(path.join(out, 'failure.txt'), await page.locator('body').innerText()); throw error; }
   finally { await context.setOffline(false); await browser.close(); }

@@ -1,10 +1,18 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4B: tài khoản/phiên, học kỳ, môn học và bài tập dùng dữ liệu thật**. Lịch, buổi tự học, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Lịch học/thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4C: API kế hoạch tự học
+## Mới nhất — 4D: Giao diện tự học lưu vào tài khoản
 
-Backend có V4 và API CRUD/lọc buổi tự học theo tài khoản/môn/kỳ/bài/trạng thái/khoảng giờ. Kiểm tra trùng buổi, kết thúc trước 24:00, đúng môn và không sau deadline; bảo vệ ghi đồng thời. Xóa bài giữ buổi học độc lập và tăng version; môn còn buổi bị chặn xóa/chuyển kỳ. **Giao diện tự học vẫn RAM, nối ở 4D.** Học kỳ/môn/bài trên UI vẫn dùng dữ liệu thật.
+Đăng nhập → **Lịch học → Tự học**: tạo/sửa/xóa và trạng thái gọi API 4C. Xem ngày/tuần, chọn ngày cần xem, liên kết một bài với nhiều buổi. F5/đăng nhập lại giữ dữ liệu; hai tài khoản có danh sách riêng. Có tải/lỗi/thử lại, giữ bản nháp khi lỗi hoặc xung đột version, không tự gửi lại thao tác mất phản hồi. Xóa bài giữ buổi độc lập và tải lại version; Dashboard/chi tiết bài/môn dùng chung nguồn.
+
+**Thời lượng dự kiến không tự cộng phút Pomodoro**; lịch sử timer còn RAM. AI trong tài khoản thật giữ bước xem trước, lưu hàng loạt qua API để đợt AI sau; chế độ khách vẫn thử local. Lịch/thi/điểm/checklist/tài liệu tiếp tục làm sau. Không thay backend/migration hoặc seed vào tài khoản người dùng.
+
+Xem [hướng dẫn test 4D](docs/FRONTEND-STUDY-4D.md), [checklist](docs/UI-BACKLOG.md), [tên commit và lệnh push](docs/GIT-COMMITS.md).
+
+## 4C: API kế hoạch tự học
+
+Backend có V4 và API CRUD/lọc buổi tự học theo tài khoản/môn/kỳ/bài/trạng thái/khoảng giờ. Kiểm tra trùng buổi, kết thúc trước 24:00, đúng môn và không sau deadline; bảo vệ ghi đồng thời. Xóa bài giữ buổi học độc lập và tăng version; môn còn buổi bị chặn xóa/chuyển kỳ. **Giao diện tự học đã nối ở 4D.** Học kỳ/môn/bài trên UI vẫn dùng dữ liệu thật.
 
 **155 tests/Maven verify qua**, gồm 37 test tự học/migration mới, nâng V3 giữ dữ liệu cũ, restart toàn backend và script PowerShell 5.1. Khởi động lại backend để Flyway áp dụng V4; không tạo lại database.
 
@@ -14,7 +22,7 @@ Xem [hướng dẫn test terminal VS Code/IntelliJ 4C](docs/BACKEND-PHASE-4C.md)
 
 Đăng nhập → Lịch học → Bài tập: tải/thêm/sửa/xóa, deadline ngày giờ, độ ưu tiên, trạng thái và ghi chú được lưu vào PostgreSQL. F5/đăng nhập lại giữ bài; hai tài khoản có danh sách riêng. Có bộ chọn học kỳ/lọc môn/tìm kiếm/hạn nộp, chờ xác nhận khi lưu, giữ bản nháp khi lỗi mạng hoặc xung đột version và không tự gửi lại thao tác mất phản hồi. Dashboard, chi tiết môn, thống kê và các ô chọn bài dùng chung dữ liệu thật.
 
-Xem [hướng dẫn test từng bước 4B](docs/FRONTEND-ASSIGNMENTS-4B.md). Không đổi database/migration. Checklist, tài liệu mẫu và buổi tự học vẫn chỉ giữ trong phiên; bài bị xóa/đổi từ nơi khác sẽ gỡ liên kết buổi học không còn hợp lệ và giữ buổi tự học độc lập.
+Xem [hướng dẫn test từng bước 4B](docs/FRONTEND-ASSIGNMENTS-4B.md). Checklist/tài liệu mẫu chỉ giữ trong phiên. Từ 4D, tự học đã lưu backend: xóa bài gỡ liên kết và giữ buổi; đổi môn/rút deadline sai liên kết bị chặn.
 
 ## 4A: API quản lý bài tập
 

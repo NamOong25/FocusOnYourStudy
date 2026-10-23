@@ -17,15 +17,15 @@ const draftOf = (item?: Task, courseId = ''): AssignmentInput => ({ title: item?
 export function TaskApiForm({ item, initialCourseId, onClose, onDeleted }: {
   item?: Task; initialCourseId?: string; onClose: () => void; onDeleted: () => void;
 }) {
-  const { assignmentConnection: c, courseConnection, courseCatalog, studySessions, academicSemesterId } = useApp();
+  const { assignmentConnection: c, courseConnection, courseCatalog, studySessions, academicSemesterId, studyConnection } = useApp();
   const { width } = useWindowDimensions();
   // Editing is based on the version that opened the form, never a live replacement of its draft.
   const [basis, setBasis] = useState(item), [draft, setDraft] = useState(() => draftOf(item, initialCourseId ?? courseCatalog.find(course => course.semesterId === academicSemesterId)?.id ?? courseCatalog[0]?.id));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [mustRebase, setMustRebase] = useState(false), [confirmDelete, setConfirmDelete] = useState(false);
   const action = useApiAction();
   if (!c) return null;
-  const locked = action.busy || c.busy || c.loading || !!courseConnection?.busy || !!courseConnection?.loading;
-  const needsReload = c.needsReload || !!courseConnection?.needsReload;
+  const locked = action.busy || c.busy || c.loading || !!courseConnection?.busy || !!courseConnection?.loading || !!studyConnection?.busy || !!studyConnection?.loading;
+  const needsReload = c.needsReload || !!courseConnection?.needsReload || !!studyConnection?.needsReload;
   const update = (patch: Partial<AssignmentInput>) => { if (!locked) { setDraft(d => ({ ...d, ...patch })); setError(''); setConfirmDelete(false); } };
   const execute = (operation: () => Promise<unknown>, success: () => void) => {
     setError(''); void action.run(async () => {
@@ -75,7 +75,7 @@ export function TaskApiForm({ item, initialCourseId, onClose, onDeleted }: {
     {!!action.error?.fields && Object.entries(action.error.fields).map(([field, message]) => <T key={field} accessibilityRole="alert" style={{ color: C.red }}>{message}</T>)}
     {(needsReload || mustRebase) && <><T style={S.small}>{basis ? 'Nạp bản mới sẽ thay nội dung đang chỉnh sửa bằng dữ liệu đã lưu.' : 'Kiểm tra danh sách trước khi tạo tiếp để biết lần lưu trước đã được ghi nhận hay chưa.'}</T><Button label={basis ? 'Nạp bản bài tập mới nhất' : 'Kiểm tra lại danh sách bài tập'} secondary loading={action.busy} disabled={c.busy || c.loading || !!courseConnection?.busy || !!courseConnection?.loading} onPress={latest} /></>}
     <Button label={basis ? 'Lưu thay đổi' : 'Tạo bài tập'} icon="checkmark" loading={action.busy} disabled={locked || needsReload || mustRebase} onPress={save} />
-    {basis && <><T style={S.small}>Xóa bài tập sẽ gỡ liên kết các buổi tự học trong phiên này; buổi học vẫn được giữ lại.</T>
+    {basis && <><T style={S.small}>Xóa bài tập sẽ gỡ liên kết các buổi tự học đã lưu; buổi học vẫn được giữ lại.</T>
       {confirmDelete && <T accessibilityRole="alert" style={S.small}>Xóa bài tập “{basis.title}” khỏi tài khoản?</T>}
       <Button label={confirmDelete ? 'Xác nhận xóa bài tập' : 'Xóa bài tập'} danger={confirmDelete} secondary={!confirmDelete} disabled={locked || needsReload || mustRebase} onPress={remove} />
       {confirmDelete && <Button label="Giữ bài tập" secondary disabled={locked} onPress={() => setConfirmDelete(false)} />}</>}
