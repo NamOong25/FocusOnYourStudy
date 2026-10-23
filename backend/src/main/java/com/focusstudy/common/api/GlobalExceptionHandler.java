@@ -6,6 +6,7 @@ import com.focusstudy.auth.AuthApiException;
 import com.focusstudy.academics.semesters.SemesterApiException;
 import com.focusstudy.academics.courses.CourseApiException;
 import com.focusstudy.assignments.AssignmentApiException;
+import com.focusstudy.study.StudyApiException;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -25,6 +26,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+    @ExceptionHandler(StudyApiException.class)
+    ResponseEntity<ProblemDetail> studyProblem(StudyApiException ex, HttpServletRequest request) {
+        return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore())
+                .body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));
+    }
     @ExceptionHandler(AssignmentApiException.class)
     ResponseEntity<ProblemDetail> assignmentProblem(AssignmentApiException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore())

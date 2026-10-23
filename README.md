@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4B: tài khoản/phiên, học kỳ, môn học và bài tập dùng dữ liệu thật**. Lịch, buổi tự học, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4B: Giao diện bài tập lưu vào tài khoản
+## Mới nhất — 4C: API kế hoạch tự học
+
+Backend có V4 và API CRUD/lọc buổi tự học theo tài khoản/môn/kỳ/bài/trạng thái/khoảng giờ. Kiểm tra trùng buổi, kết thúc trước 24:00, đúng môn và không sau deadline; bảo vệ ghi đồng thời. Xóa bài giữ buổi học độc lập và tăng version; môn còn buổi bị chặn xóa/chuyển kỳ. **Giao diện tự học vẫn RAM, nối ở 4D.** Học kỳ/môn/bài trên UI vẫn dùng dữ liệu thật.
+
+**155 tests/Maven verify qua**, gồm 37 test tự học/migration mới, nâng V3 giữ dữ liệu cũ, restart toàn backend và script PowerShell 5.1. Khởi động lại backend để Flyway áp dụng V4; không tạo lại database.
+
+Xem [hướng dẫn test terminal VS Code/IntelliJ 4C](docs/BACKEND-PHASE-4C.md), [hợp đồng API tự học](backend/docs/STUDY-SESSIONS.md), mẫu request `backend/api/study-sessions.http` và script `backend/scripts/Try-StudySessions.ps1`.
+
+## 4B: Giao diện bài tập lưu vào tài khoản
 
 Đăng nhập → Lịch học → Bài tập: tải/thêm/sửa/xóa, deadline ngày giờ, độ ưu tiên, trạng thái và ghi chú được lưu vào PostgreSQL. F5/đăng nhập lại giữ bài; hai tài khoản có danh sách riêng. Có bộ chọn học kỳ/lọc môn/tìm kiếm/hạn nộp, chờ xác nhận khi lưu, giữ bản nháp khi lỗi mạng hoặc xung đột version và không tự gửi lại thao tác mất phản hồi. Dashboard, chi tiết môn, thống kê và các ô chọn bài dùng chung dữ liệu thật.
 
@@ -48,7 +56,7 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
-## Backend hiện tại — đợt 4A
+## Backend hiện tại — đợt 4C
 
 Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend đã nối khôi phục/refresh/logout ở 2C.2; nghiệm thu thiết bị thật ở 2C.3.
 

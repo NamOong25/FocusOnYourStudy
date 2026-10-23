@@ -11,7 +11,7 @@ Base `/api/v1/assignments`. Tất cả request cần Bearer access token và phi
 | PUT `/api/v1/assignments/{id}` | 200, thay toàn bộ các trường; bắt buộc version mới nhất |
 | DELETE `/api/v1/assignments/{id}?version=...` | 204 không body, xóa bài; giữ môn/học kỳ |
 
-Mặc định sắp `dueAt` tăng dần rồi UUID để ổn định khi trùng hạn. Không loại bài hoàn thành khỏi danh sách nếu không truyền status. Kỳ/môn lọc khác chủ hoặc không tồn tại trả 404 giống nhau; hai bộ lọc cùng chủ nhưng không khớp nhau trả `[]`. Chưa phân trang hoặc tổng hợp Dashboard; frontend 4B sẽ dùng danh sách theo tài khoản.
+Mặc định sắp `dueAt` tăng dần rồi UUID để ổn định khi trùng hạn. Không loại bài hoàn thành khỏi danh sách nếu không truyền status. Kỳ/môn lọc khác chủ hoặc không tồn tại trả 404 giống nhau; hai bộ lọc cùng chủ nhưng không khớp nhau trả `[]`. Chưa phân trang hoặc tổng hợp Dashboard; frontend 4B đã dùng danh sách theo tài khoản.
 
 POST tối thiểu:
 
@@ -47,7 +47,7 @@ Nguồn quy ước timestamp: [PostgreSQL 17 — date/time](https://www.postgres
 ## Quan hệ và ghi đồng thời
 
 - V3 thêm bảng `assignments`; FK ghép `(course_id,user_id)` → `courses(id,user_id)` ngăn gắn bài vào môn khác chủ ngay tại database. Không sửa V1/V2; không cascade xóa dữ liệu học tập.
-- Được đổi bài sang môn khác của cùng tài khoản vì backend chưa có buổi tự học/checklist/tệp liên quan. Khi mở các bảng con ở đợt sau phải bổ sung kiểm tra các liên kết đó.
+- Từ 4C, chỉ đổi bài sang môn khác khi không còn buổi tự học liên kết. Rút deadline không được làm buổi liên kết kết thúc sau hạn mới. Xóa bài giữ các buổi, gỡ assignmentId và tăng version từng buổi trong cùng giao dịch; xem STUDY-SESSIONS.md.
 - Môn còn **bất kỳ bài tập nào**, kể cả hoàn thành, bị chặn xóa hoặc chuyển học kỳ với `COURSE_HAS_ASSIGNMENTS`. Vẫn sửa tên/giảng viên/tín chỉ/các thông tin khác trong cùng kỳ được; bài giữ courseId.
 - Sau khi xóa/chuyển hết bài sang môn khác, môn cũ được xóa/chuyển kỳ theo quy tắc 3B. Học kỳ còn môn vẫn bị 3A chặn xóa.
 - Ghi bài lấy cùng khóa hàng chủ tài khoản với môn/học kỳ trước khi kiểm tra bản ghi, version và liên kết. Tạo/chuyển bài không chạy lọt giữa kiểm tra và xóa/chuyển môn. PUT/DELETE version cũ trả 409; không tự ghi đè.
@@ -67,4 +67,9 @@ Nguồn quy ước timestamp: [PostgreSQL 17 — date/time](https://www.postgres
 | 409 DATA_CONFLICT | Constraint/optimistic conflict cuối cùng nếu ghi ngoài luồng service |
 | 503 DATABASE_UNAVAILABLE | Không truy cập được database |
 
-Không echo SQL/token/mật khẩu trong lỗi. PATCH và các API lịch/tự học/điểm chưa mở. Chưa có upload/tài liệu/checklist hoặc gửi thông báo thật. UI bài tập hiện vẫn RAM; nối ở 4B. Hướng dẫn terminal/IntelliJ: `../../docs/BACKEND-PHASE-4A.md`; mẫu request: `../api/assignments.http`.
+Không echo SQL/token/mật khẩu trong lỗi. API tự học đã mở ở 4C; PATCH và API lịch/điểm chưa mở. Chưa có upload/tài liệu/checklist hoặc gửi thông báo thật. UI bài tập đã nối ở 4B; UI tự học chờ 4D. Hướng dẫn terminal/IntelliJ: `../../docs/BACKEND-PHASE-4A.md`; mẫu request: `../api/assignments.http`.
+
+
+## Guard bổ sung ở 4C
+
+PUT bài trả 409 ASSIGNMENT_HAS_STUDY_SESSIONS khi đổi môn mà còn buổi liên kết, hoặc 409 ASSIGNMENT_DEADLINE_CONFLICT khi hạn mới trước lúc kết thúc buổi liên kết, kể cả buổi đã hoàn thành. Đổi tên/ghi chú/trạng thái hoặc hạn phù hợp vẫn được; không tự đổi trạng thái buổi theo bài. DELETE gỡ link buổi và tăng version trước khi xóa bài, giữ nội dung và thời gian buổi. Ghi bài/môn/tự học cùng khóa hàng chủ tài khoản đầu tiên để kiểm tra và commit nhất quán.

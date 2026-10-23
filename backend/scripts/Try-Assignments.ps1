@@ -64,7 +64,7 @@ try {
         }
     }
     if ($Mode -ne 'Delete') { $result | ConvertTo-Json -Depth 6 }
-    Write-Host 'Dữ liệu bài tập lấy từ PostgreSQL. Giao diện bài tập sẽ nối API ở đợt 4B.' -ForegroundColor Cyan
+    Write-Host 'Dữ liệu bài tập lấy từ PostgreSQL. Giao diện bài tập đã nối API ở đợt 4B.' -ForegroundColor Cyan
 } catch {
     $failure = $_; $problem = $null
     try { $problem = $failure.ErrorDetails.Message | ConvertFrom-Json } catch { }

@@ -1,6 +1,6 @@
 # API — v1
 
-Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/bài tập theo tài khoản**, xem [học kỳ](SEMESTERS.md), [môn học](COURSES.md) và [bài tập 4A](ASSIGNMENTS.md). Frontend đã nối tài khoản/phiên và học kỳ/môn đến 3C.2; UI bài tập chờ 4B. Thiết bị thật 2C.3B để làm sau.
+Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/bài tập/tự học theo tài khoản**, xem [học kỳ](SEMESTERS.md), [môn học](COURSES.md), [bài tập 4A](ASSIGNMENTS.md) và [tự học 4C](STUDY-SESSIONS.md). Frontend đã nối tài khoản/phiên, học kỳ/môn/bài đến 4B; UI tự học chờ 4D. Thiết bị thật 2C.3B để làm sau.
 
 ## Endpoint hiện có
 
@@ -26,6 +26,10 @@ Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/b
 | POST `/api/v1/assignments` | Bearer và môn thuộc mình | 201, bài mới; deadline cần ngày/giờ và offset. |
 | PUT `/api/v1/assignments/{id}` | Bearer và version mới nhất | 200, thay đầy đủ trường; 409 nếu version cũ. |
 | DELETE `/api/v1/assignments/{id}?version=...` | Bearer và version mới nhất | 204, xóa bài, giữ môn/học kỳ. |
+| GET `/api/v1/study-sessions` và `/{id}` | Bearer và phiên hoạt động | 200, buổi cùng tài khoản; lọc môn/kỳ/bài/trạng thái/khoảng giờ. |
+| POST `/api/v1/study-sessions` | Bearer và phiên hoạt động | 201, kế hoạch độc lập hoặc gắn bài; kiểm tra trùng và deadline. |
+| PUT `/api/v1/study-sessions/{id}` | Bearer và version mới nhất | 200, thay toàn bộ trường; 409 nếu version cũ/trùng giờ/liên kết không hợp lệ. |
+| DELETE `/api/v1/study-sessions/{id}?version=...` | Bearer và version mới nhất | 204, giữ bài/môn/kỳ. |
 | Các đường dẫn nghiệp vụ còn lại | Chưa mở | 401 khi chưa xác thực; 403 khi có token hợp lệ. |
 
 Flyway/JPA phải thành công trước khi app lắng nghe HTTP. DB chưa chạy từ đầu sẽ làm backend không khởi động.

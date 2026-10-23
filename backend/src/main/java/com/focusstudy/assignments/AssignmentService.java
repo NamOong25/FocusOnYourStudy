@@ -7,6 +7,7 @@ import com.focusstudy.academics.semesters.SemesterApiException;
 import com.focusstudy.academics.semesters.SemesterRepository;
 import com.focusstudy.assignments.validation.DeadlineValidator;
 import com.focusstudy.users.UserRepository;
+import com.focusstudy.study.StudySessionRepository;
 import jakarta.persistence.criteria.Predicate;
 import java.util.*;
 import org.springframework.data.domain.Sort;
@@ -21,8 +22,9 @@ public class AssignmentService {
     private final CourseRepository courses;
     private final SemesterRepository semesters;
     private final UserRepository users;
-    public AssignmentService(AssignmentRepository assignments, CourseRepository courses, SemesterRepository semesters, UserRepository users) {
-        this.assignments = assignments; this.courses = courses; this.semesters = semesters; this.users = users;
+    private final StudySessionRepository studySessions;
+    public AssignmentService(AssignmentRepository assignments, CourseRepository courses, SemesterRepository semesters, UserRepository users, StudySessionRepository studySessions) {
+        this.assignments = assignments; this.courses = courses; this.semesters = semesters; this.users = users; this.studySessions = studySessions;
     }
     @Transactional(readOnly = true)
     public List<AssignmentResponse> list(UUID owner, UUID courseId, UUID semesterId, AssignmentEntity.Status status) {
@@ -53,12 +55,20 @@ public class AssignmentService {
     @Transactional
     public AssignmentResponse update(UUID owner, UUID id, AssignmentRequests.Update input) {
         lockOwner(owner); var assignment = owned(owner, id); checkVersion(assignment, input.version()); ownedCourse(owner, input.courseId());
-        assignment.change(input.courseId(), input.title(), DeadlineValidator.parse(input.dueAt()), input.priority(), input.status(), input.notes());
+        if (!assignment.getCourseId().equals(input.courseId()) && studySessions.existsByUserIdAndAssignmentId(owner, id))
+            throw new AssignmentApiException(HttpStatus.CONFLICT, "ASSIGNMENT_HAS_STUDY_SESSIONS", "Bài tập còn buổi tự học liên kết. Gỡ liên kết các buổi trước khi đổi môn.");
+        var deadline = DeadlineValidator.parse(input.dueAt());
+        if (studySessions.existsByUserIdAndAssignmentIdAndEndsAtAfter(owner, id, deadline))
+            throw new AssignmentApiException(HttpStatus.CONFLICT, "ASSIGNMENT_DEADLINE_CONFLICT", "Hạn nộp mới đang trước lúc kết thúc buổi tự học liên kết. Điều chỉnh buổi học hoặc gỡ liên kết trước.");
+        assignment.change(input.courseId(), input.title(), deadline, input.priority(), input.status(), input.notes());
         assignments.flush(); return AssignmentResponse.from(assignment);
     }
     @Transactional
     public void delete(UUID owner, UUID id, long version) {
         lockOwner(owner); var assignment = owned(owner, id); checkVersion(assignment, version);
+        // Keep plans, detach links and increment their versions before the FK parent is removed.
+        studySessions.findByUserIdAndAssignmentId(owner, id).forEach(session -> session.detachAssignment());
+        studySessions.flush();
         assignments.delete(assignment); assignments.flush();
     }
     private void lockOwner(UUID owner) {

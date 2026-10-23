@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:8080
+@accessToken = REPLACE_WITH_ACCESS_TOKEN
+@courseId = REPLACE_WITH_OWN_COURSE_UUID
+@assignmentId = REPLACE_WITH_OWN_ASSIGNMENT_UUID
+@studySessionId = REPLACE_WITH_STUDY_SESSION_UUID
+@version = 0
+
+### GET list — empty [] is normal for an account with no saved plans
+GET {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{accessToken}}
+
+### Independent plan
+POST {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "assignmentId": null,
+  "title": "Ôn tập Java",
+  "startsAt": "2026-10-30T19:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "durationMinutes": 45,
+  "status": "PLANNED",
+  "notes": "Đọc tài liệu chương 3"
+}
+
+### Linked plan — make sure the assignment deadline is not earlier than this end
+POST {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "assignmentId": "{{assignmentId}}",
+  "title": "Làm báo cáo Java",
+  "startsAt": "2026-10-30T20:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "durationMinutes": 45,
+  "status": "PLANNED",
+  "notes": "Hoàn thiện phần kết luận"
+}
+
+### Read actual current version
+GET {{baseUrl}}/api/v1/study-sessions/{{studySessionId}}
+Authorization: Bearer {{accessToken}}
+
+### Combined filters — +07:00 must be encoded
+GET {{baseUrl}}/api/v1/study-sessions?courseId={{courseId}}&from=2026-10-30T18:00:00%2B07:00&to=2026-10-30T23:59:00%2B07:00&status=PLANNED
+Authorization: Bearer {{accessToken}}
+
+### Full replacement; null assignmentId detaches a linked plan
+PUT {{baseUrl}}/api/v1/study-sessions/{{studySessionId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "assignmentId": null,
+  "title": "Ôn Java — cập nhật",
+  "startsAt": "2026-10-30T19:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "durationMinutes": 60,
+  "status": "IN_PROGRESS",
+  "notes": "Thời lượng mới; không ghi nhận Pomodoro",
+  "version": {{version}}
+}
+
+### Re-read version before deleting; never use an old version by assumption
+DELETE {{baseUrl}}/api/v1/study-sessions/{{studySessionId}}?version={{version}}
+Authorization: Bearer {{accessToken}}

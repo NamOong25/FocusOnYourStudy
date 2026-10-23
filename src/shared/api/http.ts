@@ -33,6 +33,9 @@ const messages: Record<string, string> = {
   COURSE_HAS_ASSIGNMENTS: 'Môn còn bài tập đã lưu. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.',
   ASSIGNMENT_NOT_FOUND: 'Bài tập không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
   ASSIGNMENT_VERSION_CONFLICT: 'Bài tập đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
+  ASSIGNMENT_HAS_STUDY_SESSIONS: 'Bài tập còn buổi tự học đã lưu. Gỡ liên kết các buổi trước khi đổi môn.',
+  ASSIGNMENT_DEADLINE_CONFLICT: 'Hạn nộp mới đang trước lúc kết thúc buổi tự học đã lưu. Điều chỉnh buổi học hoặc gỡ liên kết trước.',
+  COURSE_HAS_STUDY_SESSIONS: 'Môn còn buổi tự học đã lưu. Xử lý các buổi trước khi xóa hoặc chuyển học kỳ.',
   DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }

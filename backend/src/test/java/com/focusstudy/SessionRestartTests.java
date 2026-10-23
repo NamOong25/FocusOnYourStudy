@@ -49,7 +49,7 @@ class SessionRestartTests {
     @Test void refreshAndRevocationSurviveClosingAndRecreatingTheEntireBackend() throws Exception {
         String schema = "backend_it_" + UUID.randomUUID().toString().replace("-", "");
         String email = "restart-" + UUID.randomUUID() + "@example.test", password = "RestartTest123!";
-        String first, independent, rotated, semesterId, courseId, assignmentId;
+        String first, independent, rotated, semesterId, courseId, assignmentId, studyId;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -66,6 +66,11 @@ class SessionRestartTests {
                         "title", "Bài lưu qua khởi động lại", "dueAt", "2026-10-30T23:59:00+07:00", "notes", "Giữ nguyên dữ liệu"));
                 assertThat(assignment.statusCode()).isEqualTo(201);
                 assignmentId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(assignment.body(), Map.class).get("data")).get("id").toString();
+                var study = semester(app, "POST", "/api/v1/study-sessions", pair.get("accessToken").toString(), Map.of("courseId", courseId,
+                        "assignmentId", assignmentId, "title", "Buổi học giữ qua restart", "startsAt", "2026-10-30T19:00:00+07:00",
+                        "timeZone", "Asia/Ho_Chi_Minh", "durationMinutes", 45, "notes", "Giữ kế hoạch"));
+                assertThat(study.statusCode()).isEqualTo(201);
+                studyId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(study.body(), Map.class).get("data")).get("id").toString();
             }
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
@@ -74,6 +79,9 @@ class SessionRestartTests {
                 assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("code")).isEqualTo("RESTART101");
                 var assignment = data(app, semester(app, "GET", "/api/v1/assignments/" + assignmentId, pair.get("accessToken").toString(), null));
                 assertThat(assignment.get("dueAt")).isEqualTo("2026-10-30T16:59:00Z"); assertThat(assignment.get("notes")).isEqualTo("Giữ nguyên dữ liệu");
+                var study = data(app, semester(app, "GET", "/api/v1/study-sessions/" + studyId, pair.get("accessToken").toString(), null));
+                assertThat(study.get("startsAt")).isEqualTo("2026-10-30T12:00:00Z"); assertThat(study.get("endsAt")).isEqualTo("2026-10-30T12:45:00Z");
+                assertThat(study.get("assignmentId")).isEqualTo(assignmentId); assertThat(study.get("timeZone")).isEqualTo("Asia/Ho_Chi_Minh");
                 assertThat(post(app, "/api/v1/auth/logout", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(204);
             }
             try (var app = start(schema)) {
@@ -83,6 +91,7 @@ class SessionRestartTests {
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("status")).isEqualTo("CURRENT");
                 assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("semesterId")).isEqualTo(semesterId);
                 assertThat(data(app, semester(app, "GET", "/api/v1/assignments/" + assignmentId, pair.get("accessToken").toString(), null)).get("courseId")).isEqualTo(courseId);
+                assertThat(data(app, semester(app, "GET", "/api/v1/study-sessions/" + studyId, pair.get("accessToken").toString(), null)).get("notes")).isEqualTo("Giữ kế hoạch");
             }
         } finally {
             if (!schema.matches("backend_it_[a-f0-9]{32}")) throw new IllegalStateException("Unsafe schema");

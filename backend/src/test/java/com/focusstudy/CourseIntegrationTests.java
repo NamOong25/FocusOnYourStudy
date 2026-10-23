@@ -161,7 +161,7 @@ class CourseIntegrationTests {
     @Test void missingAndRevokedTokensBlockAllMethodsAndUnopenedRoutesStayClosed() throws Exception {
         var a = account(); var c = create(a, semester(a, 1), "QA");
         for (String method : List.of("GET", "POST", "PUT", "DELETE")) error(send(method, method.equals("PUT") || method.equals("DELETE") ? item(c) + "?version=0" : PATH, null, method.equals("POST") || method.equals("PUT") ? update(c) : null), 401, "AUTHENTICATION_REQUIRED");
-        assertThat(send("PATCH", item(c), a.token, Map.of()).statusCode()).isEqualTo(403); assertThat(send("GET", "/api/v1/study-sessions", a.token, null).statusCode()).isEqualTo(403);
+        assertThat(send("PATCH", item(c), a.token, Map.of()).statusCode()).isEqualTo(403); assertThat(send("GET", "/api/v1/class-schedules", a.token, null).statusCode()).isEqualTo(403);
         jdbc.update("UPDATE refresh_sessions SET revoked_at=now(),revocation_reason='LOGOUT' WHERE user_id=?", a.id); assertThat(send("GET", PATH, a.token, null).statusCode()).isEqualTo(401);
     }
     @Test void browserBearerWorksButCookieAloneAndUntrustedOriginDoNot() throws Exception {

@@ -138,10 +138,9 @@ erDiagram
 | Nhóm | Bảng dự kiến | Quy tắc cần giữ |
 | --- | --- | --- |
 | Auth bổ sung | verification_tokens, password_reset_tokens | Lưu hash token, hạn dùng/thu hồi; không lưu token/mật khẩu rõ. refresh_sessions/refresh_tokens đã có trong V2. |
-| Bài tập bổ sung | assignment_checklist | assignments đã có trong V3; checklist/tệp và liên kết tự học làm ở đợt sau. |
+| Bài tập bổ sung | assignment_checklist | assignments đã có trong V3, liên kết tự học có ở V4; checklist/tệp làm ở đợt sau. |
 | Lịch học | class_series, class_series_weekdays, class_exceptions | Chuỗi có ngày bắt đầu/kết thúc và múi giờ; ngoại lệ duy nhất `(series_id, date)` cho đổi/nghỉ một buổi; phát hiện trùng ở service. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
-| Tự học | study_sessions | Gắn môn, liên kết bài tùy chọn; một bài có nhiều buổi; thời điểm/thời lượng/trạng thái độc lập. |
 | Điểm, đợt 5 | course_grade_configs, grade_columns, grade_project_allocations | Cột có thể thêm/xóa/đổi tên/đổi loại; score nullable, 0 khác chưa nhập; cấu hình vai trò/tỷ lệ BTL rõ; lưu phiên bản quy tắc. |
 | Pomodoro | focus_records, focus_preferences | Định danh phiên để không ghi trùng; mốc bắt đầu/kết thúc/tạm dừng, thời gian học thực; lưu snapshot môn/học kỳ. |
 | Thông báo | reminder_preferences, notification_receipts, delivery_jobs | Lưu phiên bản nội dung đã đọc; lịch gửi/hủy/cập nhật riêng với danh sách trong app; không coi nhắc trong app là đã gửi push. |
@@ -149,6 +148,28 @@ erDiagram
 
 Các bảng con dùng composite FK `(parent_id, user_id)` khi có chủ sở hữu. Bài tập/lịch/buổi học tra theo ID, không theo tên môn. GPA và thống kê được tính từ nguồn, chưa tạo bảng chứa số tổng hợp dễ lệch dữ liệu. Cần chốt thêm snapshot và quy tắc học lại trước migration điểm.
 
+## Đã tạo trong V4 — kế hoạch tự học
+
+Bảng `study_sessions` lưu buổi lên kế hoạch, tách với lịch sử Pomodoro sẽ làm sau. Tài khoản/phiên/kỳ/môn/bài cũ giữ nguyên; không seed dữ liệu tự học mẫu.
+
+| Cột | Dữ liệu |
+| --- | --- |
+| id / user_id / course_id | UUID buổi, chủ tài khoản và môn; môn/chủ bắt buộc. |
+| assignment_id | UUID bài tùy chọn; null là độc lập. |
+| title / notes | Nội dung tối đa 200, ghi chú tối đa 5000. |
+| starts_at / ends_at | TIMESTAMPTZ; ends_at = starts_at + duration_minutes. |
+| time_zone | Tên múi giờ cho ngày của buổi và giới hạn trước 24:00. |
+| duration_minutes | Số nguyên 1–240. |
+| status | PLANNED / IN_PROGRESS / COMPLETED. |
+| created_at / updated_at / version | Thời điểm tạo/cập nhật và khóa phiên bản. |
+
+- FK `(course_id,user_id)` → courses; FK `(assignment_id,user_id,course_id)` → assignments ngăn bài khác chủ hoặc khác môn. V4 thêm UNIQUE tương ứng cho assignments, không thay dữ liệu V3.
+- Link bài nullable dùng MATCH SIMPLE mặc định; khóa môn/chủ riêng vẫn kiểm tra khi assignmentId null. Không cascade xóa kế hoạch.
+- CHECK bảo vệ thời lượng/khoảng năm, end tính đúng, phút nguyên, cùng ngày theo time_zone, tiêu đề/trạng thái/ghi chú/version; index theo owner/time, owner/course và owner/assignment.
+- API dùng chung khóa hàng chủ tài khoản cho mọi ghi học kỳ/môn/bài/tự học, kiểm tra trùng thời gian và hạn trước commit. Quy tắc trùng/deadline liên bảng nằm trong service, không dùng CHECK truy vấn bảng khác. SQL ngoài API có thể bỏ qua hai quy tắc liên bảng này.
+- Xóa bài cập nhật từng buổi thành độc lập, flush để tăng version rồi mới xóa bài trong cùng giao dịch. Môn còn bất kỳ buổi nào chặn xóa/chuyển kỳ. Sửa/xóa buổi dùng owner/version; không nhận userId hoặc focusedSeconds từ client.
+- 4D nối UI tự học; bảng/API lịch học/lịch thi/Pomodoro còn các đợt sau. Chi tiết ở `STUDY-SESSIONS.md`.
+
 ## Migration
 
-Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên và V3 bài tập; đợt sau thêm V4 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
+Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên, V3 bài tập và V4 tự học; đợt sau thêm V5 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.

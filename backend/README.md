@@ -1,14 +1,16 @@
 # Backend — FocusYourStudy
 
-**Đợt 4A — API bài tập:** V3 tạo bảng bài tập, CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có múi giờ và version; chặn xóa/chuyển kỳ môn còn bài. UI bài tập chưa nối API, làm ở 4B. Xem [hướng dẫn test 4A](../docs/BACKEND-PHASE-4A.md), [hợp đồng bài tập](docs/ASSIGNMENTS.md) và `api/assignments.http`. Khởi động lại backend để Flyway thêm bảng; không xóa/tạo lại database.
+**Đợt 4C — API kế hoạch tự học:** V4 thêm study_sessions, CRUD/lọc theo tài khoản/môn/kỳ/bài/trạng thái/khoảng giờ, lưu timeZone và startsAt/endsAt UTC. Chặn trùng buổi, sai môn và vượt deadline; xóa bài gỡ link giữ buổi, chống đua khi ghi với bài/môn. **155 tests/Maven verify qua**, gồm 37 test tự học/migration mới, nâng V3 giữ dữ liệu, restart và script PowerShell 5.1. Màn Tự học nối ở 4D. Xem [hướng dẫn test 4C](../docs/BACKEND-PHASE-4C.md), [hợp đồng](docs/STUDY-SESSIONS.md), `api/study-sessions.http` và `scripts/Try-StudySessions.ps1`.
 
-**Kiểm tra 4A:** 118 tests/Maven verify qua, 26 test bài tập/migration mới; có nâng V2 → V3 giữ dữ liệu cũ, UTC/offset, version, hai tài khoản, race ghi bài với xóa/chuyển môn, restart toàn backend và script Windows PowerShell 5.1. TypeScript và các bộ kiểm tra HTTP/môn frontend cũng qua. Kiểm thử dùng schema riêng, không seed dữ liệu vào schema ứng dụng.
+**Đợt 4A — API bài tập:** V3 tạo bảng bài tập, CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có múi giờ và version; chặn xóa/chuyển kỳ môn còn bài. UI bài tập đã nối API ở 4B. Xem [hướng dẫn test 4A](../docs/BACKEND-PHASE-4A.md), [hợp đồng bài tập](docs/ASSIGNMENTS.md) và `api/assignments.http`. Khởi động lại backend để Flyway thêm bảng; không xóa/tạo lại database.
+
+**Kiểm tra tại đợt 4A:** 118 tests/Maven verify qua, 26 test bài tập/migration mới; có nâng V2 → V3 giữ dữ liệu cũ, UTC/offset, version, hai tài khoản, race ghi bài với xóa/chuyển môn, restart toàn backend và script Windows PowerShell 5.1. TypeScript và các bộ kiểm tra HTTP/môn frontend cũng qua. Kiểm thử dùng schema riêng, không seed dữ liệu vào schema ứng dụng.
 
 **Đợt 3B đã xong:** API CRUD môn/lọc theo học kỳ, chuẩn hóa mã, version và quyền theo chủ tài khoản; dùng chung khóa với học kỳ. **92 tests/Maven verify qua tại đợt 3B**, có 20 test môn mới, script PowerShell 5.1 và đọc lại môn qua khởi động lại backend. UI học kỳ/môn đã nối ở 3C.1/3C.2; thiết bị thật 2C.3B để làm sau. Xem [hướng dẫn test 3B](../docs/BACKEND-PHASE-3B.md), [hợp đồng môn](docs/COURSES.md), [UI môn 3C.2](../docs/FRONTEND-COURSES-3C2.md).
 
 **Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua** tại đợt 3A, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. UI học kỳ đã nối ở 3C.1; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
 
-Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối tài khoản/phiên và học kỳ/môn**; nghiệm thu thiết bị thật ở 2C.3B. Bài tập/lịch/điểm/Pomodoro vẫn trong bộ nhớ. Xem `../docs/FRONTEND-AUTH-2C2.md`, `../docs/FRONTEND-COURSES-3C2.md`.
+Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối tài khoản/phiên, học kỳ/môn và bài tập**; nghiệm thu thiết bị thật ở 2C.3B. UI lịch/tự học/điểm/Pomodoro vẫn trong bộ nhớ; API tự học có ở 4C. Xem `../docs/FRONTEND-AUTH-2C2.md`, `../docs/FRONTEND-COURSES-3C2.md`.
 
 ## Chạy trên máy Windows hiện tại
 
@@ -25,7 +27,7 @@ Script sẽ:
 2. Tạo cluster riêng ở `.local/data`, mật khẩu ngẫu nhiên trong `.local/database.json`, chỉ nghe `127.0.0.1:55432`.
 3. Tạo database `focus_study` nếu chưa có; không xóa hoặc tạo lại data khi chạy lần tiếp theo.
 4. Tạo cặp khóa RSA ở `.local/auth` nếu chưa có, giữ nguyên khóa ở các lần chạy sau; nạp biến kết nối và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
-5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token) và V3 (bài tập); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
+5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token), V3 (bài tập) và V4 (tự học); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
 
 Mở **http://localhost:8080/api/v1/health**. Kết quả đúng:
 
@@ -116,11 +118,11 @@ backend/
 │   └── assignments/             Bài tập, deadline, validation, API và quyền theo tài khoản
 ├── src/main/resources/
 │   ├── application.yml
-│   └── db/migration/             V1 nền tảng; V2 phiên; V3 bài tập
+│   └── db/migration/             V1 nền tảng; V2 phiên; V3 bài tập; V4 tự học
 └── src/test/java/com/focusstudy/ Kiểm thử API và PostgreSQL
 ```
 
-GET/POST/PUT/DELETE học kỳ/môn đã mở ở 3A/3B và cần Bearer/phiên hoạt động. POST đăng ký/đăng nhập/refresh/logout, GET CSRF và hai health endpoint không yêu cầu access token. Cookie auth bắt buộc CSRF và origin được phép. GET `/api/v1/users/me` cần Bearer token gắn phiên còn hiệu lực; các endpoint học tập khác vẫn khóa. CORS cho localhost 8092/8081 và cho credentials với origin cụ thể, không wildcard. API mặc định chỉ nghe localhost; cấu hình điện thoại sẽ làm ở 2C.
+GET/POST/PUT/DELETE học kỳ/môn/bài/tự học đã mở ở 3A/3B/4A/4C và cần Bearer/phiên hoạt động. POST đăng ký/đăng nhập/refresh/logout, GET CSRF và hai health endpoint không yêu cầu access token. Cookie auth bắt buộc CSRF và origin được phép. GET `/api/v1/users/me` cần Bearer token gắn phiên còn hiệu lực; các endpoint học tập khác vẫn khóa. CORS cho localhost 8092/8081 và cho credentials với origin cụ thể, không wildcard. API mặc định chỉ nghe localhost; cấu hình điện thoại sẽ làm ở 2C.
 
 Mật khẩu PBKDF2-HMAC-SHA256 với salt 16 byte, 600.000 vòng, hash 256 bit; nhận 8–128 ký tự và giữ nguyên khoảng trắng. JWT RS256 chỉ nhận qua Authorization, có `sid`; mỗi request kiểm tra phiên chưa bị thu hồi/hết hạn trong DB. Refresh token là bí mật ngẫu nhiên 256 bit, chỉ lưu SHA-256, dùng một lần. Phiên tối đa 30 ngày; mỗi refresh token tối đa 7 ngày và không vượt hạn phiên. Dùng lại token đã tiêu thụ sẽ thu hồi cả phiên; client 2C cần gộp refresh đồng thời và không tự gửi lại token cũ sau lỗi mạng không rõ kết quả.
 
@@ -136,4 +138,4 @@ Khóa `.local/auth`, thông tin DB và `target/` ngoài Git. Môi trường khá
 - [Spring Framework 7 ProblemDetail](https://docs.spring.io/spring-framework/reference/7.0/web/webmvc/mvc-ann-rest-exceptions.html)
 - [Nguồn đóng gói PostgreSQL portable Zonky](https://github.com/zonkyio/embedded-postgres-binaries) và [artifact Maven Central](https://repo.maven.apache.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-windows-amd64/17.11.0/)
 
-UI học kỳ/môn đã nối ở **3C.1/3C.2**; **API bài tập 4A** đã có. Tiếp theo là **4B nối UI bài tập**, rồi các phần lịch/tự học theo từng đợt. 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.
+UI học kỳ/môn/bài đã nối ở **3C.1/3C.2/4B**; **API tự học 4C** đã có. Tiếp theo là **4D nối UI tự học**, rồi các phần lịch học/lịch thi theo từng đợt. 2C.3A đã kiểm tra web, 2C.3B thiết bị thật để làm sau. Token 2A cũ thiếu `sid` cần đăng nhập lại sau nâng cấp 2B. Phân quyền dữ liệu học tập phải kiểm tra khi mở từng API tương ứng.

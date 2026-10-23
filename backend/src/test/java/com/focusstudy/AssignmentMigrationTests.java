@@ -18,7 +18,7 @@ class AssignmentMigrationTests {
                 statement.execute("INSERT INTO semesters(id,user_id,term,start_year,note) VALUES ('" + semester + "','" + owner + "',1,2026,'Existing semester')");
                 statement.execute("INSERT INTO courses(id,user_id,semester_id,code,name,credits,description) VALUES ('" + course + "','" + owner + "','" + semester + "','OLD101','Existing course',3,'Keep me')");
             }
-            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).target("3").load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
             assertThat(current.info().current().getVersion().toString()).isEqualTo("3"); assertThat(current.migrate().migrationsExecuted).isZero(); current.validate();
             try (var connection = DriverManager.getConnection(url, user, password); var statement = connection.createStatement()) {
                 statement.execute("SET search_path TO " + schema);

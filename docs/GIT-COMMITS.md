@@ -4,15 +4,15 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4B — Giao diện bài tập lưu thật
+## Đợt vừa hoàn thành: 4C — API kế hoạch tự học
 
-Nối UI bài tập với API 4A; F5, tách tài khoản, deadline có múi giờ và version, bộ lọc học kỳ/môn/trạng thái/hạn, Dashboard chung nguồn. Giữ bản nháp khi lỗi, không tự gửi lại thao tác mất phản hồi; buổi tự học/checklist/tài liệu vẫn RAM. Xem `FRONTEND-ASSIGNMENTS-4B.md`.
+V4 thêm kế hoạch tự học, CRUD/lọc theo tài khoản và liên kết bài/môn; kiểm tra trùng giờ, múi giờ, deadline và version. Giữ buổi độc lập khi xóa bài, bảo vệ các request ghi đồng thời; 155 tests qua, UI nối ở 4D. Xem `BACKEND-PHASE-4C.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Kết nối giao diện bài tập với dữ liệu backend"
+git commit -m "Triển khai API kế hoạch tự học và kiểm tra liên kết bài tập"
 git push
 ```
 
@@ -22,6 +22,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Frontend 4B — Nối bài tập | `Kết nối giao diện bài tập với dữ liệu backend` |
 | Backend 4A — API bài tập | `Triển khai API quản lý bài tập theo môn học` |
 | Frontend 3C.2 — Nối môn học | `Kết nối giao diện môn học với dữ liệu backend` |
 | Frontend 3C.1 — Nối học kỳ | `Kết nối giao diện học kỳ với API và lưu dữ liệu thật` |
@@ -59,7 +60,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4B — Nối giao diện bài tập (đã xong) | Tải/lưu thật, F5, đổi tài khoản và liên kết môn/Dashboard | Kết nối giao diện bài tập với dữ liệu backend |
+| 4D — Nối giao diện tự học | Tải/lưu thật, ngày/tuần, F5, liên kết bài/môn, version/lỗi mạng | Kết nối giao diện tự học với dữ liệu backend |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài 3C.1/3C.2/4B; tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài 3C.1/3C.2/4B; tiếp theo theo `next`/`go`.
