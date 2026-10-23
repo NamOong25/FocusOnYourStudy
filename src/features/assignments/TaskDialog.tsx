@@ -1,3 +1,4 @@
+import { TaskStatusControl } from './components/TaskStatusControl';
 import StudySessionDialog from '../study/StudyDialog';
 import React, { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
@@ -18,22 +19,25 @@ export default function TaskDialog({ taskId, onClose }: { taskId: string; onClos
   const [mode, setMode] = useState<'detail' | 'edit' | 'session' | 'attach' | 'preview'>('detail');
   const [section, setSection] = useState('Tổng quan'); const [draft, setDraft] = useState('');
   const [sessionId, setSessionId] = useState<string | undefined>(); const [preview, setPreview] = useState<SampleAttachment | null>(null);
-  const task = tasks.find(t => t.id === taskId); if (!task) return null;
+  const [editBasis, setEditBasis] = useState<import('./assignments').Task | undefined>();
+  const task = tasks.find(t => t.id === taskId);
+  if (mode === 'edit') return <TaskForm item={editBasis} onClose={() => setMode('detail')} onDeleted={onClose} />;
+  if (!task) return <Sheet title="Bài tập không còn trong danh sách" onClose={onClose}><T style={S.small}>Bài tập đã bị xóa hoặc không còn truy cập được. Đóng để xem danh sách mới.</T><Button label="Đóng chi tiết bài tập" onPress={onClose} /></Sheet>;
   const extras: TaskExtras = taskExtras[taskId] ?? { checklist: [], attachments: [] };
   const linked = studySessions.filter(s => s.taskId === taskId).sort((a,b) => `${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`));
   const done = extras.checklist.filter(c => c.done).length;
   const addCheck = () => { if (!draft.trim()) return; updateTaskExtras(taskId, { ...extras, checklist: [...extras.checklist, { id: uid(), title: draft.trim(), done: false }] }); setDraft(''); };
-  if (mode === 'edit') return <TaskForm item={task} onClose={() => setMode('detail')} onDeleted={onClose} />;
+
   if (mode === 'session') return sessionId ? <StudySessionDialog id={sessionId} onClose={() => setMode('detail')} onTask={() => { setSection('Buổi học'); setMode('detail'); }} /> : <StudySessionForm initialTaskId={taskId} onClose={() => setMode('detail')} onDeleted={() => setMode('detail')} />;
   if (mode === 'attach') return <Sheet title="Gắn tài liệu mẫu" onClose={() => setMode('detail')}><Badge label="Thư viện minh họa · Chưa tải tệp thật" /><T style={S.small}>Chọn tài liệu để thử danh sách và màn đọc. Tệp thật, lưu trữ và quyền truy cập sẽ được nối sau.</T>{sampleDocuments.map(doc => { const attached = extras.attachments.some(d => d.id === doc.id); return <Card key={doc.id} style={{ gap: 12 }}><Row><IconTile name="document-text-outline" /><View style={S.grow}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{doc.name}</T><T style={S.small}>{doc.description}</T></View></Row><Button label={attached ? `Đã gắn ${doc.name}` : `Gắn ${doc.name}`} disabled={attached} secondary onPress={() => { updateTaskExtras(taskId, { ...extras, attachments: [...extras.attachments, doc] }); setSection('Tài liệu'); setMode('detail'); }} /></Card>; })}</Sheet>;
   if (mode === 'preview' && preview) return <Sheet title="Xem tài liệu" onClose={() => setMode('detail')}><Badge label="Tài liệu mẫu" icon="document-text-outline" /><T style={{ fontFamily: F.bold, fontSize: 19 }}>{preview.name}</T><T style={S.small}>{preview.description}</T><Card style={{ backgroundColor: C.canvas }}><T style={{ fontSize: 14, lineHeight: 25 }}>{preview.content}</T></Card><Button label="Về danh sách tài liệu" secondary onPress={() => setMode('detail')} /></Sheet>;
   return <Sheet title="Chi tiết bài tập" onClose={onClose} scrollKey={`task-${taskId}-${section}`}>
     <LinearGradient colors={['#E8E1FF', '#F4F0FF']} style={{ padding: 18, borderRadius: 24, gap: 13 }}>
-      <Row between><Badge label={`Ưu tiên ${task.priority.toLowerCase()}`} color={task.priority === 'Cao' ? C.red : C.primary} bg={task.priority === 'Cao' ? C.redSoft : C.soft} icon="flag-outline" /><IconButton name="create-outline" label="Chỉnh sửa bài tập" bg="#FFFFFFCC" onPress={() => setMode('edit')} /></Row>
+      <Row between><Badge label={`Ưu tiên ${task.priority.toLowerCase()}`} color={task.priority === 'Cao' ? C.red : C.primary} bg={task.priority === 'Cao' ? C.redSoft : C.soft} icon="flag-outline" /><IconButton name="create-outline" label="Chỉnh sửa bài tập" bg="#FFFFFFCC" onPress={() => { setEditBasis(task); setMode('edit'); }} /></Row>
       <T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33, letterSpacing: -0.5 }}>{task.title}</T><T style={{ color: C.primary, fontFamily: F.semi, fontSize: 12 }}>{task.course}</T>
       <View style={{backgroundColor:'#FFFFFF99',borderRadius:15,padding:12,gap:9}}><Row between><Row><Icon name="calendar-outline" size={16}/><T style={{color:C.muted,fontSize:10}}>HẠN NỘP BÀI</T></Row><Badge label={taskDueLabel(task,now)} bg={task.status==='Hoàn thành'?C.greenSoft:taskIsOverdue(task,now)?C.redSoft:C.soft} color={task.status==='Hoàn thành'?C.green:taskIsOverdue(task,now)?C.red:C.primary}/></Row><T style={{fontFamily:F.bold,fontSize:14,lineHeight:22}}>{taskDeadlineLabel(task)}</T></View>
     </LinearGradient>
-    <Segments values={['Chưa làm', 'Đang làm', 'Hoàn thành']} value={task.status} onChange={v => saveTask({ ...task, status: v as TaskStatus })} />
+    <TaskStatusControl task={task} />
     <Segments values={['Tổng quan', 'Việc nhỏ', 'Tài liệu', 'Buổi học']} value={section} onChange={setSection} />
     {section === 'Tổng quan' && <>
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Yêu cầu & ghi chú</T><T style={{ color: C.muted, fontSize: 13, lineHeight: 23 }}>{task.notes || 'Chưa có ghi chú. Bạn có thể bổ sung ở phần chỉnh sửa bài tập.'}</T>
@@ -41,7 +45,7 @@ export default function TaskDialog({ taskId, onClose }: { taskId: string; onClos
       <Button label="Lên lịch học cho bài này" icon="calendar-outline" onPress={() => { setSessionId(undefined); setMode('session'); }} /><Button label="Tập trung vào bài này" icon="timer-outline" secondary onPress={() => { prepareFocus({ courseId: task.courseId, taskId }); }} />
     </>}
     {section === 'Việc nhỏ' && <>
-      <Row between><T style={{ fontFamily: F.bold }}>Checklist thực hiện</T><Badge label={`${done}/${extras.checklist.length} việc`} /></Row>
+      <T style={S.small}>Checklist chỉ giữ trong phiên này, chưa lưu vào tài khoản.</T><Row between><T style={{ fontFamily: F.bold }}>Checklist thực hiện</T><Badge label={`${done}/${extras.checklist.length} việc`} /></Row>
       {extras.checklist.map(item => <Card key={item.id} style={{ padding: 11, backgroundColor: C.canvas }}><Row><Pressable accessibilityRole="checkbox" accessibilityLabel={item.title} accessibilityState={{ checked: item.done }} aria-checked={item.done} onPress={() => updateTaskExtras(taskId, { ...extras, checklist: extras.checklist.map(c => c.id === item.id ? { ...c, done: !c.done } : c) })} style={[S.row, S.grow, { minHeight: 44, gap: 10 }]}><Icon name={item.done ? 'checkmark-circle' : 'ellipse-outline'} color={item.done ? C.green : C.primary} size={23} /><T style={[S.grow, { fontSize: 13, color: item.done ? C.muted : C.ink, textDecorationLine: item.done ? 'line-through' : 'none' }]}>{item.title}</T></Pressable><IconButton name="close" label={`Xóa việc ${item.title}`} bg="transparent" color={C.muted} onPress={() => updateTaskExtras(taskId, { ...extras, checklist: extras.checklist.filter(c => c.id !== item.id) })} /></Row></Card>)}
       <Row style={{ backgroundColor: C.canvas, borderRadius: 16, padding: 8 }}><TextInput accessibilityLabel="Việc nhỏ mới" placeholder="Thêm một bước cần làm…" placeholderTextColor={C.muted} value={draft} onChangeText={setDraft} onSubmitEditing={addCheck} style={{ flex: 1, minWidth: 0, padding: 9, fontFamily: F.regular, color: C.ink, fontSize: 13 }} /><IconButton name="add" label="Thêm việc nhỏ" onPress={addCheck} /></Row>
       <T style={S.small}>Checklist giúp chia nhỏ công việc. Bạn chủ động chọn trạng thái bài tập khi đã hoàn tất yêu cầu.</T>

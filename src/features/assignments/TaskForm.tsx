@@ -1,3 +1,4 @@
+import { TaskApiForm } from './components/TaskApiForm';
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -9,13 +10,14 @@ import { useFormChanges } from '../../shared/forms/useFormChanges';
 import {deadlineTimestamp,sessionExceedsDeadline,taskDeadlineLabel,taskDeadlineTime} from './assignments';
 
 export function TaskForm({ item, initialCourseId, onClose, onDeleted }: { item?: Task; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
-  const { saveTask, deleteTask, setToast, courseCatalog, studySessions } = useApp();
+  const { saveTask, deleteTask, setToast, courseCatalog, studySessions, assignmentConnection } = useApp();
   const [title, setTitle] = useState(item?.title ?? ''); const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const course = courseCatalog.find(c => c.id === courseId)?.name ?? '';
   const [deadline, setDeadline] = useState(item?.deadline ?? dateKey(addDays(new Date(), 1))); const [deadlineTime,setDeadlineTime]=useState(item?taskDeadlineTime(item):'23:59'); const [notes, setNotes] = useState(item?.notes ?? '');
   const [priority, setPriority] = useState<'Cao' | 'Trung bình'>(item?.priority ?? 'Trung bình'); const [status, setStatus] = useState<TaskStatus>(item?.status ?? 'Chưa làm');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
   const dirty = useFormChanges({ title, courseId, deadline, deadlineTime, notes, priority, status });
+  if (assignmentConnection) return <TaskApiForm item={item} initialCourseId={initialCourseId} onClose={onClose} onDeleted={onDeleted ?? onClose} />;
   return <Sheet title={item ? 'Chỉnh sửa bài tập' : 'Bài tập mới'} onClose={onClose} dirty={dirty}>
     <Field label="Tên bài tập" value={title} onChange={setTitle} placeholder="Bạn cần hoàn thành điều gì?" />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Môn học</T><CourseChoices value={courseId} onChange={setCourseId} />

@@ -31,6 +31,8 @@ const messages: Record<string, string> = {
   COURSE_NOT_FOUND: 'Môn học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
   COURSE_VERSION_CONFLICT: 'Môn học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   COURSE_HAS_ASSIGNMENTS: 'Môn còn bài tập đã lưu. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.',
+  ASSIGNMENT_NOT_FOUND: 'Bài tập không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
+  ASSIGNMENT_VERSION_CONFLICT: 'Bài tập đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
@@ -39,7 +41,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
+      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');

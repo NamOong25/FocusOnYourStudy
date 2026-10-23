@@ -1,3 +1,4 @@
+import { AssignmentSyncStatus } from '../assignments/components/AssignmentSyncStatus';
 import React,{useState} from 'react';
 import {Image,Pressable,View} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
@@ -37,7 +38,7 @@ export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:T
   if(semesterConnection&&!semesterConnection.loaded)return <SemesterSyncStatus/>;
   if(!semester)return <><SemesterSyncStatus/><SetupCard/></>;
   return <FlowScope onClose={()=>setPanel(null)}>
-    <SemesterSyncStatus/>
+    <SemesterSyncStatus/><AssignmentSyncStatus/>
     <Pressable accessibilityRole="button" accessibilityLabel="Xem hồ sơ" onPress={onProfile} style={[S.row,{gap:11}]}><StudentAvatar profile={displayProfile} size={46}/><View style={S.grow}><T style={S.small}>{hour<12?'Chào buổi sáng':hour<18?'Chào buổi chiều':'Chào buổi tối'} ☀️</T><T style={{fontFamily:F.bold,fontSize:18}}>{displayName}</T></View><T style={{fontSize:11,color:C.muted}}>{dateLabel(data.today)}</T></Pressable>
     <Pressable testID="dashboard-semester" accessibilityRole="button" accessibilityLabel="Đổi học kỳ trên Trang chủ" onPress={()=>setPanel({kind:'semester'})} style={{backgroundColor:'#fff',borderWidth:1,borderColor:C.line,borderRadius:20,padding:15}}><Row><IconTile name="calendar-outline" size={39}/><View style={[S.grow,{gap:4}]}><T style={{fontSize:10,color:C.muted}}>BẠN ĐANG XEM</T><T style={{fontFamily:F.bold,fontSize:16}}>{semester.name}</T><T style={{fontSize:12,color:C.muted}}>Năm học {semester.academicYear}</T></View><Icon name="chevron-down" size={19}/></Row></Pressable>
     {!data.courses.length?<Empty title="Học kỳ này chưa có môn học" message="Thêm môn vào học kỳ vừa chọn để bắt đầu xem lịch, công việc và điểm." actionLabel="Thêm môn cho học kỳ" onAdd={manage}/>:<>

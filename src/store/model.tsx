@@ -1,5 +1,7 @@
 import { useFeedback } from '../shared/feedback/FeedbackProvider';
 import { useServerSemesters } from '../features/academics/api/useServerSemesters';
+import { useServerAssignments } from '../features/assignments/api/useServerAssignments';
+import { reconcileAssignmentLinks } from '../features/assignments/assignmentLinks';
 import { useServerCourses } from '../features/academics/api/useServerCourses';
 import { reconcileCourseLinks } from '../features/academics/courseLinks';
 import React, { createContext, useContext, useEffect, useReducer, useRef, useState, ReactNode } from 'react';
@@ -62,7 +64,10 @@ function usePrototype(empty: boolean) {
   const gradeBook = React.useMemo(() => autoLinkAttempts(courseCatalog, storedGradeBook, semesters), [courseCatalog, storedGradeBook, semesters]);
   const [gradeRules, setGradeRules] = useState<GradeRules>(defaultRules);
   const saveGrades = (id: string, record: CourseGrades) => setGradeBook(v => ({ ...v, [id]: record }));
-  const [tasks, setTasks] = useState(empty ? [] : initialTasks);
+  const [previewTasks, setPreviewTasks] = useState(empty ? [] : initialTasks);
+  const assignmentConnection = useServerAssignments();
+  const serverAssignments = assignmentConnection?.tasks;
+  const tasks = React.useMemo(() => serverAssignments ? serverAssignments.map(task => ({ ...task, course: courseCatalog.find(c => c.id === task.courseId)?.name ?? 'Môn chưa được tải' })) : previewTasks, [serverAssignments, courseCatalog, previewTasks]);
   const [classes, setClasses] = useState(empty ? [] : initialClasses);
   const [classExceptions, setClassExceptions] = useState<ClassException[]>([]);
   const [exams, setExams] = useState(empty ? [] : initialExams);
@@ -115,13 +120,29 @@ function usePrototype(empty: boolean) {
     if (!serverCourses) return;
     const reconciled = reconcileCourseLinks(lastServerCourses.current, serverCourses, { tasks, classes, exams, studySessions, gradeBook: storedGradeBook });
     lastServerCourses.current = serverCourses;
-    setTasks(reconciled.tasks); setClasses(reconciled.classes); setExams(reconciled.exams); setStudySessions(reconciled.studySessions); setGradeBook(reconciled.gradeBook);
+    if (!assignmentConnection) setPreviewTasks(reconciled.tasks);
+    setClasses(reconciled.classes); setExams(reconciled.exams); setStudySessions(reconciled.studySessions); setGradeBook(reconciled.gradeBook);
     setClassExceptions(v => v.filter(e => reconciled.classes.some(c => c.id === e.seriesId)));
-    setTaskExtras(v => Object.fromEntries(Object.entries(v).filter(([id]) => reconciled.tasks.some(t => t.id === id))));
+
     if (reconciled.invalidated.has(focusCourseId)) { resetTimer(); setFocusTaskId(undefined); setFocusSessionId(undefined); }
-    if (reconciled.cleared) setToast('Môn đã đổi học kỳ hoặc bị xóa ở nơi khác. Các bài, lịch và điểm thử liên quan trong phiên này đã được đặt lại.');
+    if (reconciled.cleared) setToast('Môn đã đổi học kỳ hoặc bị xóa ở nơi khác. Lịch, buổi tự học và điểm thử liên quan trong phiên này đã được đặt lại.');
     // Reconcile only when a confirmed server catalogue changes, never on trial edits.
   }, [serverCourses]);
+  useEffect(() => {
+    if (!assignmentConnection?.loaded) return;
+    const result = reconcileAssignmentLinks(tasks, studySessions);
+    if (result.detached.size) {
+      setStudySessions(result.studySessions);
+      setToast('Bài tập đã đổi môn, đổi hạn hoặc bị xóa. Buổi tự học liên quan được giữ và gỡ liên kết.');
+    }
+    setTaskExtras(previous => {
+      const entries = Object.entries(previous).filter(([id]) => tasks.some(task => task.id === id));
+      return entries.length === Object.keys(previous).length ? previous : Object.fromEntries(entries);
+    });
+    if (focusTaskId && (result.detached.has(focusTaskId) || !tasks.some(task => task.id === focusTaskId && task.courseId === focusCourseId))) {
+      resetTimer(); setFocusTaskId(undefined); setFocusSessionId(undefined);
+    }
+  }, [tasks, assignmentConnection?.loaded, studySessions, focusTaskId, focusCourseId]);
   const toggleTimer = () => {
     if (!focusCourseId) return;
     dispatchFocus({ type: 'toggle', now: Date.now(), id: uid(), context: {
@@ -131,9 +152,13 @@ function usePrototype(empty: boolean) {
     } });
     if (endsAt === null && mode === 0 && focusSessionId) setStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s));
   };
-  const saveTask = (task: Task) => setTasks(v => v.some(t => t.id === task.id) ? v.map(t => t.id === task.id ? task : t) : [...v, task]);
+  const saveTask = (task: Task) => {
+    if (assignmentConnection) throw new Error('Use assignment API for authenticated accounts');
+    setPreviewTasks(v => v.some(t => t.id === task.id) ? v.map(t => t.id === task.id ? task : t) : [...v, task]);
+  };
   const deleteTask = (id: string) => {
-    setTasks(v => v.filter(t => t.id !== id));
+    if (assignmentConnection) throw new Error('Use assignment API for authenticated accounts');
+    setPreviewTasks(v => v.filter(t => t.id !== id));
     setStudySessions(v => v.map(s => s.taskId === id ? { ...s, taskId: undefined } : s));
     setTaskExtras(v => { const next = { ...v }; delete next[id]; return next; });
     if (focusTaskId === id) setFocusTaskId(undefined);
@@ -186,7 +211,7 @@ function usePrototype(empty: boolean) {
     const previous = courseCatalog.find(c => c.id === course.id);
     setCourseCatalog(v => previous ? v.map(c => c.id === course.id ? course : c) : [...v, course]);
     // IDs keep links intact when a name/code changes or the same subject occurs in another semester.
-    setTasks(v => v.map(t => t.courseId === course.id ? { ...t, course: course.name } : t));
+    setPreviewTasks(v => v.map(t => t.courseId === course.id ? { ...t, course: course.name } : t));
     setClasses(v => v.map(c => c.courseId === course.id ? { ...c, title: course.name, teacher: previous && c.teacher === previous.teacher ? course.teacher : c.teacher } : c));
     setExams(v => v.map(e => e.courseId === course.id ? { ...e, course: course.name } : e));
   };
@@ -199,7 +224,7 @@ function usePrototype(empty: boolean) {
     if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, setTasks, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
+  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, setStudySessions, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }

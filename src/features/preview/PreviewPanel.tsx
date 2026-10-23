@@ -10,7 +10,7 @@ export default function PreviewPanel({ onClose, onLoad, onGuide }: { onClose: ()
     <Button label="Xem lại hướng dẫn bắt đầu" secondary onPress={onGuide} />
     <Button label="Thử trạng thái đang tải" secondary icon="refresh-outline" onPress={() => onLoad(false)} />
     <Button label="Thử trạng thái lỗi tải" secondary icon="cloud-offline-outline" onPress={() => onLoad(true)} />
-    <Card style={{ gap: 10 }}><T style={{ fontFamily: F.bold }}>Thử lỗi khi lưu hoặc xử lý</T><T style={S.small}>Bật rồi tạo hoặc sửa một mục. Lần xử lý kế tiếp sẽ báo lỗi trước khi thay đổi dữ liệu; form vẫn giữ nội dung để thử lại.</T><Button label={failNextSave ? 'Đã bật lỗi cho lần xử lý tới' : 'Bật lỗi cho lần xử lý tới'} secondary icon={failNextSave ? 'checkmark-circle-outline' : 'flask-outline'} onPress={() => armSaveFailure(!failNextSave)} />{failNextSave && <T accessibilityLiveRegion="polite" style={{ color: C.amber, fontSize: 12 }}>Chỉ áp dụng một lần. Bấm lại để tắt.</T>}</Card>
+    <Card style={{ gap: 10 }}><T style={{ fontFamily: F.bold }}>Thử lỗi khi lưu hoặc xử lý</T><T style={S.small}>Áp dụng cho các mục thử trong bộ nhớ như lịch và buổi tự học. Học kỳ, môn và bài tập đã nối API sẽ hiển thị lỗi kết nối thật; nút này không mô phỏng lỗi máy chủ.</T><Button label={failNextSave ? 'Đã bật lỗi cho lần xử lý tới' : 'Bật lỗi cho lần xử lý tới'} secondary icon={failNextSave ? 'checkmark-circle-outline' : 'flask-outline'} onPress={() => armSaveFailure(!failNextSave)} />{failNextSave && <T accessibilityLiveRegion="polite" style={{ color: C.amber, fontSize: 12 }}>Chỉ áp dụng một lần. Bấm lại để tắt.</T>}</Card>
     <Button label="Quay lại ứng dụng" onPress={onClose} />
   </Sheet>;
 }

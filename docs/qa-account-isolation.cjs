@@ -53,10 +53,10 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
       await button('Mở môn Môn riêng ' + who).waitFor();
     } else await text('Góc học tập đang chờ bạn').waitFor();
     assert.equal(await text('Bản nháp riêng ' + who).count(), 0);
-    await tab('Lịch học').click(); await tab('Bài tập').click(); assert.equal(await button('Mở bài tập Bài riêng ' + who).count(), 0);
+    await tab('Lịch học').click(); await tab('Bài tập').click(); if (hasSemester) await button('Mở bài tập Bài riêng ' + who).first().waitFor(); else assert.equal(await button('Mở bài tập Bài riêng ' + who).count(), 0);
     await tab('Tập trung').click(); if (!hasSemester) await text('Chọn một môn để bắt đầu tập trung').waitFor(); await text('0 / 4 phiên').waitFor();
     assert.equal(await button('Tạm dừng').count(), 0); await button('Xem lịch sử theo ngày').click(); await text('Chưa có phiên hoàn tất').waitFor(); await button('Đóng').click();
-    await button('Thông báo').click(); assert.equal(await button('Mở nhắc bài Bài riêng ' + who).count(), 0); await button('Đóng').click(); await tab('Trang chủ').click();
+    await button('Thông báo').click(); if (!hasSemester) assert.equal(await button('Mở nhắc bài Bài riêng ' + who).count(), 0); await button('Đóng').click(); await tab('Trang chủ').click();
   }
   try {
     for (const user of Object.values(users)) {
@@ -72,7 +72,7 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
     await switchTo('A'); await button('Đóng tài khoản').click(); await button('Thử trạng thái giao diện').click();
     await button('Bật lỗi cho lần xử lý tới').waitFor(); assert.equal(await button('Đã bật lỗi cho lần xử lý tới').count(), 0); await button('Đóng').click();
     step('feedback notices and simulated save failures reset on identity change');
-    await emptyChecks('A', true); step('returning to A restores server semesters/courses; trial tasks/timer are cleared');
+    await emptyChecks('A', true); step('returning to A restores server semesters/courses/assignments; trial study/timer are cleared');
     await seed('A', true);
     await button('Đăng xuất', second).waitFor(); await button('Đăng xuất', second).click(); await button('Xác nhận đăng xuất', second).click();
     await text('Đã đăng xuất.', second).waitFor(); await profile(page).waitFor({ state: 'detached' });
@@ -109,7 +109,7 @@ const base = process.env.QA_APP_URL || 'http://localhost:8092', api = process.en
     await page.waitForTimeout(500);
     for (const width of [320, 390, 430, 1280]) { await page.setViewportSize({ width, height: 900 }); assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false); await page.screenshot({ path: path.join(out, `account-${width}.png`) }); }
     step('account layouts at 320/390/430/1280'); assert.deepEqual(errors, []); assert.ok(!logs.join('|').includes(password));
-    assert.ok(requests.every(r => r.method === 'GET' || r.path.startsWith('/api/v1/auth/') || r.path.startsWith('/api/v1/semesters') || r.path.startsWith('/api/v1/courses'))); step('only auth/semester/course writes; other learning data remains prototype; no password logs');
+    assert.ok(requests.every(r => r.method === 'GET' || r.path.startsWith('/api/v1/auth/') || r.path.startsWith('/api/v1/semesters') || r.path.startsWith('/api/v1/courses') || r.path.startsWith('/api/v1/assignments'))); step('only auth/semester/course/assignment writes; study and timer remain prototype; no password logs');
     const result = { passed: true, checks: cases.length, cases, errors }; fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify(result, null, 2)); console.log(JSON.stringify(result));
   } catch (error) { await page.screenshot({ path: path.join(out, 'failure.png') }); fs.writeFileSync(path.join(out, 'failure.txt'), await page.locator('body').innerText()); throw error; }
   finally { await context.setOffline(false); await browser.close(); }

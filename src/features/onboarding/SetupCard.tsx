@@ -15,6 +15,6 @@ export default function SetupCard() {
     <T style={S.small}>Chỉ cần vài bước để lịch học và công việc có chỗ riêng.</T>
     <View style={{ gap: 13 }}>{steps.map(step => <Row key={step.label}><Icon name={step.done ? 'checkmark-circle' : 'ellipse-outline'} color={step.done ? C.green : C.muted} /><T style={{ flex: 1, fontSize: 13, color: step.done ? C.green : C.ink }}>{step.label}</T></Row>)}</View>
     <Button label={next.label} icon="arrow-forward" onPress={() => setScheduleMode(tasks.length || !courseCatalog.length ? 'Môn & học kỳ' : 'Bài tập')} />
-    <T style={{ fontSize: 11, color: C.muted }}>{semesterConnection ? 'Học kỳ và môn học được lưu trong tài khoản. Bài tập hiện chỉ thử trong phiên này.' : 'Dữ liệu của bạn chỉ nằm trong phiên thử này.'}</T>
+    <T style={{ fontSize: 11, color: C.muted }}>{semesterConnection ? 'Học kỳ, môn học và bài tập được lưu trong tài khoản. Lịch và điểm vẫn thử trong phiên này.' : 'Dữ liệu của bạn chỉ nằm trong phiên thử này.'}</T>
   </Card>;
 }

@@ -2,13 +2,14 @@ import type {Course} from '../academics/academic';
 import {addDays,dateKey,dateLabel,isValidDate,parseDay} from '../../shared/utils/dates';
 
 export type TaskStatus='Chưa làm'|'Đang làm'|'Hoàn thành';
-export type Task={id:string;title:string;courseId:string;course:string;deadline:string;deadlineTime?:string;priority:'Cao'|'Trung bình';status:TaskStatus;notes:string};
+export type Task={id:string;title:string;courseId:string;course:string;deadline:string;deadlineTime?:string;priority:'Cao'|'Trung bình';status:TaskStatus;notes:string;version?:number;dueAt?:string};
 export const deadlineFilters=['Tất cả','Hôm nay','Quá hạn','Sắp hạn'] as const;
 export type DeadlineFilter=typeof deadlineFilters[number];
-type Deadline=Pick<Task,'deadline'|'deadlineTime'>;
+type Deadline=Pick<Task,'deadline'|'deadlineTime'|'dueAt'>;
 const validTime=(s:string)=>/^([01]\d|2[0-3]):[0-5]\d$/.test(s);
 export function taskDeadlineTime(task:Deadline){return task.deadlineTime??'23:59';}
 export function deadlineTimestamp(task:Deadline){
+  if(task.dueAt)return new Date(task.dueAt).getTime();
   const time=taskDeadlineTime(task);
   return isValidDate(task.deadline)&&validTime(time)?new Date(`${task.deadline}T${time}:00`).getTime():NaN;
 }

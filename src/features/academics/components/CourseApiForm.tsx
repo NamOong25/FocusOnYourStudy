@@ -40,7 +40,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
     if (!/^\d+$/.test(draft.credits) || Number(draft.credits) < 1 || Number(draft.credits) > 30) { setError('Số tín chỉ cần là số nguyên từ 1 đến 30.'); return; }
     if (!semesters.some(s => s.id === draft.semesterId)) { setError('Hãy chọn học kỳ đang có trong tài khoản.'); return; }
     if (courseCatalog.some(course => course.id !== basis?.id && course.semesterId === draft.semesterId && course.code.toUpperCase() === code)) { setError('Mã môn này đã có trong học kỳ đã chọn.'); return; }
-    if (basis && draft.semesterId !== basis.semesterId && (linkCount || gradeLinked)) { setError('Môn còn bài, lịch, điểm hoặc liên kết học lại thử. Xử lý các mục này trước khi chuyển học kỳ.'); return; }
+    if (basis && draft.semesterId !== basis.semesterId && (linkCount || gradeLinked)) { setError('Môn còn bài tập, lịch, điểm hoặc liên kết học lại. Xử lý các mục này trước khi chuyển học kỳ.'); return; }
     if (basis && retakeLinked && Number(draft.credits) !== basis.credits) { setError('Các lần học lại cần cùng số tín chỉ. Xử lý liên kết học lại trước khi đổi tín chỉ.'); return; }
     const input: CourseInput = { ...draft, name, code, credits: Number(draft.credits), teacher: draft.teacher.trim(), room: draft.room.trim(), description: draft.description.trim() };
     execute(() => c.save(input, basis), value => { const result = value as Course; onSaved(result.id, result.semesterId); });
@@ -58,7 +58,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
   };
   const remove = () => {
     if (!basis || locked || needsReload || mustRebase) return;
-    if (linkCount || gradeLinked) { setError('Xử lý các bài, lịch, điểm và liên kết học lại thử trước khi xóa môn.'); return; }
+    if (linkCount || gradeLinked) { setError('Xử lý các bài tập, lịch, điểm và liên kết học lại trước khi xóa môn.'); return; }
     if (!confirmDelete) { setConfirmDelete(true); return; }
     execute(() => c.remove(basis), onDeleted);
   };
@@ -81,7 +81,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
     {(mustRebase || needsReload) && <View style={{ gap: 9 }}><T style={S.small}>{basis ? 'Nạp bản mới sẽ thay nội dung đang chỉnh sửa bằng dữ liệu đã lưu.' : 'Kiểm tra danh sách để biết lần lưu trước đã được ghi nhận hay chưa. App không tự gửi lại thao tác lưu.'}</T><Button label={basis ? 'Nạp bản môn học mới nhất' : 'Kiểm tra lại danh sách môn học'} secondary loading={action.busy} disabled={c.busy || c.loading || !!semesterConnection?.busy || !!semesterConnection?.loading} onPress={latest} /></View>}
     <Button label="Lưu môn học" icon="checkmark" loading={action.busy} disabled={locked || needsReload || mustRebase} onPress={save} />
     {basis && <>
-      {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có bài, lịch, điểm hoặc liên kết học lại thử. Xử lý các mục này trước khi chuyển kỳ hoặc xóa môn. Các dữ liệu thử chưa được lưu vào tài khoản.</T></Card>}
+      {(linkCount > 0 || gradeLinked) && <Card style={{ backgroundColor: C.canvas }}><T style={S.small}>Môn đang có bài tập, lịch, điểm hoặc liên kết học lại. Xử lý các mục này trước khi chuyển kỳ hoặc xóa môn. Bài tập đã lưu trong tài khoản; lịch và điểm thử vẫn chỉ giữ trong phiên này.</T></Card>}
       {confirmDelete && <T accessibilityRole="alert" style={S.small}>Xóa môn {basis.name} khỏi tài khoản? Thao tác này không xóa học kỳ.</T>}
       <Button label={confirmDelete ? 'Xác nhận xóa môn học' : 'Xóa môn học'} danger={confirmDelete} secondary={!confirmDelete} disabled={locked || needsReload || mustRebase || linkCount > 0 || gradeLinked} onPress={remove} />
       {confirmDelete && <Button label="Giữ môn học" secondary disabled={locked} onPress={() => setConfirmDelete(false)} />}
