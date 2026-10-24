@@ -65,6 +65,7 @@ Response occurrence: `scheduleId, courseId, date, startTime, endTime, timeZone, 
 | 404 CLASS_SCHEDULE_NOT_FOUND | Chuỗi không có hoặc không thuộc tài khoản. |
 | 404 COURSE_NOT_FOUND / SEMESTER_NOT_FOUND | Cha/bộ lọc không có hoặc không được truy cập. |
 | 409 CLASS_SCHEDULE_VERSION_CONFLICT | Sửa/xóa từ bản cũ; GET rồi xem lại trước khi chủ động gửi tiếp. |
+| 409 SCHEDULE_TIME_CONFLICT | Từ 4E.2B: một buổi hiệu lực trùng lịch học/tự học đã lưu; response có conflict chỉ rõ nguồn/ngày/giờ. |
 | 409 COURSE_HAS_CLASS_SCHEDULES | API môn chặn xóa/chuyển kỳ vì còn lịch. |
 | 409 DATA_CONFLICT / 503 DATABASE_UNAVAILABLE | Ràng buộc hoặc kết nối dữ liệu. |
 
@@ -78,7 +79,7 @@ API ngoại lệ đã có ở [CLASS-EXCEPTIONS.md](CLASS-EXCEPTIONS.md): nghỉ
 
 V5 tạo `class_schedules`, không sửa V1–V4 hoặc seed dữ liệu. `weekday_mask` 1–127 là biểu diễn 7 thứ nội bộ; không dùng làm contract API. FK `(course_id,user_id)` → courses bảo vệ chủ sở hữu; UNIQUE `(id,user_id)` chuẩn bị liên kết ngoại lệ. CHECK bảo vệ mask, khoảng ngày, giờ phút/cùng ngày, reminder, notes và version. Việc có buổi trúng thứ, múi giờ hợp lệ và DST được kiểm tra ở API; SQL ngoài API có thể bỏ qua các quy tắc này.
 
-**Từ 4E.2A đã có ngoại lệ từng buổi. Còn làm:** kiểm tra trùng lịch–lịch hoặc lịch–tự học/thi; nối UI; gửi thông báo. Hai chuỗi trùng giờ hiện có thể cùng được lưu. 4E.2B sẽ kiểm tra xung đột dưới khóa chung và bảo vệ cả chiều sửa tự học; lịch thi theo đợt riêng. Giao diện lịch học hiện vẫn RAM, nối sau ở 4F; dữ liệu đã tạo bằng API không tự xuất hiện trên thời khóa biểu trước 4F.
+**Từ 4E.2A có ngoại lệ; 4E.2B có kiểm tra trùng lịch–lịch/tự học hai chiều dưới khóa chung.** Tạo/sửa toàn chuỗi xét toàn khoảng tối đa 366 ngày sau ngoại lệ, không dùng giới hạn đọc 92 ngày; bỏ chính chuỗi khi sửa. Buổi nghỉ không chiếm giờ, buổi đổi dùng giờ mới, hai buổi nối tiếp được phép. Lỗi giữ nguyên dữ liệu/version; dữ liệu trùng cũ vẫn đọc được để xử lý. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md). Lịch thi và thông báo theo đợt riêng. Giao diện lịch học vẫn RAM, nối ở 4F; dữ liệu API chưa tự xuất hiện trên thời khóa biểu.
 
 Đối chiếu kỹ thuật: [Java 21 ZoneRules.getValidOffsets](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/zone/ZoneRules.html#getValidOffsets(java.time.LocalDateTime)) phân biệt giờ bình thường, khoảng giờ không tồn tại và giờ xuất hiện hai lần. Chính sách từ chối giờ không rõ là lựa chọn của dự án, không phải mặc định tự xử lý DST của Java.
 

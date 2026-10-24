@@ -12,7 +12,8 @@ public class ClassExceptionService {
     private final ClassExceptionRepository exceptions;
     private final ClassScheduleRepository schedules;
     private final UserRepository users;
-    public ClassExceptionService(ClassExceptionRepository exceptions, ClassScheduleRepository schedules, UserRepository users) { this.exceptions = exceptions; this.schedules = schedules; this.users = users; }
+    private final ScheduleConflictService conflicts;
+    public ClassExceptionService(ClassExceptionRepository exceptions, ClassScheduleRepository schedules, UserRepository users, ScheduleConflictService conflicts) { this.exceptions = exceptions; this.schedules = schedules; this.users = users; this.conflicts = conflicts; }
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<ClassExceptionResponse> list(UUID owner, UUID scheduleId) {
         var s = owned(owner, scheduleId);
@@ -26,15 +27,18 @@ public class ClassExceptionService {
     @Transactional
     public ClassExceptionResponse save(UUID owner, UUID scheduleId, String date, ClassExceptionRequests.Save input) {
         lockOwner(owner); var s = owned(owner, scheduleId); checkVersion(s, input.scheduleVersion()); var day = occurrence(s, date);
+        var candidate = ClassExceptionEntity.create(owner, scheduleId, day); candidate.change(input); ClassExceptionRules.validate(s, candidate);
+        conflicts.checkOccurrence(owner, s, day, candidate);
         var value = exceptions.findByScheduleIdAndUserIdAndDate(scheduleId, owner, day).orElseGet(() -> ClassExceptionEntity.create(owner, scheduleId, day));
-        value.change(input); ClassExceptionRules.validate(s, value);
+        value.change(input);
         exceptions.saveAndFlush(value); s.markExceptionChange(); schedules.flush();
         return ClassExceptionResponse.from(value, s.getVersion());
     }
     @Transactional
     public void restore(UUID owner, UUID scheduleId, String date, long scheduleVersion) {
         lockOwner(owner); var s = owned(owner, scheduleId); checkVersion(s, scheduleVersion); var day = occurrence(s, date);
-        exceptions.delete(exception(owner, scheduleId, day)); exceptions.flush(); s.markExceptionChange(); schedules.flush();
+        var value = exception(owner, scheduleId, day); conflicts.checkOccurrence(owner, s, day, null);
+        exceptions.delete(value); exceptions.flush(); s.markExceptionChange(); schedules.flush();
     }
     private ClassScheduleEntity owned(UUID owner, UUID id) { return schedules.findByIdAndUserId(id, owner).orElseThrow(() -> new ClassScheduleApiException(HttpStatus.NOT_FOUND, "CLASS_SCHEDULE_NOT_FOUND", "Không tìm thấy lịch học.")); }
     private ClassExceptionEntity exception(UUID owner, UUID id, LocalDate day) { return exceptions.findByScheduleIdAndUserIdAndDate(id, owner, day).orElseThrow(() -> new ClassScheduleApiException(HttpStatus.NOT_FOUND, "CLASS_EXCEPTION_NOT_FOUND", "Buổi này không có thay đổi riêng để đọc hoặc khôi phục.")); }

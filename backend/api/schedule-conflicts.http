@@ -1,0 +1,41 @@
+### Dùng tài khoản/ngày thử riêng. Không commit token thật. Chuỗi gốc 07–09 đã tạo trước đó.
+@baseUrl = http://localhost:8080
+@accessToken = PASTE_ACCESS_TOKEN
+@courseId = PASTE_COURSE_UUID
+@classScheduleId = PASTE_CLASS_SCHEDULE_UUID
+@scheduleVersion = 0
+@date = 2026-11-16
+
+### Đọc version trước khi sửa
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}
+Authorization: Bearer {{accessToken}}
+
+### Trùng lớp 07–09: 409 SCHEDULE_TIME_CONFLICT, không lưu thêm chuỗi
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "courseId": "{{courseId}}", "weekdays": [1], "startsOn": "{{date}}", "endsOn": "{{date}}", "startTime": "08:00", "endTime": "10:00", "timeZone": "Asia/Ho_Chi_Minh" }
+
+### Tự học trùng lớp: 409; đổi startsAt sang 09:00 thì được phép nếu chưa có tự học khác
+POST {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "courseId": "{{courseId}}", "title": "Test giờ trùng", "startsAt": "{{date}}T08:00:00+07:00", "timeZone": "Asia/Ho_Chi_Minh", "durationMinutes": 45 }
+
+### Báo nghỉ giải phóng ngày; cập nhật scheduleVersion sau thành công
+PUT {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "kind": "CANCELLED", "scheduleVersion": {{scheduleVersion}}, "reason": "Test giải phóng giờ" }
+
+### Sau nghỉ, thử POST tự học 08:00 ở trên: nay lưu được.
+### Cập nhật scheduleVersion trước khi khôi phục: 409 nếu tự học 08:00 vẫn chiếm giờ; ngoại lệ vẫn còn.
+DELETE {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}?scheduleVersion={{scheduleVersion}}
+Authorization: Bearer {{accessToken}}
+
+### Kiểm tra trạng thái và version sau thao tác thất bại
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}
+Authorization: Bearer {{accessToken}}

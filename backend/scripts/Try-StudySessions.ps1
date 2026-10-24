@@ -17,6 +17,7 @@
     [string]$To = ''
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Read-ApiProblem.ps1')
 $BaseUrl = $BaseUrl.TrimEnd('/')
 function Test-OffsetTime([string]$Value) {
     $parsed = [DateTimeOffset]::MinValue
@@ -78,8 +79,7 @@ try {
     if ($Mode -ne 'Delete') { $result | ConvertTo-Json -Depth 6 }
     Write-Host 'Buổi tự học lấy từ PostgreSQL. Giao diện tự học sẽ nối API ở đợt 4D.' -ForegroundColor Cyan
 } catch {
-    $failure = $_; $problem = $null
-    try { $problem = $failure.ErrorDetails.Message | ConvertFrom-Json } catch { }
+    $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) {
         Write-Host "$($problem.code): $($problem.detail)" -ForegroundColor Red
         foreach ($item in $problem.errors) { Write-Host "  $($item.field): $($item.message)" }

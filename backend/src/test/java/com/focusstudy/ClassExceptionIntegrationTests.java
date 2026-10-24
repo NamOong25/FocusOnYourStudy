@@ -179,7 +179,7 @@ class ClassExceptionIntegrationTests {
         assertThat(send("DELETE", at(s, "2026-10-26") + "?scheduleVersion=1", a.token, null).statusCode()).isEqualTo(204); v.put("version", 2); assertThat(data(send("PUT", item(s), a.token, v)).get("courseId")).isEqualTo(d.get("id"));
     }
     @Test void deletingWholeRuleCascadesOnlyItsOwnOverrides() throws Exception {
-        var a = account(); var c = course(a, semester(a, 1), "QA"); var s = create(a, c); var other = create(a, c); save(a, s, "2026-10-26", cancel(0)); save(a, other, "2026-10-28", change(0));
+        var a = account(); var c = course(a, semester(a, 1), "QA"); var s = create(a, c); var otherValues = input(c); otherValues.put("startTime", "09:00"); otherValues.put("endTime", "11:00"); var other = data(send("POST", PATH, a.token, otherValues)); save(a, s, "2026-10-26", cancel(0)); save(a, other, "2026-10-28", change(0));
         assertThat(send("DELETE", item(s) + "?version=1", a.token, null).statusCode()).isEqualTo(204); assertThat(jdbc.queryForObject("SELECT count(*) FROM class_exceptions WHERE schedule_id=?", Integer.class, UUID.fromString(s.get("id").toString()))).isZero(); assertThat(exceptionList(a, other)).hasSize(1);
     }
     @Test void databaseGuardsUniqueDateOwnerKindTimesAndRevision() throws Exception {

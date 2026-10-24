@@ -85,10 +85,10 @@ class ClassScheduleIntegrationTests {
         var a = account(); var c = course(a, semester(a, 1), "QA"); var previous = TimeZone.getDefault(); var saved = new ArrayList<Map<?, ?>>();
         try {
             for (String zone : List.of("UTC", "Asia/Ho_Chi_Minh", "America/Los_Angeles")) {
-                TimeZone.setDefault(TimeZone.getTimeZone(zone)); var s = create(a, c); saved.add(s); UUID id = UUID.fromString(s.get("id").toString());
-                assertThat(jdbc.queryForObject("SELECT start_time::text FROM class_schedules WHERE id=?", String.class, id)).isEqualTo("07:00:00");
+                TimeZone.setDefault(TimeZone.getTimeZone(zone)); var values = input(c); values.put("startTime", String.format("%02d:00", 7 + saved.size() * 2)); values.put("endTime", String.format("%02d:00", 9 + saved.size() * 2)); var s = data(send("POST", PATH, a.token, values)); saved.add(s); UUID id = UUID.fromString(s.get("id").toString());
+                assertThat(jdbc.queryForObject("SELECT start_time::text FROM class_schedules WHERE id=?", String.class, id)).isEqualTo(values.get("startTime") + ":00");
                 assertThat(jdbc.queryForObject("SELECT starts_on::text FROM class_schedules WHERE id=?", String.class, id)).isEqualTo("2026-10-26");
-                for (var old : saved) { var current = data(send("GET", item(old), a.token, null)); assertThat(current.get("startTime")).isEqualTo("07:00"); assertThat(current.get("startsOn")).isEqualTo("2026-10-26"); }
+                for (var old : saved) { var current = data(send("GET", item(old), a.token, null)); assertThat(current.get("startTime")).isEqualTo(old.get("startTime")); assertThat(current.get("startsOn")).isEqualTo("2026-10-26"); }
                 var first = (Map<?, ?>) occurrences(a, "?from=2026-10-26&to=2026-10-26").getFirst(); assertThat(first.get("startsAt")).isEqualTo("2026-10-26T00:00:00Z");
             }
         } finally { TimeZone.setDefault(previous); }
@@ -137,7 +137,7 @@ class ClassScheduleIntegrationTests {
         v.put("timeZone", "+07:00"); error(send("POST", PATH, a.token, v), 400, "VALIDATION_FAILED"); v.put("timeZone", "Fake/Zone"); error(send("POST", PATH, a.token, v), 400, "VALIDATION_FAILED");
     }
     @Test void filtersCombineOwnerCourseSemesterAndDateRange() throws Exception {
-        var a = account(); var sem = semester(a, 1); var otherSem = semester(a, 2); var c = course(a, sem, "QA"); var d = course(a, otherSem, "QB"); create(a, c); create(a, d);
+        var a = account(); var sem = semester(a, 1); var otherSem = semester(a, 2); var c = course(a, sem, "QA"); var d = course(a, otherSem, "QB"); create(a, c); var otherValues = input(d); otherValues.put("startTime", "09:00"); otherValues.put("endTime", "11:00"); data(send("POST", PATH, a.token, otherValues));
         String query = "?courseId=" + c.get("id") + "&semesterId=" + sem.get("id") + "&from=2026-10-28&to=2026-10-28";
         assertThat(list(a, "")).hasSize(2); assertThat(list(a, query)).hasSize(1); assertThat(occurrences(a, query)).hasSize(1);
         assertThat(list(a, query.replace(sem.get("id").toString(), otherSem.get("id").toString()))).isEmpty();
@@ -193,7 +193,7 @@ class ClassScheduleIntegrationTests {
         var a = account(); var c = course(a, semester(a, 1), "QA"); var s = create(a, c);
         for (String method : List.of("GET", "POST", "PUT", "DELETE")) error(send(method, method.equals("PUT") || method.equals("DELETE") ? item(s) + "?version=0" : PATH, null, method.equals("POST") || method.equals("PUT") ? update(s) : null), 401, "AUTHENTICATION_REQUIRED");
         error(send("GET", PATH + "/occurrences?from=2026-10-26&to=2026-11-01", null, null), 401, "AUTHENTICATION_REQUIRED"); error(send("GET", PATH, "invalid", null), 401, "INVALID_ACCESS_TOKEN");
-        var b = account(); var v = input(c); v.put("userId", b.id); var forged = send("POST", PATH, a.token, v); assertThat(forged.statusCode()).isIn(201, 400); assertThat(list(b, "")).isEmpty();
+        var b = account(); var v = input(c); v.put("startTime", "09:00"); v.put("endTime", "11:00"); v.put("userId", b.id); var forged = send("POST", PATH, a.token, v); assertThat(forged.statusCode()).isIn(201, 400); assertThat(list(b, "")).isEmpty();
         var cookieOnly = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + PATH)).header("Cookie", "FOCUS_REFRESH=not-a-bearer").GET().build();
         error(client.send(cookieOnly, HttpResponse.BodyHandlers.ofString()), 401, "AUTHENTICATION_REQUIRED");
         var browser = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + PATH)).header("Origin", "http://localhost:8092").header("Authorization", "Bearer " + a.token).GET().build();

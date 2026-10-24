@@ -57,7 +57,7 @@ DELETE xóa ngoại lệ của đúng ngày, dùng lại **giá trị hiện t�
 
 `GET /api/v1/class-schedules/occurrences` bổ sung `cancelled, changed, reason, exceptionId`. startTime/endTime, startsAt/endsAt, room/teacher là giá trị **đã áp dụng ngoại lệ**. cancelled và changed không đồng thời true. Không có ngoại lệ: cả hai false, reason rỗng, exceptionId null. scheduleVersion là version chuỗi ở cùng ảnh chụp đọc.
 
-Buổi nghỉ **vẫn có trong danh sách** để hiển thị/khôi phục; thành phần tính giờ bận phải bỏ dòng cancelled. 4E.2B sẽ nối điều này vào kiểm tra trùng. Không thay giới hạn lọc 92 ngày của 4E.1.
+Buổi nghỉ **vẫn có trong danh sách** để hiển thị/khôi phục; thành phần tính giờ bận bỏ dòng cancelled. Từ 4E.2B backend đã xét lịch hiệu lực khi kiểm tra trùng. Không thay giới hạn lọc 92 ngày của 4E.1.
 
 - Sửa ngày/thứ cả chuỗi làm một ngày ngoại lệ không còn thuộc lịch: 409 `CLASS_SCHEDULE_HAS_EXCEPTIONS`. Cần khôi phục ngày đó trước, không tự xóa ngoại lệ.
 - Đổi giờ/múi giờ chuỗi làm một buổi CHANGED không còn hợp lệ sau kế thừa: 409, rollback toàn bộ.
@@ -76,6 +76,7 @@ Buổi nghỉ **vẫn có trong danh sách** để hiển thị/khôi phục; th
 | 404 CLASS_EXCEPTION_NOT_FOUND | Buổi không có ngoại lệ để đọc/khôi phục. |
 | 409 CLASS_SCHEDULE_VERSION_CONFLICT | Chuỗi hoặc một buổi đã đổi, cần đọc và xem lại. |
 | 409 CLASS_SCHEDULE_HAS_EXCEPTIONS | Sửa cả chuỗi làm mất/sai ngoại lệ hoặc chuyển môn khi còn ngoại lệ. |
+| 409 SCHEDULE_TIME_CONFLICT | Từ 4E.2B: buổi đổi hoặc buổi gốc khi khôi phục trùng lớp/tự học. Giữ ngoại lệ và version cũ; conflict mô tả buổi đang cản. |
 
 Các mã auth/dữ liệu chung như các API trước. POST/PATCH ở endpoint ngoại lệ chưa được mở.
 
@@ -85,4 +86,6 @@ V6 thêm `class_exceptions`, duy nhất `(schedule_id,occurrence_date)`, FK `(sc
 
 Mọi ghi dùng khóa hàng tài khoản đầu tiên, chung với các nghiệp vụ trước. Danh sách ngoại lệ và occurrences đọc trong giao dịch REPEATABLE_READ: tránh lấy version chuỗi ở một thời điểm nhưng ngoại lệ ở thời điểm khác. Query ngoại lệ theo lô cho các chuỗi, không query từng ngày.
 
-**Chưa làm:** kiểm tra trùng với lịch học khác/tự học/thi (4E.2B và đợt lịch thi), nối UI (4F), chuyển một buổi sang ngày khác, phát thông báo hệ điều hành. SQL ngoài API có thể bỏ qua kiểm tra ngày thuộc chuỗi và giờ sau kế thừa; không sửa nghiệp vụ bằng SQL tay.
+**4E.2B đã kiểm tra trùng lớp/tự học khi đổi và khôi phục.** Khôi phục giờ gốc có thể bị chặn nếu thời gian đã được dùng cho buổi khác; không tự xóa ngoại lệ hoặc dời buổi cản. Báo nghỉ luôn giải phóng giờ. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md).
+
+**Chưa làm:** kiểm tra với lịch thi, nối UI (4F), chuyển một buổi sang ngày khác, phát thông báo hệ điều hành. SQL ngoài API có thể bỏ qua kiểm tra nghiệp vụ; không sửa bằng SQL tay.

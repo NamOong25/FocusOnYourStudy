@@ -40,6 +40,7 @@ const messages: Record<string, string> = {
   STUDY_SESSION_NOT_FOUND: 'Buổi học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại.',
   STUDY_SESSION_VERSION_CONFLICT: 'Buổi học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',
+  SCHEDULE_TIME_CONFLICT: 'Khung giờ trùng lịch học hoặc buổi tự học đã lưu. Chọn giờ khác hoặc điều chỉnh lịch.',
   STUDY_ASSIGNMENT_COURSE_MISMATCH: 'Bài tập cần thuộc đúng môn của buổi học. Kiểm tra lại bài đã chọn.',
   STUDY_AFTER_DEADLINE: 'Buổi học kết thúc sau hạn bài đã lưu. Đổi giờ hoặc gỡ liên kết bài tập.',
   INVALID_STUDY_RANGE: 'Khoảng thời gian lọc chưa hợp lệ. Chọn lại ngày và giờ.',
@@ -55,6 +56,9 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');
+  // This known conflict includes the owned course/date/time; retain the specific explanation in the study form.
+  if (status === 409 && code === 'SCHEDULE_TIME_CONFLICT' && object(value)
+    && typeof value.detail === 'string' && value.detail.trim() && value.detail.length <= 1200) message = value.detail;
   if (status === 429 && retryAfter && /^\d{1,5}$/.test(retryAfter)) message = `Bạn đã thử nhiều lần. Thử lại sau ${Number(retryAfter)} giây.`;
   return new ApiError(message, code, status, fields);
 }

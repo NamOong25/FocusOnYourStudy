@@ -4,15 +4,15 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4E.2A — Nghỉ đổi và khôi phục từng buổi
+## Đợt vừa hoàn thành: 4E.2B — Kiểm tra trùng lịch học và tự học
 
-V6 lưu nghỉ/đổi giờ/phòng/giảng viên và khôi phục đúng ngày, giữ các buổi khác. Occurrences áp dụng ngoại lệ; version chuỗi, snapshot đọc và khóa ghi chung bảo vệ sửa đồng thời/khôi phục rồi tạo lại. Chặn sửa chuỗi làm mất/sai ngoại lệ; chưa nối UI hoặc kiểm tra trùng. Hướng dẫn terminal VS Code/IntelliJ ở `BACKEND-PHASE-4E2A.md`.
+Chặn trùng lịch hiệu lực khi thêm/sửa chuỗi, đổi/khôi phục buổi và thêm/sửa tự học; bỏ buổi nghỉ, cho phép nối tiếp, so UTC từng ngày và giữ khóa chung đến commit. 409 có buổi/môn/ngày/giờ; thất bại không đổi dữ liệu/version. 238 tests/Maven verify qua (30 mới), TypeScript và smoke HTTP qua. Script PowerShell 5.1 và form tự học hiển thị lỗi cụ thể. Không thêm migration hoặc sửa dữ liệu cũ; UI thời khóa biểu ở 4F. Hướng dẫn `BACKEND-PHASE-4E2B.md`.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
 git status
 git add .
-git commit -m "Bổ sung API nghỉ đổi và khôi phục từng buổi học"
+git commit -m "Bổ sung kiểm tra trùng giờ lịch học và buổi tự học"
 git push
 ```
 
@@ -22,6 +22,7 @@ git push
 
 | Đợt | Tên commit |
 | --- | --- |
+| Backend 4E.2A — Ngoại lệ từng buổi | `Bổ sung API nghỉ đổi và khôi phục từng buổi học` |
 | Backend 4E.1 — API lịch lặp | `Triển khai API quản lý lịch học lặp theo môn` |
 | Frontend 4D — Nối tự học | `Kết nối giao diện tự học với dữ liệu backend` |
 | Backend 4C — API tự học | `Triển khai API kế hoạch tự học và kiểm tra liên kết bài tập` |
@@ -63,8 +64,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4E.2B — Kiểm tra trùng giờ | Lịch hiệu lực sau ngoại lệ, trùng lịch–lịch/tự học, bảo vệ ghi hai chiều và đồng thời | Bổ sung kiểm tra trùng lịch học và tự học |
 | 4F — Nối giao diện lịch học | Thời khóa biểu dùng API, sửa một buổi/cả chuỗi, F5 và lỗi/version | Kết nối thời khóa biểu với dữ liệu backend |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
-Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C/4E.1/4E.2A, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài/tự học 3C.1/3C.2/4B/4D; tiếp theo theo `next`/`go`.
+Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C/4E.1/4E.2A/4E.2B, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài/tự học 3C.1/3C.2/4B/4D; tiếp theo theo `next`/`go`.

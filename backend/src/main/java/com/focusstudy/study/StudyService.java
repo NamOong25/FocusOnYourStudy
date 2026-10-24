@@ -5,6 +5,7 @@ import com.focusstudy.academics.courses.*;
 import com.focusstudy.academics.semesters.*;
 import com.focusstudy.assignments.*;
 import com.focusstudy.users.UserRepository;
+import com.focusstudy.schedule.ScheduleConflictService;
 import jakarta.persistence.criteria.Predicate;
 import java.time.*;
 import java.util.*;
@@ -21,8 +22,9 @@ public class StudyService {
     private final SemesterRepository semesters;
     private final AssignmentRepository assignments;
     private final UserRepository users;
-    public StudyService(StudySessionRepository sessions, CourseRepository courses, SemesterRepository semesters, AssignmentRepository assignments, UserRepository users) {
-        this.sessions = sessions; this.courses = courses; this.semesters = semesters; this.assignments = assignments; this.users = users;
+    private final ScheduleConflictService conflicts;
+    public StudyService(StudySessionRepository sessions, CourseRepository courses, SemesterRepository semesters, AssignmentRepository assignments, UserRepository users, ScheduleConflictService conflicts) {
+        this.sessions = sessions; this.courses = courses; this.semesters = semesters; this.assignments = assignments; this.users = users; this.conflicts = conflicts;
     }
     @Transactional(readOnly = true)
     public List<StudyResponse> list(UUID owner, UUID courseId, UUID semesterId, UUID assignmentId, StudySessionEntity.Status status, String from, String to) {
@@ -74,6 +76,7 @@ public class StudyService {
         }
         boolean overlaps = excluded == null ? sessions.overlaps(owner, start, end) : sessions.overlapsExcept(owner, start, end, excluded);
         if (overlaps) throw new StudyApiException(HttpStatus.CONFLICT, "STUDY_TIME_CONFLICT", "Khung giờ trùng một buổi tự học khác. Chọn giờ khác hoặc điều chỉnh buổi đã lưu.");
+        conflicts.checkStudy(owner, start, end);
     }
     private Instant bound(String value) {
         if (value == null) return null;

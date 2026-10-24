@@ -8,6 +8,7 @@ import com.focusstudy.academics.courses.CourseApiException;
 import com.focusstudy.assignments.AssignmentApiException;
 import com.focusstudy.study.StudyApiException;
 import com.focusstudy.schedule.ClassScheduleApiException;
+import com.focusstudy.schedule.ScheduleTimeConflict;
 import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -27,6 +28,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+    @ExceptionHandler(ScheduleTimeConflict.class)
+    ResponseEntity<ProblemDetail> timeConflict(ScheduleTimeConflict ex, HttpServletRequest request) {
+        var problem = ApiProblems.of(HttpStatus.CONFLICT, "SCHEDULE_TIME_CONFLICT", ex.getMessage(), request);
+        problem.setProperty("conflict", ex.conflict());
+        return ResponseEntity.status(HttpStatus.CONFLICT).cacheControl(CacheControl.noStore()).body(problem);
+    }
     @ExceptionHandler(ClassScheduleApiException.class)
     ResponseEntity<ProblemDetail> classProblem(ClassScheduleApiException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore())

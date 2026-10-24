@@ -11,6 +11,7 @@
     [ValidateLength(0, 1000)][string]$Reason = ''
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Read-ApiProblem.ps1')
 $BaseUrl = $BaseUrl.TrimEnd('/')
 if ($ClassScheduleId -eq [guid]::Empty) { throw 'Cần ClassScheduleId từ danh sách chuỗi lịch.' }
 if ($Mode -ne 'List') {
@@ -57,10 +58,9 @@ try {
         }
     }
     if ($Mode -ne 'Restore') { $result | ConvertTo-Json -Depth 6 }
-    Write-Host 'Ngoại lệ lấy từ PostgreSQL. Các buổi khác vẫn giữ nguyên; kiểm tra trùng giờ sẽ có ở 4E.2B.' -ForegroundColor Cyan
+    Write-Host 'Ngoại lệ lấy từ PostgreSQL. Các buổi khác vẫn giữ nguyên; đổi/khôi phục đã kiểm tra trùng lịch học và tự học.' -ForegroundColor Cyan
 } catch {
-    $failure = $_; $problem = $null
-    try { $problem = $failure.ErrorDetails.Message | ConvertFrom-Json } catch { }
+    $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) {
         Write-Host "$($problem.code): $($problem.detail)" -ForegroundColor Red
         foreach ($item in $problem.errors) { Write-Host "  $($item.field): $($item.message)" }

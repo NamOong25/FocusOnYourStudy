@@ -22,8 +22,9 @@ public class ClassScheduleService {
     private final SemesterRepository semesters;
     private final UserRepository users;
     private final ClassExceptionRepository exceptions;
-    public ClassScheduleService(ClassScheduleRepository schedules, CourseRepository courses, SemesterRepository semesters, UserRepository users, ClassExceptionRepository exceptions) {
-        this.schedules = schedules; this.courses = courses; this.semesters = semesters; this.users = users; this.exceptions = exceptions;
+    private final ScheduleConflictService conflicts;
+    public ClassScheduleService(ClassScheduleRepository schedules, CourseRepository courses, SemesterRepository semesters, UserRepository users, ClassExceptionRepository exceptions, ScheduleConflictService conflicts) {
+        this.schedules = schedules; this.courses = courses; this.semesters = semesters; this.users = users; this.exceptions = exceptions; this.conflicts = conflicts;
     }
     private List<ClassScheduleEntity> rows(UUID owner, UUID courseId, UUID semesterId, LocalDate from, LocalDate to) {
         if (courseId != null) ownedCourse(owner, courseId);
@@ -66,7 +67,9 @@ public class ClassScheduleService {
     }
     @Transactional(readOnly = true) public ClassScheduleResponse get(UUID owner, UUID id) { return ClassScheduleResponse.from(owned(owner, id)); }
     @Transactional public ClassScheduleResponse create(UUID owner, ClassScheduleRequests.Create v) {
-        lockOwner(owner); ownedCourse(owner, v.courseId()); return ClassScheduleResponse.from(schedules.saveAndFlush(ClassScheduleEntity.create(owner, v)));
+        lockOwner(owner); ownedCourse(owner, v.courseId()); var candidate = ClassScheduleEntity.create(owner, v);
+        conflicts.checkRule(owner, candidate, List.of(), null);
+        return ClassScheduleResponse.from(schedules.saveAndFlush(candidate));
     }
     @Transactional public ClassScheduleResponse update(UUID owner, UUID id, ClassScheduleRequests.Update v) {
         lockOwner(owner); var schedule = owned(owner, id); checkVersion(schedule, v.version()); ownedCourse(owner, v.courseId());
@@ -77,6 +80,7 @@ public class ClassScheduleService {
             if (!ClassExceptionRules.scheduled(candidate, e.getDate())) throw exceptionConflict("Ngày " + e.getDate() + " đang có thay đổi riêng. Khôi phục buổi đó trước khi bỏ ngày/thứ khỏi chuỗi.");
             try { ClassExceptionRules.validate(candidate, e); } catch (ClassScheduleApiException failure) { throw exceptionConflict("Thay đổi chuỗi làm buổi " + e.getDate() + " không hợp lệ: " + failure.getMessage()); }
         }
+        conflicts.checkRule(owner, candidate, existing, id);
         schedule.change(v); schedules.flush(); return ClassScheduleResponse.from(schedule);
     }
     @Transactional public void delete(UUID owner, UUID id, long version) {

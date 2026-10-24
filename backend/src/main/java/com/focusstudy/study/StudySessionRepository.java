@@ -9,6 +9,7 @@ public interface StudySessionRepository extends JpaRepository<StudySessionEntity
     Optional<StudySessionEntity> findByIdAndUserId(UUID id, UUID userId);
     List<StudySessionEntity> findByUserIdAndAssignmentId(UUID userId, UUID assignmentId);
     boolean existsByUserIdAndCourseId(UUID userId, UUID courseId);
+    List<StudySessionEntity> findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(UUID userId, Instant end, Instant start);
     boolean existsByUserIdAndAssignmentId(UUID userId, UUID assignmentId);
     boolean existsByUserIdAndAssignmentIdAndEndsAtAfter(UUID userId, UUID assignmentId, Instant deadline);
     @Query("select (count(s) > 0) from StudySessionEntity s where s.userId = :owner and s.startsAt < :end and s.endsAt > :start")

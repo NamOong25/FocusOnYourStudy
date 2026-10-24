@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đã có API chuỗi lịch 4E.1 và ngoại lệ 4E.2A; đợt 4 còn trùng giờ 4E.2B, nối UI lịch 4F và lịch thi. UI lịch/điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
+Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đã có API chuỗi lịch 4E.1, ngoại lệ 4E.2A và trùng giờ 4E.2B; đợt 4 còn nối UI lịch 4F và lịch thi. UI lịch/điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -119,7 +119,7 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [ ] Đợt Pomodoro — Lưu lịch sử phiên và mục tiêu ngày qua API, không suy thời gian học thật từ trạng thái hoàn thành thủ công hoặc thời lượng kế hoạch.
 - [x] 4E.1 — V5 + API chuỗi lịch theo môn/tài khoản: các thứ, khoảng ngày, giờ địa phương/múi giờ, phòng/giảng viên, ghi chú và cấu hình nhắc; CRUD/lọc, đọc các buổi phát sinh, ownership/version và guard chuyển/xóa môn. 182 tests/Maven verify qua (27 mới), nâng V4 giữ dữ liệu, restart, DST/ba múi giờ JVM và script PowerShell 5.1. Xem `BACKEND-PHASE-4E1.md`; UI lịch còn RAM, chưa kiểm tra trùng/ngoại lệ hoặc gửi nhắc.
 - [x] 4E.2A — V6 + API nghỉ/đổi giờ/phòng/giảng viên, khôi phục một ngày đúng chuỗi; occurrences có cờ nghỉ/đổi và giá trị sau ghi đè. Dùng version cả chuỗi chống bản cũ, khôi phục/tạo lại cùng ngày và ghi đồng thời; sửa chuỗi không làm mất/sai ngoại lệ. 208 tests/Maven verify qua (26 mới), nâng V5 giữ dữ liệu/version, snapshot đọc, restart và script PowerShell 5.1. Hướng dẫn `BACKEND-PHASE-4E2A.md`; chưa nối UI hoặc kiểm tra trùng.
-- [ ] 4E.2B — Kiểm tra trùng lịch–lịch và lịch–tự học hai chiều dưới khóa chung, theo buổi hiệu lực sau ngoại lệ; bỏ buổi nghỉ, xét khôi phục/đổi buổi và ghi đồng thời.
+- [x] 4E.2B — Chặn trùng lịch–lịch/tự học hai chiều theo UTC sau ngoại lệ; bỏ buổi nghỉ, cho phép nối tiếp, bảo vệ đổi/khôi phục buổi, sửa chuỗi và ghi đồng thời. Lỗi có buổi/môn/ngày/giờ, thất bại giữ dữ liệu/version. 238 tests/Maven verify qua (30 mới), TypeScript và 6 tình huống smoke HTTP qua. Script PowerShell 5.1 và form tự học hiện lỗi cụ thể; không thêm migration/seed. Xem `BACKEND-PHASE-4E2B.md`; UI thời khóa biểu ở 4F.
 - [ ] 4F — Nối UI thời khóa biểu với API lịch/ngoại lệ, đọc ngày/tuần/tháng, F5/đổi tài khoản, sửa một buổi/cả chuỗi, lỗi/version giữ bản nháp.
 - [ ] Backend 4 tiếp theo — API lịch thi và nối UI; kiểm tra trùng thi với lịch học/tự học, nối nhắc việc theo dữ liệu đã lưu.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.

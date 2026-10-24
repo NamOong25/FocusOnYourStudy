@@ -192,4 +192,4 @@ Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phi
 - `class_schedules.exception_revision` mặc định 0, không đổi version cũ khi migrate. Mỗi ghi/khôi phục ngoại lệ làm dirty counter để @Version chuỗi tăng; counter không lộ DTO. Client luôn kiểm tra version cả chuỗi, tránh bản cũ ghi lại sau khi ngoại lệ được khôi phục/tạo lại.
 - Ghi dùng khóa hàng tài khoản chung; parent version và child data commit nguyên tử. GET ngoại lệ/occurrences dùng snapshot REPEATABLE_READ, query ngoại lệ theo lô.
 - Sửa chuỗi không được bỏ ngày đang có ngoại lệ, làm giờ hiệu lực sai hoặc chuyển môn khi còn ngoại lệ. Khôi phục ngoại lệ trước các thay đổi đó. Không có bảng occurrence materialized.
-- 4E.2A chưa kiểm tra trùng; 4E.2B dùng lịch hiệu lực và bỏ buổi nghỉ khi xét giờ bận, rồi 4F nối UI. Chi tiết: `CLASS-EXCEPTIONS.md`.
+- 4E.2B đã kiểm tra trùng lịch–lịch/tự học hai chiều, dùng lịch hiệu lực và bỏ buổi nghỉ khi xét giờ bận; không thêm bảng/migration, vẫn V6. 4F nối UI. Chi tiết: `CLASS-EXCEPTIONS.md`.

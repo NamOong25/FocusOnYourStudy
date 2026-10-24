@@ -65,6 +65,7 @@ Phản hồi `data` gồm `id, courseId, assignmentId, title, startsAt, endsAt, 
 | 404 COURSE_NOT_FOUND / ASSIGNMENT_NOT_FOUND / SEMESTER_NOT_FOUND | Mục liên kết/bộ lọc không có hoặc thuộc người khác. |
 | 409 STUDY_SESSION_VERSION_CONFLICT | PUT/DELETE dùng phiên bản cũ. |
 | 409 STUDY_TIME_CONFLICT | Trùng buổi tự học khác trong tài khoản. |
+| 409 SCHEDULE_TIME_CONFLICT | Từ 4E.2B: trùng một buổi lên lớp sau khi áp dụng ngoại lệ; conflict mô tả chuỗi/ngày/giờ cản. |
 | 409 STUDY_ASSIGNMENT_COURSE_MISMATCH | Bài và buổi khác môn. |
 | 409 STUDY_AFTER_DEADLINE | Buổi học kết thúc sau hạn bài đang gắn. |
 | 409 ASSIGNMENT_HAS_STUDY_SESSIONS | API bài tập chặn đổi môn vì còn buổi liên kết. |
@@ -82,6 +83,8 @@ Mọi ghi tự học, bài, môn và học kỳ cùng khóa hàng tài khoản �
 
 Trùng giờ và deadline liên bảng được kiểm tra trong service dưới khóa chung; không dùng CHECK truy vấn bảng khác. Ghi SQL ngoài API có thể bỏ qua hai quy tắc này, nên không dùng SQL tay để thay dữ liệu nghiệp vụ. Không yêu cầu extension PostgreSQL mới.
 
-Chưa kiểm tra trùng với lịch học/lịch thi trên backend vì API/bảng lịch chưa mở; giao diện hiện vẫn kiểm tra các lịch RAM như trước. Chưa lưu lịch lặp/ngoại lệ, focus records/Pomodoro, checklist/tài liệu; chưa phân trang, cập nhật thời gian thực hoặc nghiệm thu native. Đợt 4D nối UI tự học, các đợt lịch tiếp tục sau đó.
+Từ **4E.2B backend đã kiểm tra trùng với lịch lên lớp** theo giờ hiệu lực sau ngoại lệ, bỏ buổi nghỉ; chiều thêm/sửa lớp và đổi/khôi phục buổi cũng đối chiếu tự học. Tất cả status tự học chiếm giờ như quy tắc cũ, hai buổi nối tiếp được phép. Lỗi giữ nguyên dữ liệu/version, form Tự học đã nối ở 4D hiển thị thông báo cụ thể. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md).
+
+UI thời khóa biểu còn RAM đến 4F; các guard RAM của giao diện chỉ hỗ trợ trải nghiệm, backend quyết định đối với dữ liệu đã lưu. Lịch thi, focus records/Pomodoro, checklist/tài liệu, phân trang/cập nhật thời gian thực và nghiệm thu native vẫn làm sau.
 
 Nguồn đối chiếu: [PostgreSQL 17 — Constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), [Java 21 — ZonedDateTime](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZonedDateTime.html).
