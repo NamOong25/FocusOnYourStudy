@@ -28,7 +28,7 @@ export default function ServerRuleList({ semesterId, source, onEdit, onClose }: 
       })}
       {error && <T accessibilityRole="alert" style={{ color: C.red }}>{error.message}</T>}
       {source.error && <Button label="Tải lại lịch để tiếp tục chỉnh sửa" secondary disabled={source.busy || source.loading} onPress={() => { void source.reload().catch(failure => setError(asApiError(failure))); }} />}
-      {source.needsReload && <><T style={S.small}>Kiểm tra danh sách trên để biết lần lưu trước đã xuất hiện hay chưa. App không tự gửi lại yêu cầu lưu.</T><Button label="Đã kiểm tra dữ liệu, tiếp tục" secondary disabled={source.busy || source.loading} onPress={confirm} /></>}
+      {source.needsReload && (source.pendingOccurrence ? <><T style={S.small}>Cần kiểm tra ngoại lệ của đúng ngày vừa ghi; danh sách cả chuỗi không xác định được kết quả buổi đó.</T><Button label="Đóng để kiểm tra đúng buổi" secondary onPress={onClose} /></> : <><T style={S.small}>Kiểm tra danh sách trên để biết lần lưu trước đã xuất hiện hay chưa. App không tự gửi lại yêu cầu lưu.</T><Button label="Đã kiểm tra dữ liệu, tiếp tục" secondary disabled={source.busy || source.loading} onPress={confirm} /></>)}
       <Button label="Tải lại danh sách chuỗi" secondary disabled={source.busy || source.loading} onPress={() => setAttempt(n => n + 1)} />
     </>}
   </Sheet>;

@@ -15,12 +15,16 @@ import { firstRuleDate } from './ruleDraft';
 import { parseDay } from '../../shared/utils/dates';
 import { useFeedback } from '../../shared/feedback/FeedbackProvider';
 import { scheduleWindow, type CalendarView } from './scheduleView';
+import ServerExceptionFlow, { type ExceptionFlowRequest } from './components/ServerExceptionFlow';
+import type { ExceptionSnapshot } from './api/classExceptionsApi';
+import type { ExceptionMode } from './exceptionDraft';
 
 export default function ServerSchedule() {
   const { semesters, academicSemesterId, setAcademicSemesterId, courseCatalog, courseConnection, setScheduleMode } = useApp();
   const [view, setView] = useState<CalendarView>('Theo ngày'), [selected, setSelected] = useState(() => new Date());
   const [choose, setChoose] = useState(false), [detail, setDetail] = useState<{ key: string; item: ServerOccurrence } | null>(null);
   const [editor, setEditor] = useState<{ original?: ServerRule; date: string; semesterId: string } | null>(null), [manage, setManage] = useState(false);
+  const [occurrenceFlow, setOccurrenceFlow] = useState<ExceptionFlowRequest | null>(null);
   const { showNotice } = useFeedback();
   const scope = useNavigationScope(), range = scheduleWindow(selected, view);
   const semester = semesters.find(s => s.id === academicSemesterId);
@@ -32,13 +36,15 @@ export default function ServerSchedule() {
   const stale = !!source.error || source.loading || source.busy;
   const edit = (rule?: ServerRule) => { if (!semester || stale || source.needsReload) return; setManage(false); setDetail(null); setEditor({ original: rule, date: dateKey(selected), semesterId: semester.id }); };
   const saved = (rule: ServerRule) => { setEditor(null); setDetail(null); const course = courseCatalog.find(c => c.id === rule.courseId); if (course) setAcademicSemesterId(course.semesterId); setSelected(parseDay(firstRuleDate(rule))); showNotice('Đã lưu chuỗi lịch vào tài khoản.'); };
-  return <FlowScope onClose={() => { if (!source.busy) { setChoose(false); setDetail(null); setEditor(null); setManage(false); } }}>
+  const startException = (mode: ExceptionMode, item: ServerOccurrence) => { if (stale || source.needsReload || !source.loaded) return; setDetail(null); setOccurrenceFlow({ mode, target: { scheduleId: item.scheduleId, date: item.date }, expectedVersion: item.scheduleVersion }); };
+  const exceptionDone = (snapshot: ExceptionSnapshot, mode: ExceptionMode) => { setOccurrenceFlow(null); setDetail(null); const course = courseCatalog.find(c => c.id === snapshot.rule.courseId); if (course) setAcademicSemesterId(course.semesterId); setSelected(parseDay(snapshot.occurrence.date)); showNotice(mode === 'review' ? 'Đã kiểm tra buổi học hiện tại.' : mode === 'cancel' ? 'Đã lưu nghỉ đúng một buổi học.' : mode === 'restore' ? 'Đã khôi phục buổi theo lịch gốc hiện tại.' : 'Đã lưu thay đổi đúng một buổi học.'); };
+  return <FlowScope onClose={() => { if (!source.busy) { setChoose(false); setDetail(null); setEditor(null); setManage(false); setOccurrenceFlow(null); } }}>
     <Row between style={{ flexWrap: 'wrap', rowGap: 8 }}><T style={{ fontFamily: F.extra, fontSize: 23 }}>Thời khóa biểu</T><Badge label="Lịch trong tài khoản" icon="cloud-done-outline" /></Row>
     <Button label={semester ? `${semester.name} · ${semester.academicYear}` : 'Chọn học kỳ xem lịch'} secondary icon="calendar-outline" onPress={() => setChoose(true)} disabled={!semesters.length} />
     {!semester ? <StateView title="Chưa có học kỳ để xem lịch" message="Tạo học kỳ và thêm môn học trong Môn & học kỳ để bắt đầu." actionLabel="Đến Môn & học kỳ" onAction={() => setScheduleMode('Môn & học kỳ')} /> : <>
       <Button label="Thêm chuỗi lịch học" icon="add-circle-outline" disabled={stale || !source.loaded || source.needsReload || !!courseConnection?.needsReload} onPress={() => edit()} />
       <Button label="Quản lý chuỗi lịch" secondary icon="repeat-outline" disabled={source.busy} onPress={() => setManage(true)} />
-      {source.needsReload && <Card style={{backgroundColor:C.amberSoft}}><T accessibilityRole="alert" style={S.small}>Lần ghi trước chưa xác định được kết quả. Mở Quản lý chuỗi lịch và kiểm tra dữ liệu trước khi tiếp tục lưu.</T></Card>}
+      {source.needsReload && <Card style={{backgroundColor:C.amberSoft,gap:10}}><T accessibilityRole="alert" style={S.small}>{source.pendingOccurrence ? 'Lần thay đổi buổi học chưa rõ kết quả. Kiểm tra đúng chuỗi và ngày vừa ghi trước khi tiếp tục.' : 'Lần ghi trước chưa xác định được kết quả. Mở Quản lý chuỗi lịch và kiểm tra dữ liệu trước khi tiếp tục lưu.'}</T>{source.pendingOccurrence && <Button label="Kiểm tra buổi vừa thay đổi" secondary disabled={source.busy} onPress={() => { setDetail(null); setManage(false); setOccurrenceFlow({ mode:'review', target:source.pendingOccurrence! }); }} />}</Card>}
       <ScheduleCalendar selected={selected} view={view} onSelect={setSelected} onView={setView} hasEvent={date => source.loaded && forDay(date).length > 0} />
       <Button label="Tải lại lịch học" secondary icon="refresh-outline" loading={source.loading} disabled={source.busy || !!courseConnection?.loading || !!courseConnection?.busy} onPress={reload} />
       <T style={S.small}>Ngày và giờ theo múi giờ ghi trên từng buổi. Buổi nghỉ vẫn hiện để bạn theo dõi.</T>
@@ -56,8 +62,9 @@ export default function ServerSchedule() {
     </>}
     {choose && <Sheet title="Học kỳ xem lịch" onClose={() => setChoose(false)}>{semesters.map(s => <Button key={s.id} secondary={s.id !== semester?.id} label={`${s.name} · ${s.academicYear}`} onPress={() => { setAcademicSemesterId(s.id); setChoose(false); setDetail(null); }} />)}</Sheet>}
     {source.confirmedWrite && source.error && <T style={S.small}>Lần lưu/xóa đã được xác nhận. Chưa tải lại được lịch; không cần gửi lại thao tác ghi.</T>}
-    {detail?.key === key && <ServerClassDialog key={`${key}:${detail.item.scheduleId}:${detail.item.date}`} item={detail.item} title={name(detail.item)} onClose={() => setDetail(null)} onReload={reload} onEdit={edit} />}
+    {detail?.key === key && <ServerClassDialog key={`${key}:${detail.item.scheduleId}:${detail.item.date}`} item={detail.item} title={name(detail.item)} blocked={stale || source.needsReload || !source.loaded} onClose={() => setDetail(null)} onReload={reload} onEdit={edit} onException={startException} />}
     {manage && semester && <ServerRuleList semesterId={semester.id} source={source} onEdit={edit} onClose={() => setManage(false)} />}
     {editor && <ServerClassForm key={editor.original?.id ?? 'new'} source={source} original={editor.original} initialDate={editor.date} semesterId={editor.semesterId} onClose={() => setEditor(null)} onSaved={saved} onDeleted={() => { setEditor(null); setDetail(null); showNotice('Đã xóa cả chuỗi lịch và các ngoại lệ của chuỗi.'); }} />}
+    {occurrenceFlow && <ServerExceptionFlow key={`${occurrenceFlow.target.scheduleId}:${occurrenceFlow.target.date}:${occurrenceFlow.mode}`} request={occurrenceFlow} source={source} onClose={() => { if (!source.busy) setOccurrenceFlow(null); }} onComplete={exceptionDone} />}
   </FlowScope>;
 }

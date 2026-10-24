@@ -4,9 +4,21 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4F.2 — Thêm sửa xóa chuỗi lịch học
+## Đợt vừa hoàn thành: 4F.3 — Nghỉ đổi và khôi phục từng buổi
 
-Nối POST/PUT/DELETE cả chuỗi; form và danh sách chuỗi trong học kỳ, giữ bản nháp/lỗi trùng, nạp rõ ràng khi version cũ, xác nhận xóa và không tự tạo lại chuỗi đã mất. Mất phản hồi kiểm tra toàn tài khoản trước khi tiếp tục; ghi đã xác nhận khác với GET lỗi. 54 test đọc/ghi (26 mới), TypeScript, export web và browser API thật qua, không đổi backend/migration. Hướng dẫn `FRONTEND-SCHEDULE-4F2.md`; ghi từng buổi ở 4F.3.
+Nối giao diện ngoại lệ đúng ngày bằng API: kế thừa/ghi đè từng trường, nghỉ và khôi phục về chuỗi hiện tại, bảo vệ version, trùng giờ và bản nháp. Mất phản hồi kiểm tra đúng buổi; không tự gửi lại hoặc tạo lại chuỗi đã xóa. 81 test đọc/ghi (27 mới), TypeScript, export web và browser API thật qua. Hướng dẫn `FRONTEND-SCHEDULE-4F3.md`; không đổi backend/migration.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối nghỉ đổi và khôi phục từng buổi học"
+git push
+```
+
+## 4F.2 — Thêm sửa xóa chuỗi lịch học
+
+Nối POST/PUT/DELETE cả chuỗi; form và danh sách chuỗi trong học kỳ, giữ bản nháp/lỗi trùng, nạp rõ ràng khi version cũ, xác nhận xóa và không tự tạo lại chuỗi đã mất. Mất phản hồi kiểm tra toàn tài khoản trước khi tiếp tục; ghi đã xác nhận khác với GET lỗi. 54 test đọc/ghi (26 mới), TypeScript, export web và browser API thật qua, không đổi backend/migration. Hướng dẫn `FRONTEND-SCHEDULE-4F2.md`; ghi từng buổi đã có ở 4F.3.
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

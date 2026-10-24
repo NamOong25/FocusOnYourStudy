@@ -60,7 +60,7 @@ Chỉ thử xóa chuỗi bạn vừa tạo để kiểm tra, hoặc dữ liệu 
 | Tình huống | Kết quả cần thấy |
 | --- | --- |
 | Bỏ chọn hết thứ, kết thúc trước bắt đầu, quá 366 ngày, mốc nhắc sai | Báo lỗi trước khi gửi; giữ form. |
-| Đổi chuỗi làm mất ngày đang có ngoại lệ/chuyển môn khi còn ngoại lệ | Backend chặn và báo nguyên nhân; giữ nội dung đang nhập. Xử lý ngoại lệ riêng vẫn thuộc 4F.3. |
+| Đổi chuỗi làm mất ngày đang có ngoại lệ/chuyển môn khi còn ngoại lệ | Backend chặn và báo nguyên nhân; giữ nội dung đang nhập. Xử lý ngoại lệ riêng đã có ở 4F.3. |
 | Đóng form khi có thay đổi | Có Tiếp tục chỉnh sửa/Bỏ thay đổi; chọn tiếp tục giữ bản nháp. |
 | Bấm lưu nhiều lần | Chỉ một thao tác được gửi, các điều khiển bị khóa khi đang xử lý. Đợi kết quả trước khi đóng. |
 | Hai tab cùng sửa một chuỗi | Tab lưu sau bị chặn version, bản nháp vẫn còn và không tự ghép version mới. |
@@ -91,6 +91,6 @@ Có thể thử tắt backend rồi lưu và bật lại để kiểm tra đư�
 
 Môi trường QA đã được dọn hoàn tất: dừng backend thử ở cổng 8087, Expo thử ở cổng 8093 và xóa schema QA riêng. Hai cổng đã được kiểm tra không còn lắng nghe; không đổi schema ứng dụng. Chưa tự commit hoặc push.
 
-**4F.3 còn làm:** nghỉ/đổi/khôi phục riêng một buổi trên giao diện. Dashboard/chi tiết môn/nhắc việc tổng hợp lịch thật vẫn theo checklist sau phần ghi lịch; không coi trang lịch tải theo khoảng là toàn bộ lịch.
+**4F.3 đã hoàn thành:** nghỉ/đổi/khôi phục riêng một buổi trên giao diện; xem `FRONTEND-SCHEDULE-4F3.md`. Dashboard/chi tiết môn/nhắc việc tổng hợp lịch thật vẫn theo checklist sau phần ghi lịch; không coi trang lịch tải theo khoảng là toàn bộ lịch.
 
 Tên commit: **Kết nối thêm sửa xóa chuỗi lịch học với backend**.

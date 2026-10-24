@@ -46,6 +46,7 @@ function occurrence(value: unknown): ServerOccurrence {
     startsAt: v.startsAt, endsAt: v.endsAt, room: v.room, teacher: v.teacher, reminderMinutes: v.reminderMinutes, notes: v.notes,
     scheduleVersion: v.scheduleVersion, cancelled: v.cancelled, changed: v.changed, reason: v.reason, exceptionId: v.exceptionId };
 }
+export { occurrence as parseServerOccurrence };
 function rule(value: unknown): ServerRule {
   if (!record(value) || !base(value) || !validId(value.id) || !version(value.version) || !day(value.startsOn) || !day(value.endsOn)
     || daysBetween(value.startsOn, value.endsOn) < 0 || daysBetween(value.startsOn, value.endsOn) > 365

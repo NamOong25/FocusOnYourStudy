@@ -7,9 +7,10 @@ import { API_BASE_URL } from '../../../shared/api/config';
 import { useAuth } from '../../account/auth/AuthProvider';
 import { weekdaysLabel, reminderLabel } from '../calendar';
 import { createScheduleApi, type ServerOccurrence, type ServerRule } from '../api/scheduleApi';
+import type { ExceptionMode } from '../exceptionDraft';
 
-export default function ServerClassDialog({ item, title, onClose, onReload, onEdit }: {
-  item: ServerOccurrence; title: string; onClose: () => void; onReload: () => void; onEdit: (rule: ServerRule) => void;
+export default function ServerClassDialog({ item, title, blocked, onClose, onReload, onEdit, onException }: {
+  item: ServerOccurrence; title: string; blocked: boolean; onClose: () => void; onReload: () => void; onEdit: (rule: ServerRule) => void; onException: (mode: ExceptionMode, item: ServerOccurrence) => void;
 }) {
   const auth = useAuth(), [rule, setRule] = useState<ServerRule | null>(null), [error, setError] = useState<ApiError | null>(null);
   useEffect(() => {
@@ -26,8 +27,12 @@ export default function ServerClassDialog({ item, title, onClose, onReload, onEd
       {(item.changed || item.cancelled) && <Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><T style={{ fontFamily: F.bold, color: C.amber }}>Chỉ áp dụng cho ngày này</T><T style={S.small}>{item.reason || 'Chưa ghi lý do'}</T><T style={S.small}>Lịch gốc: {rule.startTime} – {rule.endTime} · {rule.room || 'Chưa có phòng'}</T></Card>}
       {!!item.notes && <Card><T style={S.small}>{item.notes}</T></Card>}
       <Card style={{ backgroundColor: C.canvas, gap: 7 }}><T style={{ fontFamily: F.bold }}>Chuỗi lịch học</T><T style={S.small}>{weekdaysLabel(rule.weekdays.map(d => d % 7))} · {rule.startTime} – {rule.endTime}</T><T style={S.small}>{dateLabel(rule.startsOn)}/{rule.startsOn.slice(0, 4)} → {dateLabel(rule.endsOn)}/{rule.endsOn.slice(0, 4)}</T><T style={S.small}>{rule.reminderMinutes ? `Mốc nhắc đã chọn: trước ${reminderLabel(rule.reminderMinutes)}` : 'Không chọn mốc nhắc'} · Chưa gửi nhắc trên thiết bị.</T></Card>
-      <Button label="Chỉnh sửa cả chuỗi lịch" icon="repeat-outline" onPress={() => onEdit(rule)} />
-      <T style={S.small}>Chỉnh sửa áp dụng cho cả chuỗi. Nghỉ, đổi hoặc khôi phục riêng một buổi sẽ được bổ sung sau.</T><Button label="Đóng chi tiết" secondary onPress={onClose} />
+      {blocked && <T accessibilityRole="alert" style={S.small}>Chưa thể chỉnh lịch. Đóng chi tiết để tải lại lịch hoặc kiểm tra lần ghi chưa rõ kết quả trước khi tiếp tục.</T>}
+      <Button label="Chỉnh sửa cả chuỗi lịch" icon="repeat-outline" disabled={blocked} onPress={() => onEdit(rule)} />
+      <Button label="Đổi buổi này" secondary icon="swap-horizontal-outline" disabled={blocked} onPress={() => onException('change', item)} />
+      {!item.cancelled && <Button label="Nghỉ buổi này" secondary icon="close-circle-outline" disabled={blocked} onPress={() => onException('cancel', item)} />}
+      {(item.changed || item.cancelled) && <Button label={item.cancelled ? 'Khôi phục buổi này' : 'Bỏ thay đổi buổi này'} secondary icon="refresh-outline" disabled={blocked} onPress={() => onException('restore', item)} />}
+      <T style={S.small}>Các nút buổi này chỉ áp dụng ngày {item.date}. Chỉnh sửa cả chuỗi áp dụng toàn khoảng lịch.</T><Button label="Đóng chi tiết" secondary onPress={onClose} />
     </>}
   </Sheet>;
 }
