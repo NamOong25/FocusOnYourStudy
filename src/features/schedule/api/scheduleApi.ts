@@ -9,6 +9,7 @@ export type ServerOccurrence = { scheduleId: string; courseId: string; date: str
   scheduleVersion: number; cancelled: boolean; changed: boolean; reason: string; exceptionId: string | null };
 export type ServerRule = { id: string; courseId: string; weekdays: number[]; startsOn: string; endsOn: string;
   startTime: string; endTime: string; timeZone: string; room: string; teacher: string; reminderMinutes: number; notes: string; version: number };
+export type RuleInput = Omit<ServerRule, 'id' | 'version'>;
 const uuid = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i;
 const validId = (v: unknown): v is string => typeof v === 'string' && uuid.test(v);
 const day = (v: unknown): v is string => typeof v === 'string' && v >= '1900-01-01' && v <= '2099-12-31' && isValidDate(v);
@@ -54,9 +55,52 @@ function rule(value: unknown): ServerRule {
   return { id: v.id, courseId: v.courseId, weekdays: [...v.weekdays], startsOn: v.startsOn, endsOn: v.endsOn,
     startTime: v.startTime, endTime: v.endTime, timeZone: v.timeZone, room: v.room, teacher: v.teacher, reminderMinutes: v.reminderMinutes, notes: v.notes, version: v.version };
 }
+export function ruleInput(input: RuleInput): RuleInput {
+  let value: ServerRule;
+  try { value = rule({ ...input, id: '00000000-0000-4000-8000-000000000000', version: 0,
+    room: input.room.trim(), teacher: input.teacher.trim(), notes: input.notes.trim(), timeZone: input.timeZone.trim() }); }
+  catch { throw new ApiError('Kiểm tra môn, thứ, khoảng ngày tối đa 366 ngày, giờ kết thúc, múi giờ và mốc nhắc.', 'INVALID_CLASS_INPUT', 400); }
+  let matched = false;
+  for (let day = parseDay(value.startsOn); day <= parseDay(value.endsOn); day.setDate(day.getDate() + 1)) {
+    if (value.weekdays.includes(day.getDay() || 7)) { matched = true; break; }
+  }
+  if (!matched) throw new ApiError('Khoảng ngày áp dụng cần có ít nhất một buổi đúng thứ đã chọn.', 'INVALID_CLASS_INPUT', 400);
+  const { id, version: ignored, ...body } = value;
+  return { ...body, weekdays: [...body.weekdays].sort((a, b) => a - b) };
+}
+function expectedVersion(original: ServerRule) {
+  if (!validId(original.id) || !version(original.version)) throw new ApiError('Nạp bản lịch mới nhất trước khi sửa hoặc xóa.', 'CLASS_SCHEDULE_VERSION_CONFLICT', 409);
+  return original.version;
+}
 export function createScheduleApi(baseUrl: string, authorized: Authorized, options?: Parameters<typeof createHttpClient>[1]) {
   const http = createHttpClient(baseUrl, options), headers = (token: string) => ({ Authorization: `Bearer ${token}` });
   return {
+    async rules(semesterId?: string, signal?: AbortSignal) {
+      if (semesterId !== undefined && !validId(semesterId)) throw new ApiError('Chọn học kỳ hợp lệ.', 'INVALID_CLASS_INPUT');
+      const rows = await authorized(token => http<unknown>('/api/v1/class-schedules' + (semesterId ? `?semesterId=${encodeURIComponent(semesterId)}` : ''), { headers: headers(token), signal }), signal);
+      if (!Array.isArray(rows)) throw invalid();
+      const result = rows.map(rule);
+      if (new Set(result.map(r => r.id)).size !== result.length) throw invalid();
+      return result;
+    },
+    async readRule(id: string, signal?: AbortSignal) {
+      if (!validId(id)) throw invalid();
+      const value = rule(await authorized(token => http<unknown>(`/api/v1/class-schedules/${encodeURIComponent(id)}`, { headers: headers(token), signal }), signal));
+      if (value.id !== id) throw invalid();
+      return value;
+    },
+    async save(input: RuleInput, original?: ServerRule) {
+      const expected = original ? expectedVersion(original) : undefined, body = ruleInput(input);
+      const value = rule(await authorized(token => http<unknown>('/api/v1/class-schedules' + (original ? '/' + encodeURIComponent(original.id) : ''), {
+        method: original ? 'PUT' : 'POST', headers: headers(token), body: { ...body, ...(original ? { version: expected } : {}) },
+      })));
+      if (original && (value.id !== original.id || value.version < original.version) || value.courseId !== body.courseId) throw invalid();
+      return value;
+    },
+    async remove(original: ServerRule) {
+      const expected = expectedVersion(original);
+      await authorized(token => http<void>(`/api/v1/class-schedules/${encodeURIComponent(original.id)}?version=${expected}`, { method: 'DELETE', empty: true, headers: headers(token) }));
+    },
     async list(q: ScheduleQuery, signal?: AbortSignal) {
       queryKey(q);
       const path = `/api/v1/class-schedules/occurrences?semesterId=${encodeURIComponent(q.semesterId)}&from=${q.from}&to=${q.to}`;

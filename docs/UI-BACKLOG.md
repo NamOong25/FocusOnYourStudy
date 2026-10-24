@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đã có API chuỗi lịch 4E.1, ngoại lệ 4E.2A và trùng giờ 4E.2B; 4F.1 đã đọc lịch thật trên Thời khóa biểu, còn ghi lịch 4F.2/4F.3 và lịch thi. Điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
+Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đã có API chuỗi lịch 4E.1, ngoại lệ 4E.2A và trùng giờ 4E.2B; 4F.1 đã đọc lịch thật trên Thời khóa biểu, 4F.2 đã ghi cả chuỗi, còn ghi từng buổi 4F.3 và lịch thi. Điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -122,7 +122,7 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 4E.2B — Chặn trùng lịch–lịch/tự học hai chiều theo UTC sau ngoại lệ; bỏ buổi nghỉ, cho phép nối tiếp, bảo vệ đổi/khôi phục buổi, sửa chuỗi và ghi đồng thời. Lỗi có buổi/môn/ngày/giờ, thất bại giữ dữ liệu/version. 238 tests/Maven verify qua (30 mới), TypeScript và 6 tình huống smoke HTTP qua. Script PowerShell 5.1 và form tự học hiện lỗi cụ thể; không thêm migration/seed. Xem `BACKEND-PHASE-4E2B.md`; UI thời khóa biểu ở 4F.
 - [ ] 4F — Nối UI thời khóa biểu với API, chia từng đợt dưới đây; chỉ hoàn thành toàn phần khi đã kiểm tra cả đọc và ghi.
 - [x] 4F.1 — Đọc lịch theo tài khoản/học kỳ/khoảng ngày; ngày/tuần/tháng, chi tiết chỉ xem, hiển thị nghỉ/đổi, tải/lỗi/thử lại và chặn phản hồi cũ khi đổi khoảng/tài khoản. 28 test đọc lịch, TypeScript, export web và browser API thật 320/390/430/1280px qua; F5, kỳ trống, mất mạng và hai tài khoản. Không đổi backend; chưa nối thao tác ghi hoặc nghiệm thu native. Xem `FRONTEND-SCHEDULE-4F1.md`.
-- [ ] 4F.2 — Nối thêm/sửa/xóa cả chuỗi; xác thực, version, lỗi trùng giờ, giữ bản nháp và đọc lại kết quả sau ghi.
+- [x] 4F.2 — Thêm/sửa/xóa cả chuỗi bằng API, danh sách chuỗi ngoài khoảng đang xem, xác nhận xóa đúng chuỗi và ngoại lệ; giữ bản nháp khi trùng/lỗi, nạp lại rõ ràng khi version cũ, không tạo lại chuỗi đã xóa. Khóa gửi trùng, kiểm tra toàn tài khoản khi mất phản hồi, phân biệt ghi đã xác nhận và GET lỗi. 54 test đọc/ghi (26 mới), TypeScript, export web và browser API thật qua; không đổi backend/migration. Xem `FRONTEND-SCHEDULE-4F2.md`.
 - [ ] 4F.3 — Nối nghỉ/đổi/khôi phục một buổi; khóa theo version cả chuỗi, xử lý giờ đã bị chiếm và không ảnh hưởng tuần khác.
 - [ ] Sau phần ghi lịch — Tổng hợp lịch thật ở Dashboard/chi tiết môn/nhắc việc; dùng nguồn đủ khoảng và ngoại lệ, không coi trang lịch vừa tải là toàn bộ dữ liệu. Hiện các vị trí chưa tổng hợp dẫn đến Thời khóa biểu, không báo số ca/không có lịch từ RAM trong tài khoản.
 - [ ] Backend 4 tiếp theo — API lịch thi và nối UI; kiểm tra trùng thi với lịch học/tự học, nối nhắc việc theo dữ liệu đã lưu.

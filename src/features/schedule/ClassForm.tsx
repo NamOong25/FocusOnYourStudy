@@ -12,8 +12,8 @@ import { useAuth } from '../account/auth/AuthProvider';
 import { StateView } from '../../shared/components';
 
 export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
-  const auth = useAuth();
-  return auth.hasSession ? <Sheet title="Lịch học trong tài khoản" onClose={onClose}><StateView title="Lịch học hiện ở chế độ chỉ xem" message="Bạn có thể xem các buổi đã lưu trong Thời khóa biểu. Chức năng chỉnh sửa lịch sẽ được bổ sung sau." actionLabel="Đóng" onAction={onClose} /></Sheet>
+  const auth = useAuth(), { setScheduleMode } = useApp();
+  return auth.hasSession ? <Sheet title="Lịch học trong tài khoản" onClose={onClose}><StateView title="Quản lý lịch tại Thời khóa biểu" message="Bạn có thể thêm, sửa hoặc xóa cả chuỗi lịch đã lưu tại Thời khóa biểu." actionLabel="Mở Thời khóa biểu" onAction={() => { onClose(); setScheduleMode('Thời khóa biểu'); }} /></Sheet>
     : <PreviewClassForm item={item} initialCourseId={initialCourseId} onClose={onClose} onDeleted={onDeleted} />;
 }
 function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {

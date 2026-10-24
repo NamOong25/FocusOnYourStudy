@@ -1,8 +1,10 @@
-import { asApiError, cancelledRequest, type ApiError } from '../../../shared/api/http';
-import { queryKey, type ScheduleQuery, type ServerOccurrence, type createScheduleApi } from './scheduleApi';
+import { ApiError, asApiError, cancelledRequest } from '../../../shared/api/http';
+import { queryKey, type ScheduleQuery, type ServerOccurrence, type ServerRule, type RuleInput, type createScheduleApi } from './scheduleApi';
 
-export type ScheduleState = { key: string | null; rows: ServerOccurrence[]; loaded: boolean; loading: boolean; error: ApiError | null };
-export const emptyScheduleState = (): ScheduleState => ({ key: null, rows: [], loaded: false, loading: false, error: null });
+export type ScheduleState = { key: string | null; rows: ServerOccurrence[]; loaded: boolean; loading: boolean; error: ApiError | null;
+  busy: boolean; needsReload: boolean; revision: number; confirmedWrite: boolean };
+export const emptyScheduleState = (): ScheduleState => ({ key: null, rows: [], loaded: false, loading: false, error: null,
+  busy: false, needsReload: false, revision: 0, confirmedWrite: false });
 export class ScheduleManager {
   state = emptyScheduleState();
   private listeners = new Set<() => void>();
@@ -15,18 +17,43 @@ export class ScheduleManager {
   private publish(change: Partial<ScheduleState>) { if (!this.disposed) { this.state = { ...this.state, ...change }; this.listeners.forEach(fn => fn()); } }
   load = (q: ScheduleQuery): Promise<ServerOccurrence[]> => {
     if (this.disposed) return Promise.reject(cancelledRequest());
+    if (this.state.busy) return Promise.reject(new ApiError('Đang lưu lịch học. Đợi một chút nhé.', 'REQUEST_BUSY'));
     const key = queryKey(q);
     if (key === this.state.key && this.flight) return this.flight;
     this.read?.abort(); const generation = ++this.generation, controller = new AbortController(); this.read = controller;
     this.publish({ ...(key === this.state.key ? {} : { key, rows: [], loaded: false }), loading: true, error: null });
     this.flight = this.api.list(q, controller.signal).then(rows => {
       if (this.disposed || generation !== this.generation) throw cancelledRequest();
-      this.publish({ rows, loaded: true }); return rows;
+      this.publish({ rows, loaded: true, confirmedWrite: false }); return rows;
     }).catch(error => {
       if (!this.disposed && generation === this.generation) this.publish({ error: asApiError(error) });
       throw error;
     }).finally(() => { if (generation === this.generation) { this.flight = null; this.read = null; this.publish({ loading: false }); } });
     return this.flight;
+  };
+  private async write<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.disposed) throw cancelledRequest();
+    if (this.state.busy || this.state.loading) throw new ApiError('Đang xử lý lịch học. Đợi một chút nhé.', 'REQUEST_BUSY');
+    if (!this.state.loaded || this.state.error || this.state.needsReload) throw new ApiError('Kiểm tra lịch đã lưu trước khi gửi tiếp.', 'SCHEDULE_RELOAD_REQUIRED');
+    this.publish({ busy: true });
+    try {
+      const result = await operation();
+      if (this.disposed) throw cancelledRequest();
+      // Never fabricate occurrences from a rule or retry a write after losing its response.
+      this.publish({ rows: [], loaded: false, error: null, revision: this.state.revision + 1, confirmedWrite: true });
+      return result;
+    } catch (failure) {
+      const error = asApiError(failure);
+      if (!error.status || error.status >= 500 || error.code === 'DATA_CONFLICT') this.publish({ needsReload: true });
+      throw error;
+    } finally { this.publish({ busy: false }); }
+  }
+  save = (input: RuleInput, original?: ServerRule) => this.write(() => this.api.save(input, original));
+  remove = (original: ServerRule) => this.write(() => this.api.remove(original));
+  readRule = (id: string, signal?: AbortSignal) => this.disposed ? Promise.reject(cancelledRequest()) : this.api.readRule(id, signal);
+  rules = (semesterId?: string, signal?: AbortSignal) => this.disposed ? Promise.reject(cancelledRequest()) : this.api.rules(semesterId, signal);
+  acknowledge = () => {
+    if (this.state.loaded && !this.state.error && !this.state.loading && !this.state.busy) this.publish({ needsReload: false });
   };
   dispose = () => { this.disposed = true; this.generation++; this.read?.abort(); this.listeners.clear(); };
 }

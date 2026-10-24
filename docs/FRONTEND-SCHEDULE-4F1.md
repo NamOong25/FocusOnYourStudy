@@ -1,5 +1,7 @@
 # 4F.1 — Xem thời khóa biểu từ tài khoản
 
+Ghi chú phiên bản: từ **4F.2** giao diện đã thêm/sửa/xóa cả chuỗi; xem `FRONTEND-SCHEDULE-4F2.md`. Nội dung bên dưới ghi lại phạm vi và kiểm tra của riêng đợt đọc 4F.1.
+
 Phạm vi đã làm: đọc lịch theo học kỳ, ngày/tuần/tháng, tải lại và xem chi tiết. Chưa nối thêm/sửa/xóa chuỗi (4F.2) hoặc nghỉ/đổi/khôi phục một buổi trên giao diện (4F.3). Backend các thao tác này đã có từ 4E; hiện vẫn có thể thử bằng script/HTTP như trước.
 
 ## Chạy để xem

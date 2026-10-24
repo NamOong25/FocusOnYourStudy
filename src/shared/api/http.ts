@@ -42,6 +42,8 @@ const messages: Record<string, string> = {
   STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',
   SCHEDULE_TIME_CONFLICT: 'Khung giờ trùng lịch học hoặc buổi tự học đã lưu. Chọn giờ khác hoặc điều chỉnh lịch.',
   CLASS_SCHEDULE_NOT_FOUND: 'Lịch học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại lịch.',
+  CLASS_SCHEDULE_VERSION_CONFLICT: 'Chuỗi hoặc một buổi đã được sửa ở nơi khác. Xem lại bản mới trước khi tiếp tục.',
+  CLASS_SCHEDULE_HAS_EXCEPTIONS: 'Chuỗi có buổi đã nghỉ/đổi. Giữ ngày và cấu hình còn hợp lệ, hoặc xử lý ngoại lệ trước khi thay đổi.',
   INVALID_CLASS_RANGE: 'Khoảng ngày xem lịch chưa hợp lệ. Chọn lại ngày hoặc khoảng ngắn hơn.',
   STUDY_ASSIGNMENT_COURSE_MISMATCH: 'Bài tập cần thuộc đúng môn của buổi học. Kiểm tra lại bài đã chọn.',
   STUDY_AFTER_DEADLINE: 'Buổi học kết thúc sau hạn bài đã lưu. Đổi giờ hoặc gỡ liên kết bài tập.',
@@ -54,12 +56,12 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && ['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId'].includes(item.field)) fields[item.field] = item.message.slice(0, 180);
+      && (['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');
   // This known conflict includes the owned course/date/time; retain the specific explanation in the study form.
-  if (status === 409 && code === 'SCHEDULE_TIME_CONFLICT' && object(value)
+  if (status === 409 && ['SCHEDULE_TIME_CONFLICT', 'CLASS_SCHEDULE_HAS_EXCEPTIONS'].includes(code) && object(value)
     && typeof value.detail === 'string' && value.detail.trim() && value.detail.length <= 1200) message = value.detail;
   if (status === 429 && retryAfter && /^\d{1,5}$/.test(retryAfter)) message = `Bạn đã thử nhiều lần. Thử lại sau ${Number(retryAfter)} giây.`;
   return new ApiError(message, code, status, fields);
@@ -94,7 +96,10 @@ export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher 
       let payload: unknown;
       try { payload = text ? JSON.parse(text) : null; } catch { payload = null; }
       if (!response.ok) throw errorFromResponse(response.status, payload, response.headers.get('Retry-After'));
-      if (options.empty && response.status === 204 && !text) return undefined as T;
+      if (options.empty) {
+        if (response.status === 204 && !text) return undefined as T;
+        throw new ApiError('Phản hồi xác nhận chưa hợp lệ. Kiểm tra dữ liệu trước khi thử lại.', 'INVALID_RESPONSE');
+      }
       if (!object(payload) || !('data' in payload)) throw new ApiError('Phản hồi chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
       return payload.data as T;
     })();

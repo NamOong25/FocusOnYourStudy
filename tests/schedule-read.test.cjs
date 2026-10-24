@@ -24,11 +24,11 @@ function api(payload, status = 200, calls = []) {
   } });
 }
 const invalid = promise => assert.rejects(promise, error => error.code === 'INVALID_RESPONSE');
-test('reads only GET with Bearer, selected semester, bounded dates and signal', async () => {
+test('reads occurrences with GET, Bearer, selected semester, bounded dates and signal', async () => {
   const calls = [], controller = new AbortController(); await api([row()], 200, calls).list(query, controller.signal);
   assert.match(calls[0].url, /semesterId=11111111.*from=2026-10-19&to=2026-10-25$/);
   assert.equal(calls[0].options.method, 'GET'); assert.equal(calls[0].options.headers.Authorization, 'Bearer test-access');
-  assert.equal(calls[0].options.credentials, 'omit'); assert.deepEqual(Object.keys(api([])).sort(), ['get', 'list']);
+  assert.equal(calls[0].options.credentials, 'omit'); assert.deepEqual(Object.keys(api([])).sort(), ['get', 'list', 'readRule', 'remove', 'rules', 'save']);
 });
 test('empty response is a successful empty calendar', async () => assert.deepEqual(await api([]).list(query), []));
 test('cancelled and changed keep effective fields and original source dates', async () => {
