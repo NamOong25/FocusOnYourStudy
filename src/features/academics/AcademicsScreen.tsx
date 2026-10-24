@@ -65,7 +65,7 @@ export default function Academics() {
         <Row><IconTile name="book-outline" color={colors.ink} bg={colors.bg} size={46} /><View style={[S.grow, { gap: 4 }]}><T style={{ color: colors.ink, fontFamily: F.bold, fontSize: 10, letterSpacing: 0.7 }}>{course.code}</T><T style={{ fontFamily: F.bold, fontSize: 17, lineHeight: 25, letterSpacing: -0.3 }}>{course.name}</T></View><Icon name="chevron-forward" color={C.muted} size={17} /></Row>
         <Row between><Row style={[S.grow, { gap: 5 }]}><Icon name="person-outline" color={C.muted} size={14} /><T numberOfLines={1} style={{ color: C.muted, fontSize: 11, flex: 1 }}>{course.teacher || 'Chưa có giảng viên'}</T></Row><Badge label={grade.failed?'Không đạt':grade.passed?'Hoàn thành':course.status} bg={grade.failed ? C.redSoft : grade.passed || course.status === 'Hoàn thành' ? C.greenSoft : colors.bg} color={grade.failed ? C.red : grade.passed || course.status === 'Hoàn thành' ? C.green : colors.ink} /></Row>
         {(grade.failed||grade.passed)&&<GradeStatus result={grade}/>}
-        <Row style={{ gap: 7, flexWrap: 'wrap' }}><Badge label={`${course.credits} tín chỉ`} bg={C.canvas} color={C.muted} icon="ribbon-outline" /><Badge label={`${classCount} ca học`} bg={C.canvas} color={C.muted} icon="calendar-outline" /><Badge label={`${linkedTasks.length} bài tập`} bg={C.canvas} color={C.muted} icon="clipboard-outline" /></Row>
+        <Row style={{ gap: 7, flexWrap: 'wrap' }}><Badge label={`${course.credits} tín chỉ`} bg={C.canvas} color={C.muted} icon="ribbon-outline" /><Badge label={semesterConnection ? 'Xem ở Thời khóa biểu' : `${classCount} ca học`} bg={C.canvas} color={C.muted} icon="calendar-outline" /><Badge label={`${linkedTasks.length} bài tập`} bg={C.canvas} color={C.muted} icon="clipboard-outline" /></Row>
         {!!linkedTasks.length && <View style={{ gap: 7 }}><Row between><T style={{ color: C.muted, fontSize: 10 }}>Bài tập đã hoàn thành</T><T style={{ color: colors.ink, fontSize: 10, fontFamily: F.bold }}>{done}/{linkedTasks.length}</T></Row><Progress value={done / linkedTasks.length * 100} /></View>}
       </Card></Pressable>;
     })}
@@ -83,7 +83,7 @@ export default function Academics() {
 
 function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
   const now=useCurrentTime();
-  const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules } = useApp();
+  const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules, semesterConnection, setAcademicSemesterId, setScheduleMode } = useApp();
   const grade=courseResult(gradeBook[course.id],gradeRules);
   const colors = grade.failed?{bg:C.redSoft,ink:C.red}:courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
@@ -101,11 +101,11 @@ function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, on
       {linkedExams.map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi môn ${exam.course}`} onPress={() => onExam(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
       <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
     </>}
-    {section === 'Lịch học' && <>
+    {section === 'Lịch học' && (semesterConnection ? <Card style={{backgroundColor:C.canvas,gap:10}}><T style={S.small}>Các buổi đã lưu được hiển thị trong Thời khóa biểu của học kỳ này.</T><Button label="Xem thời khóa biểu đã lưu" secondary onPress={()=>{onClose();setAcademicSemesterId(course.semesterId);setScheduleMode('Thời khóa biểu');}}/></Card> : <>
       <Row between><T style={{ fontFamily: F.bold }}>Các ca học trong tuần</T><IconButton name="add" label="Thêm ca học cho môn" onPress={() => onClass()} /></Row>
       {linkedClasses.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Sửa ca ${item.start}`} onPress={() => onClass(item)}><Card style={{ backgroundColor: C.canvas, gap: 12 }}><Row between><Badge label={weekdaysLabel(item.weekdays)} /><Icon name="create-outline" size={17} /></Row><T style={{ fontFamily: F.bold, fontSize: 20 }}>{item.start} – {item.end}</T><T style={S.small}>Phòng {item.room} · {item.teacher}</T></Card></Pressable>)}
       {!linkedClasses.length && <Card style={{ backgroundColor: C.canvas, gap: 10 }}><IconTile name="calendar-outline" /><T style={{ fontFamily: F.bold }}>Chưa có ca học</T><T style={S.small}>Thêm lịch để biết khi nào và ở đâu bạn sẽ học môn này.</T><Button label="Thêm lịch cho môn" secondary onPress={() => onClass()} /></Card>}
-    </>}
+    </>)}
     {section === 'Bài tập' && <>
       <Row between><T style={{ fontFamily: F.bold }}>Bài tập của môn</T><IconButton name="add" label="Thêm bài tập cho môn" onPress={() => onTask()} /></Row>
       {linkedTasks.map(task => <Pressable key={task.id} accessibilityRole="button" accessibilityLabel={`Mở bài tập ${task.title}`} onPress={() => onTask(task)}><Card style={{ backgroundColor: C.canvas, gap: 10 }}><Row between><Badge label={task.status} color={task.status === 'Hoàn thành' ? C.green : C.primary} bg={task.status === 'Hoàn thành' ? C.greenSoft : C.soft} /><T style={{ fontSize: 10, color: C.muted }}>{taskDueLabel(task,now)}</T></Row><T style={{ fontFamily: F.bold, fontSize: 15 }}>{task.title}</T><T style={S.small}>Hạn nộp {taskDeadlineLabel(task)} · Ưu tiên {task.priority.toLowerCase()}</T></Card></Pressable>)}

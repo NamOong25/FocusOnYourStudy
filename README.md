@@ -1,14 +1,22 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Lịch học/thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đọc lịch đã lưu từ 4F.1 và hiện chỉ xem. Lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4E.2B: Kiểm tra trùng lịch học và tự học
+## Mới nhất — 4F.1: Xem thời khóa biểu đã lưu
+
+Đăng nhập → Lịch học → Thời khóa biểu: chọn học kỳ, xem ngày/tuần/tháng, tải lại và mở chi tiết từ backend. Buổi nghỉ/đổi hiển thị đúng giờ/phòng/giảng viên hiệu lực, có múi giờ; không trộn dữ liệu mẫu hoặc phản hồi cũ khi đổi tài khoản/khoảng ngày. Có tải/lỗi/thử lại, giữ lịch cùng khoảng khi mất mạng và phát hiện chi tiết đã đổi version.
+
+**Hiện chỉ xem**; thêm/sửa/xóa cả chuỗi ở 4F.2, ngoại lệ từng buổi ở 4F.3. Trang chủ/chi tiết môn dẫn đến Thời khóa biểu trong lúc chưa tổng hợp lịch thật ở các vị trí đó. Không tự nhập lịch RAM cũ vào tài khoản. **28 test đọc lịch, TypeScript, export web và browser với API thật qua**, gồm hai tài khoản, F5, kỳ trống, mất mạng và 320/390/430/1280px. Backend không đổi.
+
+Xem [hướng dẫn kiểm tra 4F.1](docs/FRONTEND-SCHEDULE-4F1.md). Chạy backend và frontend như trước; tài khoản chưa có lịch server dùng script 4E để tạo dữ liệu thử chủ động. Chế độ khách vẫn giữ lịch mẫu/local.
+
+## 4E.2B: Kiểm tra trùng lịch học và tự học
 
 Backend kiểm tra trước khi tạo/sửa chuỗi, đổi/khôi phục từng buổi và tạo/sửa tự học. So sánh UTC từng ngày sau ngoại lệ; buổi nghỉ không chiếm giờ, hai buổi nối tiếp được phép. Lỗi 409 báo rõ buổi/môn/ngày/giờ cản; thao tác bị chặn giữ nguyên dữ liệu/version. Hai nơi cùng ghi dùng chung khóa tài khoản. Không thêm migration hoặc sửa dữ liệu cũ.
 
 **238 tests/Maven verify qua (30 mới), không lỗi/bỏ qua**; TypeScript và 6 tình huống smoke HTTP qua. Có kiểm tra ghi đồng thời, version/rollback, lịch cả năm/DST/khác ngày địa phương, script PowerShell 5.1 và hồi quy restart/migration.
 
-Xem [hướng dẫn test bằng terminal VS Code/IntelliJ](docs/BACKEND-PHASE-4E2B.md), [contract trùng giờ](backend/docs/SCHEDULE-CONFLICTS.md), `backend/api/schedule-conflicts.http`. Script PowerShell 5.1 đọc đúng lỗi HTTP; form Tự học hiển thị thông báo cụ thể. **Thời khóa biểu trên UI vẫn RAM, nối ở 4F; lịch thi làm riêng.**
+Xem [hướng dẫn test bằng terminal VS Code/IntelliJ](docs/BACKEND-PHASE-4E2B.md), [contract trùng giờ](backend/docs/SCHEDULE-CONFLICTS.md), `backend/api/schedule-conflicts.http`. Script PowerShell 5.1 đọc đúng lỗi HTTP; form Tự học hiển thị thông báo cụ thể. Thời khóa biểu đã đọc API ở 4F.1; thao tác chuỗi ở 4F.2 và ngoại lệ ở 4F.3; lịch thi làm riêng.
 
 ## 4E.2A: Ngoại lệ từng buổi học
 
@@ -16,7 +24,7 @@ API đã lưu nghỉ/đổi giờ/phòng/giảng viên cho đúng một ngày c�
 
 **208 tests/Maven verify qua (26 mới)**, gồm migration V5 → V6, snapshot/ghi đồng thời, restart và script Windows PowerShell 5.1.
 
-Test terminal VS Code/IntelliJ theo [hướng dẫn 4E.2A](docs/BACKEND-PHASE-4E2A.md), [hợp đồng API](backend/docs/CLASS-EXCEPTIONS.md), `backend/scripts/Try-ClassExceptions.ps1` và `backend/api/class-exceptions.http`. Kiểm tra trùng giờ đã có ở 4E.2B; UI lịch vẫn RAM và nối ở 4F.
+Test terminal VS Code/IntelliJ theo [hướng dẫn 4E.2A](docs/BACKEND-PHASE-4E2A.md), [hợp đồng API](backend/docs/CLASS-EXCEPTIONS.md), `backend/scripts/Try-ClassExceptions.ps1` và `backend/api/class-exceptions.http`. Kiểm tra trùng giờ đã có ở 4E.2B; UI thời khóa biểu đã đọc API ở 4F.1, thao tác ghi còn làm ở 4F.2/4F.3.
 
 ## 4E.1: API lịch học lặp
 
@@ -24,7 +32,7 @@ Backend có V5 và API chuỗi lịch theo môn/tài khoản: thứ trong tuần
 
 **182 tests/Maven verify qua, gồm 27 test mới**, kiểm tra migration giữ dữ liệu cũ, đóng/mở backend, DST/ba múi giờ JVM và script PowerShell 5.1. TypeScript và unit API môn/tự học qua; không coi là đã nối UI lịch.
 
-**Thời khóa biểu trên UI vẫn RAM**, nối ở 4F. Ngoại lệ/nghỉ/đổi từng buổi và kiểm tra trùng giờ đã có ở 4E.2A/4E.2B; mốc nhắc được lưu nhưng chưa gửi thông báo. Test bằng terminal VS Code/IntelliJ theo [hướng dẫn 4E.1](docs/BACKEND-PHASE-4E1.md), [hợp đồng API](backend/docs/CLASS-SCHEDULES.md), `backend/scripts/Try-ClassSchedules.ps1` và `backend/api/class-schedules.http`.
+Thời khóa biểu đã đọc API ở 4F.1, thao tác ghi còn làm ở 4F.2/4F.3. Ngoại lệ/nghỉ/đổi từng buổi và kiểm tra trùng giờ đã có ở 4E.2A/4E.2B; mốc nhắc được lưu nhưng chưa gửi thông báo. Test bằng terminal VS Code/IntelliJ theo [hướng dẫn 4E.1](docs/BACKEND-PHASE-4E1.md), [hợp đồng API](backend/docs/CLASS-SCHEDULES.md), `backend/scripts/Try-ClassSchedules.ps1` và `backend/api/class-schedules.http`.
 
 ## 4D: Giao diện tự học lưu vào tài khoản
 

@@ -41,6 +41,8 @@ const messages: Record<string, string> = {
   STUDY_SESSION_VERSION_CONFLICT: 'Buổi học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',
   SCHEDULE_TIME_CONFLICT: 'Khung giờ trùng lịch học hoặc buổi tự học đã lưu. Chọn giờ khác hoặc điều chỉnh lịch.',
+  CLASS_SCHEDULE_NOT_FOUND: 'Lịch học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại lịch.',
+  INVALID_CLASS_RANGE: 'Khoảng ngày xem lịch chưa hợp lệ. Chọn lại ngày hoặc khoảng ngắn hơn.',
   STUDY_ASSIGNMENT_COURSE_MISMATCH: 'Bài tập cần thuộc đúng môn của buổi học. Kiểm tra lại bài đã chọn.',
   STUDY_AFTER_DEADLINE: 'Buổi học kết thúc sau hạn bài đã lưu. Đổi giờ hoặc gỡ liên kết bài tập.',
   INVALID_STUDY_RANGE: 'Khoảng thời gian lọc chưa hợp lệ. Chọn lại ngày và giờ.',

@@ -5,8 +5,14 @@ import { Badge, Button, Card, Icon, IconButton, IconTile, Row, Section, Segments
 import { C, F, S } from '../../shared/theme';
 import { ExamDialog } from '../exams/Exams';
 import { ClassItem, addDays, dateKey, dateLabel, today, useApp } from '../../store/model';
+import { useAuth } from '../account/auth/AuthProvider';
+import ServerSchedule from './ServerSchedule';
 
 export default function Schedule({ onClass, onNewClass }: { onClass: (c: ClassItem, date?: string) => void; onNewClass: () => void }) {
+  const auth = useAuth();
+  return auth.hasSession ? <ServerSchedule /> : <PreviewSchedule onClass={onClass} onNewClass={onNewClass} />;
+}
+function PreviewSchedule({ onClass, onNewClass }: { onClass: (c: ClassItem, date?: string) => void; onNewClass: () => void }) {
   const { getClassesOn, exams } = useApp(); const [examId, setExamId] = useState<string | null>(null); const [view, setView] = useState('Theo ngày'); const [selected, setSelected] = useState(new Date(today));
   const monday = addDays(selected, -((selected.getDay() + 6) % 7)); const week = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const first = new Date(selected.getFullYear(), selected.getMonth(), 1); const monthStart = addDays(first, -((first.getDay() + 6) % 7)); const month = Array.from({ length: 42 }, (_, i) => addDays(monthStart, i));

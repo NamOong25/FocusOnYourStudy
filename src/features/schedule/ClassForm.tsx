@@ -8,8 +8,15 @@ import ConflictPanel from './ConflictPanel';
 import { addDays, dateKey, isValidDate, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
+import { useAuth } from '../account/auth/AuthProvider';
+import { StateView } from '../../shared/components';
 
 export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
+  const auth = useAuth();
+  return auth.hasSession ? <Sheet title="Lịch học trong tài khoản" onClose={onClose}><StateView title="Lịch học hiện ở chế độ chỉ xem" message="Bạn có thể xem các buổi đã lưu trong Thời khóa biểu. Chức năng chỉnh sửa lịch sẽ được bổ sung sau." actionLabel="Đóng" onAction={onClose} /></Sheet>
+    : <PreviewClassForm item={item} initialCourseId={initialCourseId} onClose={onClose} onDeleted={onDeleted} />;
+}
+function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
   const { saveClass, deleteClass, classes, classExceptions, exams, studySessions, courseCatalog, setToast } = useApp();
   const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const course = courseCatalog.find(c => c.id === courseId);
