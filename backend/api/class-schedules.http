@@ -1,0 +1,61 @@
+### Điền biến bằng dữ liệu cùng tài khoản; không lưu token thật vào Git.
+@baseUrl = http://localhost:8080
+@accessToken = PASTE_ACCESS_TOKEN
+@courseId = PASTE_COURSE_UUID
+@classScheduleId = PASTE_SCHEDULE_UUID
+@version = 0
+
+### Danh sách chuỗi
+GET {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{accessToken}}
+
+### Tạo chuỗi thứ Hai/thứ Tư, giờ địa phương của chuỗi
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [1, 3],
+  "startsOn": "2026-10-26",
+  "endsOn": "2026-11-08",
+  "startTime": "07:00",
+  "endTime": "09:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "room": "A1.01",
+  "teacher": "Giảng viên",
+  "reminderMinutes": 15,
+  "notes": "Mang laptop"
+}
+
+### Các buổi phát sinh trong tuần (2 buổi; không ghi thêm hàng DB)
+GET {{baseUrl}}/api/v1/class-schedules/occurrences?from=2026-10-26&to=2026-11-01&courseId={{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### Một chuỗi, đọc version trước khi sửa/xóa
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}
+Authorization: Bearer {{accessToken}}
+
+### Thay TOÀN BỘ chuỗi, không phải một buổi riêng
+PUT {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [1, 3],
+  "startsOn": "2026-10-26",
+  "endsOn": "2026-11-08",
+  "startTime": "07:30",
+  "endTime": "09:30",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "room": "B2.03",
+  "teacher": "Giảng viên",
+  "reminderMinutes": 15,
+  "notes": "Đã đổi cả chuỗi",
+  "version": {{version}}
+}
+
+### Dùng version trả từ PUT/GET mới nhất
+DELETE {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}?version={{version}}
+Authorization: Bearer {{accessToken}}

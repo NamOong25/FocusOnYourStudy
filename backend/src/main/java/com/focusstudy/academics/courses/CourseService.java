@@ -6,6 +6,7 @@ import com.focusstudy.academics.semesters.SemesterApiException;
 import com.focusstudy.users.UserRepository;
 import com.focusstudy.assignments.AssignmentRepository;
 import com.focusstudy.study.StudySessionRepository;
+import com.focusstudy.schedule.ClassScheduleRepository;
 import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,9 @@ public class CourseService {
     private final UserRepository users;
     private final AssignmentRepository assignments;
     private final StudySessionRepository studySessions;
-    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users, AssignmentRepository assignments, StudySessionRepository studySessions) {
-        this.courses = courses; this.semesters = semesters; this.users = users; this.assignments = assignments; this.studySessions = studySessions;
+    private final ClassScheduleRepository classSchedules;
+    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users, AssignmentRepository assignments, StudySessionRepository studySessions, ClassScheduleRepository classSchedules) {
+        this.courses = courses; this.semesters = semesters; this.users = users; this.assignments = assignments; this.studySessions = studySessions; this.classSchedules = classSchedules;
     }
     @Transactional(readOnly = true)
     public List<CourseResponse> list(UUID owner, UUID semesterId) {
@@ -55,6 +57,8 @@ public class CourseService {
                 "COURSE_HAS_ASSIGNMENTS", "Môn còn bài tập. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.");
         if (studySessions.existsByUserIdAndCourseId(owner, courseId)) throw new CourseApiException(HttpStatus.CONFLICT,
                 "COURSE_HAS_STUDY_SESSIONS", "Môn còn buổi tự học đã lưu. Xử lý các buổi trước khi xóa hoặc chuyển học kỳ.");
+        if (classSchedules.existsByUserIdAndCourseId(owner, courseId)) throw new CourseApiException(HttpStatus.CONFLICT,
+                "COURSE_HAS_CLASS_SCHEDULES", "Môn còn lịch học đã lưu. Xử lý các chuỗi lịch trước khi xóa hoặc chuyển học kỳ.");
     }
     private void lockOwner(UUID owner) {
         // Same first lock as semester writes: create/move cannot race deletion of

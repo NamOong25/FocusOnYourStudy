@@ -139,7 +139,7 @@ erDiagram
 | --- | --- | --- |
 | Auth bổ sung | verification_tokens, password_reset_tokens | Lưu hash token, hạn dùng/thu hồi; không lưu token/mật khẩu rõ. refresh_sessions/refresh_tokens đã có trong V2. |
 | Bài tập bổ sung | assignment_checklist | assignments đã có trong V3, liên kết tự học có ở V4; checklist/tệp làm ở đợt sau. |
-| Lịch học | class_series, class_series_weekdays, class_exceptions | Chuỗi có ngày bắt đầu/kết thúc và múi giờ; ngoại lệ duy nhất `(series_id, date)` cho đổi/nghỉ một buổi; phát hiện trùng ở service. |
+| Lịch học bổ sung | class_exceptions | Chuỗi đã có trong V5 dưới tên class_schedules; ngoại lệ duy nhất `(schedule_id,date)` cho nghỉ/đổi một buổi, kiểm tra trùng ở 4E.2. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
 | Điểm, đợt 5 | course_grade_configs, grade_columns, grade_project_allocations | Cột có thể thêm/xóa/đổi tên/đổi loại; score nullable, 0 khác chưa nhập; cấu hình vai trò/tỷ lệ BTL rõ; lưu phiên bản quy tắc. |
 | Pomodoro | focus_records, focus_preferences | Định danh phiên để không ghi trùng; mốc bắt đầu/kết thúc/tạm dừng, thời gian học thực; lưu snapshot môn/học kỳ. |
@@ -168,8 +168,19 @@ Bảng `study_sessions` lưu buổi lên kế hoạch, tách với lịch sử P
 - CHECK bảo vệ thời lượng/khoảng năm, end tính đúng, phút nguyên, cùng ngày theo time_zone, tiêu đề/trạng thái/ghi chú/version; index theo owner/time, owner/course và owner/assignment.
 - API dùng chung khóa hàng chủ tài khoản cho mọi ghi học kỳ/môn/bài/tự học, kiểm tra trùng thời gian và hạn trước commit. Quy tắc trùng/deadline liên bảng nằm trong service, không dùng CHECK truy vấn bảng khác. SQL ngoài API có thể bỏ qua hai quy tắc liên bảng này.
 - Xóa bài cập nhật từng buổi thành độc lập, flush để tăng version rồi mới xóa bài trong cùng giao dịch. Môn còn bất kỳ buổi nào chặn xóa/chuyển kỳ. Sửa/xóa buổi dùng owner/version; không nhận userId hoặc focusedSeconds từ client.
-- 4D nối UI tự học; bảng/API lịch học/lịch thi/Pomodoro còn các đợt sau. Chi tiết ở `STUDY-SESSIONS.md`.
+- 4D đã nối UI tự học; V5 có chuỗi lịch, ngoại lệ/trùng giờ và UI lịch tiếp tục 4E.2/4F. Lịch thi/Pomodoro còn các đợt sau. Chi tiết ở `STUDY-SESSIONS.md`.
 
 ## Migration
 
-Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên, V3 bài tập và V4 tự học; đợt sau thêm V5 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
+Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên, V3 bài tập, V4 tự học và V5 lịch lặp; đợt sau thêm V6 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
+
+## Đã tạo trong V5 — chuỗi lịch học
+
+`class_schedules` lưu một hàng cho mỗi chuỗi; API tính occurrence khi đọc, không nhân bản hàng theo ngày. Giữ dữ liệu V1–V4, không seed. FK `(course_id,user_id)` → courses và UNIQUE `(id,user_id)` bảo vệ chủ sở hữu/chuẩn bị ngoại lệ.
+
+- `weekday_mask` integer 1–127: 7 bit cho ISO thứ Hai đến Chủ nhật. Contract trả danh sách `weekdays` 1–7; không lộ mask. Không tạo bảng weekdays riêng cho tập cố định 7 thứ.
+- `starts_on/ends_on` DATE gồm cả hai đầu, năm 1900–2099, tối đa 366 ngày. `start_time/end_time` TIME không có offset: phút nguyên, tăng trong cùng ngày; `time_zone` xác định offset cho mỗi ngày, tránh cố định UTC qua DST.
+- `room/teacher/notes`, `reminder_minutes` 0–10080, `created_at/updated_at/version` lưu cùng chuỗi. Mốc nhắc chưa tạo job hoặc gửi thông báo.
+- CHECK bảo vệ mask/khoảng ngày/giờ/notes/reminder/version; API kiểm tra trúng thứ, zone và giờ DST không rõ. Index owner/date và owner/course. SQL ngoài API có thể bỏ qua các quy tắc service.
+- Ghi chuỗi cùng khóa tài khoản với môn/kỳ/bài/tự học; môn còn lịch chặn xóa/chuyển kỳ. Sửa/xóa rule kiểm tra owner/version trước commit.
+- 4E.1 chưa có ngoại lệ hoặc kiểm tra trùng; 4E.2 bổ sung các guard hai chiều rồi 4F nối UI. Contract: `CLASS-SCHEDULES.md`.

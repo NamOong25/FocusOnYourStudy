@@ -79,7 +79,7 @@ Các mục chưa đánh dấu là phần để làm sau, không coi đã hoàn t
 
 ## Lộ trình backend — 5 đợt lõi
 
-Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đợt 4 còn lịch học lặp/ngoại lệ và lịch thi. UI lịch/điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
+Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xong nền tảng 1, tài khoản 2A/2B/2C.1/2C.2/2C.3A, học kỳ/môn 3A/3B/3C.1/3C.2, **4A/4B API + UI bài tập và 4C/4D API + UI tự học**. 2C.3B để sau. Đã có API chuỗi lịch 4E.1; đợt 4 còn ngoại lệ/trùng giờ 4E.2, nối UI lịch 4F và lịch thi. UI lịch/điểm/Pomodoro, checklist/tài liệu mẫu vẫn RAM.
 
 | Đợt | Làm gì | Kết quả cần kiểm tra được |
 | --- | --- | --- |
@@ -117,7 +117,10 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 4D — Nối UI tự học với API 4C: ngày/tuần, tạo/sửa/xóa/đổi trạng thái, liên kết bài/môn, F5/đổi tài khoản, giữ bản nháp/version và lỗi mạng; xóa bài giữ buổi độc lập và nạp version mới. Tách phút Pomodoro trong phiên khỏi trạng thái/thời lượng dự kiến. 37 nhóm unit mới, 16 nhóm browser tự học, hồi quy bài tập và smoke web 4 kích thước qua. Xem `FRONTEND-STUDY-4D.md`; không đổi backend/migration, chưa nghiệm thu máy thật.
 - [ ] Đợt AI — Lưu/điều chỉnh nhiều buổi qua API sau bước xem trước/duyệt; xử lý lỗi từng phần, trùng giờ, version và tránh tạo trùng khi mất phản hồi. Từ 4D tài khoản thật chỉ xem trước, có lối đến Tự học; khách vẫn thử local.
 - [ ] Đợt Pomodoro — Lưu lịch sử phiên và mục tiêu ngày qua API, không suy thời gian học thật từ trạng thái hoàn thành thủ công hoặc thời lượng kế hoạch.
-- [ ] Backend 4 tiếp theo — Lịch học lặp/ngoại lệ và lịch thi, kiểm tra trùng giữa lịch học/thi/tự học phía server rồi nối UI theo từng đợt.
+- [x] 4E.1 — V5 + API chuỗi lịch theo môn/tài khoản: các thứ, khoảng ngày, giờ địa phương/múi giờ, phòng/giảng viên, ghi chú và cấu hình nhắc; CRUD/lọc, đọc các buổi phát sinh, ownership/version và guard chuyển/xóa môn. 182 tests/Maven verify qua (27 mới), nâng V4 giữ dữ liệu, restart, DST/ba múi giờ JVM và script PowerShell 5.1. Xem `BACKEND-PHASE-4E1.md`; UI lịch còn RAM, chưa kiểm tra trùng/ngoại lệ hoặc gửi nhắc.
+- [ ] 4E.2 — Ngoại lệ nghỉ/đổi giờ/phòng/giảng viên và khôi phục từng buổi, version; kiểm tra trùng lịch–lịch và lịch–tự học hai chiều dưới khóa chung, kể cả ghi đồng thời.
+- [ ] 4F — Nối UI thời khóa biểu với API lịch/ngoại lệ, đọc ngày/tuần/tháng, F5/đổi tài khoản, sửa một buổi/cả chuỗi, lỗi/version giữ bản nháp.
+- [ ] Backend 4 tiếp theo — API lịch thi và nối UI; kiểm tra trùng thi với lịch học/tự học, nối nhắc việc theo dữ liệu đã lưu.
 - [ ] Backend 5 — Cột điểm tùy chỉnh/BTL được lưu và mở lại đúng; tổng kết/GPA khớp ví dụ tính tay và số liệu Dashboard.
 
 Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Đợt 2 tiếp tục chia 2A → 2B → 2C; không làm hết trong một lần. 2A cần access token ngắn hạn để thử hồ sơ có bảo vệ; giữ phiên/refresh/đăng xuất vẫn thuộc 2B. Lộ trình đầy đủ phía dưới giữ Pomodoro, thống kê, tài liệu/AI và hoàn thiện. Chỉ đánh dấu toàn đợt khi đã kiểm tra đầy đủ chức năng thật.

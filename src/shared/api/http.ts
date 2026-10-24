@@ -36,6 +36,7 @@ const messages: Record<string, string> = {
   ASSIGNMENT_HAS_STUDY_SESSIONS: 'Bài tập còn buổi tự học đã lưu. Gỡ liên kết các buổi trước khi đổi môn.',
   ASSIGNMENT_DEADLINE_CONFLICT: 'Hạn nộp mới đang trước lúc kết thúc buổi tự học đã lưu. Điều chỉnh buổi học hoặc gỡ liên kết trước.',
   COURSE_HAS_STUDY_SESSIONS: 'Môn còn buổi tự học đã lưu. Xử lý các buổi trước khi xóa hoặc chuyển học kỳ.',
+  COURSE_HAS_CLASS_SCHEDULES: 'Môn còn lịch học đã lưu. Xử lý các chuỗi lịch trước khi xóa hoặc chuyển học kỳ.',
   STUDY_SESSION_NOT_FOUND: 'Buổi học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại.',
   STUDY_SESSION_VERSION_CONFLICT: 'Buổi học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',

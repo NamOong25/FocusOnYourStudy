@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Lịch học/thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4D: Giao diện tự học lưu vào tài khoản
+## Mới nhất — 4E.1: API lịch học lặp
+
+Backend có V5 và API chuỗi lịch theo môn/tài khoản: thứ trong tuần, khoảng ngày, giờ/múi giờ, phòng/giảng viên, ghi chú và cấu hình mốc nhắc. Có tải/thêm/sửa/xóa, version và đọc các buổi phát sinh theo ngày/tuần. Môn còn chuỗi bị chặn xóa/chuyển kỳ. Không seed hoặc thay dữ liệu cũ; chạy lại backend để Flyway thêm bảng, không tạo lại database.
+
+**182 tests/Maven verify qua, gồm 27 test mới**, kiểm tra migration giữ dữ liệu cũ, đóng/mở backend, DST/ba múi giờ JVM và script PowerShell 5.1. TypeScript và unit API môn/tự học qua; không coi là đã nối UI lịch.
+
+**Thời khóa biểu trên UI vẫn RAM**, nối ở 4F. Ngoại lệ/nghỉ/đổi từng buổi và kiểm tra trùng giờ để 4E.2; mốc nhắc được lưu nhưng chưa gửi thông báo. Test bằng terminal VS Code/IntelliJ theo [hướng dẫn 4E.1](docs/BACKEND-PHASE-4E1.md), [hợp đồng API](backend/docs/CLASS-SCHEDULES.md), `backend/scripts/Try-ClassSchedules.ps1` và `backend/api/class-schedules.http`.
+
+## 4D: Giao diện tự học lưu vào tài khoản
 
 Đăng nhập → **Lịch học → Tự học**: tạo/sửa/xóa và trạng thái gọi API 4C. Xem ngày/tuần, chọn ngày cần xem, liên kết một bài với nhiều buổi. F5/đăng nhập lại giữ dữ liệu; hai tài khoản có danh sách riêng. Có tải/lỗi/thử lại, giữ bản nháp khi lỗi hoặc xung đột version, không tự gửi lại thao tác mất phản hồi. Xóa bài giữ buổi độc lập và tải lại version; Dashboard/chi tiết bài/môn dùng chung nguồn.
 

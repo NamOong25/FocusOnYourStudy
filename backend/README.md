@@ -1,5 +1,9 @@
 # Backend — FocusYourStudy
 
+**Đợt mới 4E.1 — API lịch học lặp:** V5 tạo class_schedules, CRUD/lọc theo môn/kỳ/tài khoản và đọc các buổi phát sinh theo ngày/tuần. Lưu thứ, khoảng ngày, giờ/múi giờ, phòng/giảng viên, ghi chú và cấu hình mốc nhắc; ownership/version, guard chuyển/xóa môn và khóa ghi chung. UI thời khóa biểu nối 4F; ngoại lệ và kiểm tra trùng để 4E.2. Không seed dữ liệu. Xem [hướng dẫn terminal VS Code/IntelliJ](../docs/BACKEND-PHASE-4E1.md), [hợp đồng](docs/CLASS-SCHEDULES.md), `api/class-schedules.http`, `scripts/Try-ClassSchedules.ps1`.
+
+**Kết quả 4E.1: 182 tests/Maven verify qua (27 mới), không bỏ qua**, gồm ownership/version, migration V4 → V5, restart toàn backend, DST/giờ không rõ, giữ đúng giờ SQL qua ba múi giờ JVM và script Windows PowerShell 5.1.
+
 **Đợt 4C — API kế hoạch tự học:** V4 thêm study_sessions, CRUD/lọc theo tài khoản/môn/kỳ/bài/trạng thái/khoảng giờ, lưu timeZone và startsAt/endsAt UTC. Chặn trùng buổi, sai môn và vượt deadline; xóa bài gỡ link giữ buổi, chống đua khi ghi với bài/môn. **155 tests/Maven verify qua**, gồm 37 test tự học/migration mới, nâng V3 giữ dữ liệu, restart và script PowerShell 5.1. Màn Tự học nối ở 4D. Xem [hướng dẫn test 4C](../docs/BACKEND-PHASE-4C.md), [hợp đồng](docs/STUDY-SESSIONS.md), `api/study-sessions.http` và `scripts/Try-StudySessions.ps1`.
 
 **Đợt 4A — API bài tập:** V3 tạo bảng bài tập, CRUD/lọc theo tài khoản/môn/kỳ/trạng thái, deadline có múi giờ và version; chặn xóa/chuyển kỳ môn còn bài. UI bài tập đã nối API ở 4B. Xem [hướng dẫn test 4A](../docs/BACKEND-PHASE-4A.md), [hợp đồng bài tập](docs/ASSIGNMENTS.md) và `api/assignments.http`. Khởi động lại backend để Flyway thêm bảng; không xóa/tạo lại database.
@@ -10,7 +14,7 @@
 
 **Đợt 3A đã xong:** API CRUD học kỳ theo chủ tài khoản, lưu PostgreSQL, tối đa một CURRENT, kiểm tra version và chặn xóa kỳ còn môn. **72 tests/Maven verify qua** tại đợt 3A, gồm 21 test học kỳ và đọc lại kỳ sau khi backend khởi động lại. UI học kỳ đã nối ở 3C.1; 2C.3B để làm sau. Xem [hướng dẫn test 3A](../docs/BACKEND-PHASE-3A.md) và [hợp đồng API](docs/SEMESTERS.md).
 
-Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối tài khoản/phiên, học kỳ/môn và bài tập**; nghiệm thu thiết bị thật ở 2C.3B. UI lịch/tự học/điểm/Pomodoro vẫn trong bộ nhớ; API tự học có ở 4C. Xem `../docs/FRONTEND-AUTH-2C2.md`, `../docs/FRONTEND-COURSES-3C2.md`.
+Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, Flyway và Spring Data JPA. **Đợt 2B** bổ sung refresh token luân chuyển, phiên bền vững và đăng xuất thu hồi ngay cả access token của phiên. Native dùng JSON; web dùng cookie HttpOnly và CSRF. **Frontend đã nối tài khoản/phiên, học kỳ/môn và bài tập**; nghiệm thu thiết bị thật ở 2C.3B. Tự học đã nối API ở 4D; UI lịch học/thi, điểm và Pomodoro vẫn trong bộ nhớ. API chuỗi lịch có ở 4E.1, ngoại lệ/trùng giờ ở 4E.2 và UI lịch nối 4F. Xem `../docs/FRONTEND-AUTH-2C2.md`, `../docs/FRONTEND-COURSES-3C2.md`.
 
 ## Chạy trên máy Windows hiện tại
 
@@ -27,7 +31,7 @@ Script sẽ:
 2. Tạo cluster riêng ở `.local/data`, mật khẩu ngẫu nhiên trong `.local/database.json`, chỉ nghe `127.0.0.1:55432`.
 3. Tạo database `focus_study` nếu chưa có; không xóa hoặc tạo lại data khi chạy lần tiếp theo.
 4. Tạo cặp khóa RSA ở `.local/auth` nếu chưa có, giữ nguyên khóa ở các lần chạy sau; nạp biến kết nối và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
-5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token), V3 (bài tập) và V4 (tự học); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
+5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token), V3 (bài tập), V4 (tự học) và V5 (lịch lặp); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
 
 Mở **http://localhost:8080/api/v1/health**. Kết quả đúng:
 

@@ -23,7 +23,7 @@ class StudyMigrationTests {
                 statement.execute("INSERT INTO refresh_sessions(id,user_id,transport,expires_at,last_used_at) VALUES ('" + session + "','" + owner + "','BODY',now()+interval '7 days',now())");
                 statement.execute("INSERT INTO refresh_tokens(id,session_id,token_hash,expires_at) VALUES ('" + token + "','" + session + "','" + "a".repeat(64) + "',now()+interval '7 days')");
             }
-            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).target("4").load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
             assertThat(current.info().current().getVersion().toString()).isEqualTo("4"); assertThat(current.migrate().migrationsExecuted).isZero(); current.validate();
             try (var connection = DriverManager.getConnection(url, user, password); var statement = connection.createStatement()) {
                 statement.execute("SET search_path TO " + schema);
