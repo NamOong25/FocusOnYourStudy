@@ -139,7 +139,7 @@ erDiagram
 | --- | --- | --- |
 | Auth bổ sung | verification_tokens, password_reset_tokens | Lưu hash token, hạn dùng/thu hồi; không lưu token/mật khẩu rõ. refresh_sessions/refresh_tokens đã có trong V2. |
 | Bài tập bổ sung | assignment_checklist | assignments đã có trong V3, liên kết tự học có ở V4; checklist/tệp làm ở đợt sau. |
-| Lịch học bổ sung | class_exceptions | Chuỗi đã có trong V5 dưới tên class_schedules; ngoại lệ duy nhất `(schedule_id,date)` cho nghỉ/đổi một buổi, kiểm tra trùng ở 4E.2. |
+| Lịch học bổ sung | Chưa cần bảng mới cho kiểm tra trùng | Chuỗi có ở V5, ngoại lệ ở V6; 4E.2B xét lịch hiệu lực sau ngoại lệ trong service. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
 | Điểm, đợt 5 | course_grade_configs, grade_columns, grade_project_allocations | Cột có thể thêm/xóa/đổi tên/đổi loại; score nullable, 0 khác chưa nhập; cấu hình vai trò/tỷ lệ BTL rõ; lưu phiên bản quy tắc. |
 | Pomodoro | focus_records, focus_preferences | Định danh phiên để không ghi trùng; mốc bắt đầu/kết thúc/tạm dừng, thời gian học thực; lưu snapshot môn/học kỳ. |
@@ -172,7 +172,7 @@ Bảng `study_sessions` lưu buổi lên kế hoạch, tách với lịch sử P
 
 ## Migration
 
-Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên, V3 bài tập, V4 tự học và V5 lịch lặp; đợt sau thêm V6 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
+Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phiên, V3 bài tập, V4 tự học, V5 lịch lặp và V6 ngoại lệ; đợt sau thêm V7 trở đi. Không sửa các migration đã áp dụng hoặc bật `ddl-auto=update` để sửa ngầm. `flyway.clean` bị khóa. Hibernate `validate` kiểm tra mapping khi khởi động; lỗi migration/schema làm app dừng thay vì chạy trên database sai.
 
 ## Đã tạo trong V5 — chuỗi lịch học
 
@@ -184,3 +184,12 @@ Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phi
 - CHECK bảo vệ mask/khoảng ngày/giờ/notes/reminder/version; API kiểm tra trúng thứ, zone và giờ DST không rõ. Index owner/date và owner/course. SQL ngoài API có thể bỏ qua các quy tắc service.
 - Ghi chuỗi cùng khóa tài khoản với môn/kỳ/bài/tự học; môn còn lịch chặn xóa/chuyển kỳ. Sửa/xóa rule kiểm tra owner/version trước commit.
 - 4E.1 chưa có ngoại lệ hoặc kiểm tra trùng; 4E.2 bổ sung các guard hai chiều rồi 4F nối UI. Contract: `CLASS-SCHEDULES.md`.
+
+## Đã tạo trong V6 — ngoại lệ từng buổi
+
+- `class_exceptions`: UUID, user_id, schedule_id, occurrence_date, kind CANCELLED/CHANGED, start_time/end_time/room/teacher nullable, reason tối đa 1000, timestamps/version nội bộ. Null nghĩa là kế thừa chuỗi; chuỗi rỗng ở phòng/giảng viên là ghi đè thành trống.
+- UNIQUE `(schedule_id,occurrence_date)`; FK `(schedule_id,user_id)` → class_schedules bảo vệ chủ sở hữu và cascade chỉ khi xóa cả chuỗi. CHECK bảo vệ kind, dữ liệu buổi nghỉ/đổi, giờ phút/trước 24:00, thứ tự giờ khi đủ hai đầu, khoảng năm và version. API kiểm tra ngày thuộc chuỗi và thời gian sau kế thừa/DST.
+- `class_schedules.exception_revision` mặc định 0, không đổi version cũ khi migrate. Mỗi ghi/khôi phục ngoại lệ làm dirty counter để @Version chuỗi tăng; counter không lộ DTO. Client luôn kiểm tra version cả chuỗi, tránh bản cũ ghi lại sau khi ngoại lệ được khôi phục/tạo lại.
+- Ghi dùng khóa hàng tài khoản chung; parent version và child data commit nguyên tử. GET ngoại lệ/occurrences dùng snapshot REPEATABLE_READ, query ngoại lệ theo lô.
+- Sửa chuỗi không được bỏ ngày đang có ngoại lệ, làm giờ hiệu lực sai hoặc chuyển môn khi còn ngoại lệ. Khôi phục ngoại lệ trước các thay đổi đó. Không có bảng occurrence materialized.
+- 4E.2A chưa kiểm tra trùng; 4E.2B dùng lịch hiệu lực và bỏ buổi nghỉ khi xét giờ bận, rồi 4F nối UI. Chi tiết: `CLASS-EXCEPTIONS.md`.

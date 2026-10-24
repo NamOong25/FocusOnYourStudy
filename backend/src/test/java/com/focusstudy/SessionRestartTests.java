@@ -75,6 +75,10 @@ class SessionRestartTests {
                         "weekdays", List.of(1, 3), "startsOn", "2026-10-26", "endsOn", "2026-11-08", "startTime", "07:00", "endTime", "09:00", "timeZone", "Asia/Ho_Chi_Minh", "room", "A1.01"));
                 assertThat(schedule.statusCode()).isEqualTo(201);
                 classId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(schedule.body(), Map.class).get("data")).get("id").toString();
+                var change = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), Map.of("kind", "CHANGED", "room", "B2.03", "startTime", "10:00", "endTime", "12:00", "scheduleVersion", 0));
+                assertThat(change.statusCode()).isEqualTo(200);
+                var cancelled = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), Map.of("kind", "CANCELLED", "reason", "Keep cancellation", "scheduleVersion", 1));
+                assertThat(cancelled.statusCode()).isEqualTo(200);
             }
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
@@ -87,9 +91,13 @@ class SessionRestartTests {
                 assertThat(study.get("startsAt")).isEqualTo("2026-10-30T12:00:00Z"); assertThat(study.get("endsAt")).isEqualTo("2026-10-30T12:45:00Z");
                 assertThat(study.get("assignmentId")).isEqualTo(assignmentId); assertThat(study.get("timeZone")).isEqualTo("Asia/Ho_Chi_Minh");
                 var schedule = data(app, semester(app, "GET", "/api/v1/class-schedules/" + classId, pair.get("accessToken").toString(), null));
-                assertThat(schedule.get("weekdays")).isEqualTo(List.of(1, 3)); assertThat(schedule.get("room")).isEqualTo("A1.01"); assertThat(schedule.get("version")).isEqualTo(0);
+                assertThat(schedule.get("weekdays")).isEqualTo(List.of(1, 3)); assertThat(schedule.get("room")).isEqualTo("A1.01"); assertThat(schedule.get("version")).isEqualTo(2);
                 var expanded = semester(app, "GET", "/api/v1/class-schedules/occurrences?from=2026-10-26&to=2026-11-08", pair.get("accessToken").toString(), null);
                 assertThat(expanded.statusCode()).isEqualTo(200); assertThat((List<?>) app.getBean(ObjectMapper.class).readValue(expanded.body(), Map.class).get("data")).hasSize(4);
+                var changed = data(app, semester(app, "GET", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), null));
+                assertThat(changed.get("startTime")).isEqualTo("10:00"); assertThat(changed.get("room")).isEqualTo("B2.03");
+                assertThat(data(app, semester(app, "GET", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), null)).get("kind")).isEqualTo("CANCELLED");
+                assertThat(semester(app, "DELETE", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26?scheduleVersion=2", pair.get("accessToken").toString(), null).statusCode()).isEqualTo(204);
                 assertThat(post(app, "/api/v1/auth/logout", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(204);
             }
             try (var app = start(schema)) {
@@ -101,6 +109,8 @@ class SessionRestartTests {
                 assertThat(data(app, semester(app, "GET", "/api/v1/assignments/" + assignmentId, pair.get("accessToken").toString(), null)).get("courseId")).isEqualTo(courseId);
                 assertThat(data(app, semester(app, "GET", "/api/v1/study-sessions/" + studyId, pair.get("accessToken").toString(), null)).get("notes")).isEqualTo("Giữ kế hoạch");
                 assertThat(data(app, semester(app, "GET", "/api/v1/class-schedules/" + classId, pair.get("accessToken").toString(), null)).get("courseId")).isEqualTo(courseId);
+                assertThat(semester(app, "GET", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), null).statusCode()).isEqualTo(404);
+                assertThat(data(app, semester(app, "GET", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), null)).get("reason")).isEqualTo("Keep cancellation");
             }
         } finally {
             if (!schema.matches("backend_it_[a-f0-9]{32}")) throw new IllegalStateException("Unsafe schema");

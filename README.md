@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Lịch học/thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4E.1: API lịch học lặp
+## Mới nhất — 4E.2A: Ngoại lệ từng buổi học
+
+API đã lưu nghỉ/đổi giờ/phòng/giảng viên cho đúng một ngày của chuỗi và khôi phục về lịch gốc hiện tại. Các tuần/ngày khác giữ nguyên. Occurrences trả cờ nghỉ/đổi và giờ thực tế sau ghi đè; mọi thay đổi kiểm tra version của cả chuỗi để bảo vệ sửa từ hai nơi và khôi phục/tạo lại cùng ngày. V6 giữ dữ liệu/version cũ, không seed; chạy lại backend để thêm bảng, không tạo lại database.
+
+**208 tests/Maven verify qua (26 mới)**, gồm migration V5 → V6, snapshot/ghi đồng thời, restart và script Windows PowerShell 5.1.
+
+Test terminal VS Code/IntelliJ theo [hướng dẫn 4E.2A](docs/BACKEND-PHASE-4E2A.md), [hợp đồng API](backend/docs/CLASS-EXCEPTIONS.md), `backend/scripts/Try-ClassExceptions.ps1` và `backend/api/class-exceptions.http`. **Kiểm tra trùng giờ làm tiếp ở 4E.2B; UI lịch vẫn RAM và nối ở 4F.**
+
+## 4E.1: API lịch học lặp
 
 Backend có V5 và API chuỗi lịch theo môn/tài khoản: thứ trong tuần, khoảng ngày, giờ/múi giờ, phòng/giảng viên, ghi chú và cấu hình mốc nhắc. Có tải/thêm/sửa/xóa, version và đọc các buổi phát sinh theo ngày/tuần. Môn còn chuỗi bị chặn xóa/chuyển kỳ. Không seed hoặc thay dữ liệu cũ; chạy lại backend để Flyway thêm bảng, không tạo lại database.
 

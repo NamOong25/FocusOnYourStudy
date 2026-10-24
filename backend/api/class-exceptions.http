@@ -1,0 +1,48 @@
+### Điền biến, không commit token thật. version lấy từ GET chuỗi hoặc scheduleVersion vừa trả.
+@baseUrl = http://localhost:8080
+@accessToken = PASTE_ACCESS_TOKEN
+@classScheduleId = PASTE_SCHEDULE_UUID
+@scheduleVersion = 0
+@date = 2026-10-26
+
+### Đọc version chuỗi trước khi ghi
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}
+Authorization: Bearer {{accessToken}}
+
+### Danh sách ngoại lệ đang có
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions
+Authorization: Bearer {{accessToken}}
+
+### Nghỉ một buổi
+PUT {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "kind": "CANCELLED", "reason": "Giảng viên báo nghỉ", "scheduleVersion": {{scheduleVersion}} }
+
+### Đọc thay đổi riêng và scheduleVersion mới
+GET {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}
+Authorization: Bearer {{accessToken}}
+
+### Đổi một buổi; cập nhật scheduleVersion trước khi chạy
+PUT {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "kind": "CHANGED",
+  "startTime": "10:00",
+  "endTime": "12:00",
+  "room": "B2.03",
+  "teacher": "Giảng viên thay thế",
+  "reason": "Đổi buổi thực hành",
+  "scheduleVersion": {{scheduleVersion}}
+}
+
+### Xem cả tuần, gồm cờ nghỉ và giá trị đã thay thế
+GET {{baseUrl}}/api/v1/class-schedules/occurrences?from=2026-10-26&to=2026-11-01
+Authorization: Bearer {{accessToken}}
+
+### Khôi phục về chuỗi gốc hiện tại, dùng version mới nhất
+DELETE {{baseUrl}}/api/v1/class-schedules/{{classScheduleId}}/exceptions/{{date}}?scheduleVersion={{scheduleVersion}}
+Authorization: Bearer {{accessToken}}

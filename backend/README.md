@@ -1,5 +1,9 @@
 # Backend — FocusYourStudy
 
+**Mới nhất 4E.2A — Ngoại lệ từng buổi:** V6 lưu nghỉ/đổi giờ/phòng/giảng viên và khôi phục theo ngày của chuỗi. Occurrences áp dụng ngoại lệ và trả cancelled/changed; version chuỗi bảo vệ mọi thao tác kể cả khôi phục/tạo lại. Sửa cả chuỗi không được làm mất/sai ngoại lệ; xóa cả chuỗi cascade đúng ngoại lệ của chuỗi. Không seed hoặc sửa migration cũ. Xem [hướng dẫn test](../docs/BACKEND-PHASE-4E2A.md), [contract](docs/CLASS-EXCEPTIONS.md), `scripts/Try-ClassExceptions.ps1` và `api/class-exceptions.http`. Trùng giờ ở 4E.2B, UI ở 4F.
+
+**Kết quả 4E.2A: 208 tests/Maven verify qua (26 mới), không bỏ qua**. Có nâng V5 giữ dữ liệu/version, nguyên tử khi khôi phục/tạo lại, đọc snapshot, ghi đồng thời, restart và script Windows PowerShell 5.1.
+
 **Đợt mới 4E.1 — API lịch học lặp:** V5 tạo class_schedules, CRUD/lọc theo môn/kỳ/tài khoản và đọc các buổi phát sinh theo ngày/tuần. Lưu thứ, khoảng ngày, giờ/múi giờ, phòng/giảng viên, ghi chú và cấu hình mốc nhắc; ownership/version, guard chuyển/xóa môn và khóa ghi chung. UI thời khóa biểu nối 4F; ngoại lệ và kiểm tra trùng để 4E.2. Không seed dữ liệu. Xem [hướng dẫn terminal VS Code/IntelliJ](../docs/BACKEND-PHASE-4E1.md), [hợp đồng](docs/CLASS-SCHEDULES.md), `api/class-schedules.http`, `scripts/Try-ClassSchedules.ps1`.
 
 **Kết quả 4E.1: 182 tests/Maven verify qua (27 mới), không bỏ qua**, gồm ownership/version, migration V4 → V5, restart toàn backend, DST/giờ không rõ, giữ đúng giờ SQL qua ba múi giờ JVM và script Windows PowerShell 5.1.
@@ -31,7 +35,7 @@ Script sẽ:
 2. Tạo cluster riêng ở `.local/data`, mật khẩu ngẫu nhiên trong `.local/database.json`, chỉ nghe `127.0.0.1:55432`.
 3. Tạo database `focus_study` nếu chưa có; không xóa hoặc tạo lại data khi chạy lần tiếp theo.
 4. Tạo cặp khóa RSA ở `.local/auth` nếu chưa có, giữ nguyên khóa ở các lần chạy sau; nạp biến kết nối và chạy Spring Boot. Maven Wrapper tự tải Maven nếu cần.
-5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token), V3 (bài tập), V4 (tự học) và V5 (lịch lặp); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
+5. Flyway áp dụng V1 (tài khoản/học kỳ/môn), V2 (phiên/hash refresh token), V3 (bài tập), V4 (tự học), V5 (lịch lặp) và V6 (ngoại lệ từng buổi); Hibernate chỉ `validate`, không tự sửa schema. Không sửa migration cũ hoặc xóa data đã có.
 
 Mở **http://localhost:8080/api/v1/health**. Kết quả đúng:
 

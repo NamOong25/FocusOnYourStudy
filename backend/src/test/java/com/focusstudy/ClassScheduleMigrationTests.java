@@ -22,7 +22,7 @@ class ClassScheduleMigrationTests {
                 s.execute("INSERT INTO study_sessions(id,user_id,course_id,assignment_id,title,starts_at,ends_at,time_zone,duration_minutes,notes,version) VALUES ('" + study + "','" + owner + "','" + course + "','" + assignment + "','Existing plan','2026-10-30T19:00:00+07','2026-10-30T19:45:00+07','Asia/Ho_Chi_Minh',45,'Keep plan',7)");
                 s.execute("INSERT INTO refresh_sessions(id,user_id,transport,expires_at,last_used_at) VALUES ('" + session + "','" + owner + "','BODY',now()+interval '7 days',now())");
             }
-            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+            var current = Flyway.configure().dataSource(url, user, password).defaultSchema(schema).schemas(schema).target("5").load(); assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
             assertThat(current.info().current().getVersion().toString()).isEqualTo("5"); assertThat(current.migrate().migrationsExecuted).isZero(); current.validate();
             try (var c = DriverManager.getConnection(url, user, password); var s = c.createStatement()) {
                 s.execute("SET search_path TO " + schema);

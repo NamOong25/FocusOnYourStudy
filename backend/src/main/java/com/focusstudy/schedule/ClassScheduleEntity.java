@@ -23,6 +23,7 @@ public class ClassScheduleEntity extends BaseEntity {
     @Column(nullable = false, length = 200) private String teacher;
     @Column(name = "reminder_minutes", nullable = false) private int reminderMinutes;
     @Column(nullable = false, columnDefinition = "text") private String notes;
+    @Column(name = "exception_revision", nullable = false) private long exceptionRevision;
     protected ClassScheduleEntity() { }
     public static ClassScheduleEntity create(UUID owner, ClassScheduleRequests.Rule input) { var rule = new ClassScheduleEntity(); rule.userId = owner; rule.change(input); return rule; }
     public void change(ClassScheduleRequests.Rule v) {
@@ -30,6 +31,7 @@ public class ClassScheduleEntity extends BaseEntity {
         startTime = LocalTime.parse(v.startTime()); endTime = LocalTime.parse(v.endTime()); timeZone = v.timeZone(); room = v.room(); teacher = v.teacher(); reminderMinutes = v.reminderMinutes(); notes = v.notes();
     }
     public UUID getCourseId() { return courseId; }
+    public void markExceptionChange() { exceptionRevision = Math.incrementExact(exceptionRevision); }
     public int getWeekdayMask() { return weekdayMask; }
     public LocalDate getStartsOn() { return startsOn; }
     public LocalDate getEndsOn() { return endsOn; }

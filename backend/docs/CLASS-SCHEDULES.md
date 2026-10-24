@@ -70,11 +70,15 @@ Response occurrence: `scheduleId, courseId, date, startTime, endTime, timeZone, 
 
 Không tự gửi lại POST/PUT/DELETE khi mất phản hồi. Kiểm tra List/Get trước để tránh tạo trùng. 4E.1 chưa có idempotency key.
 
+## Bổ sung từ 4E.2A
+
+API ngoại lệ đã có ở [CLASS-EXCEPTIONS.md](CLASS-EXCEPTIONS.md): nghỉ/đổi/khôi phục một ngày, snapshot đọc và guard sửa chuỗi khi có ngoại lệ. Occurrences thêm cancelled/changed/reason/exceptionId và áp dụng giờ/phòng/giảng viên thực tế. Version chuỗi tăng khi ghi/khôi phục ngoại lệ, nên luôn đọc phiên bản mới nhất.
+
 ## Database và phạm vi kế tiếp
 
 V5 tạo `class_schedules`, không sửa V1–V4 hoặc seed dữ liệu. `weekday_mask` 1–127 là biểu diễn 7 thứ nội bộ; không dùng làm contract API. FK `(course_id,user_id)` → courses bảo vệ chủ sở hữu; UNIQUE `(id,user_id)` chuẩn bị liên kết ngoại lệ. CHECK bảo vệ mask, khoảng ngày, giờ phút/cùng ngày, reminder, notes và version. Việc có buổi trúng thứ, múi giờ hợp lệ và DST được kiểm tra ở API; SQL ngoài API có thể bỏ qua các quy tắc này.
 
-**Chưa làm trong 4E.1:** ngoại lệ nghỉ/đổi/khôi phục từng buổi; kiểm tra trùng lịch–lịch hoặc lịch–tự học/thi; nối UI; gửi thông báo; seed demo. Hai chuỗi trùng giờ hiện có thể cùng được lưu. 4E.2 sẽ kiểm tra xung đột dưới khóa chung và bảo vệ cả chiều sửa tự học; lịch thi theo đợt riêng. Giao diện lịch học hiện vẫn RAM, nối sau ở 4F; dữ liệu đã tạo bằng API không tự xuất hiện trên thời khóa biểu trước 4F.
+**Từ 4E.2A đã có ngoại lệ từng buổi. Còn làm:** kiểm tra trùng lịch–lịch hoặc lịch–tự học/thi; nối UI; gửi thông báo. Hai chuỗi trùng giờ hiện có thể cùng được lưu. 4E.2B sẽ kiểm tra xung đột dưới khóa chung và bảo vệ cả chiều sửa tự học; lịch thi theo đợt riêng. Giao diện lịch học hiện vẫn RAM, nối sau ở 4F; dữ liệu đã tạo bằng API không tự xuất hiện trên thời khóa biểu trước 4F.
 
 Đối chiếu kỹ thuật: [Java 21 ZoneRules.getValidOffsets](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/zone/ZoneRules.html#getValidOffsets(java.time.LocalDateTime)) phân biệt giờ bình thường, khoảng giờ không tồn tại và giờ xuất hiện hai lần. Chính sách từ chối giờ không rõ là lựa chọn của dự án, không phải mặc định tự xử lý DST của Java.
 

@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 @Service
 public class ClassScheduleService {
@@ -20,8 +21,9 @@ public class ClassScheduleService {
     private final CourseRepository courses;
     private final SemesterRepository semesters;
     private final UserRepository users;
-    public ClassScheduleService(ClassScheduleRepository schedules, CourseRepository courses, SemesterRepository semesters, UserRepository users) {
-        this.schedules = schedules; this.courses = courses; this.semesters = semesters; this.users = users;
+    private final ClassExceptionRepository exceptions;
+    public ClassScheduleService(ClassScheduleRepository schedules, CourseRepository courses, SemesterRepository semesters, UserRepository users, ClassExceptionRepository exceptions) {
+        this.schedules = schedules; this.courses = courses; this.semesters = semesters; this.users = users; this.exceptions = exceptions;
     }
     private List<ClassScheduleEntity> rows(UUID owner, UUID courseId, UUID semesterId, LocalDate from, LocalDate to) {
         if (courseId != null) ownedCourse(owner, courseId);
@@ -45,15 +47,19 @@ public class ClassScheduleService {
         var a = bound(from); var b = bound(to); requireRange(a, b);
         return rows(owner, courseId, semesterId, a, b).stream().map(ClassScheduleResponse::from).toList();
     }
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<ClassOccurrenceResponse> occurrences(UUID owner, UUID courseId, UUID semesterId, String from, String to) {
         var a = bound(from); var b = bound(to); requireRange(a, b);
         if (a == null || b == null || ChronoUnit.DAYS.between(a, b) > 91) throw range("Chọn đủ from/to; mỗi lần xem tối đa 92 ngày gồm cả hai đầu.");
         var result = new ArrayList<ClassOccurrenceResponse>();
-        for (var schedule : rows(owner, courseId, semesterId, a, b)) {
+        var rules = rows(owner, courseId, semesterId, a, b);
+        var overrides = new HashMap<UUID, Map<LocalDate, ClassExceptionEntity>>();
+        if (!rules.isEmpty()) for (var e : exceptions.findByUserIdAndScheduleIdInAndDateBetween(owner, rules.stream().map(ClassScheduleEntity::getId).toList(), a, b))
+            overrides.computeIfAbsent(e.getScheduleId(), ignored -> new HashMap<>()).put(e.getDate(), e);
+        for (var schedule : rules) {
             var start = schedule.getStartsOn().isAfter(a) ? schedule.getStartsOn() : a;
             var end = schedule.getEndsOn().isBefore(b) ? schedule.getEndsOn() : b;
-            for (var day = start; !day.isAfter(end); day = day.plusDays(1)) if (ClassScheduleValidator.matches(schedule.getWeekdayMask(), day)) result.add(ClassOccurrenceResponse.from(schedule, day));
+            for (var day = start; !day.isAfter(end); day = day.plusDays(1)) if (ClassScheduleValidator.matches(schedule.getWeekdayMask(), day)) result.add(ClassOccurrenceResponse.from(schedule, day, overrides.getOrDefault(schedule.getId(), Map.of()).get(day)));
         }
         result.sort(Comparator.comparing(ClassOccurrenceResponse::startsAt).thenComparing(ClassOccurrenceResponse::scheduleId));
         return result;
@@ -64,6 +70,13 @@ public class ClassScheduleService {
     }
     @Transactional public ClassScheduleResponse update(UUID owner, UUID id, ClassScheduleRequests.Update v) {
         lockOwner(owner); var schedule = owned(owner, id); checkVersion(schedule, v.version()); ownedCourse(owner, v.courseId());
+        var existing = exceptions.findByScheduleIdAndUserIdOrderByDateAsc(id, owner);
+        if (!existing.isEmpty() && !schedule.getCourseId().equals(v.courseId())) throw exceptionConflict("Khôi phục các buổi đã đổi/nghỉ trước khi chuyển chuỗi sang môn khác.");
+        var candidate = ClassScheduleEntity.create(owner, v);
+        for (var e : existing) {
+            if (!ClassExceptionRules.scheduled(candidate, e.getDate())) throw exceptionConflict("Ngày " + e.getDate() + " đang có thay đổi riêng. Khôi phục buổi đó trước khi bỏ ngày/thứ khỏi chuỗi.");
+            try { ClassExceptionRules.validate(candidate, e); } catch (ClassScheduleApiException failure) { throw exceptionConflict("Thay đổi chuỗi làm buổi " + e.getDate() + " không hợp lệ: " + failure.getMessage()); }
+        }
         schedule.change(v); schedules.flush(); return ClassScheduleResponse.from(schedule);
     }
     @Transactional public void delete(UUID owner, UUID id, long version) {
@@ -75,6 +88,7 @@ public class ClassScheduleService {
     }
     private void requireRange(LocalDate a, LocalDate b) { if (a != null && b != null && b.isBefore(a)) throw range("Ngày đến không được trước ngày bắt đầu."); }
     private ClassScheduleApiException range(String message) { return new ClassScheduleApiException(HttpStatus.BAD_REQUEST, "INVALID_CLASS_RANGE", message); }
+    private ClassScheduleApiException exceptionConflict(String message) { return new ClassScheduleApiException(HttpStatus.CONFLICT, "CLASS_SCHEDULE_HAS_EXCEPTIONS", message); }
     private void lockOwner(UUID owner) { users.lockForAcademicChanges(owner).orElseThrow(() -> new ClassScheduleApiException(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", "Cần đăng nhập lại để tiếp tục.")); }
     private void ownedCourse(UUID owner, UUID id) { courses.findByIdAndUserId(id, owner).orElseThrow(() -> new CourseApiException(HttpStatus.NOT_FOUND, "COURSE_NOT_FOUND", "Không tìm thấy môn học.")); }
     private ClassScheduleEntity owned(UUID owner, UUID id) { return schedules.findByIdAndUserId(id, owner).orElseThrow(() -> new ClassScheduleApiException(HttpStatus.NOT_FOUND, "CLASS_SCHEDULE_NOT_FOUND", "Không tìm thấy lịch học.")); }
