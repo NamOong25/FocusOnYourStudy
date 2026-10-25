@@ -5,9 +5,11 @@ import { API_BASE_URL } from '../../../shared/api/config';
 import { cancelledRequest } from '../../../shared/api/http';
 import { emptyExamRead, ExamReadManager, type ExamReadState } from './ExamReadManager';
 import { createExamsApi, examQueryKey, type ExamQuery } from './examsApi';
+import { useExamWrites } from './ExamWritesProvider';
 
 function useExamRead<Q, T>(query: Q | null, key: string | null, active: boolean, read: (query: Q, signal: AbortSignal) => Promise<T>, keyOf: (query: Q) => string) {
   const auth = useAuth(), owner = auth.hasSession ? `${auth.revision}:${auth.profile?.id ?? ''}` : null;
+  const { state: writes } = useExamWrites();
   const ref = useRef<{ owner: string; manager: ExamReadManager<Q, T> } | null>(null);
   const [snapshot, setSnapshot] = useState<{ owner: string | null; state: ExamReadState<T> }>({ owner: null, state: emptyExamRead<T>() });
   useEffect(() => {
@@ -25,7 +27,7 @@ function useExamRead<Q, T>(query: Q | null, key: string | null, active: boolean,
     if (Platform.OS === 'web') document.addEventListener('visibilitychange', check);
     const manager = ref.current?.manager;
     return () => { native.remove(); if (Platform.OS === 'web') document.removeEventListener('visibilitychange', check); manager?.cancel(); };
-  }, [active, key, owner, reload]);
+  }, [active, key, owner, reload, writes.revision]);
   return { ...(snapshot.owner === owner && snapshot.state.key === key ? snapshot.state : emptyExamRead<T>()), reload };
 }
 const idKey = (id: string) => id.toLowerCase();

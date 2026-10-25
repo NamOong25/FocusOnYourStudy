@@ -53,7 +53,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               {auth.canRestore && <Button label="Khôi phục đăng nhập" secondary onPress={() => { void auth.restore(); }} />}
               {auth.hasSession ? <>
                 <AccountProfile onLogin={() => { setEmail(auth.email); open('login'); }} />
-                <Card style={{ backgroundColor: C.soft, gap: 8 }}><Row><Icon name="leaf-outline" /><T style={{ fontFamily: F.bold }}>Góc học tập đang được hoàn thiện</T></Row><T style={S.small}>Hồ sơ, học kỳ, môn học, bài tập và buổi tự học đã lưu trong tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi đã lưu xem được trong mục Kỳ thi. Điểm và Pomodoro vẫn thử trong phiên này.</T></Card>
+                <Card style={{ backgroundColor: C.soft, gap: 8 }}><Row><Icon name="leaf-outline" /><T style={{ fontFamily: F.bold }}>Góc học tập đang được hoàn thiện</T></Row><T style={S.small}>Hồ sơ, học kỳ, môn học, bài tập và buổi tự học đã lưu trong tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi đã thêm, sửa và xóa được trong mục Kỳ thi. Điểm và Pomodoro vẫn thử trong phiên này.</T></Card>
               </> : <Card style={{ gap: 16 }}>
                 <Badge label="CÙNG BẮT ĐẦU NHÉ" icon="school-outline" />
                 <AuthHero icon="person-outline" title="Góc học tập của bạn" detail="Đăng nhập hoặc tạo tài khoản để xem hồ sơ đã lưu." />

@@ -1,7 +1,7 @@
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Badge, Button, Field, Icon, Row, Segments, Sheet, StateView, T } from '../../shared/components';
+import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from '../../shared/components';
 import { CourseChoices } from '../academics/CourseChoices';
 import { CalendarEvent, Exam, calendarEvents, findConflicts, reminderLabel } from '../schedule/calendar';
 import ConflictPanel from '../schedule/ConflictPanel';
@@ -9,11 +9,14 @@ import { addDays, dateKey, isValidDate, today, uid, useApp } from '../../store/m
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
 import { useAuth } from '../account/auth/AuthProvider';
+import ExamApiForm from './components/ExamApiForm';
+import ServerExamDialog from './components/ServerExamDialog';
 
 type ExamFormProps = { item?: Exam; initialCourseId?: string; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void };
 export function ExamForm(props: ExamFormProps) {
-  const auth = useAuth(), { setScheduleMode } = useApp();
-  if (auth.hasSession) return <Sheet title="Lịch thi trong tài khoản" onClose={props.onClose}><StateView title="Xem lịch thi đã lưu" message="Bạn hiện có thể xem lịch thi trong tài khoản. Thêm, sửa và xóa sẽ có trong bản cập nhật tiếp theo." actionLabel="Đến lịch thi đã lưu" onAction={() => { props.onClose(); setScheduleMode('Kỳ thi'); }} /></Sheet>;
+  const auth = useAuth();
+  if (auth.hasSession) return props.item ? <ServerExamDialog id={props.item.id} onClose={props.onClose} onRefreshList={() => {}} />
+    : <ExamApiForm initialCourseId={props.initialCourseId} onClose={props.onClose} onDeleted={props.onDeleted} onSaved={props.onSaved ? exam => props.onSaved!(exam.id) : () => props.onClose()} />;
   return <PreviewExamForm {...props} />;
 }
 

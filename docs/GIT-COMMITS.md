@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4H.2A — Đọc danh sách và chi tiết lịch thi
+## Đợt vừa hoàn thành: 4H.2B — Thêm, sửa và xóa lịch thi
+
+Nối POST/PUT/DELETE theo tài khoản; chọn ngày/giờ/zone, mốc nhắc tùy chỉnh, xác nhận xóa. Giữ bản nháp khi trùng, chặn version cũ và kết quả ghi chưa xác nhận; đọc/đối chiếu trước khi cho phép thao tác tiếp, không tự retry. 84 test lịch thi (34 mới) + 140 test lịch hồi quy, TypeScript/export web và browser API/PostgreSQL thật qua. Không backend/migration/dependency. Xem `FRONTEND-EXAMS-4H2B.md`. Dashboard/chi tiết môn/nhắc việc thuộc 4H.2C.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối thêm sửa xóa lịch thi vào tài khoản"
+git push
+```
+
+## 4H.2A — Đọc danh sách và chi tiết lịch thi
 
 Nối GET lịch thi theo tài khoản/học kỳ/môn, lọc thời điểm UTC và đọc mới chi tiết. Tải/lỗi/trống/thử lại/404, bỏ phản hồi cũ khi đổi bộ lọc hoặc tài khoản, F5 và giờ nguồn/zone/DST. Giữ chế độ mẫu riêng, chặn ghi RAM trong tài khoản; Dashboard có lối vào danh sách, ghi UI và tổng hợp/nhắc việc làm 4H.2B/4H.2C. TypeScript, 50 test mới + 140 test lịch hồi quy, export web và browser API/PostgreSQL thật qua, ảnh 4 kích thước. Không backend/migration/dependency; hướng dẫn `FRONTEND-EXAMS-4H2A.md`.
 
@@ -150,7 +162,7 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4H.2B — Ghi lịch thi | Thêm/sửa/xóa, cấu hình nhắc, version và lỗi trùng/mạng | Kết nối thêm sửa xóa lịch thi vào tài khoản |
+
 | 4H.2C — Tổng hợp lịch thi | Dashboard, chi tiết môn và nhắc việc từ lịch thi thật | Đồng bộ lịch thi với Trang chủ và nhắc việc |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 

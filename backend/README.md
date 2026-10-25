@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**Frontend 4H.2B đã thêm/sửa/xóa lịch thi qua API**, xử lý version/trùng/mất phản hồi và cấu hình nhắc. Xem [hướng dẫn 4H.2B](../docs/FRONTEND-EXAMS-4H2B.md). Không đổi backend/migration, vẫn V7; tổng hợp/nhắc việc 4H.2C còn trong checklist.
+
 **Frontend 4H.2A đã đọc GET lịch thi:** danh sách theo tài khoản/học kỳ/môn và chi tiết mới nhất, trạng thái tải/lỗi/trống, F5 và đổi tài khoản. Tạo kỳ thi thử bằng `scripts/Try-Exams.ps1`; xem [hướng dẫn 4H.2A](../docs/FRONTEND-EXAMS-4H2A.md). Ghi từ UI nối 4H.2B, tổng hợp/nhắc việc 4H.2C; backend/migration đợt này giữ nguyên V7.
 
 **Mới nhất 4H.1B.2 — Lịch học/tự học kiểm tra lịch thi:** tạo/sửa chuỗi, đổi/khôi phục từng buổi và POST/PUT tự học kiểm tra thi toàn tài khoản. Trùng giờ giữ ngoại lệ/toàn bộ dữ liệu/version; kiểm tra hai chiều dưới khóa tài khoản bảo vệ ghi đồng thời. **325 tests/Maven verify qua (31 mới), không bỏ qua**, gồm chuỗi dài, UTC/DST, rollback, race và PowerShell 5.1. TypeScript/140 test lịch frontend qua; không migration/seed, vẫn V7. Chạy lại backend, xem [hướng dẫn 4H.1B.2](../docs/BACKEND-PHASE-4H1B2.md), [contract](docs/SCHEDULE-CONFLICTS.md), `api/exam-reverse-conflicts.http`. **4H.1B đã hoàn thành, UI thi nối ở 4H.2**.

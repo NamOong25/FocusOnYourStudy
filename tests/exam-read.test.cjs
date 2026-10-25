@@ -25,7 +25,7 @@ test('lists owned exams using GET, Bearer and selected semester/course, never wr
   const calls = [], source = api([row()], 200, calls), abort = new AbortController(); await source.list({ ...query, courseId: B }, abort.signal);
   assert.match(calls[0].url, /\/api\/v1\/exams\?semesterId=11111111.*&courseId=22222222/);
   assert.equal(calls[0].options.method, 'GET'); assert.equal(calls[0].options.headers.Authorization, 'Bearer test-access'); assert.equal(calls[0].options.credentials, 'omit'); assert.equal(calls[0].options.body, undefined);
-  assert.deepEqual(Object.keys(source).sort(), ['get', 'list']);
+  assert.deepEqual(Object.keys(source).sort(), ['all', 'get', 'list', 'remove', 'save']);
 });
 test('detail is a fresh GET for exact ID, not the list snapshot', async () => {
   const calls = []; const result = await api(row({ version: 2, room: 'Updated' }), 200, calls).get(A);

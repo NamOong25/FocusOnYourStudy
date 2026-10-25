@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Danh sách/chi tiết lịch thi đã đọc API ở 4H.2A**; ghi lịch thi nối 4H.2B, tổng hợp thi 4H.2C. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; tổng hợp thi tiếp tục ở 4H.2C. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 4H.2A: Đọc danh sách và chi tiết lịch thi
+## Mới nhất — 4H.2B: Thêm, sửa và xóa lịch thi
+
+Mục Lịch thi đã lưu qua API: chọn môn/ngày/giờ/zone, loại/hình thức, phòng/ghi chú, bật/tắt và nhiều mốc nhắc (gồm 0 phút và tùy chọn). Có xác nhận xóa, chống bấm đôi, giữ bản nháp khi trùng lịch, đối chiếu version cũ và kết quả chưa xác nhận khi mất mạng; không tự gửi lại thao tác ghi. Xem [hướng dẫn test 4H.2B](docs/FRONTEND-EXAMS-4H2B.md).
+
+**84 test lịch thi (34 mới), 140 test lịch hồi quy, TypeScript/export web và browser API/PostgreSQL thật qua.** Không đổi backend/migration/dependency. Tổng hợp Dashboard/chi tiết môn/nhắc việc thuộc 4H.2C; chưa gửi thông báo thiết bị. Kiểm tra: `npm run test:exams`, `npm run test:schedule`, `npm run typecheck`.
+
+## 4H.2A: Đọc danh sách và chi tiết lịch thi
 
 Lịch học → Lịch thi dùng GET API theo tài khoản/học kỳ/môn, Sắp tới/Đã qua/Tất cả và đọc mới chi tiết. Có tải/lỗi/thử lại/trống, giữ bản cùng bộ lọc khi mạng lỗi, bỏ phản hồi cũ khi đổi kỳ/tài khoản; giờ nguồn/UTC/DST, nhắc 0 phút và 404 lịch đã xóa. Trong tài khoản thật không ghi vào RAM; chế độ mẫu riêng vẫn giữ. Dashboard có lối mở danh sách, phần tổng hợp/nhắc việc dành 4H.2C.
 
