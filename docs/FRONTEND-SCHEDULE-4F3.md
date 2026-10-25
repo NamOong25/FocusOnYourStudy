@@ -98,4 +98,4 @@ Trong form, có thể dùng **Thay bản nháp bằng buổi mới nhất** đ�
 
 Tài khoản/lịch mẫu chỉ được tạo trong schema QA riêng và dọn sau khi kiểm tra; không seed vào tài khoản của bạn. Backend/migration không thay đổi; không chạy lại 238 backend tests vì đợt này không sửa backend. Kiểm tra thiết bị thật **2C.3B** vẫn theo lịch hoãn của bạn.
 
-Sau 4F.3, tổng hợp lịch thật ở Dashboard/chi tiết môn/nhắc việc và API lịch thi vẫn nằm trong `UI-BACKLOG.md`; chưa tự coi nguồn lịch của một khoảng đang mở là toàn bộ dữ liệu.
+Sau 4F.3 đã làm 4G.1: Dashboard/chi tiết môn tổng hợp lịch thật bằng nguồn đọc đủ phạm vi; xem `FRONTEND-SCHEDULE-4G1.md`. Nhắc việc 4G.2 và API lịch thi vẫn nằm trong `UI-BACKLOG.md`.

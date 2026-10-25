@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4F.3 — Nghỉ đổi và khôi phục từng buổi
+## Đợt vừa hoàn thành: 4G.1 — Lịch thật trên Trang chủ và chi tiết môn
+
+Tổng hợp độc lập đủ phạm vi/version từ API: buổi gần nhất/hôm nay đúng học kỳ, số buổi và danh sách đúng môn, ngoại lệ và múi giờ, mở đúng ngày trong Thời khóa biểu. Tải lại sau ghi, xử lý lỗi/phản hồi cũ và không tính dữ liệu chưa biết thành 0. 111 test lịch (30 mới), TypeScript/export web và 19 nhóm browser API thật qua; không đổi backend/migration. Hướng dẫn `FRONTEND-SCHEDULE-4G1.md`; nhắc việc 4G.2 làm sau.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Hiển thị lịch học thật trên Trang chủ và chi tiết môn"
+git push
+```
+
+## 4F.3 — Nghỉ đổi và khôi phục từng buổi
 
 Nối giao diện ngoại lệ đúng ngày bằng API: kế thừa/ghi đè từng trường, nghỉ và khôi phục về chuỗi hiện tại, bảo vệ version, trùng giờ và bản nháp. Mất phản hồi kiểm tra đúng buổi; không tự gửi lại hoặc tạo lại chuỗi đã xóa. 81 test đọc/ghi (27 mới), TypeScript, export web và browser API thật qua. Hướng dẫn `FRONTEND-SCHEDULE-4F3.md`; không đổi backend/migration.
 

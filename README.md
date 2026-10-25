@@ -2,13 +2,23 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4F.3: Nghỉ, đổi và khôi phục từng buổi
+## Mới nhất — 4G.1: Lịch thật trên Trang chủ và chi tiết môn
+
+Trang chủ có **Buổi học gần nhất** và **Lịch học hôm nay** đúng học kỳ đang chọn; chi tiết môn có số buổi đang học/sắp tới và danh sách tối đa 5 buổi đúng môn. Bỏ buổi nghỉ, dùng giờ/phòng/giảng viên sau điều chỉnh, mở đúng ngày nguồn trong Thời khóa biểu. Tạo/sửa/xóa/khôi phục lịch làm phần tổng hợp đọc lại; có tải/lỗi/thử lại, F5 và tách tài khoản.
+
+Nguồn đọc độc lập lấy đủ phạm vi chuỗi, chia request tối đa 92 ngày và kiểm tra các buổi/version trước khi công bố kết quả. Không coi trang lịch đang mở hoặc request đầu tiên là toàn bộ dữ liệu. Giờ chính theo thiết bị; khi khác giờ lịch thì thẻ có thêm ngày/giờ nguồn. Lỗi không tự trở thành số 0 hoặc không có lịch.
+
+**111 test lịch qua (30 mới), TypeScript, export web và 19 nhóm browser với API/PostgreSQL thật qua**, gồm ngày nguồn khác ngày thiết bị, học kỳ xa, lỗi/mất mạng, đổi kỳ đang tải và thêm/sửa/xóa chuỗi. Đã xem ảnh Trang chủ 320/390/430/1280px và chi tiết môn 320px. Xem [hướng dẫn test 4G.1](docs/FRONTEND-SCHEDULE-4G1.md).
+
+Không đổi backend/migration. **4G.2 nhắc việc dùng lịch thật** còn trong checklist; kiểm tra điện thoại thật 2C.3B đang hoãn.
+
+## 4F.3: Nghỉ, đổi và khôi phục từng buổi
 
 Đăng nhập → Lịch học → Thời khóa biểu → chọn ngày → mở thẻ buổi học: **Đổi buổi này**, **Nghỉ buổi này**, **Khôi phục buổi này** hoặc **Bỏ thay đổi buổi này**. Chỉ bật giờ/phòng/giảng viên muốn đổi; phần còn lại theo chuỗi. Khôi phục dùng lịch gốc hiện tại và chặn nếu giờ đã có lịch/tự học. Các tuần khác giữ nguyên, F5 vẫn còn.
 
 Giữ bản nháp khi trùng hoặc version cũ; chủ động đọc lại trước khi tiếp tục. Nếu mất phản hồi sau ghi, app không tự gửi lại và yêu cầu kiểm tra đúng buổi/ngày. **81 test đọc/ghi qua (27 mới), TypeScript, export web và browser API thật qua**, gồm F5, kế thừa, xung đột, khôi phục, mất phản hồi PUT/DELETE, hai tài khoản và ảnh lịch 320/390/430/1280px.
 
-Xem [hướng dẫn test 4F.3](docs/FRONTEND-SCHEDULE-4F3.md). Không đổi backend/migration. Dashboard/chi tiết môn/nhắc việc tổng hợp lịch thật và API lịch thi còn trong checklist; kiểm tra điện thoại thật 2C.3B vẫn đang hoãn.
+Xem [hướng dẫn test 4F.3](docs/FRONTEND-SCHEDULE-4F3.md). Không đổi backend/migration. Dashboard/chi tiết môn đã dùng lịch thật ở 4G.1; nhắc việc 4G.2 và API lịch thi còn trong checklist; kiểm tra điện thoại thật 2C.3B vẫn đang hoãn.
 
 ## 4F.2: Thêm, sửa và xóa chuỗi lịch
 
@@ -22,7 +32,7 @@ Xem [hướng dẫn test 4F.2](docs/FRONTEND-SCHEDULE-4F2.md). Không đổi bac
 
 Đăng nhập → Lịch học → Thời khóa biểu: chọn học kỳ, xem ngày/tuần/tháng, tải lại và mở chi tiết từ backend. Buổi nghỉ/đổi hiển thị đúng giờ/phòng/giảng viên hiệu lực, có múi giờ; không trộn dữ liệu mẫu hoặc phản hồi cũ khi đổi tài khoản/khoảng ngày. Có tải/lỗi/thử lại, giữ lịch cùng khoảng khi mất mạng và phát hiện chi tiết đã đổi version.
 
-Đợt 4F.1 ban đầu chỉ đọc; 4F.2 đã thêm/sửa/xóa cả chuỗi, ngoại lệ từng buổi đã có ở 4F.3. Trang chủ/chi tiết môn dẫn đến Thời khóa biểu trong lúc chưa tổng hợp lịch thật ở các vị trí đó. Không tự nhập lịch RAM cũ vào tài khoản. **28 test đọc lịch, TypeScript, export web và browser với API thật qua**, gồm hai tài khoản, F5, kỳ trống, mất mạng và 320/390/430/1280px. Backend không đổi.
+Đợt 4F.1 ban đầu chỉ đọc; 4F.2 đã thêm/sửa/xóa cả chuỗi, ngoại lệ từng buổi đã có ở 4F.3. Trang chủ/chi tiết môn ban đầu dẫn đến Thời khóa biểu; 4G.1 đã bổ sung thẻ tổng hợp lịch thật tại hai vị trí này. Không tự nhập lịch RAM cũ vào tài khoản. **28 test đọc lịch, TypeScript, export web và browser với API thật qua**, gồm hai tài khoản, F5, kỳ trống, mất mạng và 320/390/430/1280px. Backend không đổi.
 
 Xem [hướng dẫn kiểm tra 4F.1](docs/FRONTEND-SCHEDULE-4F1.md). Chạy backend và frontend như trước; tài khoản chưa có lịch server dùng script 4E để tạo dữ liệu thử chủ động. Chế độ khách vẫn giữ lịch mẫu/local.
 

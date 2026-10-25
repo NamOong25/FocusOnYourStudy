@@ -21,6 +21,10 @@ import { C, F, S } from '../../shared/theme';
 import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from '../assignments/assignments';
 import useCurrentTime from '../../shared/hooks/useCurrentTime';
 import { SemesterSyncStatus } from './components/SemesterSyncStatus';
+import CourseServerSchedule from './components/CourseServerSchedule';
+import { useScheduleOverview } from '../schedule/overview/useScheduleOverview';
+import { projectOverview } from '../schedule/overview/overview';
+import { dateKey } from '../../shared/utils/dates';
 
 type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
 export default function Academics() {
@@ -84,6 +88,8 @@ export default function Academics() {
 function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
   const now=useCurrentTime();
   const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules, semesterConnection, setAcademicSemesterId, setScheduleMode } = useApp();
+  const overview = useScheduleOverview(semesterConnection ? { semesterId: course.semesterId, courseId: course.id, today: dateKey(now) } : null);
+  const overviewData = projectOverview(overview, now);
   const grade=courseResult(gradeBook[course.id],gradeRules);
   const colors = grade.failed?{bg:C.redSoft,ink:C.red}:courseColors[course.color];
   const semester = semesters.find(s => s.id === course.semesterId);
@@ -97,11 +103,12 @@ function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, on
     {section === 'Tổng quan' && <>
       <Card style={{ gap: 15 }}><Row><IconTile name="person-outline" size={38} bg={C.canvas} /><View style={S.grow}><T style={S.small}>Giảng viên</T><T style={{ fontFamily: F.semi }}>{course.teacher || 'Chưa cập nhật'}</T></View></Row><Row><IconTile name="business-outline" size={38} bg={C.canvas} /><View style={S.grow}><T style={S.small}>Phòng học thường dùng</T><T style={{ fontFamily: F.semi }}>{course.room || 'Chưa cập nhật'}</T></View></Row></Card>
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Về môn học này</T><T style={{ fontSize: 13, lineHeight: 23, color: C.muted }}>{course.description || 'Bạn có thể thêm nội dung và mục tiêu môn học trong phần chỉnh sửa.'}</T>
-      <Row style={{ alignItems: 'stretch' }}><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="calendar-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedClasses.reduce((sum,c) => sum + c.weekdays.length, 0)}</T><T style={S.small}>ca học mỗi tuần</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="clipboard-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedTasks.filter(t => t.status !== 'Hoàn thành').length}</T><T style={S.small}>bài tập cần làm</T></Card></Row>
+      <Row style={{ alignItems: 'stretch' }}><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="calendar-outline" /><T testID="course-upcoming-count" style={{ fontFamily: F.extra, fontSize: 24 }}>{semesterConnection ? overview.loaded && !overview.loading && !overview.error ? overviewData.remaining.length : '—' : linkedClasses.reduce((sum,c) => sum + c.weekdays.length, 0)}</T><T style={S.small}>{semesterConnection ? 'buổi đang học/sắp tới' : 'ca học mỗi tuần'}</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="clipboard-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedTasks.filter(t => t.status !== 'Hoàn thành').length}</T><T style={S.small}>bài tập cần làm</T></Card></Row>
+      {!!semesterConnection && <CourseServerSchedule source={overview} course={course} now={now} compact onNavigate={onClose} />}
       {linkedExams.map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi môn ${exam.course}`} onPress={() => onExam(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
       <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
     </>}
-    {section === 'Lịch học' && (semesterConnection ? <Card style={{backgroundColor:C.canvas,gap:10}}><T style={S.small}>Các buổi đã lưu được hiển thị trong Thời khóa biểu của học kỳ này.</T><Button label="Xem thời khóa biểu đã lưu" secondary onPress={()=>{onClose();setAcademicSemesterId(course.semesterId);setScheduleMode('Thời khóa biểu');}}/></Card> : <>
+    {section === 'Lịch học' && (semesterConnection ? <CourseServerSchedule source={overview} course={course} now={now} onNavigate={onClose} /> : <>
       <Row between><T style={{ fontFamily: F.bold }}>Các ca học trong tuần</T><IconButton name="add" label="Thêm ca học cho môn" onPress={() => onClass()} /></Row>
       {linkedClasses.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Sửa ca ${item.start}`} onPress={() => onClass(item)}><Card style={{ backgroundColor: C.canvas, gap: 12 }}><Row between><Badge label={weekdaysLabel(item.weekdays)} /><Icon name="create-outline" size={17} /></Row><T style={{ fontFamily: F.bold, fontSize: 20 }}>{item.start} – {item.end}</T><T style={S.small}>Phòng {item.room} · {item.teacher}</T></Card></Pressable>)}
       {!linkedClasses.length && <Card style={{ backgroundColor: C.canvas, gap: 10 }}><IconTile name="calendar-outline" /><T style={{ fontFamily: F.bold }}>Chưa có ca học</T><T style={S.small}>Thêm lịch để biết khi nào và ở đâu bạn sẽ học môn này.</T><Button label="Thêm lịch cho môn" secondary onPress={() => onClass()} /></Card>}

@@ -58,6 +58,10 @@ function usePrototype(empty: boolean) {
   const semesterConnection = useServerSemesters();
   const semesters = semesterConnection?.semesters ?? previewSemesters;
   const [academicSemesterId, setAcademicSemesterId] = useState('sem-5');
+  const [scheduleRevision, setScheduleRevision] = useState(0);
+  const invalidateSchedule = React.useCallback(() => setScheduleRevision(value => value + 1), []);
+  const [scheduleDestination, setScheduleDestination] = useState<{ key: string; semesterId: string; date: string } | null>(null);
+  const consumeScheduleDestination = React.useCallback((key: string) => setScheduleDestination(value => value?.key === key ? null : value), []);
   useEffect(() => { setAcademicSemesterId(id => semesters.some(s => s.id === id) ? id : semesters.find(s => s.status === 'Đang học')?.id ?? semesters[0]?.id ?? ''); }, [semesters]);
   const [previewCourses, setCourseCatalog] = useState(empty ? [] : initialCourses);
   const courseConnection = useServerCourses();
@@ -77,6 +81,7 @@ function usePrototype(empty: boolean) {
   const route = routeTrail[routeTrail.length - 1]!; const tab = route.tab; const scheduleMode = route.scheduleMode;
   const setTab = (next: Tab) => setRouteTrail(v => next === 'home' ? [{ ...v[v.length - 1]!, tab: 'home' }] : pushRoute(v, { ...v[v.length - 1]!, tab: next }));
   const setScheduleMode = (next: ScheduleMode) => setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: next }));
+  const openSavedSchedule = (semesterId: string, date = dateKey(new Date())) => { setAcademicSemesterId(semesterId); setScheduleDestination({ key: uid(), semesterId, date }); setScheduleMode('Thời khóa biểu'); };
   const goBackRoute = () => setRouteTrail(previousRoute);
   const [focusCourseId, setFocusCourseId] = useState(empty ? '' : 'course-dsa');
   useEffect(() => { if (!courseCatalog.some(c => c.id === focusCourseId)) setFocusCourseId(courseCatalog[0]?.id ?? ''); }, [courseCatalog, focusCourseId]);
@@ -243,7 +248,7 @@ function usePrototype(empty: boolean) {
     if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
+  return { scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }

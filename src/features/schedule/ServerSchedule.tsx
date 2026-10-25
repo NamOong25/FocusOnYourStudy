@@ -20,13 +20,18 @@ import type { ExceptionSnapshot } from './api/classExceptionsApi';
 import type { ExceptionMode } from './exceptionDraft';
 
 export default function ServerSchedule() {
-  const { semesters, academicSemesterId, setAcademicSemesterId, courseCatalog, courseConnection, setScheduleMode } = useApp();
+  const { semesters, academicSemesterId, setAcademicSemesterId, courseCatalog, courseConnection, setScheduleMode, scheduleDestination, consumeScheduleDestination } = useApp();
   const [view, setView] = useState<CalendarView>('Theo ngày'), [selected, setSelected] = useState(() => new Date());
   const [choose, setChoose] = useState(false), [detail, setDetail] = useState<{ key: string; item: ServerOccurrence } | null>(null);
   const [editor, setEditor] = useState<{ original?: ServerRule; date: string; semesterId: string } | null>(null), [manage, setManage] = useState(false);
   const [occurrenceFlow, setOccurrenceFlow] = useState<ExceptionFlowRequest | null>(null);
   const { showNotice } = useFeedback();
   const scope = useNavigationScope(), range = scheduleWindow(selected, view);
+  React.useLayoutEffect(() => {
+    if (!scope.active || !scheduleDestination) return;
+    setSelected(parseDay(scheduleDestination.date)); setView('Theo ngày'); setChoose(false); setDetail(null); setEditor(null); setManage(false); setOccurrenceFlow(null);
+    consumeScheduleDestination(scheduleDestination.key);
+  }, [scope.active, scheduleDestination, consumeScheduleDestination]);
   const semester = semesters.find(s => s.id === academicSemesterId);
   const query = semester ? { semesterId: semester.id, from: range.from, to: range.to } : null;
   const key = query ? queryKey(query) : '', source = useServerSchedule(query, scope.active);
