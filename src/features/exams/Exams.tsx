@@ -8,6 +8,7 @@ import { dateKey, dateLabel, dueLabel, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useAuth } from '../account/auth/AuthProvider';
 import ServerExams from './ServerExams';
+import ServerExamDialog from './components/ServerExamDialog';
 
 export default function ExamList() {
   const auth = useAuth();
@@ -28,6 +29,11 @@ function PreviewExamList() {
 }
 
 export function ExamDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const auth = useAuth();
+  return auth.hasSession ? <ServerExamDialog id={id} onClose={onClose} onRefreshList={() => {}} /> : <PreviewExamDialog id={id} onClose={onClose} />;
+}
+
+function PreviewExamDialog({ id, onClose }: { id: string; onClose: () => void }) {
   const { exams, courseCatalog, semesters } = useApp(); const [editing, setEditing] = useState(false); const exam = exams.find(e => e.id === id);
   if (!exam) return null; const course = courseCatalog.find(c => c.id === exam.courseId); const semester = semesters.find(s => s.id === course?.semesterId);
   if (editing) return <ExamForm item={exam} onClose={() => setEditing(false)} onDeleted={onClose} />;

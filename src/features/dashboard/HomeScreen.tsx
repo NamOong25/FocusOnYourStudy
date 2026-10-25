@@ -22,6 +22,7 @@ import useDashboardClock from './useDashboardClock';
 import DashboardSemesterPicker from './components/DashboardSemesterPicker';
 import DashboardSummary from './components/DashboardSummary';
 import NearestExamCard from './components/NearestExamCard';
+import ServerExamOverview from '../exams/components/ServerExamOverview';
 import HomeServerSchedule from './components/HomeServerSchedule';
 import {taskDeadlineLabel,taskIsOverdue} from '../assignments/assignments';
 
@@ -49,7 +50,7 @@ export default function Home({onTask,onClass,onProfile,onStudyPlan}:{onTask:(t:T
     {data.summary.excludedIncomplete>0&&<T style={S.small}>{data.summary.excludedIncomplete} môn chưa có điểm tính GPA (thiếu điểm, chặn thi hoặc chỉ xét đạt/không đạt). Không tự tính điểm thiếu thành 0.</T>}
     {data.failed.length>0&&<Card style={{backgroundColor:C.redSoft,gap:12}}><Row><Icon name="alert-circle-outline" color={C.red}/><T style={[S.grow,{fontFamily:F.bold,color:C.red}]}>Môn học cần chú ý</T></Row>{data.failed.map(c=><Pressable key={c.id} accessibilityRole="button" accessibilityLabel={`Dashboard: cảnh báo điểm ${c.name}`} onPress={()=>setPanel({kind:'grade',id:c.id})} style={{paddingVertical:8,gap:7}}><Row between><T style={[S.grow,{fontFamily:F.bold,fontSize:13,color:C.red}]}>{c.name}</T><Icon name="chevron-forward" size={17} color={C.red}/></Row><GradeStatus result={courseResult(gradeBook[c.id],gradeRules)}/></Pressable>)}</Card>}
     <Section title="Lịch thi gần nhất" icon="calendar-outline"/>
-    {auth.hasSession ? <Card style={{backgroundColor:C.canvas,gap:11}}><IconTile name="calendar-outline"/><T style={{fontFamily:F.bold}}>Lịch thi đã lưu trong tài khoản</T><T style={S.small}>Mở mục Kỳ thi để xem lịch theo học kỳ và môn. Thẻ kỳ thi gần nhất sẽ được bổ sung sau.</T><Button label="Xem lịch thi đã lưu" secondary onPress={()=>{setAcademicSemesterId(semester.id);setScheduleMode('Kỳ thi');}}/></Card> : <NearestExamCard exam={data.nextExam} now={now} onOpen={id=>setPanel({kind:'exam',id})} onAdd={()=>setPanel({kind:'new-exam'})}/>}
+    {auth.hasSession ? <ServerExamOverview query={{semesterId:semester.id}} now={now} nearest active={panel===null} onOpen={id=>setPanel({kind:'exam',id})} onAdd={()=>setPanel({kind:'new-exam'})} onViewAll={()=>{setAcademicSemesterId(semester.id);setScheduleMode('Kỳ thi');}}/> : <NearestExamCard exam={data.nextExam} now={now} onOpen={id=>setPanel({kind:'exam',id})} onAdd={()=>setPanel({kind:'new-exam'})}/>}
     {auth.hasSession?<HomeServerSchedule semesterId={semester.id} now={now}/>:<>
     <Section title="Lịch học hôm nay" icon="time-outline"/>
     <T style={S.small}>{now.toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'})} · Theo học kỳ đang chọn</T>

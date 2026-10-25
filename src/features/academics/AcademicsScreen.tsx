@@ -12,6 +12,9 @@ import TaskDialog from '../assignments/TaskDialog';
 import ClassDialog from '../schedule/ClassDialog';
 import { weekdaysLabel } from '../schedule/calendar';
 import { ExamDialog } from '../exams/Exams';
+import { ExamForm } from '../exams/ExamForm';
+import ServerExamOverview from '../exams/components/ServerExamOverview';
+import type { ExamPeriod } from '../exams/examView';
 import GradePanel from '../grades/GradePanel';
 import GradeStatus from '../grades/GradeStatus';
 import {courseResult} from '../grades/grades';
@@ -26,11 +29,12 @@ import { useScheduleOverview } from '../schedule/overview/useScheduleOverview';
 import { projectOverview } from '../schedule/overview/overview';
 import { dateKey } from '../../shared/utils/dates';
 
-type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'grades' | null;
+type SheetMode = 'detail' | 'new-course' | 'edit-course' | 'new-semester' | 'edit-semester' | 'task' | 'class' | 'exam' | 'new-exam' | 'grades' | null;
 export default function Academics() {
   const { semesters, semesterConnection, courseCatalog, tasks, classes, gradeBook, gradeRules, academicSemesterId:semesterId, setAcademicSemesterId:setSemesterId } = useApp();
   const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
   const [detailSection, setDetailSection] = useState('Tổng quan');
+  const [examPeriod, setExamPeriod] = useState<ExamPeriod>('Sắp tới');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
   const [examId, setExamId] = useState<string | null>(null);
@@ -48,7 +52,7 @@ export default function Academics() {
   const list = semesterCourses.filter(c => (filter === 'Tất cả' || (filter === 'Không đạt' ? courseResult(gradeBook[c.id],gradeRules).failed : !courseResult(gradeBook[c.id],gradeRules).failed && (courseResult(gradeBook[c.id],gradeRules).passed ? 'Hoàn thành' : c.status) === filter)) && `${c.name} ${c.code} ${c.teacher}`.toLocaleLowerCase().includes(normalizedQuery));
   const openedCourse = courseCatalog.find(c => c.id === courseId);
   const selectSemester = (id: string) => { setSemesterId(id); setFilter('Tất cả'); setQuery(''); };
-  const openCourse = (course: Course) => { setCourseId(course.id); setDetailSection('Tổng quan'); setSheet('detail'); };
+  const openCourse = (course: Course) => { setCourseId(course.id); setDetailSection('Tổng quan'); setExamPeriod('Sắp tới'); setSheet('detail'); };
   return <FlowScope onClose={() => setSheet(null)}>
     <View style={{ gap: 5, marginTop: 5 }}><T style={{ fontFamily: F.bold, fontSize: 10, color: C.primary, letterSpacing: 1.4 }}>HÀNH TRÌNH HỌC TẬP</T><T style={{ fontFamily: F.extra, fontSize: 25, lineHeight: 36, letterSpacing: -0.8 }}>Môn học & học kỳ</T><T style={{ fontSize: 12, color: C.muted }}>Hiểu rõ từng môn. Tiến bộ qua từng học kỳ.</T></View>
     <SemesterSyncStatus />
@@ -77,15 +81,16 @@ export default function Academics() {
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
     {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm key="semester-editor" item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} onDeleted={() => { setSheet(null); setSemesterId(''); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { if (targetSemesterId !== semester.id) selectSemester(targetSemesterId); if (sheet === 'new-course') setDetailSection('Tổng quan'); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
-    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onGrades={() => setSheet('grades')} /></Sheet>}
+    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail examPeriod={examPeriod} onExamPeriod={setExamPeriod} section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onNewExam={() => setSheet('new-exam')} onGrades={() => setSheet('grades')} /></Sheet>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && (classItem ? <ClassDialog id={classItem.id} onClose={() => setSheet('detail')} /> : <ClassForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'exam' && examId && <ExamDialog id={examId} onClose={() => setSheet('detail')} />}
+    {sheet === 'new-exam' && openedCourse && <ExamForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} onSaved={id => { setExamId(id); setSheet('exam'); }} />}
     {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} onClose={() => setSheet('detail')} />}
   </FlowScope>;
 }
 
-function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onGrades }: { section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onGrades: () => void }) {
+function CourseDetail({ examPeriod, onExamPeriod, section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onNewExam, onGrades }: { examPeriod: ExamPeriod; onExamPeriod: (value: ExamPeriod) => void; section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onNewExam: () => void; onGrades: () => void }) {
   const now=useCurrentTime();
   const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules, semesterConnection, setAcademicSemesterId, setScheduleMode } = useApp();
   const overview = useScheduleOverview(semesterConnection ? { semesterId: course.semesterId, courseId: course.id, today: dateKey(now) } : null);
@@ -105,7 +110,8 @@ function CourseDetail({ section, setSection, course, onEdit, onClose, onTask, on
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Về môn học này</T><T style={{ fontSize: 13, lineHeight: 23, color: C.muted }}>{course.description || 'Bạn có thể thêm nội dung và mục tiêu môn học trong phần chỉnh sửa.'}</T>
       <Row style={{ alignItems: 'stretch' }}><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="calendar-outline" /><T testID="course-upcoming-count" style={{ fontFamily: F.extra, fontSize: 24 }}>{semesterConnection ? overview.loaded && !overview.loading && !overview.error ? overviewData.remaining.length : '—' : linkedClasses.reduce((sum,c) => sum + c.weekdays.length, 0)}</T><T style={S.small}>{semesterConnection ? 'buổi đang học/sắp tới' : 'ca học mỗi tuần'}</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, padding: 14, gap: 5 }]}><Icon name="clipboard-outline" /><T style={{ fontFamily: F.extra, fontSize: 24 }}>{linkedTasks.filter(t => t.status !== 'Hoàn thành').length}</T><T style={S.small}>bài tập cần làm</T></Card></Row>
       {!!semesterConnection && <CourseServerSchedule source={overview} course={course} now={now} compact onNavigate={onClose} />}
-      {linkedExams.map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi môn ${exam.course}`} onPress={() => onExam(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
+      {!!semesterConnection && <><T accessibilityRole="header" style={{ fontFamily: F.bold, fontSize: 16 }}>Lịch thi của môn</T><ServerExamOverview query={{ semesterId: course.semesterId, courseId: course.id }} now={now} period={examPeriod} onPeriodChange={onExamPeriod} onOpen={onExam} onAdd={onNewExam} /></>}
+      {!semesterConnection && linkedExams.map(exam => <Pressable key={exam.id} accessibilityRole="button" accessibilityLabel={`Xem kỳ thi môn ${exam.course}`} onPress={() => onExam(exam.id)}><Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><Row><Icon name="calendar-outline" color={C.amber} /><T style={{ fontFamily: F.bold, color: C.amber }}>Lịch thi · {dueLabel(exam.date)}</T></Row><T style={{ fontSize: 12 }}>{dateLabel(exam.date)} · {exam.time} · {exam.room}</T><T style={S.small}>{exam.type}</T></Card></Pressable>)}
       <Button label="Tập trung môn này" icon="timer-outline" onPress={() => { prepareFocus({ courseId: course.id }); }} /><T style={{ fontSize: 10, color: C.muted, textAlign: 'center' }}>Chọn môn sẽ đặt lại thời gian của phiên tập trung.</T>
     </>}
     {section === 'Lịch học' && (semesterConnection ? <CourseServerSchedule source={overview} course={course} now={now} onNavigate={onClose} /> : <>

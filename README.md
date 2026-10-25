@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; tổng hợp thi tiếp tục ở 4H.2C. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc thi tiếp tục ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 4H.2B: Thêm, sửa và xóa lịch thi
+## Mới nhất — 4H.2C.1: Lịch thi trên Trang chủ và chi tiết môn
+
+Trang chủ đọc kỳ thi đang diễn ra/sắp tới gần nhất của học kỳ đang chọn, đếm ngược và mở chi tiết thật; nút xem tất cả giữ đúng kỳ. Chi tiết môn có lịch thi riêng theo môn và kỳ, lọc Sắp tới/Đã qua/Tất cả, mở/thêm/sửa/xóa qua API và giữ bộ lọc khi quay lại. Tải/lỗi/thử lại/trống, bản cũ khi lỗi mạng, đổi phạm vi/tài khoản và lịch bị xóa được xử lý riêng; không dùng lịch mẫu trong tài khoản.
+
+**104 test lịch thi (20 mới), 140 test lịch hồi quy, TypeScript/export web và browser API/PostgreSQL thật qua.** Xem [hướng dẫn test 4H.2C.1](docs/FRONTEND-EXAMS-4H2C1.md). Không đổi backend/migration/dependency. **Nhắc việc lịch thi trong chuông còn ở 4H.2C.2**, chưa gửi thông báo thiết bị.
+
+## 4H.2B: Thêm, sửa và xóa lịch thi
 
 Mục Lịch thi đã lưu qua API: chọn môn/ngày/giờ/zone, loại/hình thức, phòng/ghi chú, bật/tắt và nhiều mốc nhắc (gồm 0 phút và tùy chọn). Có xác nhận xóa, chống bấm đôi, giữ bản nháp khi trùng lịch, đối chiếu version cũ và kết quả chưa xác nhận khi mất mạng; không tự gửi lại thao tác ghi. Xem [hướng dẫn test 4H.2B](docs/FRONTEND-EXAMS-4H2B.md).
 

@@ -25,8 +25,9 @@ function useExamRead<Q, T>(query: Q | null, key: string | null, active: boolean,
     const check = () => { if (Platform.OS !== 'web' || document.visibilityState === 'visible') void reload().catch(() => {}); };
     const native = AppState.addEventListener('change', status => { if (status === 'active') check(); });
     if (Platform.OS === 'web') document.addEventListener('visibilitychange', check);
+    if (Platform.OS === 'web') window.addEventListener('focus', check);
     const manager = ref.current?.manager;
-    return () => { native.remove(); if (Platform.OS === 'web') document.removeEventListener('visibilitychange', check); manager?.cancel(); };
+    return () => { native.remove(); if (Platform.OS === 'web') { document.removeEventListener('visibilitychange', check); window.removeEventListener('focus', check); } manager?.cancel(); };
   }, [active, key, owner, reload, writes.revision]);
   return { ...(snapshot.owner === owner && snapshot.state.key === key ? snapshot.state : emptyExamRead<T>()), reload };
 }
