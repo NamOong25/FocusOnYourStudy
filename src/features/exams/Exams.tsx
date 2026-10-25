@@ -6,8 +6,15 @@ import { reminderLabel } from '../schedule/calendar';
 import { ExamForm } from './ExamForm';
 import { dateKey, dateLabel, dueLabel, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
+import { useAuth } from '../account/auth/AuthProvider';
+import ServerExams from './ServerExams';
 
 export default function ExamList() {
+  const auth = useAuth();
+  return auth.hasSession ? <ServerExams /> : <PreviewExamList />;
+}
+
+function PreviewExamList() {
   const { exams, courseCatalog, setExams, setToast } = useApp(); const [filter, setFilter] = useState('Sắp tới'); const [create, setCreate] = useState(false); const [opened, setOpened] = useState<string | null>(null);
   const list = [...exams].filter(e => filter === 'Tất cả' || (filter === 'Sắp tới' ? new Date(`${e.date}T${e.end}:00`).getTime() >= Date.now() : new Date(`${e.date}T${e.end}:00`).getTime() < Date.now())).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   return <FlowScope onClose={() => { setCreate(false); setOpened(null); }}>

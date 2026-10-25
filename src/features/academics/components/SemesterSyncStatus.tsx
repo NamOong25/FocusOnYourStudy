@@ -12,7 +12,7 @@ export function SemesterSyncStatus() {
   if (courses && !courses.loaded) return <StateView kind={courses.error ? 'error' : 'loading'} title={courses.error ? 'Chưa tải được môn học' : 'Đang tải môn học'}
     message={courses.error?.message ?? 'Đang lấy các môn học đã lưu của bạn.'} actionLabel={courses.error ? 'Thử tải lại môn học' : undefined} onAction={reload} />;
   return <Card style={{ backgroundColor: C.soft, gap: 9 }}>
-    <T style={S.small}>Học kỳ, môn học và bài tập được lưu cùng tài khoản. Buổi tự học cũng đã lưu; Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi và điểm vẫn thử trong phiên này.</T>
+    <T style={S.small}>Học kỳ, môn học, bài tập và tự học được lưu cùng tài khoản. Thời khóa biểu đã lưu cả chuỗi lịch. Lịch thi đã lưu xem được trong mục Kỳ thi; điểm và Pomodoro vẫn thử trong phiên này.</T>
     {!!c.error && <T accessibilityRole="alert" style={{ color: C.red }}>{c.needsReload ? 'Cần kiểm tra lại danh sách trước khi lưu tiếp. ' : ''}{c.error.message}</T>}
     {!!courses?.error && <T accessibilityRole="alert" style={{ color: C.red }}>Cần kiểm tra lại danh sách môn học trước khi lưu tiếp. {courses.error.message}</T>}
     <Button label="Tải lại danh sách học kỳ" secondary loading={c.loading} disabled={c.busy || !!courses?.busy || !!courses?.loading} onPress={reload} />

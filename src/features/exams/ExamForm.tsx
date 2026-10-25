@@ -1,15 +1,23 @@
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from '../../shared/components';
+import { Badge, Button, Field, Icon, Row, Segments, Sheet, StateView, T } from '../../shared/components';
 import { CourseChoices } from '../academics/CourseChoices';
 import { CalendarEvent, Exam, calendarEvents, findConflicts, reminderLabel } from '../schedule/calendar';
 import ConflictPanel from '../schedule/ConflictPanel';
 import { addDays, dateKey, isValidDate, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
+import { useAuth } from '../account/auth/AuthProvider';
 
-export function ExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }: { item?: Exam; initialCourseId?: string; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void }) {
+type ExamFormProps = { item?: Exam; initialCourseId?: string; onClose: () => void; onDeleted?: () => void; onSaved?: (id: string) => void };
+export function ExamForm(props: ExamFormProps) {
+  const auth = useAuth(), { setScheduleMode } = useApp();
+  if (auth.hasSession) return <Sheet title="Lịch thi trong tài khoản" onClose={props.onClose}><StateView title="Xem lịch thi đã lưu" message="Bạn hiện có thể xem lịch thi trong tài khoản. Thêm, sửa và xóa sẽ có trong bản cập nhật tiếp theo." actionLabel="Đến lịch thi đã lưu" onAction={() => { props.onClose(); setScheduleMode('Kỳ thi'); }} /></Sheet>;
+  return <PreviewExamForm {...props} />;
+}
+
+function PreviewExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }: ExamFormProps) {
   const { courseCatalog, classes, classExceptions, exams, studySessions, saveExam, deleteExam, setToast } = useApp();
   const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const [date, setDate] = useState(item?.date ?? dateKey(addDays(today, 7))); const [time, setTime] = useState(item?.time ?? '08:00'); const [end, setEnd] = useState(item?.end ?? '10:00');

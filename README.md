@@ -1,8 +1,16 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Giao diện lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Danh sách/chi tiết lịch thi đã đọc API ở 4H.2A**; ghi lịch thi nối 4H.2B, tổng hợp thi 4H.2C. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 4H.1B.2: Lịch học và tự học kiểm tra lịch thi
+## Mới nhất — 4H.2A: Đọc danh sách và chi tiết lịch thi
+
+Lịch học → Lịch thi dùng GET API theo tài khoản/học kỳ/môn, Sắp tới/Đã qua/Tất cả và đọc mới chi tiết. Có tải/lỗi/thử lại/trống, giữ bản cùng bộ lọc khi mạng lỗi, bỏ phản hồi cũ khi đổi kỳ/tài khoản; giờ nguồn/UTC/DST, nhắc 0 phút và 404 lịch đã xóa. Trong tài khoản thật không ghi vào RAM; chế độ mẫu riêng vẫn giữ. Dashboard có lối mở danh sách, phần tổng hợp/nhắc việc dành 4H.2C.
+
+**TypeScript, 50 test đọc lịch thi mới, 140 test lịch hồi quy và export web qua.** Browser API/PostgreSQL thật qua với F5, đổi tài khoản, lỗi mạng/restart, cập nhật/xóa ở nơi khác và ảnh 320/390/430/1280px. Không đổi backend/migration/dependency.
+
+Xem [hướng dẫn chạy và test 4H.2A](docs/FRONTEND-EXAMS-4H2A.md). Tạo dữ liệu thử bằng `backend/scripts/Try-Exams.ps1`; **thêm/sửa/xóa từ UI ở 4H.2B**, Dashboard/chi tiết môn/nhắc việc ở 4H.2C.
+
+## 4H.1B.2: Lịch học và tự học kiểm tra lịch thi
 
 Tạo/sửa chuỗi lịch học, đổi/khôi phục một buổi và thêm/sửa tự học kiểm tra kỳ thi đã lưu toàn tài khoản. Khôi phục bị chặn giữ nguyên ngoại lệ và version; cùng khóa ghi nên không thể lưu đồng thời hai bên vào một giờ. 4H.1B đã kiểm tra hai chiều; không thêm migration/seed, vẫn V7.
 

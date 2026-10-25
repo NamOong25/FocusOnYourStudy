@@ -224,8 +224,14 @@ function usePrototype(empty: boolean) {
   const saveClassException = (item: ClassException) => setClassExceptions(v => [...v.filter(e => !(e.seriesId === item.seriesId && e.date === item.date)), item]);
   const restoreClassOccurrence = (seriesId: string, date: string) => setClassExceptions(v => v.filter(e => !(e.seriesId === seriesId && e.date === date)));
   const getClassesOn = (date: string) => classOccurrences(date, classes, classExceptions);
-  const saveExam = (item: Exam) => setExams(v => (v.some(e => e.id === item.id) ? v.map(e => e.id === item.id ? item : e) : [...v, item]).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)));
-  const deleteExam = (id: string) => setExams(v => v.filter(e => e.id !== id));
+  const saveExam = (item: Exam) => {
+    if (semesterConnection) throw new Error('Use exam API for authenticated accounts');
+    setExams(v => (v.some(e => e.id === item.id) ? v.map(e => e.id === item.id ? item : e) : [...v, item]).sort((a,b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)));
+  };
+  const deleteExam = (id: string) => {
+    if (semesterConnection) throw new Error('Use exam API for authenticated accounts');
+    setExams(v => v.filter(e => e.id !== id));
+  };
   const saveSemester = (semester: Semester) => {
     if (semesterConnection) throw new Error('Use semester API for authenticated accounts');
     setSemesters(v => v.some(s => s.id === semester.id) ? v.map(s => s.id === semester.id ? semester : s) : [...v, semester]);
