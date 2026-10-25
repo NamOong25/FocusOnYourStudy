@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc thi tiếp tục ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 4H.2C.1: Lịch thi trên Trang chủ và chi tiết môn
+## Mới nhất — 4H.2C.2: Chuông nhắc lịch thi
+
+Nhắc thi lấy từ toàn tài khoản theo các mốc đã lưu, gồm 0 phút. Mỗi kỳ thi một thẻ; mốc mới vừa tới thì hiện chưa đọc lại. Sửa giờ/phòng/mốc, tắt nhắc, xóa hoặc hết giờ thi cập nhật thẻ; reload/đếm phút/version không tự tạo chưa đọc giả. Mở đúng chi tiết API để sửa/xóa, giữ bộ lọc khi Back. Nguồn lịch học/thi lỗi được xử lý riêng, chuông hiện dấu chờ khi chưa đủ dữ liệu và giữ receipts qua retry.
+
+**139 test lịch thi (35 mới), 140 test lịch hồi quy, TypeScript/export web và browser PostgreSQL thật qua.** Xem [hướng dẫn test 4H.2C.2](docs/FRONTEND-EXAMS-4H2C2.md). Không backend/migration/dependency. Đây là nhắc trong app; dấu đọc giữ trong phiên, chưa gửi thông báo hệ điều hành. Các đợt UI lịch thi 4H.2 đã hoàn thành; điểm/GPA và native vẫn theo checklist riêng.
+
+## 4H.2C.1: Lịch thi trên Trang chủ và chi tiết môn
 
 Trang chủ đọc kỳ thi đang diễn ra/sắp tới gần nhất của học kỳ đang chọn, đếm ngược và mở chi tiết thật; nút xem tất cả giữ đúng kỳ. Chi tiết môn có lịch thi riêng theo môn và kỳ, lọc Sắp tới/Đã qua/Tất cả, mở/thêm/sửa/xóa qua API và giữ bộ lọc khi quay lại. Tải/lỗi/thử lại/trống, bản cũ khi lỗi mạng, đổi phạm vi/tài khoản và lịch bị xóa được xử lý riêng; không dùng lịch mẫu trong tài khoản.
 

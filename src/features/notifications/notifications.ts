@@ -4,7 +4,8 @@ import { classOccurrences, type ClassException, type ClassItem, type Exam } from
 import { addDays, dateKey, dateLabel, isValidDate } from '../../shared/utils/dates';
 
 export type NotificationTarget = { kind: 'task'; id: string } | { kind: 'class'; id: string; date: string } | { kind: 'exam'; id: string }
-  | { kind: 'saved-class'; id: string; date: string; courseId: string; semesterId: string };
+  | { kind: 'saved-class'; id: string; date: string; courseId: string; semesterId: string }
+  | { kind: 'saved-exam'; id: string; courseId: string; semesterId: string };
 export type InAppReminder = {
   id: string; revision: string; kind: NotificationTarget['kind']; target: NotificationTarget;
   title: string; subtitle: string; detail: string; when: string; at: number;

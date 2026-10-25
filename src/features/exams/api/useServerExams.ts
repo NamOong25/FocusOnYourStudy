@@ -32,6 +32,12 @@ function useExamRead<Q, T>(query: Q | null, key: string | null, active: boolean,
   return { ...(snapshot.owner === owner && snapshot.state.key === key ? snapshot.state : emptyExamRead<T>()), reload };
 }
 const idKey = (id: string) => id.toLowerCase();
+const accountKey = () => 'account-exams';
+export function useServerAllExams(active: boolean) {
+  const auth = useAuth(), api = useMemo(() => createExamsApi(API_BASE_URL, auth.authorized), [auth.authorized]);
+  const read = useCallback((_account: string, signal: AbortSignal) => api.all(signal), [api]);
+  return useExamRead('account', 'account-exams', active, read, accountKey);
+}
 export function useServerExamList(query: ExamQuery | null, active: boolean) {
   const auth = useAuth(), api = useMemo(() => createExamsApi(API_BASE_URL, auth.authorized), [auth.authorized]);
   return useExamRead(query, query ? examQueryKey(query) : null, active, api.list, examQueryKey);

@@ -4,7 +4,7 @@ import type { Course, Semester } from '../academics/academic';
 import { occurrenceClock, type OverviewSnapshot } from '../schedule/overview/overview';
 import type { InAppReminder, ReadReceipts } from './notifications';
 
-export type NotificationScheduleState = { ready: boolean; loading: boolean; error: ApiError | null; reload: () => Promise<unknown> };
+export type NotificationScheduleState = { ready: boolean; loading: boolean; error: ApiError | null; reload: () => Promise<unknown>; classesReady?: boolean; examsReady?: boolean };
 export function buildServerClassReminders(snapshot: OverviewSnapshot, courses: Course[], semesters: Semester[], now: Date): InAppReminder[] {
   const byCourse = new Map(courses.map(course => [course.id, course])), bySemester = new Map(semesters.map(semester => [semester.id, semester]));
   const current = now.getTime(), result: InAppReminder[] = [];
@@ -32,8 +32,8 @@ export function mergeReminders(...lists: InAppReminder[][]) {
   const rank = { overdue: 0, ongoing: 1, upcoming: 2 };
   return lists.flat().sort((a, b) => rank[a.urgency] - rank[b.urgency] || a.at - b.at || a.id.localeCompare(b.id));
 }
-export function pruneKnownReceipts(receipts: ReadReceipts, items: InAppReminder[], scheduleReady: boolean) {
+export function pruneKnownReceipts(receipts: ReadReceipts, items: InAppReminder[], scheduleReady: boolean, examsReady = true) {
   const ids = new Set(items.map(item => item.id));
-  const entries = Object.entries(receipts).filter(([id]) => ids.has(id) || !scheduleReady && id.startsWith('saved-class:'));
+  const entries = Object.entries(receipts).filter(([id]) => ids.has(id) || !scheduleReady && id.startsWith('saved-class:') || !examsReady && id.startsWith('saved-exam:'));
   return entries.length === Object.keys(receipts).length ? receipts : Object.fromEntries(entries);
 }

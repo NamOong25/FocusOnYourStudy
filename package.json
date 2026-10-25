@@ -10,7 +10,7 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "test:schedule": "node --test tests/schedule-read.test.cjs tests/schedule-write.test.cjs tests/schedule-exceptions.test.cjs tests/schedule-overview.test.cjs tests/schedule-reminders.test.cjs",
-    "test:exams": "node --test tests/exam-read.test.cjs tests/exam-write.test.cjs tests/exam-overview.test.cjs",
+    "test:exams": "node --test tests/exam-read.test.cjs tests/exam-write.test.cjs tests/exam-overview.test.cjs tests/exam-reminders.test.cjs",
     "build:web": "expo export --platform web",
     "check:dependencies": "expo install --check"
   },

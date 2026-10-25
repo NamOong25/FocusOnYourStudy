@@ -4,7 +4,7 @@ import { Badge, Icon, IconButton, Row, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
 import { reminderOpenLabel, type ReminderWithRead } from '../notifications';
 
-const kinds = { task: { name: 'Bài tập', icon: 'clipboard-outline' as const }, class: { name: 'Lịch học', icon: 'calendar-outline' as const }, 'saved-class': { name: 'Lịch học', icon: 'calendar-outline' as const }, exam: { name: 'Lịch thi', icon: 'reader-outline' as const } };
+const kinds = { task: { name: 'Bài tập', icon: 'clipboard-outline' as const }, class: { name: 'Lịch học', icon: 'calendar-outline' as const }, 'saved-class': { name: 'Lịch học', icon: 'calendar-outline' as const }, exam: { name: 'Lịch thi', icon: 'reader-outline' as const }, 'saved-exam': { name: 'Lịch thi', icon: 'reader-outline' as const } };
 export default function ReminderCard({ item, onOpen, onRead }: { item: ReminderWithRead; onOpen: () => void; onRead: () => void }) {
   const kind = kinds[item.kind], urgent = item.urgency === 'overdue';
   return <View style={[S.card, { gap: 10, borderColor: item.read ? C.line : '#D5CCFF', backgroundColor: item.read ? C.card : '#FCFAFF' }]}>
