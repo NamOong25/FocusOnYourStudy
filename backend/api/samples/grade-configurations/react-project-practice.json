@@ -1,0 +1,8 @@
+{
+  "assessment": "PRACTICAL",
+  "parts": [
+    {"id": "th1", "name": "Thường kỳ thực hành 1", "kind": "PRACTICE_REGULAR"},
+    {"id": "th2", "name": "Kiểm tra thực hành", "kind": "PRACTICE_TEST"},
+    {"id": "btl", "name": "BTL React", "kind": "PROJECT", "project": {"target": "PRACTICE", "share": 100}}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "assessment": "THEORY",
+  "parts": [
+    {"id": "tk1", "name": "Thường kỳ 1", "kind": "REGULAR"},
+    {"id": "mid", "name": "Giữa kỳ", "kind": "MIDTERM"},
+    {"id": "btl-final", "name": "BTL World Wide Web Java", "kind": "PROJECT", "project": {"target": "FINAL", "share": 100}}
+  ]
+}

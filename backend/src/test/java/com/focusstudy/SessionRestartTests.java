@@ -49,7 +49,8 @@ class SessionRestartTests {
     @Test void refreshAndRevocationSurviveClosingAndRecreatingTheEntireBackend() throws Exception {
         String schema = "backend_it_" + UUID.randomUUID().toString().replace("-", "");
         String email = "restart-" + UUID.randomUUID() + "@example.test", password = "RestartTest123!";
-        String first, independent, rotated, semesterId, courseId, assignmentId, studyId, classId, examId;
+        String first, independent, rotated, semesterId, courseId, assignmentId, studyId, classId, examId, gradeConfigurationId;
+        Map<?, ?> savedGradeConfiguration;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -80,6 +81,13 @@ class SessionRestartTests {
                         "timeZone", "Asia/Ho_Chi_Minh", "notes", "Giữ lịch thi", "reminderMinutes", List.of(0, 180, 10080)));
                 assertThat(exam.statusCode()).isEqualTo(201);
                 examId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(exam.body(), Map.class).get("data")).get("id").toString();
+                var configuration = semester(app, "POST", "/api/v1/courses/" + courseId + "/grade-configuration", pair.get("accessToken").toString(),
+                        Map.of("assessment", "PRACTICAL", "parts", List.of(
+                                Map.of("id", "th1", "name", "Thường kỳ thực hành", "kind", "PRACTICE_REGULAR"),
+                                Map.of("id", "btl", "name", "BTL giữ qua restart", "kind", "PROJECT", "project", Map.of("target", "PRACTICE", "share", 100)))));
+                assertThat(configuration.statusCode()).as(configuration.body()).isEqualTo(201);
+                savedGradeConfiguration = (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(configuration.body(), Map.class).get("data");
+                gradeConfigurationId = savedGradeConfiguration.get("id").toString();
                 var change = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), Map.of("kind", "CHANGED", "room", "B2.03", "startTime", "10:00", "endTime", "12:00", "scheduleVersion", 0));
                 assertThat(change.statusCode()).isEqualTo(200);
                 var cancelled = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), Map.of("kind", "CANCELLED", "reason", "Keep cancellation", "scheduleVersion", 1));
@@ -88,6 +96,7 @@ class SessionRestartTests {
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
                 rotated = pair.get("refreshToken").toString();
+                assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId, pair.get("accessToken").toString(), null))).isEqualTo(savedGradeConfiguration);
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("note")).isEqualTo("Persist across restart");
                 assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("code")).isEqualTo("RESTART101");
                 var assignment = data(app, semester(app, "GET", "/api/v1/assignments/" + assignmentId, pair.get("accessToken").toString(), null));
@@ -109,6 +118,7 @@ class SessionRestartTests {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
+                assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId + "/grade-configuration", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeConfiguration);
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("status")).isEqualTo("CURRENT");
                 assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId, pair.get("accessToken").toString(), null)).get("semesterId")).isEqualTo(semesterId);
                 assertThat(data(app, semester(app, "GET", "/api/v1/assignments/" + assignmentId, pair.get("accessToken").toString(), null)).get("courseId")).isEqualTo(courseId);

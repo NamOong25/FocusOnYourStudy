@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 4H.2C.2: Chuông nhắc lịch thi
+## Mới nhất — 5A.1: Cấu hình bảng điểm được lưu ở backend
+
+V8 thêm cấu hình Lý thuyết/Thực hành theo môn, bộ cột có thể thêm/sửa/xóa/đổi thứ tự, quy BTL vào một cột thực hành hoặc cuối kỳ (toàn phần/một phần). Backend dựng trọng số từ cấu hình và cho lưu DRAFT thiếu nhóm; không khóa cột đề xuất. Có ownership/version, ghi nguyên tử, snapshot đọc nhất quán và guard xóa/chuyển môn còn cấu hình.
+
+**5A.1 chỉ lưu cấu trúc cột; màn Điểm chưa nối API, chưa lưu giá trị điểm/tổng kết/GPA.** Chạy lại backend để Flyway áp dụng V8, không tạo lại database. Xem [hướng dẫn 5A.1](docs/BACKEND-PHASE-5A1.md), [hợp đồng API](backend/docs/GRADE-CONFIGURATIONS.md), `backend/api/grade-configurations.http`, `backend/scripts/Try-GradeConfigurations.ps1`. Tiếp theo: 5A.2 lưu điểm/tính kết quả môn → 5B GPA → 5C nối UI.
+
+**357 tests/Maven verify qua (32 mới), không lỗi/bỏ qua; TypeScript qua.** Có V7 → V8 giữ dữ liệu cũ, restart toàn backend, script Windows PowerShell 5.1 hiển thị đúng tiếng Việt, snapshot đọc, ghi đồng thời và guard liên kết môn. Kiểm thử dùng schema riêng và tự dọn.
+
+## 4H.2C.2: Chuông nhắc lịch thi
 
 Nhắc thi lấy từ toàn tài khoản theo các mốc đã lưu, gồm 0 phút. Mỗi kỳ thi một thẻ; mốc mới vừa tới thì hiện chưa đọc lại. Sửa giờ/phòng/mốc, tắt nhắc, xóa hoặc hết giờ thi cập nhật thẻ; reload/đếm phút/version không tự tạo chưa đọc giả. Mở đúng chi tiết API để sửa/xóa, giữ bộ lọc khi Back. Nguồn lịch học/thi lỗi được xử lý riêng, chuông hiện dấu chờ khi chưa đủ dữ liệu và giữ receipts qua retry.
 

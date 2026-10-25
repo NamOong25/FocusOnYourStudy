@@ -8,6 +8,7 @@ import com.focusstudy.academics.courses.CourseApiException;
 import com.focusstudy.assignments.AssignmentApiException;
 import com.focusstudy.study.StudyApiException;
 import com.focusstudy.exams.ExamApiException;
+import com.focusstudy.grades.configuration.GradeConfigurationApiException;
 import com.focusstudy.schedule.ClassScheduleApiException;
 import com.focusstudy.schedule.ScheduleTimeConflict;
 import java.util.Comparator;
@@ -29,6 +30,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+    @ExceptionHandler(GradeConfigurationApiException.class)
+    ResponseEntity<ProblemDetail> gradeConfigurationProblem(GradeConfigurationApiException ex, HttpServletRequest request) {
+        return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore()).body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));
+    }
     @ExceptionHandler(ExamApiException.class)
     ResponseEntity<ProblemDetail> examProblem(ExamApiException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore()).body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));

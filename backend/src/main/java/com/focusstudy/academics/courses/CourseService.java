@@ -8,6 +8,7 @@ import com.focusstudy.assignments.AssignmentRepository;
 import com.focusstudy.study.StudySessionRepository;
 import com.focusstudy.schedule.ClassScheduleRepository;
 import com.focusstudy.exams.ExamRepository;
+import com.focusstudy.grades.configuration.GradeConfigurationRepository;
 import java.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,10 @@ public class CourseService {
     private final StudySessionRepository studySessions;
     private final ClassScheduleRepository classSchedules;
     private final ExamRepository exams;
-    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users, AssignmentRepository assignments, StudySessionRepository studySessions, ClassScheduleRepository classSchedules, ExamRepository exams) {
+    private final GradeConfigurationRepository gradeConfigurations;
+    public CourseService(CourseRepository courses, SemesterRepository semesters, UserRepository users, AssignmentRepository assignments, StudySessionRepository studySessions, ClassScheduleRepository classSchedules, ExamRepository exams, GradeConfigurationRepository gradeConfigurations) {
         this.courses = courses; this.semesters = semesters; this.users = users; this.assignments = assignments; this.studySessions = studySessions; this.classSchedules = classSchedules; this.exams = exams;
+        this.gradeConfigurations = gradeConfigurations;
     }
     @Transactional(readOnly = true)
     public List<CourseResponse> list(UUID owner, UUID semesterId) {
@@ -63,6 +66,8 @@ public class CourseService {
                 "COURSE_HAS_CLASS_SCHEDULES", "Môn còn lịch học đã lưu. Xử lý các chuỗi lịch trước khi xóa hoặc chuyển học kỳ.");
         if (exams.existsByUserIdAndCourseId(owner, courseId)) throw new CourseApiException(HttpStatus.CONFLICT,
                 "COURSE_HAS_EXAMS", "Môn còn lịch thi đã lưu. Xử lý các lịch thi trước khi xóa hoặc chuyển học kỳ.");
+        if (gradeConfigurations.existsByUserIdAndCourseId(owner, courseId)) throw new CourseApiException(HttpStatus.CONFLICT,
+                "COURSE_HAS_GRADE_CONFIGURATION", "Môn còn cấu hình điểm. Xử lý cấu hình trước khi xóa hoặc chuyển học kỳ.");
     }
     private void lockOwner(UUID owner) {
         // Same first lock as semester writes: create/move cannot race deletion of

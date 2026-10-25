@@ -4,7 +4,21 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4H.2C.2 — Nhắc việc lịch thi thật
+## Đợt vừa hoàn thành: 5A.1 — Lưu cấu hình bảng điểm theo môn
+
+V8 + API cấu hình Lý thuyết/Thực hành, bộ cột tùy chỉnh/thứ tự/tên/vai trò và cách quy BTL, trọng số dựng từ cấu hình và DRAFT thiếu nhóm. Ownership/version/khóa tài khoản, snapshot đọc, giữ ID cột và chặn xóa/chuyển môn còn cấu hình; có mẫu JSON, script PowerShell 5.1, IntelliJ HTTP và test migration/restart/đồng thời. Chỉ lưu cấu hình; điểm số, tổng kết/GPA và nối UI tiếp tục ở 5A.2/5B/5C. Xem `BACKEND-PHASE-5A1.md`.
+
+357 tests/Maven verify qua (32 mới), không lỗi/bỏ qua; TypeScript qua. Các schema kiểm thử tự dọn; không seed vào tài khoản app.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Lưu cấu hình bảng điểm và cách quy bài tập lớn theo môn"
+git push
+```
+
+## 4H.2C.2 — Nhắc việc lịch thi thật
 
 Chuông dùng lịch thi toàn tài khoản theo mốc nhắc đã lưu; một thẻ mỗi kỳ thi và read revision cho từng mốc. Mở/sửa/xóa qua API, cập nhật khi đổi giờ/phòng/mốc hoặc tắt/xóa/kết thúc. Độc lập với lịch học khi một nguồn lỗi, giữ dấu đọc qua retry và không báo trống giả. 139 test lịch thi (35 mới) + 140 test lịch hồi quy, TypeScript/export web và browser API/PostgreSQL thật qua. Không backend/migration/dependency; xem `FRONTEND-EXAMS-4H2C2.md`. Chưa gửi thông báo thiết bị.
 

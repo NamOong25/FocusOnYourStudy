@@ -1,0 +1,90 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@refreshToken = THAY_REFRESH_TOKEN
+@courseId = THAY_COURSE_ID
+@semesterId = THAY_SEMESTER_ID
+@configurationId = THAY_CONFIGURATION_ID
+@version = 0
+
+### Dùng bản sao trong .local; thay email/mật khẩu tại máy, không commit thông tin thật
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL", "password":"THAY_MAT_KHAU"}
+
+### Lấy id môn đã lưu trong tài khoản, không dùng id của dữ liệu mẫu RAM
+GET {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{accessToken}}
+
+### Danh sách cấu hình: data=[] là chưa tạo cấu hình nào
+GET {{baseUrl}}/api/v1/grade-configurations
+Authorization: Bearer {{accessToken}}
+
+### Đọc theo môn: chưa có cấu hình trả 404 GRADE_CONFIGURATION_NOT_FOUND, không tự tạo cột
+GET {{baseUrl}}/api/v1/courses/{{courseId}}/grade-configuration
+Authorization: Bearer {{accessToken}}
+
+### Tạo cấu hình lý thuyết, giữ id/version từ data để thử tiếp
+POST {{baseUrl}}/api/v1/courses/{{courseId}}/grade-configuration
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "assessment": "THEORY",
+  "parts": [
+    {"id": "tk1", "name": "Thường kỳ 1", "kind": "REGULAR"},
+    {"id": "tk2", "name": "Kiểm tra thường kỳ", "kind": "REGULAR_TEST"},
+    {"id": "mid", "name": "Giữa kỳ", "kind": "MIDTERM"},
+    {"id": "final", "name": "Cuối kỳ", "kind": "FINAL"}
+  ]
+}
+
+### Lọc đúng tài khoản + học kỳ + môn (giao của hai bộ lọc)
+GET {{baseUrl}}/api/v1/grade-configurations?semesterId={{semesterId}}&courseId={{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### Đọc mới nhất trước mỗi lần sửa/xóa; configurationId khác courseId
+GET {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}
+Authorization: Bearer {{accessToken}}
+
+### Chuyển sang thực hành, BTL thay một cột; PUT gửi đầy đủ bộ cột, không gửi weight/score
+PUT {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "version": {{version}},
+  "assessment": "PRACTICAL",
+  "parts": [
+    {"id": "th1", "name": "Thường kỳ thực hành 1", "kind": "PRACTICE_REGULAR"},
+    {"id": "th2", "name": "Kiểm tra thực hành", "kind": "PRACTICE_TEST"},
+    {"id": "btl", "name": "Bài tập lớn React", "kind": "PROJECT", "project": {"target": "PRACTICE", "share": 100}}
+  ]
+}
+
+### BTL góp 40% vào cột cuối kỳ của lý thuyết (minh họa, dùng tỷ lệ đề cương thực tế)
+PUT {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "version": {{version}},
+  "assessment": "THEORY",
+  "parts": [
+    {"id": "tk1", "name": "Thường kỳ 1", "kind": "REGULAR"},
+    {"id": "mid", "name": "Giữa kỳ", "kind": "MIDTERM"},
+    {"id": "btl-final", "name": "BTL góp cuối kỳ", "kind": "PROJECT", "project": {"target": "FINAL", "share": 40}}
+  ]
+}
+
+### Chỉ chạy khi muốn xóa cấu hình thử; lấy version mới nhất, dữ liệu môn/lịch/bài tập giữ nguyên
+DELETE {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}?version={{version}}
+Authorization: Bearer {{accessToken}}
+
+### Kết thúc đúng phiên thử này
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{refreshToken}}"}

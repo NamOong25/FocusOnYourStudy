@@ -1,0 +1,9 @@
+{
+  "assessment": "THEORY",
+  "parts": [
+    {"id": "tk1", "name": "Thường kỳ 1", "kind": "REGULAR"},
+    {"id": "tk2", "name": "Kiểm tra thường kỳ", "kind": "REGULAR_TEST"},
+    {"id": "mid", "name": "Giữa kỳ", "kind": "MIDTERM"},
+    {"id": "final", "name": "Cuối kỳ", "kind": "FINAL"}
+  ]
+}

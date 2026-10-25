@@ -1,5 +1,9 @@
 # Backend — FocusYourStudy
 
+**Nghiệm thu 5A.1 ngày 26/10/2026: 357 tests/Maven verify qua (32 mới), không lỗi/bỏ qua; TypeScript qua.** Có kiểm tra migration V7 → V8 giữ dữ liệu, restart toàn backend, Windows PowerShell 5.1/UTF-8, ownership/version, BTL, snapshot và ghi đồng thời. Kiểm thử dùng schema riêng, không seed vào tài khoản app.
+
+**Mới nhất 5A.1 — Cấu hình bảng điểm:** V8 thêm `grade_configurations`/`grade_columns`, CRUD/lọc theo tài khoản/môn/kỳ; cột tùy chỉnh, thứ tự/tên/vai trò, BTL thay thực hành hoặc toàn phần/một phần cuối kỳ. Trọng số dựng từ cấu hình, bản thiếu nhóm là DRAFT; ownership/version/khóa tài khoản, snapshot đọc và guard xóa/chuyển môn. Chưa lưu điểm số/tổng kết/GPA và chưa nối màn Điểm. Chạy lại `scripts/Run-Local.ps1` để nâng V7 → V8, không xóa/tạo lại database. Xem [hướng dẫn 5A.1](../docs/BACKEND-PHASE-5A1.md), [hợp đồng](docs/GRADE-CONFIGURATIONS.md), `api/grade-configurations.http`, `api/samples/grade-configurations`, `scripts/Try-GradeConfigurations.ps1`. 5A.2/5B/5C còn trong checklist.
+
 **Frontend 4H.2B đã thêm/sửa/xóa lịch thi qua API**, xử lý version/trùng/mất phản hồi và cấu hình nhắc. Xem [hướng dẫn 4H.2B](../docs/FRONTEND-EXAMS-4H2B.md). Không đổi backend/migration, vẫn V7; tổng hợp/nhắc việc 4H.2C còn trong checklist.
 
 **Frontend 4H.2A đã đọc GET lịch thi:** danh sách theo tài khoản/học kỳ/môn và chi tiết mới nhất, trạng thái tải/lỗi/trống, F5 và đổi tài khoản. Tạo kỳ thi thử bằng `scripts/Try-Exams.ps1`; xem [hướng dẫn 4H.2A](../docs/FRONTEND-EXAMS-4H2A.md). Ghi từ UI nối 4H.2B, tổng hợp/nhắc việc 4H.2C; backend/migration đợt này giữ nguyên V7.
