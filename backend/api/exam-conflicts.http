@@ -1,0 +1,68 @@
+### 4H.1B.1: create/update exams check saved exams, effective classes and studies.
+### Use a TEST course owned by your account. Set token/courseId in private HTTP Client env.
+### Create the busy record BEFORE the proposed exam; reverse writers are 4H.1B.2.
+@baseUrl = http://localhost:8080
+
+### 1. Save one Tuesday class 07:00-09:00; expect 201 if free.
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [2],
+  "startsOn": "2026-11-10",
+  "endsOn": "2026-11-10",
+  "startTime": "07:00",
+  "endTime": "09:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 2. Expect 409 SCHEDULE_TIME_CONFLICT, conflict.kind CLASS. Nothing inserted.
+POST {{baseUrl}}/api/v1/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "FINAL",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-10T08:00:00+07:00",
+  "endsAt": "2026-11-10T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 3. Touch class end: expect 201. Record returned id/version for optional edits.
+POST {{baseUrl}}/api/v1/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "FINAL",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-10T09:00:00+07:00",
+  "endsAt": "2026-11-10T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 4. Expect 409 SCHEDULE_TIME_CONFLICT, conflict.kind EXAM.
+POST {{baseUrl}}/api/v1/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "MIDTERM",
+  "format": "ONLINE",
+  "startsAt": "2026-11-10T09:30:00+07:00",
+  "endsAt": "2026-11-10T10:30:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 5. List confirms only the successful exam was saved (plus pre-existing records).
+GET {{baseUrl}}/api/v1/exams?courseId={{courseId}}
+Authorization: Bearer {{token}}
+
+### More cases: docs/BACKEND-PHASE-4H1B1.md. Read latest version before updates/deletes.
+### Do not publish private env files or tokens. No new migration in this phase.

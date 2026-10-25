@@ -1,8 +1,16 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Giao diện lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4H.1A: API lịch thi cơ bản
+## Mới nhất — 4H.1B.1: Chặn lịch thi trùng với lịch đã lưu
+
+POST/PUT lịch thi kiểm tra thi khác, lịch học hiệu lực (nghỉ/đổi/kế thừa giờ) và tự học cùng tài khoản, cả khác môn/học kỳ. So UTC, cho phép chạm giờ; 409 nêu buổi/môn/ngày/giờ. Thất bại giữ toàn bộ dữ liệu/version; khóa tài khoản bảo vệ các thao tác lịch thi đồng thời. Không thêm migration/seed, vẫn V7.
+
+**294 tests/Maven verify qua (26 mới), không bỏ qua**, gồm UTC/DST/đường đổi ngày, ngoại lệ, hai tài khoản, rollback, ghi đồng thời và PowerShell 5.1. TypeScript và 140 test lịch frontend hồi quy qua.
+
+Chạy lại backend rồi thử theo [hướng dẫn 4H.1B.1](docs/BACKEND-PHASE-4H1B1.md), [contract](backend/docs/EXAMS.md) hoặc `backend/api/exam-conflicts.http`. **Chiều ngược từ ghi lịch học/tự học so với kỳ thi còn ở 4H.1B.2**; UI lịch thi nối ở 4H.2, chưa dùng màn thử để nghiệm thu API.
+
+## 4H.1A: API lịch thi cơ bản
 
 Backend đã có **V7 + API CRUD/lọc lịch thi** theo tài khoản, liên kết môn/học kỳ, loại/hình thức thi, bắt đầu/kết thúc UTC và zone, phòng, ghi chú và nhiều mốc nhắc. Kiểm tra version, kể cả PUT giống hệt; môn còn lịch thi không được xóa/chuyển kỳ. V7 thêm bảng, giữ V1–V6 và dữ liệu cũ, không seed/reset database.
 

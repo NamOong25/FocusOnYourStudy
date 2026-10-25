@@ -1,6 +1,6 @@
-# Kiểm tra trùng giờ — 4E.2B
+# Kiểm tra trùng giờ — 4E.2B / 4H.1B.1
 
-Đây là guard khi ghi vào các API hiện có, không phải endpoint mới. Không thêm bảng/migration hoặc sửa dữ liệu cũ. Flyway vẫn ở V6.
+Đây là guard khi ghi vào các API hiện có, không phải endpoint mới. 4E.2B không thêm migration; 4H.1A đã thêm lịch thi bằng V7. 4H.1B.1 mở rộng kiểm tra khi tạo/sửa lịch thi, không thêm migration hoặc sửa dữ liệu cũ; Flyway hiện ở V7.
 
 ## Khi nào kiểm tra?
 
@@ -10,6 +10,7 @@
 | PUT ngoại lệ một ngày | Chỉ buổi sau thay đổi, so với chuỗi khác và tự học. Buổi CANCELLED không chiếm giờ. |
 | DELETE ngoại lệ/khôi phục | Buổi gốc hiện tại được mở lại; phải kiểm tra trước khi xóa ngoại lệ. |
 | POST/PUT tự học | So với buổi hiệu lực của lịch học; guard tự học–tự học của 4C tiếp tục hoạt động. |
+| POST/PUT lịch thi (4H.1B.1) | So với lịch thi khác, buổi lịch học hiệu lực và tự học, toàn tài khoản. PUT không so với chính lịch thi đang sửa. |
 | Xóa cả chuỗi/tự học; báo nghỉ | Giải phóng giờ, không bị chặn vì các xung đột cũ. Các guard sở hữu/version vẫn áp dụng. |
 
 - Chỉ dữ liệu cùng tài khoản, kể cả khác môn/học kỳ. Giảng viên/phòng không phải tài nguyên dùng chung giữa các sinh viên trong ứng dụng cá nhân này.
@@ -50,6 +51,7 @@ Các trường chung type/title/instance/timestamp/requestId vẫn như các l�
 
 - CLASS: id chuỗi + date nhận diện một buổi; startTime/endTime/UTC đã áp dụng ngoại lệ. title là “Buổi học”, courseName là tên môn hiện tại.
 - STUDY: id buổi tự học, title là nội dung tự học. date/endDate và giờ hiển thị theo timeZone của buổi đó.
+- EXAM: id lịch thi đã lưu; title ghép loại kỳ thi và hình thức bằng tiếng Việt (ví dụ “Thi cuối kỳ · Tự luận”). Các trường ngày/giờ theo zone của kỳ thi, startsAt/endsAt là UTC.
 - Thứ tự chọn ổn định theo startsAt UTC, kind, UUID; trả cặp đầu tiên tìm được khi quét lịch đề xuất theo giờ bắt đầu. Nếu xử lý buổi này mà vẫn còn xung đột khác, lần lưu sau có thể báo buổi tiếp theo.
 - Không lộ lịch của người khác, mật khẩu, token hoặc SQL. UUID/cha khác chủ vẫn trả 404 trước khi kiểm tra xung đột.
 - `STUDY_TIME_CONFLICT` tiếp tục dùng cho tự học–tự học, giữ contract cũ. Lỗi version/validation/ngoại lệ mất ngày vẫn có mã riêng; không bị thay bằng lỗi trùng giờ.
@@ -58,10 +60,10 @@ Form tự học đã nối API hiển thị detail của riêng mã 409 này (gi
 
 ## Tính nguyên tử và dữ liệu cũ
 
-Mọi luồng ghi giữ khóa hàng tài khoản đầu tiên trong transaction đến commit, dùng chung với lịch/ngoại lệ/tự học/bài/môn. Hai bên kiểm tra và lưu trong cùng giao dịch; không có cửa sổ “cùng thấy trống rồi cùng lưu”. Service kiểm tra chỉ chạy trong transaction của bên ghi. Không đọc lịch qua endpoint 92 ngày hoặc dùng snapshot cũ của client để quyết định.
+Mọi luồng ghi giữ khóa hàng tài khoản đầu tiên trong transaction đến commit, dùng chung với lịch/ngoại lệ/tự học/bài/môn/thi. Với các cặp đã kiểm tra hai chiều (lịch học–lịch học/tự học và thi–thi), kiểm tra/lưu cùng giao dịch ngăn hai request cùng thấy trống rồi cùng lưu. Service kiểm tra chỉ chạy trong transaction của bên ghi. Không đọc lịch qua endpoint 92 ngày hoặc dùng snapshot cũ của client để quyết định. **Lịch học/tự học ghi sau lịch thi chưa kiểm tra chiều ngược** cho đến 4H.1B.2; không suy ra đã bảo vệ hai chiều chỉ vì có khóa chung.
 
 Khi bị chặn: không lưu một phần, không tăng version/counter, không mất ngoại lệ khi khôi phục thất bại. Client giữ bản nháp, xem và chủ động điều chỉnh; không tự gửi lại thao tác ghi. Sau thành công vẫn dùng version server trả về; mất phản hồi thì GET trước.
 
 Lịch trùng đã tồn tại trước 4E.2B vẫn đọc được, không tự di chuyển/xóa. Khi sửa một chuỗi, toàn bộ lịch hiệu lực đề xuất phải hợp lệ; kể cả sửa phòng cũng có thể bị chặn nếu chuỗi đó còn trùng. Có thể báo nghỉ đúng ngày, chuyển buổi sang giờ trống hoặc xóa dữ liệu thử của chính mình để xử lý.
 
-Chưa xét lịch thi, thời gian di chuyển, lịch bù sang ngày khác hoặc tài nguyên phòng/giảng viên toàn trường. Lịch thi và UI 4F theo đợt riêng. Hướng dẫn thực hành: `../../docs/BACKEND-PHASE-4E2B.md`.
+4H.1B.1 đã xét lịch thi khi POST/PUT lịch thi; chiều ngược từ lịch học/tự học còn ở 4H.1B.2, UI thi nối 4H.2. Chưa xét thời gian di chuyển, lịch bù sang ngày khác hoặc tài nguyên phòng/giảng viên toàn trường. Hướng dẫn thực hành: `../../docs/BACKEND-PHASE-4E2B.md` và `../../docs/BACKEND-PHASE-4H1B1.md`.

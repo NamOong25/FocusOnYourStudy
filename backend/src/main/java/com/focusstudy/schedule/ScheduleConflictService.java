@@ -2,6 +2,8 @@ package com.focusstudy.schedule;
 
 import com.focusstudy.academics.courses.CourseRepository;
 import com.focusstudy.study.StudySessionRepository;
+import com.focusstudy.exams.ExamEntity;
+import com.focusstudy.exams.ExamRepository;
 import java.time.*;
 import java.util.*;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,10 @@ public class ScheduleConflictService {
     private final ClassExceptionRepository exceptions;
     private final StudySessionRepository studies;
     private final CourseRepository courses;
+    private final ExamRepository exams;
     public ScheduleConflictService(ClassScheduleRepository schedules, ClassExceptionRepository exceptions,
-            StudySessionRepository studies, CourseRepository courses) {
-        this.schedules = schedules; this.exceptions = exceptions; this.studies = studies; this.courses = courses;
+            StudySessionRepository studies, CourseRepository courses, ExamRepository exams) {
+        this.schedules = schedules; this.exceptions = exceptions; this.studies = studies; this.courses = courses; this.exams = exams;
     }
     private record Busy(String kind, UUID id, UUID courseId, String title, String zone, Instant start, Instant end) { }
     private static final Comparator<Busy> ORDER = Comparator.comparing(Busy::start).thenComparing(Busy::kind)
@@ -40,6 +43,14 @@ public class ScheduleConflictService {
         check(owner, List.of(new Busy("STUDY", new UUID(0, 0), null, "", "UTC", start, end)), null, false);
     }
     private void check(UUID owner, List<Busy> proposed, UUID excludedRule, boolean includeStudies) {
+        // Existing class/study writers retain their contract. Reverse exam
+        // protection is introduced separately in 4H.1B.2.
+        check(owner, proposed, excludedRule, includeStudies, false, null);
+    }
+    public void checkExam(UUID owner, Instant start, Instant end, UUID excludedExam) {
+        check(owner, List.of(new Busy("EXAM", new UUID(0, 0), null, "", "UTC", start, end)), null, true, true, excludedExam);
+    }
+    private void check(UUID owner, List<Busy> proposed, UUID excludedRule, boolean includeStudies, boolean includeExams, UUID excludedExam) {
         if (proposed.isEmpty()) return; // Cancelled days do not reserve any time.
         proposed = new ArrayList<>(proposed); proposed.sort(ORDER);
         var from = proposed.getFirst().start();
@@ -57,6 +68,8 @@ public class ScheduleConflictService {
         for (var rule : rules) busy.addAll(expand(rule, byRule.getOrDefault(rule.getId(), Map.of()), low, high));
         if (includeStudies) for (var study : studies.findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(owner, to, from))
             busy.add(new Busy("STUDY", study.getId(), study.getCourseId(), study.getTitle(), study.getTimeZone(), study.getStartsAt(), study.getEndsAt()));
+        if (includeExams) for (var exam : exams.findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(owner, to, from))
+            if (!exam.getId().equals(excludedExam)) busy.add(new Busy("EXAM", exam.getId(), exam.getCourseId(), examTitle(exam), exam.getTimeZone(), exam.getStartsAt(), exam.getEndsAt()));
         busy.sort(ORDER);
         int a = 0, b = 0;
         // Half-open [start,end), sweeping sorted intervals; never compare weekday/clock strings alone.
@@ -65,6 +78,11 @@ public class ScheduleConflictService {
             if (x.start().isBefore(y.end()) && y.start().isBefore(x.end())) throw conflict(owner, y);
             if (!x.end().isAfter(y.start())) a++; else b++;
         }
+    }
+    private String examTitle(ExamEntity exam) {
+        String kind = switch (exam.getKind()) { case MIDTERM -> "Thi giữa kỳ"; case FINAL -> "Thi cuối kỳ"; case OTHER -> "Kỳ thi khác"; };
+        String format = switch (exam.getFormat()) { case WRITTEN -> "Tự luận"; case MULTIPLE_CHOICE -> "Trắc nghiệm"; case PRACTICAL -> "Thực hành"; case ORAL -> "Vấn đáp"; case ONLINE -> "Trực tuyến"; };
+        return kind + " · " + format;
     }
     private List<Busy> expand(ClassScheduleEntity rule, Map<LocalDate, ClassExceptionEntity> overrides, LocalDate low, LocalDate high) {
         var result = new ArrayList<Busy>();

@@ -4,6 +4,7 @@ import com.focusstudy.academics.CourseEntity;
 import com.focusstudy.academics.courses.*;
 import com.focusstudy.academics.semesters.*;
 import com.focusstudy.users.UserRepository;
+import com.focusstudy.schedule.ScheduleConflictService;
 import jakarta.persistence.criteria.Predicate;
 import java.time.*;
 import java.util.*;
@@ -19,7 +20,8 @@ public class ExamService {
     private final CourseRepository courses;
     private final SemesterRepository semesters;
     private final UserRepository users;
-    public ExamService(ExamRepository exams, CourseRepository courses, SemesterRepository semesters, UserRepository users) { this.exams = exams; this.courses = courses; this.semesters = semesters; this.users = users; }
+    private final ScheduleConflictService conflicts;
+    public ExamService(ExamRepository exams, CourseRepository courses, SemesterRepository semesters, UserRepository users, ScheduleConflictService conflicts) { this.exams = exams; this.courses = courses; this.semesters = semesters; this.users = users; this.conflicts = conflicts; }
     @Transactional(readOnly = true)
     public List<ExamResponse> list(UUID owner, UUID courseId, UUID semesterId, ExamEntity.Kind kind, ExamEntity.Format format, String from, String to) {
         if (courseId != null) ownedCourse(owner, courseId);
@@ -45,10 +47,16 @@ public class ExamService {
     @Transactional(readOnly = true)
     public ExamResponse get(UUID owner, UUID id) { return ExamResponse.from(owned(owner, id)); }
     @Transactional
-    public ExamResponse create(UUID owner, ExamRequests.Create input) { lockOwner(owner); ownedCourse(owner, input.courseId()); return ExamResponse.from(exams.saveAndFlush(ExamEntity.create(owner, input))); }
+    public ExamResponse create(UUID owner, ExamRequests.Create input) {
+        lockOwner(owner); ownedCourse(owner, input.courseId()); var candidate = ExamEntity.create(owner, input);
+        conflicts.checkExam(owner, candidate.getStartsAt(), candidate.getEndsAt(), null);
+        return ExamResponse.from(exams.saveAndFlush(candidate));
+    }
     @Transactional
     public ExamResponse update(UUID owner, UUID id, ExamRequests.Update input) {
-        lockOwner(owner); var exam = owned(owner, id); checkVersion(exam, input.version()); ownedCourse(owner, input.courseId()); exam.change(input); exams.flush(); return ExamResponse.from(exam);
+        lockOwner(owner); var exam = owned(owner, id); checkVersion(exam, input.version()); ownedCourse(owner, input.courseId());
+        conflicts.checkExam(owner, ExamSchedule.parse(input.startsAt()), ExamSchedule.parse(input.endsAt()), id);
+        exam.change(input); exams.flush(); return ExamResponse.from(exam);
     }
     @Transactional
     public void delete(UUID owner, UUID id, long version) { lockOwner(owner); var exam = owned(owner, id); checkVersion(exam, version); exams.delete(exam); exams.flush(); }

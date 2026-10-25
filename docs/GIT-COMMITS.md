@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4H.1A — API lịch thi cơ bản
+## Đợt vừa hoàn thành: 4H.1B.1 — Chặn lịch thi trùng với lịch đã lưu
+
+Khi tạo/sửa lịch thi kiểm tra kỳ thi khác, lịch học hiệu lực sau nghỉ/đổi và tự học toàn tài khoản. So UTC, cho chạm giờ; lỗi nêu môn/buổi/ngày/giờ và giữ nguyên toàn bộ dữ liệu/version khi bị chặn. Khóa tài khoản bảo vệ ghi lịch thi đồng thời. 294 tests/Maven verify qua (26 mới), không bỏ qua, có PowerShell 5.1, rollback, múi giờ và race; TypeScript/140 test lịch frontend qua. Không migration/seed, vẫn V7. Chiều ngược 4H.1B.2 và UI 4H.2 còn trong checklist; hướng dẫn `BACKEND-PHASE-4H1B1.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Chặn lịch thi trùng với lịch đã lưu"
+git push
+```
+
+## 4H.1A — API lịch thi cơ bản
 
 V7 thêm bảng lịch thi, API CRUD/lọc theo chủ tài khoản và môn/học kỳ, ngày giờ UTC/zone, loại/hình thức và cấu hình mốc nhắc; version chống ghi đè cả PUT giống hệt, bảo vệ xóa/chuyển môn. 268 tests/Maven verify qua (30 mới), có migration giữ dữ liệu, restart và PowerShell 5.1. TypeScript/140 test lịch frontend hồi quy qua. Chưa kiểm tra trùng (4H.1B) hoặc nối UI (4H.2); hướng dẫn `BACKEND-PHASE-4H1A.md`.
 
@@ -114,7 +126,8 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4F.3 — Ghi một buổi | Nghỉ/đổi/khôi phục, version cả chuỗi và kiểm tra trùng | Kết nối nghỉ đổi và khôi phục từng buổi học |
+| 4H.1B.2 — Chiều ngược | Ghi lịch học/ngoại lệ/tự học kiểm tra lịch thi, kể cả ghi đồng thời | Chặn lịch học và tự học trùng lịch thi |
+| 4H.2 — UI lịch thi | Nối API lịch thi, Trang chủ/chi tiết môn và nhắc việc | Kết nối giao diện lịch thi với dữ liệu thật |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 
 Mỗi mục làm riêng để người dùng xem và push. Đã xong backend 1/2A/2B/3A/3B/4A/4C/4E.1/4E.2A/4E.2B, UI tài khoản 2C.1/2C.2/2C.3A và UI học kỳ/môn/bài/tự học/lịch 3C.1/3C.2/4B/4D/4F.1/4F.2; tiếp theo theo `next`/`go`.

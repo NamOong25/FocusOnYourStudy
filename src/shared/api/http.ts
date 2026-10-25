@@ -41,7 +41,7 @@ const messages: Record<string, string> = {
   STUDY_SESSION_NOT_FOUND: 'Buổi học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại.',
   STUDY_SESSION_VERSION_CONFLICT: 'Buổi học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   STUDY_TIME_CONFLICT: 'Khung giờ trùng buổi tự học khác. Tải lại lịch và chọn giờ khác.',
-  SCHEDULE_TIME_CONFLICT: 'Khung giờ trùng lịch học hoặc buổi tự học đã lưu. Chọn giờ khác hoặc điều chỉnh lịch.',
+  SCHEDULE_TIME_CONFLICT: 'Khung giờ trùng lịch thi, lịch học hoặc buổi tự học đã lưu. Chọn giờ khác hoặc điều chỉnh lịch.',
   CLASS_SCHEDULE_NOT_FOUND: 'Lịch học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại lịch.',
   CLASS_SCHEDULE_VERSION_CONFLICT: 'Chuỗi hoặc một buổi đã được sửa ở nơi khác. Xem lại bản mới trước khi tiếp tục.',
   CLASS_SCHEDULE_HAS_EXCEPTIONS: 'Chuỗi có buổi đã nghỉ/đổi. Giữ ngày và cấu hình còn hợp lệ, hoặc xử lý ngoại lệ trước khi thay đổi.',

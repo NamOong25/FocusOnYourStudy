@@ -77,7 +77,7 @@ try {
         }
     }
     if ($Mode -ne 'Delete') { $result | ConvertTo-Json -Depth 6 }
-    Write-Host 'Lịch thi lấy từ PostgreSQL. UI nối ở 4H.2; kiểm tra trùng lịch ở 4H.1B.' -ForegroundColor Cyan
+    Write-Host 'Lịch thi lấy từ PostgreSQL; thêm/sửa có kiểm tra trùng. UI nối ở 4H.2; kiểm tra chiều ngược lại ở 4H.1B.2.' -ForegroundColor Cyan
 } catch {
     $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) {
