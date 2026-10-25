@@ -3,11 +3,13 @@ import { deadlineTimestamp, taskDeadlineLabel, taskDueLabel, type Task } from '.
 import { classOccurrences, type ClassException, type ClassItem, type Exam } from '../schedule/calendar';
 import { addDays, dateKey, dateLabel, isValidDate } from '../../shared/utils/dates';
 
-export type NotificationTarget = { kind: 'task'; id: string } | { kind: 'class'; id: string; date: string } | { kind: 'exam'; id: string };
+export type NotificationTarget = { kind: 'task'; id: string } | { kind: 'class'; id: string; date: string } | { kind: 'exam'; id: string }
+  | { kind: 'saved-class'; id: string; date: string; courseId: string; semesterId: string };
 export type InAppReminder = {
   id: string; revision: string; kind: NotificationTarget['kind']; target: NotificationTarget;
   title: string; subtitle: string; detail: string; when: string; at: number;
   urgency: 'overdue' | 'ongoing' | 'upcoming'; changed?: boolean;
+  origin?: string; reason?: string;
 };
 export type ReadReceipts = Record<string, string>;
 export type ReminderWithRead = InAppReminder & { read: boolean };
@@ -59,8 +61,8 @@ export function pruneReadReceipts(receipts: ReadReceipts, items: InAppReminder[]
   return Object.keys(receipts).every(id => active.has(id)) ? receipts : Object.fromEntries(Object.entries(receipts).filter(([id]) => active.has(id)));
 }
 export function notificationTargetExists(target: NotificationTarget, sources: ReminderSources) {
-  return target.kind === 'task' ? sources.tasks.some(task => task.id === target.id) : target.kind === 'class' ? sources.classes.some(item => item.id === target.id) : sources.exams.some(exam => exam.id === target.id);
+  return target.kind === 'task' ? sources.tasks.some(task => task.id === target.id) : target.kind === 'class' ? sources.classes.some(item => item.id === target.id) : target.kind === 'exam' && sources.exams.some(exam => exam.id === target.id);
 }
 export function reminderOpenLabel(item: InAppReminder) {
-  return item.kind === 'task' ? `Mở nhắc bài ${item.title}` : item.kind === 'class' ? `Mở nhắc lịch học ${item.title}, ${item.detail}` : `Mở nhắc lịch thi ${item.title}, ${item.detail}`;
+  return item.kind === 'task' ? `Mở nhắc bài ${item.title}` : item.kind === 'class' || item.kind === 'saved-class' ? `Mở nhắc lịch học ${item.title}, ${item.detail}` : `Mở nhắc lịch thi ${item.title}, ${item.detail}`;
 }

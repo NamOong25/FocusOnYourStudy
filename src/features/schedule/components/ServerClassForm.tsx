@@ -78,8 +78,8 @@ export default function ServerClassForm({ source, original, initialDate, semeste
     <T style={S.small}>Giờ học theo múi giờ này, tối đa 366 ngày và kết thúc trước 24:00 cùng ngày. Đổi múi giờ sẽ đổi thời điểm thực tế của lịch.</T>
     <Field label="Phòng học" value={draft.room} onChange={room => change({ room })} maxLength={100} disabled={locked} />
     <Field label="Giảng viên" value={draft.teacher} onChange={teacher => change({ teacher })} maxLength={200} disabled={locked} />
-    <Field label="Nhắc trước (phút)" value={draft.reminderMinutes} onChange={reminderMinutes => change({ reminderMinutes })} numeric maxLength={5} disabled={locked} />
-    <T style={S.small}>0 là không chọn mốc nhắc. Tùy chọn được lưu; hiện chưa gửi thông báo trên thiết bị.</T>
+    <T style={S.small}>Nhắc trong mục chuông từ mốc đã lưu; 0 phút là đúng giờ bắt đầu. Chưa gửi thông báo thiết bị.</T><Field label="Nhắc trước (phút)" value={draft.reminderMinutes} onChange={reminderMinutes => change({ reminderMinutes })} numeric maxLength={5} disabled={locked} />
+    <T style={S.small}>Tối đa 10080 phút (7 ngày), áp dụng cho cả chuỗi lịch.</T>
     <Field label="Ghi chú lịch học" value={draft.notes} onChange={notes => change({ notes })} multiline maxLength={5000} disabled={locked} />
     {!!message && <T accessibilityRole="alert" style={{ color: C.red }}>{message}</T>}
     {parentsStale && <><T style={{color:C.red}}>Cần tải lại danh mục môn trước khi lưu. Nội dung đang nhập được giữ.</T><Button label="Tải lại danh mục môn" secondary disabled={locked} onPress={() => { void action.run(async signal => { await courseConnection?.reload(); assertNotCancelled(signal); }); }} /></>}

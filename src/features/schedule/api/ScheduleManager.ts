@@ -66,5 +66,12 @@ export class ScheduleManager {
     if (this.state.loaded && !this.state.error && !this.state.loading && !this.state.busy) { this.publish({ needsReload: false, pendingOccurrence: null }); return true; }
     return false;
   };
+  invalidate = () => {
+    if (this.disposed) return;
+    this.read?.abort(); this.read = null; this.flight = null; this.generation++;
+    // A link may return to the same already-mounted calendar day. Discard its
+    // old read before opening, while retaining any unresolved write/review lock.
+    this.publish({ rows: [], loaded: false, loading: false, error: null, revision: this.state.revision + 1 });
+  };
   dispose = () => { this.disposed = true; this.generation++; this.read?.abort(); this.listeners.clear(); };
 }

@@ -27,14 +27,15 @@ export default function ServerSchedule() {
   const [occurrenceFlow, setOccurrenceFlow] = useState<ExceptionFlowRequest | null>(null);
   const { showNotice } = useFeedback();
   const scope = useNavigationScope(), range = scheduleWindow(selected, view);
-  React.useLayoutEffect(() => {
-    if (!scope.active || !scheduleDestination) return;
-    setSelected(parseDay(scheduleDestination.date)); setView('Theo ngày'); setChoose(false); setDetail(null); setEditor(null); setManage(false); setOccurrenceFlow(null);
-    consumeScheduleDestination(scheduleDestination.key);
-  }, [scope.active, scheduleDestination, consumeScheduleDestination]);
   const semester = semesters.find(s => s.id === academicSemesterId);
   const query = semester ? { semesterId: semester.id, from: range.from, to: range.to } : null;
   const key = query ? queryKey(query) : '', source = useServerSchedule(query, scope.active);
+  React.useLayoutEffect(() => {
+    if (!scope.active || !scheduleDestination) return;
+    source.invalidate();
+    setSelected(parseDay(scheduleDestination.date)); setView('Theo ngày'); setChoose(false); setDetail(null); setEditor(null); setManage(false); setOccurrenceFlow(null);
+    consumeScheduleDestination(scheduleDestination.key);
+  }, [scope.active, scheduleDestination, consumeScheduleDestination, source.invalidate]);
   const rows = source.rows, forDay = (date: string) => rows.filter(row => row.date === date);
   const name = (item: ServerOccurrence) => courseCatalog.find(c => c.id === item.courseId)?.name ?? 'Môn chưa được tải';
   const reload = () => { setDetail(null); void Promise.all([source.reload(), courseConnection?.reload()]).catch(() => {}); };

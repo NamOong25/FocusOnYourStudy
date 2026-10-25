@@ -53,7 +53,7 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
 ];
 function AppShell() {
   const auth = useAuth();
-  const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute, semesterConnection, courseConnection, assignmentConnection, studyConnection } = useApp(); const inset = useSafeAreaInsets();
+  const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute, semesterConnection, courseConnection, assignmentConnection, studyConnection, openSavedSchedule } = useApp(); const inset = useSafeAreaInsets();
   const current = viewKey(route); const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
@@ -95,7 +95,7 @@ function AppShell() {
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
     <Row between style={styles.header}>
       <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T><T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'home' ? 'Không ngừng tiến bộ mỗi ngày' : tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T></View></Pressable>
-      <NotificationBell unread={notifications.unread} onPress={() => openPanel('notifications')} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
+      <NotificationBell unread={notifications.unread} pending={!!notifications.schedule && !notifications.schedule.ready} onPress={() => { openPanel('notifications'); if (notifications.schedule) void notifications.schedule.reload().catch(() => {}); }} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
     </Row>
 
     <Pressable accessibilityRole="button" accessibilityLabel="Thử trạng thái giao diện" onPress={() => openPanel('preview')} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 36, gap: 6 }]}><Icon name="flask-outline" size={15} /><T style={{ color: C.primary, fontSize: 11 }}>Bản xem trước · Thử trạng thái</T></Pressable>
@@ -117,7 +117,7 @@ function AppShell() {
       {panel === 'preview' && <PreviewPanel onClose={() => setPanel(null)} onLoad={loadPreview} onGuide={() => setPanel('guide')} />}
       {panel === 'guide' && <Sheet title="Bắt đầu cùng FocusYourStudy" onClose={() => setPanel('preview')}><T style={S.small}>1. Tạo học kỳ → 2. Thêm môn → 3. Ghi bài tập và lịch học. {auth.hasSession ? 'Học kỳ, môn học, bài tập và buổi tự học được lưu vào tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi và Pomodoro vẫn thử trong phiên.' : 'Các thay đổi chỉ giữ trong phiên thử này.'}</T><Button label="Đến Môn & học kỳ" onPress={() => { setPanel(null); setScheduleMode('Môn & học kỳ'); }} /><Button label="Quay lại bản xem trước" secondary onPress={() => setPanel('preview')} /></Sheet>}
       {panel === 'profile' && <Account onClose={() => setPanel(null)} />}
-      {panel === 'notifications' && <NotificationsCenter items={notifications.items} unread={notifications.unread} sources={notifications.sources} now={date} onRead={notifications.markRead} onReadAll={notifications.markAllRead} onClose={() => setPanel(null)} />}
+      {panel === 'notifications' && <NotificationsCenter schedule={notifications.schedule} onSavedClass={target => { setPanel(null); openSavedSchedule(target.semesterId, target.date); }} items={notifications.items} unread={notifications.unread} sources={notifications.sources} now={date} onRead={notifications.markRead} onReadAll={notifications.markAllRead} onClose={() => setPanel(null)} />}
     </FlowScope></NavigationScope>
   </View></View>;
 }

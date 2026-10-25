@@ -1,7 +1,7 @@
 import { ApiError, assertNotCancelled, createHttpClient } from '../../../shared/api/http';
 import type { Authorized } from '../../academics/api/semestersApi';
 import { createScheduleApi, parseServerOccurrence, type ServerOccurrence } from '../api/scheduleApi';
-import { expectedOccurrences, overviewKey, overviewWindows, type OverviewQuery, type OverviewSnapshot } from './overview';
+import { expectedOccurrences, overviewKey, overviewWindows, shiftDate, type OverviewQuery, type OverviewSnapshot } from './overview';
 
 const changed = () => new ApiError('Lịch đã thay đổi trong lúc tổng hợp. Tải lại để xem dữ liệu cùng phiên bản.', 'SCHEDULE_OVERVIEW_CHANGED', 409);
 const invalid = () => new ApiError('Phản hồi tổng hợp lịch chưa đầy đủ hoặc không hợp lệ. Tải lại lịch để kiểm tra.', 'INVALID_RESPONSE');
@@ -9,15 +9,19 @@ export function createOverviewApi(baseUrl: string, authorized: Authorized, optio
   const api = createScheduleApi(baseUrl, authorized, options), http = createHttpClient(baseUrl, options);
   return { async read(q: OverviewQuery, signal?: AbortSignal): Promise<OverviewSnapshot> {
     overviewKey(q);
-    const readRules = async () => (await api.rules(q.semesterId, signal)).filter(r => !q.courseId || r.courseId === q.courseId);
-    const rules = await readRules(), windows = overviewWindows(rules, q.today), byId = new Map(rules.map(r => [r.id, r]));
-    const rows: ServerOccurrence[] = [], seen = new Set<string>(), expected = expectedOccurrences(rules, q.today);
+    const account = 'reminders' in q, semesterId = 'semesterId' in q ? q.semesterId : undefined, courseId = 'courseId' in q ? q.courseId : undefined;
+    // A reminder can lead by at most 7 days; add two source-date days for
+    // opposite time zones. Dashboard/course summaries still read their full range.
+    const through = account ? (q.today > '2099-12-22' ? '2099-12-31' : shiftDate(q.today, 9)) : '2099-12-31';
+    const readRules = async () => (await api.rules(semesterId, signal)).filter(r => !courseId || r.courseId === courseId);
+    const rules = await readRules(), windows = overviewWindows(rules, q.today, through), byId = new Map(rules.map(r => [r.id, r]));
+    const rows: ServerOccurrence[] = [], seen = new Set<string>(), expected = expectedOccurrences(rules, q.today, through);
     // Use independent bounded requests instead of assuming a single calendar page
     // contains the semester. Stop on the first failed chunk; never publish partial data.
     for (const window of windows) {
       assertNotCancelled(signal);
-      const scope = q.courseId ? `courseId=${encodeURIComponent(q.courseId)}` : `semesterId=${encodeURIComponent(q.semesterId)}`;
-      const value = await authorized(token => http<unknown>(`/api/v1/class-schedules/occurrences?${scope}&from=${window.from}&to=${window.to}`, { headers: { Authorization: `Bearer ${token}` }, signal }), signal);
+      const scope = courseId ? `courseId=${encodeURIComponent(courseId)}&` : semesterId ? `semesterId=${encodeURIComponent(semesterId)}&` : '';
+      const value = await authorized(token => http<unknown>(`/api/v1/class-schedules/occurrences?${scope}from=${window.from}&to=${window.to}`, { headers: { Authorization: `Bearer ${token}` }, signal }), signal);
       if (!Array.isArray(value)) throw invalid();
       for (const raw of value) {
         const row = parseServerOccurrence(raw), rule = byId.get(row.scheduleId), key = `${row.scheduleId}:${row.date}`;

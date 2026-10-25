@@ -105,4 +105,4 @@ Nếu lúc thử không còn giờ trống trong ngày, tạo buổi ngày mai: 
 - Đã xem ảnh Trang chủ ở 320/390/430/1280px, chi tiết môn ở 320px. Kiểm tra điện thoại thật **2C.3B** vẫn đang hoãn theo yêu cầu trước đó.
 - Dữ liệu thử nằm trong schema QA riêng, được dọn sau khi kiểm tra; không seed lịch/tài khoản mẫu vào database chính của bạn.
 
-Đợt tiếp theo trong checklist là **4G.2 — Nhắc việc dùng lịch đã lưu**. Lịch thi, điểm/GPA và Pomodoro vẫn theo các đợt backend riêng.
+**4G.2 — Nhắc việc dùng lịch đã lưu** đã hoàn thành; xem `FRONTEND-SCHEDULE-4G2.md`. Lịch thi, điểm/GPA và Pomodoro vẫn theo các đợt backend riêng.

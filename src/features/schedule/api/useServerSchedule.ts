@@ -34,6 +34,7 @@ export function useServerSchedule(query: ScheduleQuery | null, active: boolean) 
   const saveException = useCallback((basis: ExceptionSnapshot, input: ExceptionInput) => mutate(manager => manager.saveException(basis, input)), [mutate]);
   const restoreException = useCallback((basis: ExceptionSnapshot) => mutate(manager => manager.restoreException(basis)), [mutate]);
   const acknowledge = useCallback((target?: OccurrenceTarget) => ref.current?.acknowledge(target) ?? false, []);
-  return { ...(state.key === key ? state : { ...emptyScheduleState(), busy: state.busy, needsReload: state.needsReload, pendingOccurrence: state.pendingOccurrence }), reload, save, remove, readRule, rules, acknowledge, readDay, saveException, restoreException };
+  const invalidate = useCallback(() => ref.current?.invalidate(), []);
+  return { ...(state.key === key ? state : { ...emptyScheduleState(), busy: state.busy, needsReload: state.needsReload, pendingOccurrence: state.pendingOccurrence }), reload, save, remove, readRule, rules, acknowledge, readDay, saveException, restoreException, invalidate };
 }
 export type ScheduleSource = ReturnType<typeof useServerSchedule>;

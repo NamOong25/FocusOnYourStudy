@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4G.1: Lịch thật trên Trang chủ và chi tiết môn
+## Mới nhất — 4G.2: Nhắc lịch đã lưu trong mục chuông
+
+**Chuông → Góc nhắc nhở** xét lịch toàn tài khoản, xuất hiện từ `giờ bắt đầu thực tế − mốc nhắc` đến trước giờ kết thúc. 0 phút là nhắc đúng giờ bắt đầu. Dùng giờ/phòng/giảng viên sau ngoại lệ, bỏ buổi nghỉ/xóa và xét lại khi khôi phục; bấm thẻ mở đúng học kỳ/ngày trong Thời khóa biểu, đọc lại cả khi ngày đó đang mở.
+
+Mục không đổi giữ đã đọc qua tải lại; sửa ngày khác không tạo chưa đọc giả. Khi lịch tải/lỗi, chuông hiện **…**, khóa đọc tất cả và không báo trống như thể đã biết đủ dữ liệu; nhắc bài tập đã tải vẫn mở được. Dấu đọc giữ trong phiên, F5/đăng nhập lại bắt đầu phiên đọc mới. Chưa gửi thông báo thiết bị; lịch thi vẫn thử trong phiên.
+
+**140 test (29 mới), 62 kiểm tra nhắc việc cũ, TypeScript/export web và 15 nhóm browser API/PostgreSQL thật qua**, gồm đồng hồ đúng mốc, lỗi/mất mạng, hai tài khoản và điều hướng sang kỳ khác. Ảnh 320/390/430/1280px đã xem. Xem [hướng dẫn test 4G.2](docs/FRONTEND-SCHEDULE-4G2.md); không đổi backend/migration. Backend lịch thi là phần tiếp theo, thông báo hệ điều hành/2C.3B vẫn nghiệm thu riêng.
+
+## 4G.1: Lịch thật trên Trang chủ và chi tiết môn
 
 Trang chủ có **Buổi học gần nhất** và **Lịch học hôm nay** đúng học kỳ đang chọn; chi tiết môn có số buổi đang học/sắp tới và danh sách tối đa 5 buổi đúng môn. Bỏ buổi nghỉ, dùng giờ/phòng/giảng viên sau điều chỉnh, mở đúng ngày nguồn trong Thời khóa biểu. Tạo/sửa/xóa/khôi phục lịch làm phần tổng hợp đọc lại; có tải/lỗi/thử lại, F5 và tách tài khoản.
 
@@ -10,7 +18,7 @@ Nguồn đọc độc lập lấy đủ phạm vi chuỗi, chia request tối đ
 
 **111 test lịch qua (30 mới), TypeScript, export web và 19 nhóm browser với API/PostgreSQL thật qua**, gồm ngày nguồn khác ngày thiết bị, học kỳ xa, lỗi/mất mạng, đổi kỳ đang tải và thêm/sửa/xóa chuỗi. Đã xem ảnh Trang chủ 320/390/430/1280px và chi tiết môn 320px. Xem [hướng dẫn test 4G.1](docs/FRONTEND-SCHEDULE-4G1.md).
 
-Không đổi backend/migration. **4G.2 nhắc việc dùng lịch thật** còn trong checklist; kiểm tra điện thoại thật 2C.3B đang hoãn.
+Không đổi backend/migration. **4G.2 nhắc việc dùng lịch thật** đã hoàn thành, xem hướng dẫn đợt này; kiểm tra điện thoại thật 2C.3B đang hoãn.
 
 ## 4F.3: Nghỉ, đổi và khôi phục từng buổi
 
