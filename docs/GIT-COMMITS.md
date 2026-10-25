@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4G.2 — Nhắc lịch đã lưu trong mục chuông
+## Đợt vừa hoàn thành: 4H.1A — API lịch thi cơ bản
+
+V7 thêm bảng lịch thi, API CRUD/lọc theo chủ tài khoản và môn/học kỳ, ngày giờ UTC/zone, loại/hình thức và cấu hình mốc nhắc; version chống ghi đè cả PUT giống hệt, bảo vệ xóa/chuyển môn. 268 tests/Maven verify qua (30 mới), có migration giữ dữ liệu, restart và PowerShell 5.1. TypeScript/140 test lịch frontend hồi quy qua. Chưa kiểm tra trùng (4H.1B) hoặc nối UI (4H.2); hướng dẫn `BACKEND-PHASE-4H1A.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Thêm API lịch thi và lưu PostgreSQL"
+git push
+```
+
+## 4G.2 — Nhắc lịch đã lưu trong mục chuông
 
 Nhắc đúng mốc của lịch/ngoại lệ toàn tài khoản; nghỉ/xóa/kết thúc bỏ mục, khôi phục/đổi giờ xét lại. Điều hướng đúng kỳ/ngày, giữ dấu đọc qua tải lại/lỗi và bảo vệ dữ liệu chưa xác nhận. 140 test (29 mới), 62 kiểm tra nhắc việc cũ, TypeScript/export web và 15 nhóm browser API thật qua; không đổi backend/migration. Hướng dẫn `FRONTEND-SCHEDULE-4G2.md`.
 

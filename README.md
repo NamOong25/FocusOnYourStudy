@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. **Đã xong 4D: tài khoản/phiên, học kỳ, môn học, bài tập và buổi tự học dùng dữ liệu thật**. Thời khóa biểu đã đọc/ghi cả chuỗi và từng buổi vào tài khoản ở 4F.1/4F.2/4F.3. Lịch thi, điểm và Pomodoro vẫn dùng dữ liệu thử trong bộ nhớ.
 
-## Mới nhất — 4G.2: Nhắc lịch đã lưu trong mục chuông
+## Mới nhất — 4H.1A: API lịch thi cơ bản
+
+Backend đã có **V7 + API CRUD/lọc lịch thi** theo tài khoản, liên kết môn/học kỳ, loại/hình thức thi, bắt đầu/kết thúc UTC và zone, phòng, ghi chú và nhiều mốc nhắc. Kiểm tra version, kể cả PUT giống hệt; môn còn lịch thi không được xóa/chuyển kỳ. V7 thêm bảng, giữ V1–V6 và dữ liệu cũ, không seed/reset database.
+
+**268 tests/Maven verify qua (30 mới), không bỏ qua**, gồm hai tài khoản, UTC/DST, mốc nhắc, DB constraints, nâng V6 → V7, đóng/mở toàn backend và PowerShell 5.1. TypeScript và 140 kiểm tra lịch/nhắc việc frontend hồi quy qua.
+
+Khởi động lại backend bằng `backend/scripts/Run-Local.ps1`, rồi thử `backend/scripts/Try-Exams.ps1 -Mode List`. Xem [hướng dẫn 4H.1A](docs/BACKEND-PHASE-4H1A.md), [hợp đồng](backend/docs/EXAMS.md) và `backend/api/exams.http`. **UI lịch thi vẫn thử trong phiên** đến 4H.2; kiểm tra trùng thi/lịch học/tự học làm ở **4H.1B**.
+
+## 4G.2: Nhắc lịch đã lưu trong mục chuông
 
 **Chuông → Góc nhắc nhở** xét lịch toàn tài khoản, xuất hiện từ `giờ bắt đầu thực tế − mốc nhắc` đến trước giờ kết thúc. 0 phút là nhắc đúng giờ bắt đầu. Dùng giờ/phòng/giảng viên sau ngoại lệ, bỏ buổi nghỉ/xóa và xét lại khi khôi phục; bấm thẻ mở đúng học kỳ/ngày trong Thời khóa biểu, đọc lại cả khi ngày đó đang mở.
 

@@ -54,11 +54,15 @@ POST tối thiểu:
 | 409 COURSE_VERSION_CONFLICT | Bản ghi đã thay đổi, cần tải lại |
 | 409 COURSE_HAS_ASSIGNMENTS | Môn còn bài tập; xử lý các bài trước khi xóa/chuyển kỳ |
 | 409 COURSE_HAS_STUDY_SESSIONS | Môn còn buổi tự học đã lưu, kể cả độc lập/hoàn thành; xử lý trước khi xóa/chuyển kỳ |
+| 409 COURSE_HAS_EXAMS | Môn còn lịch thi đã lưu; xử lý trước khi xóa/chuyển kỳ |
 | 409 DATA_CONFLICT | Constraint cuối cùng nếu có tác nhân ghi ngoài luồng service |
 | 503 DATABASE_UNAVAILABLE | Chưa truy cập được DB |
 
-Không echo giá trị đầu vào, SQL hoặc token trong lỗi. CORS tiếp tục chặn origin lạ. API bài tập đã mở ở 4A; PATCH và API lịch/điểm chưa mở.
+Không echo giá trị đầu vào, SQL hoặc token trong lỗi. CORS tiếp tục chặn origin lạ. API bài tập/lịch học/lịch thi đã mở theo từng đợt; PATCH và API điểm chưa mở.
 
 Mẫu request: `../api/courses.http`. Hướng dẫn terminal và kiểm tra: `../../docs/BACKEND-PHASE-3B.md`.
 
 Từ 4C, ghi tự học cùng khóa tài khoản với môn/kỳ/bài. Môn còn buổi tự học chặn xóa/chuyển học kỳ; đổi tên và thông tin thường vẫn được. Nếu vừa có bài vừa có buổi, ưu tiên COURSE_HAS_ASSIGNMENTS; xóa bài giữ buổi độc lập nên có thể tiếp tục nhận COURSE_HAS_STUDY_SESSIONS đến khi xử lý buổi.
+
+
+Từ 4H.1A, lịch thi cũng dùng chung khóa tài khoản. Môn còn lịch thi trả COURSE_HAS_EXAMS khi xóa/chuyển kỳ; metadata vẫn sửa được. API lịch thi ở EXAMS.md; UI lịch thi vẫn chờ 4H.2.

@@ -182,7 +182,7 @@ class AuthIntegrationTests {
         assertThat(send(request("/api/v1/courses").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(200);
         assertThat(send(request("/api/v1/class-schedules").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(200);
         // Scheduling is now implemented; unreleased routes must still be denied.
-        assertThat(send(request("/api/v1/exams").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(403);
+        assertThat(send(request("/api/v1/grades").header("Authorization", "Bearer " + tokenA).GET().build()).statusCode()).isEqualTo(403);
         assertThat(selected.body()).doesNotContain("passwordHash", "password_hash", TEST_PASSWORD);
     }
 

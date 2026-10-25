@@ -193,3 +193,11 @@ Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phi
 - Ghi dùng khóa hàng tài khoản chung; parent version và child data commit nguyên tử. GET ngoại lệ/occurrences dùng snapshot REPEATABLE_READ, query ngoại lệ theo lô.
 - Sửa chuỗi không được bỏ ngày đang có ngoại lệ, làm giờ hiệu lực sai hoặc chuyển môn khi còn ngoại lệ. Khôi phục ngoại lệ trước các thay đổi đó. Không có bảng occurrence materialized.
 - 4E.2B đã kiểm tra trùng lịch–lịch/tự học hai chiều, dùng lịch hiệu lực và bỏ buổi nghỉ khi xét giờ bận; không thêm bảng/migration, vẫn V6. 4F nối UI. Chi tiết: `CLASS-EXCEPTIONS.md`.
+
+## Đã tạo trong V7 — lịch thi
+
+`exams` lưu UUID/owner/course, kind/format, starts_at/ends_at TIMESTAMPTZ UTC, time_zone, room, reminder, reminder_minutes INTEGER[], notes và timestamps/version. FK `(course_id,user_id)` → courses, không cascade xóa môn. Index owner/time và owner/course.
+
+CHECK bảo vệ enum, khoảng năm, thứ tự giờ, phút nguyên và cùng ngày địa phương, độ dài notes/version. Hàm `exam_reminders_valid` kiểm tra mảng một chiều bắt đầu từ 1, tối đa 10 mốc riêng biệt 0–10080 và không có phần tử null; CHECK giữ mảng rỗng khi tắt nhắc và không rỗng khi bật. Java normalize mốc giảm dần.
+
+`update_revision` nội bộ làm bản ghi dirty cho mọi PUT, kể cả nội dung giống hệt; @Version tăng một lần, không trả counter ra client. V7 không sửa V1–V6, không seed. Ghi lịch thi cùng khóa tài khoản với các nghiệp vụ học tập; môn còn lịch thi chặn xóa/chuyển kỳ. Chi tiết `EXAMS.md`. Kiểm tra trùng thuộc 4H.1B; UI thuộc 4H.2.

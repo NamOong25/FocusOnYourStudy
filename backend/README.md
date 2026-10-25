@@ -1,5 +1,10 @@
 # Backend — FocusYourStudy
 
+**Mới nhất 4H.1A — API lịch thi cơ bản:** V7 + CRUD/lọc lịch thi theo tài khoản, môn/kỳ/loại/hình thức/khoảng UTC; zone, phòng, ghi chú và nhiều mốc nhắc, version cả PUT giống hệt, guard xóa/chuyển môn. **268 tests/Maven verify qua (30 mới), không bỏ qua**, có nâng V6 giữ dữ liệu, restart toàn backend và PowerShell 5.1. TypeScript/140 test lịch frontend hồi quy qua.
+
+Chạy lại `scripts/Run-Local.ps1` để Flyway áp dụng V7, không tạo lại database. Thử `scripts/Try-Exams.ps1 -Mode List`; xem [hướng dẫn 4H.1A](../docs/BACKEND-PHASE-4H1A.md), [contract](docs/EXAMS.md), `api/exams.http`. **Chưa chặn trùng lịch (4H.1B) hoặc nối UI lịch thi (4H.2)**.
+
+
 **Nghiệm thu 4E.2B ngày 24/10/2026: 238 tests/Maven verify qua (30 mới), không lỗi/bỏ qua**; TypeScript và 6 tình huống smoke HTTP frontend qua. Có kiểm tra xung đột ở mọi luồng ghi, kế thừa ngoại lệ, rollback/version, ghi đồng thời, DST/khác ngày địa phương, lịch cả năm, script PowerShell 5.1 và hồi quy restart/migration.
 
 **Mới nhất 4E.2B — Kiểm tra trùng giờ:** guard lịch–lịch/tự học khi thêm/sửa chuỗi, đổi/khôi phục từng buổi và thêm/sửa tự học. Áp dụng ngoại lệ trước, so UTC từng ngày, bỏ buổi nghỉ và cho phép nối tiếp; khóa hàng tài khoản bảo vệ ghi đồng thời. 409 `SCHEDULE_TIME_CONFLICT` có buổi/môn/ngày/giờ, thất bại giữ nguyên dữ liệu/version. Không thêm migration/seed; vẫn V6. Xem [hướng dẫn test](../docs/BACKEND-PHASE-4E2B.md), [contract](docs/SCHEDULE-CONFLICTS.md) và `api/schedule-conflicts.http`. Script PowerShell 5.1 đọc cả response body khi ErrorDetails trống; form tự học hiển thị lỗi cụ thể. UI thời khóa biểu nối ở 4F; lịch thi làm riêng.

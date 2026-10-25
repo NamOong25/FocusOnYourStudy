@@ -1,0 +1,68 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@courseId = THAY_COURSE_ID
+@examId = THAY_EXAM_ID
+@version = 0
+
+### Đăng nhập bằng tài khoản đã đăng ký; thay email/mật khẩu tại máy, không commit thông tin thật
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{
+  "email": "THAY_EMAIL",
+  "password": "THAY_MAT_KHAU"
+}
+
+### Danh sách môn: sao chép courseId của tài khoản, không lấy ID lịch RAM
+GET {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{accessToken}}
+
+### Tạo lịch thi; sao chép id/version từ data để Get/Update/Delete
+POST {{baseUrl}}/api/v1/exams
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "FINAL",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-10T08:00:00+07:00",
+  "endsAt": "2026-11-10T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "room": "A2.03",
+  "reminder": true,
+  "reminderMinutes": [1440, 180, 0],
+  "notes": "Mang thẻ sinh viên"
+}
+
+### List theo môn/khoảng UTC, khoảng giao nhau [from,to)
+GET {{baseUrl}}/api/v1/exams?courseId={{courseId}}&from=2026-11-10T00:00:00Z&to=2026-11-11T00:00:00Z
+Authorization: Bearer {{accessToken}}
+
+### Get mới nhất trước khi sửa; PUT là thay đầy đủ dữ liệu
+GET {{baseUrl}}/api/v1/exams/{{examId}}
+Authorization: Bearer {{accessToken}}
+
+### Update dùng version mới nhất; sau thành công cập nhật biến version trước khi thử tiếp
+PUT {{baseUrl}}/api/v1/exams/{{examId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "FINAL",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-10T08:00:00+07:00",
+  "endsAt": "2026-11-10T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "room": "B2.03",
+  "reminder": false,
+  "reminderMinutes": [],
+  "notes": "Đã đổi phòng",
+  "version": {{version}}
+}
+
+### Chỉ chạy khi muốn xóa bản ghi thử; dùng đúng version của Get/Update mới nhất
+DELETE {{baseUrl}}/api/v1/exams/{{examId}}?version={{version}}
+Authorization: Bearer {{accessToken}}
