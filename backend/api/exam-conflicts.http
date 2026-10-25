@@ -1,6 +1,7 @@
 ### 4H.1B.1: create/update exams check saved exams, effective classes and studies.
 ### Use a TEST course owned by your account. Set token/courseId in private HTTP Client env.
-### Create the busy record BEFORE the proposed exam; reverse writers are 4H.1B.2.
+### Create the busy record BEFORE the proposed exam. Reverse writers are now guarded too;
+### see exam-reverse-conflicts.http for 4H.1B.2.
 @baseUrl = http://localhost:8080
 
 ### 1. Save one Tuesday class 07:00-09:00; expect 201 if free.

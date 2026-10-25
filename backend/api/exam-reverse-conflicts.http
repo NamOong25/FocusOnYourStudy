@@ -1,0 +1,120 @@
+### 4H.1B.2: save exam first, then try reverse writers.
+### Use your own TEST course and private HTTP Client env: token, courseId.
+### All successful POSTs write PostgreSQL. Choose empty test dates and keep returned IDs.
+@baseUrl = http://localhost:8080
+
+### 1. Exam 08:00-10:00 Tuesday: 201 if free.
+POST {{baseUrl}}/api/v1/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "MIDTERM",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-17T08:00:00+07:00",
+  "endsAt": "2026-11-17T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 2. Class 09:00-11:00: expect 409 SCHEDULE_TIME_CONFLICT, kind EXAM. No insert.
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [2],
+  "startsOn": "2026-11-17",
+  "endsOn": "2026-11-17",
+  "startTime": "09:00",
+  "endTime": "11:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 3. Class touches exam end: 201 if no other busy record.
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [2],
+  "startsOn": "2026-11-17",
+  "endsOn": "2026-11-17",
+  "startTime": "10:00",
+  "endTime": "12:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 4. Self-study in exam: expect 409, kind EXAM. No insert.
+POST {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "title": "Exam conflict test",
+  "startsAt": "2026-11-17T09:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "durationMinutes": 45
+}
+
+### Restore flow uses a DIFFERENT day. 5. Save class, record id as private offScheduleId.
+POST {{baseUrl}}/api/v1/class-schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "weekdays": [3],
+  "startsOn": "2026-11-18",
+  "endsOn": "2026-11-18",
+  "startTime": "07:00",
+  "endTime": "09:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 6. Get current class version. Set private offScheduleVersion from response.
+GET {{baseUrl}}/api/v1/class-schedules/{{offScheduleId}}
+Authorization: Bearer {{token}}
+
+### 7. Cancel occurrence, 200. Record returned scheduleVersion; do not guess/increment it.
+PUT {{baseUrl}}/api/v1/class-schedules/{{offScheduleId}}/exceptions/2026-11-18
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kind": "CANCELLED",
+  "scheduleVersion": {{offScheduleVersion}},
+  "reason": "Exam recovery test"
+}
+
+### 8. Save exam during cancelled class: 201 if otherwise free.
+POST {{baseUrl}}/api/v1/exams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "courseId": "{{courseId}}",
+  "kind": "MIDTERM",
+  "format": "WRITTEN",
+  "startsAt": "2026-11-18T08:00:00+07:00",
+  "endsAt": "2026-11-18T10:00:00+07:00",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### 9. Read fresh class version into private offScheduleVersion before restoring.
+GET {{baseUrl}}/api/v1/class-schedules/{{offScheduleId}}
+Authorization: Bearer {{token}}
+
+### 10. Expect 409 SCHEDULE_TIME_CONFLICT, kind EXAM; cancellation/version untouched.
+DELETE {{baseUrl}}/api/v1/class-schedules/{{offScheduleId}}/exceptions/2026-11-18?scheduleVersion={{offScheduleVersion}}
+Authorization: Bearer {{token}}
+
+### 11. Confirm cancellation still exists with the same scheduleVersion.
+GET {{baseUrl}}/api/v1/class-schedules/{{offScheduleId}}/exceptions/2026-11-18
+Authorization: Bearer {{token}}
+
+### More Update/Change/Restore and cleanup cases: docs/BACKEND-PHASE-4H1B2.md.
+### Keep tokens and private env files out of Git.

@@ -31,26 +31,21 @@ public class ScheduleConflictService {
         var byDate = new HashMap<LocalDate, ClassExceptionEntity>();
         for (var e : overrides) byDate.put(e.getDate(), e);
         var proposed = expand(candidate, byDate, candidate.getStartsOn(), candidate.getEndsOn());
-        check(owner, proposed, excludedRule, true);
+        check(owner, proposed, excludedRule, true, null);
     }
     public void checkOccurrence(UUID owner, ClassScheduleEntity rule, LocalDate day, ClassExceptionEntity override) {
         var proposed = new ArrayList<Busy>();
         add(proposed, rule, day, override);
-        check(owner, proposed, rule.getId(), true);
+        check(owner, proposed, rule.getId(), true, null);
     }
     public void checkStudy(UUID owner, Instant start, Instant end) {
         // Self-study/self-study checks keep their established STUDY_TIME_CONFLICT contract.
-        check(owner, List.of(new Busy("STUDY", new UUID(0, 0), null, "", "UTC", start, end)), null, false);
-    }
-    private void check(UUID owner, List<Busy> proposed, UUID excludedRule, boolean includeStudies) {
-        // Existing class/study writers retain their contract. Reverse exam
-        // protection is introduced separately in 4H.1B.2.
-        check(owner, proposed, excludedRule, includeStudies, false, null);
+        check(owner, List.of(new Busy("STUDY", new UUID(0, 0), null, "", "UTC", start, end)), null, false, null);
     }
     public void checkExam(UUID owner, Instant start, Instant end, UUID excludedExam) {
-        check(owner, List.of(new Busy("EXAM", new UUID(0, 0), null, "", "UTC", start, end)), null, true, true, excludedExam);
+        check(owner, List.of(new Busy("EXAM", new UUID(0, 0), null, "", "UTC", start, end)), null, true, excludedExam);
     }
-    private void check(UUID owner, List<Busy> proposed, UUID excludedRule, boolean includeStudies, boolean includeExams, UUID excludedExam) {
+    private void check(UUID owner, List<Busy> proposed, UUID excludedRule, boolean includeStudies, UUID excludedExam) {
         if (proposed.isEmpty()) return; // Cancelled days do not reserve any time.
         proposed = new ArrayList<>(proposed); proposed.sort(ORDER);
         var from = proposed.getFirst().start();
@@ -68,7 +63,8 @@ public class ScheduleConflictService {
         for (var rule : rules) busy.addAll(expand(rule, byRule.getOrDefault(rule.getId(), Map.of()), low, high));
         if (includeStudies) for (var study : studies.findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(owner, to, from))
             busy.add(new Busy("STUDY", study.getId(), study.getCourseId(), study.getTitle(), study.getTimeZone(), study.getStartsAt(), study.getEndsAt()));
-        if (includeExams) for (var exam : exams.findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(owner, to, from))
+        // Every entry point checks exams, inside its writer's shared account lock.
+        for (var exam : exams.findByUserIdAndStartsAtLessThanAndEndsAtGreaterThan(owner, to, from))
             if (!exam.getId().equals(excludedExam)) busy.add(new Busy("EXAM", exam.getId(), exam.getCourseId(), examTitle(exam), exam.getTimeZone(), exam.getStartsAt(), exam.getEndsAt()));
         busy.sort(ORDER);
         int a = 0, b = 0;

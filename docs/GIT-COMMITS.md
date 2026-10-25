@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 4H.1B.1 — Chặn lịch thi trùng với lịch đã lưu
+## Đợt vừa hoàn thành: 4H.1B.2 — Chặn lịch học và tự học trùng lịch thi
+
+Tạo/sửa chuỗi, đổi/khôi phục một buổi và tạo/sửa tự học kiểm tra thi toàn tài khoản. Dùng giờ hiệu lực và UTC; trùng giờ giữ toàn bộ dữ liệu/ngoại lệ/version, bảo vệ ghi thi và lịch/tự học đồng thời dưới khóa chung. 325 tests/Maven verify qua (31 mới), không bỏ qua, có chuỗi dài, UTC/DST, quyền, rollback và PowerShell 5.1; TypeScript/140 test lịch frontend qua. Không migration/seed, V7. 4H.1B đã hoàn thành, tiếp theo UI 4H.2; hướng dẫn `BACKEND-PHASE-4H1B2.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Chặn lịch học và tự học trùng lịch thi"
+git push
+```
+
+## 4H.1B.1 — Chặn lịch thi trùng với lịch đã lưu
 
 Khi tạo/sửa lịch thi kiểm tra kỳ thi khác, lịch học hiệu lực sau nghỉ/đổi và tự học toàn tài khoản. So UTC, cho chạm giờ; lỗi nêu môn/buổi/ngày/giờ và giữ nguyên toàn bộ dữ liệu/version khi bị chặn. Khóa tài khoản bảo vệ ghi lịch thi đồng thời. 294 tests/Maven verify qua (26 mới), không bỏ qua, có PowerShell 5.1, rollback, múi giờ và race; TypeScript/140 test lịch frontend qua. Không migration/seed, vẫn V7. Chiều ngược 4H.1B.2 và UI 4H.2 còn trong checklist; hướng dẫn `BACKEND-PHASE-4H1B1.md`.
 
@@ -126,7 +138,6 @@ Các đợt này **chưa làm**, chỉ chuẩn bị tên. Khi hoàn thành sẽ 
 
 | Đợt dự kiến | Phạm vi | Tên commit tiếng Việt |
 | --- | --- | --- |
-| 4H.1B.2 — Chiều ngược | Ghi lịch học/ngoại lệ/tự học kiểm tra lịch thi, kể cả ghi đồng thời | Chặn lịch học và tự học trùng lịch thi |
 | 4H.2 — UI lịch thi | Nối API lịch thi, Trang chủ/chi tiết môn và nhắc việc | Kết nối giao diện lịch thi với dữ liệu thật |
 | 2C.3B — Để làm sau | Kết nối native, mở lại app, kho bảo mật trên máy thật | Hoàn thiện kiểm tra tài khoản và kết nối trên thiết bị |
 

@@ -76,7 +76,7 @@ Buổi nghỉ **vẫn có trong danh sách** để hiển thị/khôi phục; th
 | 404 CLASS_EXCEPTION_NOT_FOUND | Buổi không có ngoại lệ để đọc/khôi phục. |
 | 409 CLASS_SCHEDULE_VERSION_CONFLICT | Chuỗi hoặc một buổi đã đổi, cần đọc và xem lại. |
 | 409 CLASS_SCHEDULE_HAS_EXCEPTIONS | Sửa cả chuỗi làm mất/sai ngoại lệ hoặc chuyển môn khi còn ngoại lệ. |
-| 409 SCHEDULE_TIME_CONFLICT | Từ 4E.2B: buổi đổi hoặc buổi gốc khi khôi phục trùng lớp/tự học. Giữ ngoại lệ và version cũ; conflict mô tả buổi đang cản. |
+| 409 SCHEDULE_TIME_CONFLICT | Buổi đổi hoặc buổi gốc khi khôi phục trùng lớp/tự học; từ 4H.1B.2 xét cả lịch thi. Giữ ngoại lệ và version cũ; conflict mô tả buổi đang cản. |
 
 Các mã auth/dữ liệu chung như các API trước. POST/PATCH ở endpoint ngoại lệ chưa được mở.
 
@@ -86,6 +86,6 @@ V6 thêm `class_exceptions`, duy nhất `(schedule_id,occurrence_date)`, FK `(sc
 
 Mọi ghi dùng khóa hàng tài khoản đầu tiên, chung với các nghiệp vụ trước. Danh sách ngoại lệ và occurrences đọc trong giao dịch REPEATABLE_READ: tránh lấy version chuỗi ở một thời điểm nhưng ngoại lệ ở thời điểm khác. Query ngoại lệ theo lô cho các chuỗi, không query từng ngày.
 
-**4E.2B đã kiểm tra trùng lớp/tự học khi đổi và khôi phục.** Khôi phục giờ gốc có thể bị chặn nếu thời gian đã được dùng cho buổi khác; không tự xóa ngoại lệ hoặc dời buổi cản. Báo nghỉ luôn giải phóng giờ. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md).
+**4E.2B đã kiểm tra trùng lớp/tự học; 4H.1B.2 bổ sung lịch thi khi đổi và khôi phục.** Khôi phục giờ gốc có thể bị chặn nếu thời gian đã được dùng cho buổi khác; không tự xóa ngoại lệ hoặc dời buổi cản. Báo nghỉ luôn giải phóng giờ. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md) và [hướng dẫn test chiều ngược](../../docs/BACKEND-PHASE-4H1B2.md).
 
 **Chưa làm:** kiểm tra với lịch thi, nối UI (4F), chuyển một buổi sang ngày khác, phát thông báo hệ điều hành. SQL ngoài API có thể bỏ qua kiểm tra nghiệp vụ; không sửa bằng SQL tay.

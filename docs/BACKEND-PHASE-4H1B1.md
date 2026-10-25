@@ -2,7 +2,7 @@
 
 Đã làm **chiều thêm/sửa lịch thi**: backend kiểm tra kỳ thi khác, lịch học sau khi áp dụng nghỉ/đổi buổi và tự học của cùng tài khoản. Khác môn/học kỳ vẫn kiểm tra; dữ liệu người khác không ảnh hưởng. Đây là backend, **màn Lịch thi chưa nối API** đến 4H.2, nên thử bằng terminal hoặc request HTTP.
 
-4H.1B.2 sẽ bổ sung chiều ngược: tạo/sửa lịch học, đổi/khôi phục buổi hoặc ghi tự học sau khi đã có lịch thi. Checklist 4H.1B tổng vẫn để chưa hoàn thành.
+**Cập nhật 4H.1B.2:** đã bổ sung chiều ngược khi tạo/sửa lịch học, đổi/khôi phục buổi hoặc ghi tự học sau khi đã có lịch thi. Checklist 4H.1B đã hoàn thành; xem [hướng dẫn đợt 4H.1B.2](BACKEND-PHASE-4H1B2.md). Các bước dưới đây vẫn dùng để kiểm tra chiều ghi lịch thi của 4H.1B.1.
 
 ## Chuẩn bị
 
@@ -77,7 +77,7 @@ Dùng chuỗi 07:00–09:00 ở mục 1. GET chuỗi lấy version mới nhất 
 
 Để thử **đổi giờ**, dùng bộ dữ liệu khác chưa có kỳ thi: tạo buổi 07:00–09:00, đổi riêng ngày đó thành 12:00–14:00 bằng `Try-ClassExceptions.ps1 -Mode Change` với `-StartTime '12:00' -EndTime '14:00'`. Sau đó thi 08:00–10:00 tạo được, thi 12:30–13:30 bị chặn. Đổi phòng riêng lẻ vẫn giữ nguyên khoảng giờ.
 
-**Khôi phục buổi sau khi có kỳ thi** thuộc kiểm tra chiều ngược 4H.1B.2, chưa dùng làm tiêu chí nghiệm thu đợt này.
+**Khôi phục buổi sau khi có kỳ thi** hiện cũng bị chặn nếu giờ gốc trùng kỳ thi (4H.1B.2); ngoại lệ và version giữ nguyên. Xem hướng dẫn đợt 4H.1B.2 để thử tình huống này.
 
 ## 5. Buổi tự học cản kỳ thi
 

@@ -83,8 +83,8 @@ Mọi ghi tự học, bài, môn và học kỳ cùng khóa hàng tài khoản �
 
 Trùng giờ và deadline liên bảng được kiểm tra trong service dưới khóa chung; không dùng CHECK truy vấn bảng khác. Ghi SQL ngoài API có thể bỏ qua hai quy tắc này, nên không dùng SQL tay để thay dữ liệu nghiệp vụ. Không yêu cầu extension PostgreSQL mới.
 
-Từ **4E.2B backend đã kiểm tra trùng với lịch lên lớp** theo giờ hiệu lực sau ngoại lệ, bỏ buổi nghỉ; chiều thêm/sửa lớp và đổi/khôi phục buổi cũng đối chiếu tự học. Tất cả status tự học chiếm giờ như quy tắc cũ, hai buổi nối tiếp được phép. Lỗi giữ nguyên dữ liệu/version, form Tự học đã nối ở 4D hiển thị thông báo cụ thể. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md).
+Từ **4E.2B backend đã kiểm tra trùng với lịch lên lớp** theo giờ hiệu lực sau ngoại lệ, bỏ buổi nghỉ; chiều thêm/sửa lớp và đổi/khôi phục buổi cũng đối chiếu tự học. **4H.1B.2** kiểm tra thêm lịch thi khi POST/PUT tự học; chiều ghi thi so với tự học đã có từ 4H.1B.1. Tất cả status tự học chiếm giờ như quy tắc cũ, hai buổi nối tiếp được phép. Lỗi giữ nguyên dữ liệu/version; lỗi quyền/version/link/deadline và STUDY_TIME_CONFLICT giữ thứ tự kiểm tra trước như cũ. Form Tự học đã nối ở 4D hiển thị thông báo cụ thể. Xem [contract trùng giờ](SCHEDULE-CONFLICTS.md).
 
-UI thời khóa biểu còn RAM đến 4F; các guard RAM của giao diện chỉ hỗ trợ trải nghiệm, backend quyết định đối với dữ liệu đã lưu. Lịch thi, focus records/Pomodoro, checklist/tài liệu, phân trang/cập nhật thời gian thực và nghiệm thu native vẫn làm sau.
+UI thời khóa biểu đã nối ở 4F; các guard RAM của giao diện chỉ hỗ trợ trải nghiệm, backend quyết định đối với dữ liệu đã lưu. API lịch thi đã có và kiểm tra hai chiều; UI thi nối ở 4H.2. Focus records/Pomodoro, checklist/tài liệu, phân trang/cập nhật thời gian thực và nghiệm thu native vẫn làm sau.
 
 Nguồn đối chiếu: [PostgreSQL 17 — Constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), [Java 21 — ZonedDateTime](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZonedDateTime.html).

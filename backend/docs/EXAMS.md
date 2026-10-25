@@ -1,6 +1,6 @@
-# API lịch thi — 4H.1A / 4H.1B.1
+# API lịch thi — 4H.1A / 4H.1B
 
-Base: `/api/v1`. Bearer access token và phiên hoạt động bắt buộc. Chủ sở hữu lấy từ token; không nhận `userId`/`id`/`version` tùy ý khi tạo. 4H.1B.1 đã kiểm tra trùng khi tạo/sửa lịch thi. Kiểm tra chiều ngược khi ghi lịch học/tự học ở 4H.1B.2; nối UI ở 4H.2, thông báo thiết bị làm riêng.
+Base: `/api/v1`. Bearer access token và phiên hoạt động bắt buộc. Chủ sở hữu lấy từ token; không nhận `userId`/`id`/`version` tùy ý khi tạo. 4H.1B đã kiểm tra trùng hai chiều, gồm tạo/sửa thi, lịch học, đổi/khôi phục buổi và tự học. Nối UI thi ở 4H.2, thông báo thiết bị làm riêng.
 
 ## Endpoint
 
@@ -74,7 +74,7 @@ Ví dụ: `/exams?kind=FINAL&format=WRITTEN&from=2026-11-10T00:00:00Z&to=2026-11
 - Ghi dùng cùng khóa hàng tài khoản với môn/kỳ/bài/lịch học/tự học, tránh tạo lịch lọt giữa kiểm tra và xóa/chuyển môn.
 - `@Version` + version yêu cầu bảo vệ bản cũ; counter `update_revision` buộc tiêu thụ version cho cả PUT giống hệt. Hai request dùng cùng bản chỉ một thành công; update/delete thua không tự tạo lại dữ liệu.
 
-## Trùng giờ — 4H.1B.1
+## Trùng giờ — 4H.1B.1 và 4H.1B.2
 
 - POST/PUT lịch thi so với lịch thi khác, các buổi hiệu lực của lịch học và buổi tự học của cùng tài khoản; xét cả khác môn/học kỳ. PUT loại chính lịch thi đang sửa khỏi tập so sánh.
 - Áp dụng ngoại lệ: buổi nghỉ không chiếm giờ, buổi đổi dùng giờ mới; trường bỏ trống kế thừa từ chuỗi. Trạng thái tự học COMPLETED vẫn chiếm giờ như contract lịch học/tự học hiện có.
@@ -82,7 +82,7 @@ Ví dụ: `/exams?kind=FINAL&format=WRITTEN&from=2026-11-10T00:00:00Z&to=2026-11
 - Trả 409 `SCHEDULE_TIME_CONFLICT` và `conflict` theo [contract chung](SCHEDULE-CONFLICTS.md); kind là EXAM, CLASS hoặc STUDY. Mô tả buổi đã lưu đang cản, gồm môn, ngày/giờ/zone và UTC; không có dữ liệu người khác.
 - Sở hữu/version kiểm tra trước xung đột. Thất bại không lưu một phần hoặc đổi version, counter, timestamps, cấu hình nhắc. Hai POST lịch thi trùng hoặc hai PUT khác lịch thi về một giờ trống chỉ một request thành công nhờ khóa hàng tài khoản.
 - Dữ liệu trùng đã tồn tại vẫn đọc/xóa được; sửa sang giờ không trùng để xử lý, không tự di chuyển dữ liệu.
-- **Chưa kiểm tra chiều ngược ở 4H.1B.2:** khi tạo/sửa lịch học, đổi/khôi phục buổi hoặc tạo/sửa tự học sau khi đã có kỳ thi, các luồng đó chưa so với lịch thi. Vì vậy 4H.1B chưa hoàn thành toàn phần; khóa ghi hiện có không tự bảo đảm bất biến hai chiều này.
+- **Chiều ngược đã có ở 4H.1B.2:** POST/PUT lịch học kiểm tra toàn bộ lịch hiệu lực, PUT ngoại lệ kiểm tra buổi đề xuất, DELETE ngoại lệ kiểm tra buổi gốc trước khi khôi phục, POST/PUT tự học kiểm tra khoảng đề xuất với lịch thi. Dùng cùng khóa tài khoản nên hai bên tạo/sửa/khôi phục vào một khung giờ không thể cùng vượt kiểm tra. Khi bị chặn vẫn giữ nguyên ngoại lệ, version, counter và timestamps; báo nghỉ/xóa tiếp tục giải phóng giờ.
 
 ## Lỗi
 
@@ -108,3 +108,4 @@ V7 tạo `exams` cùng hàm kiểm tra mảng mốc nhắc, không sửa V1–V6
 - Script tương thích PowerShell 5.1: `../scripts/Try-Exams.ps1` (UTF-8 BOM để thông báo tiếng Việt đọc đúng).
 - Hướng dẫn từng bước: `../../docs/BACKEND-PHASE-4H1A.md`.
 - Hướng dẫn trùng giờ: `../../docs/BACKEND-PHASE-4H1B1.md`, request `../api/exam-conflicts.http`.
+- Hướng dẫn chiều ngược và khôi phục: `../../docs/BACKEND-PHASE-4H1B2.md`, request `../api/exam-reverse-conflicts.http`.
