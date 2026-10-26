@@ -8,6 +8,7 @@ import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, u
 import { ScheduleMode, routeLabel, viewKey } from './src/navigation/navigationState';
 import ExamList from './src/features/exams/Exams';
 import { ExamWritesProvider } from './src/features/exams/api/ExamWritesProvider';
+import { GradeConfigurationWritesProvider } from './src/features/grades/api/GradeConfigurationWritesProvider';
 import LearningNavigation from './src/navigation/components/LearningNavigation';
 import { AssignmentSyncStatus } from './src/features/assignments/components/AssignmentSyncStatus';
 import { StudySyncStatus } from './src/features/study/components/StudySyncStatus';
@@ -126,7 +127,7 @@ function Workspace() {
   const auth = useAuth();
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
   return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
-    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
+    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
 }
 export default function App() {
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });

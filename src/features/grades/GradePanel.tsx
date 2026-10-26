@@ -10,7 +10,7 @@ import { useAuth } from '../account/auth/AuthProvider';
 import ServerGradePanel from './components/ServerGradePanel';
 
 export default function GradePanel({courseId,onEdit}:{courseId:string;onEdit:()=>void}){
-  return useAuth().hasSession?<ServerGradePanel courseId={courseId}/>:<PreviewGradePanel courseId={courseId} onEdit={onEdit}/>;
+  return useAuth().hasSession?<ServerGradePanel courseId={courseId} onConfigure={onEdit}/>:<PreviewGradePanel courseId={courseId} onEdit={onEdit}/>;
 }
 function PreviewGradePanel({courseId,onEdit}:{courseId:string;onEdit:()=>void}){
   const {gradeBook,gradeRules,courseCatalog}=useApp();const record=gradeBook[courseId]??emptyGrades();const result=courseResult(record,gradeRules);const presentation=gradePresentation(result);const previous=courseCatalog.find(c=>c.id===record.previousCourseId);

@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; nhập/lưu điểm giao diện sẽ làm ở 5C.2. Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5C.1: Đọc bảng điểm thật
+## Mới nhất — 5C.2A: Cấu hình cột điểm thật
+
+Tạo/sửa bộ cột Lý thuyết/Thực hành, tên/thứ tự/loại cột và cách quy BTL qua API. Giữ mã cột và điểm đã có; điểm 0 cũng được bảo vệ. Có lưu bản đang thiết lập, xác nhận xóa cấu hình chưa có điểm và đối chiếu khi xung đột/mất phản hồi; không tự gửi lại hoặc âm thầm ghi đè. Lưu xong/F5 đọc lại từ PostgreSQL.
+
+TypeScript, build web và **340 tests frontend (38 mới)** đạt; đã kiểm tra UI bằng tài khoản/schema QA riêng, giữ điểm 0 và xung đột; không seed tài khoản thật. Xem [hướng dẫn kiểm tra 5C.2A](docs/FRONTEND-PHASE-5C2A.md). Tiếp theo là **5C.2B nhập điểm số**; GPA tích lũy/so sánh và Dashboard ở 5C.3.
+
+## 5C.1: Đọc bảng điểm thật
 
 Thống kê → Điểm & GPA dùng snapshot GPA học kỳ và kết quả môn từ backend. Chi tiết hiển thị cột/trọng số/BTL và điểm đã lưu; phân biệt điểm thiếu/0, màu cam môn đạt ≤ 5, đỏ môn trượt. Có tải/lỗi/trống/thử lại, kiểm tra phiên bản danh mục và chống hiển thị nhầm dữ liệu khi đổi kỳ/tài khoản. Tài khoản chỉ xem trong đợt này; dữ liệu mẫu giữ trình nhập thử riêng.
 

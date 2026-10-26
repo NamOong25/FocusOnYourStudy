@@ -4,7 +4,17 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5C.1 — Đọc bảng điểm thật
+## Đợt vừa hoàn thành: 5C.2A — Cấu hình cột điểm thật
+
+```powershell
+git add .
+git commit -m "Thêm cấu hình cột điểm thật qua API"
+git push origin main
+```
+
+Nối tạo/sửa bộ cột, BTL và xóa cấu hình chưa có điểm vào API. Giữ ID/điểm cũ, bảo vệ cả điểm 0; version/đối chiếu, không tự ghi đè hoặc gửi lại khi mất phản hồi. Lưu/F5 đọc lại PostgreSQL, chặn gửi điểm số qua API cấu hình. TypeScript/build web/340 tests frontend (38 mới), QA UI và tích hợp riêng đạt. Hướng dẫn: `FRONTEND-PHASE-5C2A.md`. Nhập điểm số ở 5C.2B.
+
+## Đợt trước: 5C.1 — Đọc bảng điểm thật
 
 ```powershell
 git add .

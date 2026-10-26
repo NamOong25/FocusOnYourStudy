@@ -9,6 +9,7 @@ import {gradeNumber,serverGradeView} from '../serverGradeView';
 import {gradePresentation} from '../gradePresentation';
 import GradeStatus from '../GradeStatus';
 import {ServerCourseGradeDialog} from './ServerGradePanel';
+import {GradeConfigurationPendingNotice} from './GradeConfigurationReview';
 
 export function ServerSemesterGradesSheet({semesterId,onClose}:{semesterId:string;onClose:()=>void}){
   return <Sheet title="Điểm học kỳ đã lưu" onClose={onClose}><ServerGradesScreen fixedSemesterId={semesterId}/></Sheet>;
@@ -20,9 +21,10 @@ export default function ServerGradesScreen({fixedSemesterId}:{fixedSemesterId?:s
   const courses=courseCatalog.filter(c=>c.semesterId===semester?.id);
   const read=useServerSemesterGrades(semester?{semesterId:semester.id,semesterVersion:semester.version??-1,courses}:null,useNavigationScope().active);
   const reload=()=>{void Promise.allSettled([read.reload(),courseConnection?.reload(),semesterConnection?.reload()]);};
-  if(!semester)return <StateView title={fixedSemesterId?'Không tìm thấy học kỳ':'Chưa có bảng điểm'} message="Tạo học kỳ và thêm môn học để bắt đầu theo dõi điểm." actionLabel="Quản lý học kỳ và môn" onAction={()=>setScheduleMode('Môn & học kỳ')}/>;
+  if(!semester)return <><GradeConfigurationPendingNotice onOpen={setOpened}/><StateView title={fixedSemesterId?'Không tìm thấy học kỳ':'Chưa có bảng điểm'} message="Tạo học kỳ và thêm môn học để bắt đầu theo dõi điểm." actionLabel="Quản lý học kỳ và môn" onAction={()=>setScheduleMode('Môn & học kỳ')}/>{opened&&<ServerCourseGradeDialog key={opened} courseId={opened} onClose={()=>setOpened(null)}/>}</>;
   const filtered=read.value?.courses.filter(c=>{const r=serverGradeView(c.result);return `${c.code} ${c.name}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())&&(filter==='Tất cả'||(filter==='Không đạt'?r.failed:filter==='Đủ điểm'?r.complete:!r.complete));})??[];
   return <>
+    <GradeConfigurationPendingNotice onOpen={setOpened}/>
     <Row between><View style={S.grow}><T style={{fontFamily:F.extra,fontSize:26,lineHeight:38}}>Điểm số & GPA</T><T style={S.small}>Điểm đã lưu trong tài khoản</T></View><Button label={read.loading?'Đang tải':'Tải lại'} disabled={read.loading} secondary icon="refresh-outline" onPress={reload}/></Row>
     {!fixedSemesterId&&<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:9}}>{semesters.map(s=><Pressable key={s.id} accessibilityRole="button" accessibilityLabel={`Xem điểm ${s.name} ${s.academicYear}`} onPress={()=>{setAcademicSemesterId(s.id);setOpened(null);}} style={{padding:14,borderRadius:18,backgroundColor:s.id===semester.id?C.primary:C.card}}><T style={{fontFamily:F.bold,color:s.id===semester.id?'white':C.ink}}>{s.name}</T><T style={{fontSize:11,color:s.id===semester.id?'white':C.muted}}>{s.academicYear}</T></Pressable>)}</ScrollView>}
     {read.error?<StateView kind="error" title="Chưa tải được điểm học kỳ" message={read.error.message} actionLabel="Thử lại" onAction={reload}/>

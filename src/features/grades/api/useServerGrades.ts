@@ -5,9 +5,11 @@ import { API_BASE_URL } from '../../../shared/api/config';
 import { asApiError, cancelledRequest } from '../../../shared/api/http';
 import { GradeReadManager, emptyGradeRead, visibleGradeRead, type GradeReadState } from './GradeReadManager';
 import { createGradesReadApi, semesterGradesKey, courseGradeKey, type SemesterGradeQuery, type CourseRef } from './gradesReadApi';
+import {useGradeConfigurationWrites} from './GradeConfigurationWritesProvider';
 
 function useGradeRead<Q,T>(query:Q|null,active:boolean,read:(query:Q,signal:AbortSignal)=>Promise<T>,keyOf:(q:Q)=>string) {
   const auth=useAuth(),owner=auth.hasSession?`${auth.revision}:${auth.profile?.id??''}`:null;
+  const {state:writes}=useGradeConfigurationWrites();
   let key:string|null=null,queryError=null;
   try { if(query!==null) key=keyOf(query); } catch(e) {queryError=asApiError(e);}
   const ref=useRef<{owner:string;manager:GradeReadManager<Q,T>}|null>(null);
@@ -27,7 +29,7 @@ function useGradeRead<Q,T>(query:Q|null,active:boolean,read:(query:Q,signal:Abor
     if(Platform.OS==='web'){document.addEventListener('visibilitychange',check);window.addEventListener('focus',check);}
     const manager=ref.current?.manager;
     return()=>{listener.remove();if(Platform.OS==='web'){document.removeEventListener('visibilitychange',check);window.removeEventListener('focus',check);}manager?.cancel();};
-  },[active,key,owner,reload]);
+  },[active,key,owner,reload,writes.revision]);
   return {...visibleGradeRead(snapshot,owner,key),...(queryError?{error:queryError}:{}),reload};
 }
 export function useServerSemesterGrades(query:SemesterGradeQuery|null,active:boolean){

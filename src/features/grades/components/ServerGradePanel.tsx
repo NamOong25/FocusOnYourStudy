@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { View } from 'react-native';
 import { Badge, Button, Card, Progress, Row, Sheet, StateView, T } from '../../../shared/components';
 import { useNavigationScope } from '../../../navigation/Navigation';
@@ -8,22 +8,27 @@ import GradeStatus from '../GradeStatus';
 import { gradePresentation } from '../gradePresentation';
 import { useServerCourseGrades } from '../api/useServerGrades';
 import { gradeKindLabels, gradeNumber, serverGradeView } from '../serverGradeView';
+import ServerGradeConfigurationEditor from './ServerGradeConfigurationEditor';
+import {useGradeConfigurationWrites} from '../api/GradeConfigurationWritesProvider';
 
 export function ServerCourseGradeDialog({courseId,onClose}:{courseId:string;onClose:()=>void}){
+  const {state:writes}=useGradeConfigurationWrites();
+  const [edit,setEdit]=useState(()=>writes.pending?.course.id===courseId);
   const {courseCatalog}=useApp(),course=courseCatalog.find(c=>c.id===courseId);
+  if(edit)return <ServerGradeConfigurationEditor key={courseId} courseId={courseId} onClose={()=>{setEdit(false);if(!course)onClose();}}/>;
   return <Sheet title="Bảng điểm môn học" onClose={onClose}>
     {course&&<><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/></>}
-    <ServerGradePanel courseId={courseId}/>
+    <ServerGradePanel courseId={courseId} onConfigure={()=>setEdit(true)}/>
   </Sheet>;
 }
-export default function ServerGradePanel({courseId}:{courseId:string}){
+export default function ServerGradePanel({courseId,onConfigure}:{courseId:string;onConfigure?:()=>void}){
   const {courseCatalog,courseConnection,semesterConnection}=useApp(),course=courseCatalog.find(c=>c.id===courseId);
   const read=useServerCourseGrades(course??null,useNavigationScope().active);
   const reload=()=>{void Promise.allSettled([read.reload(),courseConnection?.reload(),semesterConnection?.reload()]);};
   if(!course)return <StateView title="Không tìm thấy môn học" message="Môn học có thể vừa bị xóa. Tải lại danh sách môn." actionLabel="Tải lại" onAction={reload}/>;
   if(read.error)return <StateView kind="error" title="Chưa tải được bảng điểm" message={read.error.message} actionLabel="Thử lại" onAction={reload}/>;
   if(!read.loaded||!read.value)return <StateView kind="loading" title="Đang tải bảng điểm" message="Đang đọc các cột điểm đã lưu trong tài khoản."/>;
-  if(read.value.kind==='unconfigured')return <Card style={{gap:12}}><Badge label="Chưa có bảng điểm"/><T style={{fontFamily:F.bold}}>Môn này chưa có cấu hình điểm</T><T style={S.small}>Chưa có cột điểm được lưu. Điểm chưa nhập được để trống, không mặc định bằng 0.</T><T style={S.small}>Chức năng nhập và lưu điểm vào tài khoản sẽ được bổ sung tiếp.</T><Button label="Tải lại bảng điểm" secondary icon="refresh-outline" onPress={reload}/></Card>;
+  if(read.value.kind==='unconfigured')return <Card style={{gap:12}}><Badge label="Chưa có bảng điểm"/><T style={{fontFamily:F.bold}}>Môn này chưa có cấu hình điểm</T><T style={S.small}>Thiết lập bộ cột theo đề cương. Điểm chưa nhập được để trống, không mặc định bằng 0.</T>{onConfigure&&<Button label="Thiết lập bảng điểm" icon="add-outline" onPress={onConfigure}/>}<Button label="Tải lại bảng điểm" secondary icon="refresh-outline" onPress={reload}/></Card>;
   const data=read.value,result=serverGradeView(data.result),presentation=gradePresentation(result);
   return <>
     <Row between><Badge label="Điểm đã lưu trong tài khoản" icon="cloud-done-outline"/><Button label={read.loading?'Đang tải':'Tải lại'} disabled={read.loading} secondary icon="refresh-outline" onPress={reload}/></Row>
@@ -44,6 +49,7 @@ export default function ServerGradePanel({courseId}:{courseId:string}){
     </Card>)}
     {!!data.result.missingGroups.length&&<Card style={{backgroundColor:C.amberSoft,gap:6}}><T style={{fontFamily:F.semi}}>Nhóm điểm còn thiếu</T><T style={S.small}>{data.result.missingGroups.map(g=>({REGULAR:'Thường kỳ',MIDTERM:'Giữa kỳ',FINAL:'Cuối kỳ',PRACTICAL_COLUMNS:'Các cột thực hành'}[g]??g)).join(' · ')}</T></Card>}
     {data.result.notices.map((notice,i)=><Card key={`${notice.code}-${i}`} style={{backgroundColor:C.canvas}}><T style={S.small}>{notice.message}</T></Card>)}
-    <T style={S.small}>Đang xem các điểm đã lưu. Chức năng chỉnh sửa và lưu điểm vào tài khoản sẽ được bổ sung tiếp.</T>
+    {onConfigure&&<Button label="Chỉnh sửa cấu hình cột điểm" icon="options-outline" onPress={onConfigure}/>}
+    <T style={S.small}>Bạn có thể chỉnh bộ cột và cách quy BTL. Chức năng nhập điểm số trực tiếp sẽ được bổ sung tiếp.</T>
   </>;
 }
