@@ -35,6 +35,12 @@ public class GradeConfigurationEntity extends BaseEntity {
         // Child-only and identical replacements must also consume the header version.
         updateRevision = Math.incrementExact(updateRevision);
     }
+    public void changeScores(Map<String, GradeColumnEntity.Scores> scores) {
+        columns.forEach(column -> column.changeScores(Objects.requireNonNull(scores.get(column.getKey()))));
+        // Configuration and values share one concurrency token, including no-op PUTs.
+        updateRevision = Math.incrementExact(updateRevision);
+    }
+    public boolean hasScores() { return columns.stream().anyMatch(GradeColumnEntity::hasScores); }
     UUID getUserId() { return userId; }
     public UUID getCourseId() { return courseId; }
     public GradeConfigurationRequests.Assessment getAssessment() { return assessment; }

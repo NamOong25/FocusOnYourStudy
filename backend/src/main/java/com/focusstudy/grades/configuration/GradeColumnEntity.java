@@ -17,6 +17,9 @@ public class GradeColumnEntity {
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 24) private GradeConfigurationRequests.Kind kind;
     @Enumerated(EnumType.STRING) @Column(name = "project_target", length = 12) private GradeConfigurationRequests.Target projectTarget;
     @Column(name = "project_share", precision = 7, scale = 4) private BigDecimal projectShare;
+    @Column(precision = 6, scale = 4) private BigDecimal score;
+    @Column(name = "remainder_score", precision = 6, scale = 4) private BigDecimal remainderScore;
+    public record Scores(BigDecimal score, BigDecimal remainderScore) { }
     protected GradeColumnEntity() { }
     GradeColumnEntity(GradeConfigurationEntity configuration, String key) {
         this.configuration = configuration; this.userId = configuration.getUserId(); this.key = key;
@@ -32,5 +35,9 @@ public class GradeColumnEntity {
     public GradeConfigurationRequests.Kind getKind() { return kind; }
     public GradeConfigurationRequests.Target getProjectTarget() { return projectTarget; }
     public BigDecimal getProjectShare() { return projectShare; }
+    public BigDecimal getScore() { return score; }
+    public BigDecimal getRemainderScore() { return remainderScore; }
+    public boolean hasScores() { return score != null || remainderScore != null; }
+    void changeScores(Scores scores) { score = scores.score(); remainderScore = scores.remainderScore(); }
     public boolean isFinal() { return kind == GradeConfigurationRequests.Kind.FINAL || projectTarget == GradeConfigurationRequests.Target.FINAL; }
 }

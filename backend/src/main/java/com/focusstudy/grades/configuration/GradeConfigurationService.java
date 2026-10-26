@@ -58,12 +58,30 @@ public class GradeConfigurationService {
     @Transactional
     public GradeConfigurationResponse update(UUID owner, UUID id, Update input) {
         lockOwner(owner); var config = owned(owner, id); checkVersion(config, input.version); validate(input);
+        protectScores(config, input);
         config.change(input); configurations.flush(); return GradeConfigurationResponse.from(config);
     }
     @Transactional
     public void delete(UUID owner, UUID id, long version) {
         lockOwner(owner); var config = owned(owner, id); checkVersion(config, version);
+        if (config.hasScores()) throw new GradeConfigurationApiException(HttpStatus.CONFLICT, "GRADE_CONFIGURATION_HAS_SCORES", "Cấu hình còn điểm đã nhập, gồm cả điểm 0. Xóa điểm qua API điểm trước khi xóa cấu hình.");
         configurations.delete(config); configurations.flush();
+    }
+    private void protectScores(GradeConfigurationEntity config, Create input) {
+        if (!config.hasScores()) return;
+        if (config.getAssessment() != input.assessment) scoredColumnConflict();
+        var incoming = new HashMap<String, Part>(); input.parts.forEach(part -> incoming.put(part.id, part));
+        for (var column : config.getColumns()) {
+            if (!column.hasScores()) continue;
+            var part = incoming.get(column.getKey());
+            if (part == null || part.kind != column.getKind()) scoredColumnConflict();
+            var target = part.project == null ? null : part.project.target;
+            var share = part.project == null ? null : part.project.share;
+            if (target != column.getProjectTarget() || (share == null ? column.getProjectShare() != null : column.getProjectShare() == null || share.compareTo(column.getProjectShare()) != 0)) scoredColumnConflict();
+        }
+    }
+    private void scoredColumnConflict() {
+        throw new GradeConfigurationApiException(HttpStatus.CONFLICT, "GRADE_COLUMN_HAS_SCORES", "Có cột đã nhập điểm (kể cả 0). Có thể đổi tên/thứ tự; cần xóa điểm ở cột bị ảnh hưởng trước khi xóa cột, đổi loại/cách quy BTL hoặc đổi loại học phần.");
     }
     private void validate(Create input) {
         var keys = new HashSet<String>(); int finalCount = 0, midCount = 0;

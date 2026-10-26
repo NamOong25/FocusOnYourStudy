@@ -10,7 +10,7 @@ public record GradeConfigurationResponse(UUID id, UUID courseId, Assessment asse
     public enum State { DRAFT, READY }
     public record Project(Target target, BigDecimal share) { }
     public record Part(String id, String name, Kind kind, Project project, int weightNumerator, int weightDenominator, BigDecimal weight) { }
-    static GradeConfigurationResponse from(GradeConfigurationEntity config) {
+    public static GradeConfigurationResponse from(GradeConfigurationEntity config) {
         var columns = config.getColumns(); var missing = new ArrayList<String>();
         int regular = (int) columns.stream().filter(c -> c.getKind() == Kind.REGULAR || c.getKind() == Kind.REGULAR_TEST).count();
         if (config.getAssessment() == Assessment.THEORY) {

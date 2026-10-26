@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5A.1: Cấu hình bảng điểm được lưu ở backend
+## Mới nhất — 5A.2A: Lưu và đọc điểm thành phần
+
+V9 thêm điểm nullable theo cột: chưa nhập khác 0, BTL và phần còn lại của cuối kỳ; có GET/PUT riêng với version dùng chung cấu hình. Đổi tên/thứ tự giữ điểm; xóa/đổi vai trò/cách quy BTL của cột đã có điểm hoặc xóa cả cấu hình còn điểm bị chặn, cần xóa điểm rõ ràng bằng null trước. Lưu nguyên tử, đọc cùng snapshot và kiểm tra quyền tài khoản.
+
+Chạy lại backend để Flyway nâng V8 → V9, không tạo lại database. Dùng `backend/scripts/Try-GradeScores.ps1` Get → Export → sửa file → Update → Get; Export giữ điểm/version hiện tại và không ghi đè file. Xem [hướng dẫn 5A.2A](docs/BACKEND-PHASE-5A2A.md), [hợp đồng điểm](backend/docs/GRADE-SCORES.md), `backend/api/grade-scores.http`. **Màn Điểm vẫn chưa nối API; kết quả môn ở 5A.2B, GPA ở 5B, nối UI ở 5C.**
+
+**390 tests/Maven verify qua (33 mới), không lỗi/bỏ qua; TypeScript qua.** Có V8 → V9 giữ ID/cấu hình và để điểm trống, restart toàn backend, PowerShell 5.1/UTF-8, bảo vệ điểm 0, snapshot và ghi đồng thời. Kiểm thử dùng schema riêng và tự dọn.
+
+## 5A.1: Cấu hình bảng điểm được lưu ở backend
 
 V8 thêm cấu hình Lý thuyết/Thực hành theo môn, bộ cột có thể thêm/sửa/xóa/đổi thứ tự, quy BTL vào một cột thực hành hoặc cuối kỳ (toàn phần/một phần). Backend dựng trọng số từ cấu hình và cho lưu DRAFT thiếu nhóm; không khóa cột đề xuất. Có ownership/version, ghi nguyên tử, snapshot đọc nhất quán và guard xóa/chuyển môn còn cấu hình.
 

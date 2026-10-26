@@ -4,7 +4,21 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5A.1 — Lưu cấu hình bảng điểm theo môn
+## Đợt vừa hoàn thành: 5A.2A — Lưu điểm thành phần
+
+390 tests/Maven verify qua (33 mới), không lỗi/bỏ qua; TypeScript qua. Kiểm thử dùng schema riêng, không seed vào tài khoản app.
+
+V9 + GET/PUT điểm theo cấu hình, null khác 0, BTL/phần còn lại; đầy đủ mã cột/trường, version dùng chung, ghi nguyên tử và snapshot đọc. Bảo vệ cột/cấu hình còn điểm; đổi tên/thứ tự giữ điểm. Có script Get/Export/Update không tự thay version hoặc ghi đè file, mẫu IntelliJ, migration/restart/đồng thời và PowerShell 5.1. Tính kết quả môn/GPA và nối UI còn ở 5A.2B/5B/5C. Xem `BACKEND-PHASE-5A2A.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Lưu điểm thành phần và bảo vệ các cột đã nhập điểm"
+git push
+```
+
+## 5A.1 — Lưu cấu hình bảng điểm theo môn
 
 V8 + API cấu hình Lý thuyết/Thực hành, bộ cột tùy chỉnh/thứ tự/tên/vai trò và cách quy BTL, trọng số dựng từ cấu hình và DRAFT thiếu nhóm. Ownership/version/khóa tài khoản, snapshot đọc, giữ ID cột và chặn xóa/chuyển môn còn cấu hình; có mẫu JSON, script PowerShell 5.1, IntelliJ HTTP và test migration/restart/đồng thời. Chỉ lưu cấu hình; điểm số, tổng kết/GPA và nối UI tiếp tục ở 5A.2/5B/5C. Xem `BACKEND-PHASE-5A1.md`.
 

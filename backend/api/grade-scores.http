@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@refreshToken = THAY_REFRESH_TOKEN
+@configurationId = THAY_CONFIGURATION_ID
+@version = 0
+
+### Sao chép file này vào .local trước khi điền thông tin thật; không commit thông tin đăng nhập
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL","password":"THAY_MAT_KHAU"}
+
+### Chọn id cấu hình của tài khoản (khác courseId)
+GET {{baseUrl}}/api/v1/grade-configurations
+Authorization: Bearer {{accessToken}}
+
+### Đọc cả cấu hình và điểm trong cùng snapshot; chép version và đúng bộ parts[].id
+GET {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/scores
+Authorization: Bearer {{accessToken}}
+
+### Ví dụ cho cấu hình theory.json (tk1, tk2, mid, final); chỉnh đủ ID nếu bộ cột của bạn khác
+PUT {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/scores
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "version": {{version}},
+  "parts": [
+    {"id":"tk1","score":0,"remainderScore":null},
+    {"id":"tk2","score":null,"remainderScore":null},
+    {"id":"mid","score":7.5,"remainderScore":null},
+    {"id":"final","score":null,"remainderScore":null}
+  ]
+}
+
+### Ví dụ riêng cho theory-project-partial-final.json (tk1, mid, btl-final), share=40
+PUT {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/scores
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "version": {{version}},
+  "parts": [
+    {"id":"tk1","score":8,"remainderScore":null},
+    {"id":"mid","score":7.5,"remainderScore":null},
+    {"id":"btl-final","score":9,"remainderScore":7}
+  ]
+}
+
+### Xóa điểm thử của bộ 4 cột theory.json: chủ động gửi null; lấy version mới nhất trước khi chạy
+PUT {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/scores
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "version": {{version}},
+  "parts": [
+    {"id":"tk1","score":null,"remainderScore":null},
+    {"id":"tk2","score":null,"remainderScore":null},
+    {"id":"mid","score":null,"remainderScore":null},
+    {"id":"final","score":null,"remainderScore":null}
+  ]
+}
+
+### Đóng đúng phiên thử vừa mở
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{refreshToken}}"}

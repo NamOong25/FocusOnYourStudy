@@ -1,6 +1,6 @@
 # Cấu hình điểm — 5A.1
 
-V8 thêm `grade_configurations` và `grade_columns`; không seed và không sửa V1–V7. Chỉ lưu cấu trúc bảng điểm, chưa lưu giá trị điểm, tổng kết, kết quả đạt/học lại hoặc GPA. Màn Điểm React Native nối ở 5C. Các quy tắc dưới đây tái hiện cấu hình hiện có trong `src/features/grades/grades.ts`; đề cương từng lớp quyết định số cột và cách quy BTL, không suy từ tên môn.
+V8 thêm `grade_configurations` và `grade_columns`; không seed và không sửa V1–V7. Endpoint cấu hình chỉ lưu cấu trúc bảng điểm. **Từ 5A.2A/V9, giá trị điểm được lưu qua API riêng `/grade-configurations/{id}/scores`, dùng chung version và bảo vệ các cột đã có điểm.** Xem [hợp đồng điểm](GRADE-SCORES.md). Chưa tính tổng kết/đạt/học lại/GPA; màn Điểm React Native nối ở 5C. Các quy tắc dưới đây tái hiện cấu hình hiện có trong `src/features/grades/grades.ts`; đề cương từng lớp quyết định số cột và cách quy BTL, không suy từ tên môn.
 
 ## API
 
@@ -56,7 +56,7 @@ Không khóa các cột đề xuất. Có thể thêm/xóa/đổi tên/đổi lo
 
 - `PRACTICE`, `share=100`: BTL thay một cột thực hành, chỉ ở học phần PRACTICAL. Không tạo thêm một cột thực hành trùng cho cùng điểm BTL.
 - `FINAL`, `share=100`: BTL làm toàn bộ cột cuối kỳ, dùng được ở THEORY/PRACTICAL.
-- `FINAL`, `0<share<100`: BTL góp một phần cột cuối kỳ, phần còn lại sẽ nhập điểm riêng ở 5A.2. Ví dụ 40% là 40% **cột cuối kỳ**. Không thêm cột FINAL thứ hai.
+- `FINAL`, `0<share<100`: BTL góp một phần cột cuối kỳ, điểm phần còn lại nhập bằng remainderScore trong API 5A.2A. Ví dụ 40% là 40% **cột cuối kỳ**. Không thêm cột FINAL thứ hai.
 
 Hai ví dụ người dùng cung cấp: React→PRACTICE/100, World Wide Web Java→FINAL/100. Tệp mẫu chỉ minh họa; chọn loại học phần và bộ cột đúng lớp đang học. File WWW Java minh họa THEORY; nếu lớp là thực hành phải đổi assessment và các loại cột tương ứng. API không dò tên môn để tự gán chính sách.
 
@@ -69,7 +69,7 @@ Phản hồi có `id, courseId, assessment, parts, state, missingGroups, version
 - `weightNumerator/weightDenominator` biểu diễn phần trăm dưới dạng tỷ lệ chính xác; `weight` là phần trăm để hiển thị, làm tròn tối đa 12 chữ số sau dấu thập phân. Với 3 cột thực hành là `100/3`, không lưu 33.33 làm nguồn tính điểm. Backend tự dựng trọng số từ cấu hình đã lưu, client không gửi tỷ lệ toàn môn tùy ý.
 - `state=READY`: cấu trúc đủ nhóm theo chính sách trên; **không có nghĩa đã nhập đủ điểm, qua môn hoặc được tính GPA**. `DRAFT` lưu được nhưng còn thiếu nhóm; THEORY có `missingGroups` là REGULAR/MIDTERM/FINAL, PRACTICAL trống có PRACTICAL_COLUMNS.
 
-Tỷ lệ BTL được chuẩn hóa JSON giống nhau trước/sau đọc DB/restart. Điểm chưa nhập khác điểm 0 sẽ do 5A.2 xử lý; 5A.1 không sinh điểm 0 hoặc kết quả giả.
+Tỷ lệ BTL được chuẩn hóa JSON giống nhau trước/sau đọc DB/restart. API điểm 5A.2A giữ null khác 0; endpoint cấu hình không sinh điểm hoặc kết quả giả.
 
 ## Đồng thời và quan hệ dữ liệu
 
@@ -77,7 +77,7 @@ Mọi lần ghi khóa hàng tài khoản giống các module môn/học kỳ/bà
 
 Thay bộ cột giữ UUID nội bộ cho ID cột còn tồn tại; xóa thật các cột bị bỏ. DB có FK ownership, loại học phần/cột, BTL, vị trí 0–9, key/vị trí và vai trò cuối kỳ/giữa kỳ không trùng. Unique/FK phù hợp được kiểm tra cuối transaction để cho phép hoán đổi vị trí, thay cột cuối kỳ và đổi học phần nguyên tử.
 
-Xóa/chuyển học kỳ một môn còn cấu hình (kể cả DRAFT trống) trả 409 `COURSE_HAS_GRADE_CONFIGURATION`; cần xử lý cấu hình trước. Đổi tên/tín chỉ/thông tin môn trong cùng kỳ không reset bộ cột. Xóa cấu hình không xóa môn/lịch/bài tập và không tác động cấu hình môn khác. Đợt 5A.2 sẽ bổ sung quy tắc khi cột đã có giá trị điểm.
+Xóa/chuyển học kỳ một môn còn cấu hình (kể cả DRAFT trống) trả 409 `COURSE_HAS_GRADE_CONFIGURATION`; cần xử lý cấu hình trước. Đổi tên/tín chỉ/thông tin môn trong cùng kỳ không reset bộ cột. Xóa cấu hình không xóa môn/lịch/bài tập và không tác động cấu hình môn khác. Từ 5A.2A, xóa cấu hình còn điểm trả `GRADE_CONFIGURATION_HAS_SCORES`; xóa/đổi mã/loại/cách quy BTL cột có điểm hoặc đổi loại học phần khi còn điểm trả `GRADE_COLUMN_HAS_SCORES`. Đổi tên/thứ tự vẫn giữ điểm; cần xóa điểm bị ảnh hưởng rõ ràng qua API điểm trước khi sửa cấu trúc. Điểm 0 cũng được bảo vệ.
 
 ## Lỗi chính
 
