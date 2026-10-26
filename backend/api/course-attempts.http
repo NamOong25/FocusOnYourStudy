@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@refreshToken = THAY_REFRESH_TOKEN
+@courseId = THAY_COURSE_ID
+
+### Sao chép vào .local trước khi nhập tài khoản thật; không commit mật khẩu/token
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL","password":"THAY_MAT_KHAU"}
+
+### Tất cả lịch sử trong tài khoản; chưa tính GPA tích lũy
+GET {{baseUrl}}/api/v1/course-attempts
+Authorization: Bearer {{accessToken}}
+
+### Lấy id môn của tài khoản
+GET {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{accessToken}}
+
+### Mọi lần có cùng mã; khác tín chỉ nằm ở nhóm riêng và có cảnh báo
+GET {{baseUrl}}/api/v1/courses/{{courseId}}/attempts
+Authorization: Bearer {{accessToken}}
+
+### Kết thúc đúng phiên thử
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{refreshToken}}"}

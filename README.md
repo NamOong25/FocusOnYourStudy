@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5B.1: GPA học kỳ theo tín chỉ
+## Mới nhất — 5B.2A: Lịch sử các lần học cùng môn
+
+API chỉ đọc lịch sử theo tài khoản/môn, ghép đúng mã và tín chỉ rồi xếp năm học/kỳ, kể cả hè. Giữ đủ các lần học và kết quả thiếu/F/đạt; khác tín chỉ hoặc cấu hình LT/TH có dấu cần đối chiếu. Nhãn theo kết quả trước không xác nhận đăng ký học lại/cải thiện tại trường; chưa chọn điểm hoặc tính GPA tích lũy.
+
+Chạy lại backend, vẫn V9, không migration/seed/dependency/frontend mới. Xem [hướng dẫn 5B.2A](docs/BACKEND-PHASE-5B2A.md), [hợp đồng và nguồn IUH](backend/docs/COURSE-ATTEMPTS.md), `backend/scripts/Try-CourseAttempts.ps1`, `backend/api/course-attempts.http`. Quy tắc chọn điểm tích lũy còn phải xác minh ở 5B.2B; nối UI ở 5C.
+
+**504 tests/Maven verify qua (27 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 8 test timeline và 19 test HTTP/PowerShell mới; mở rộng restart qua ba lần khởi động, snapshot đồng thời, quyền tài khoản và dữ liệu thiếu/F0. Schema test riêng tự dọn; không seed dữ liệu app, vẫn V9.**
+
+## 5B.1: GPA học kỳ theo tín chỉ
 
 GET GPA học kỳ dùng điểm hệ 4 từ 5A.2B và tín chỉ từng môn, giữ môn F trong mẫu số; tách môn chưa cấu hình/thiếu điểm/chặn thi. Có GPA trống khác 0, trạng thái PARTIAL khi còn môn chưa tính, tín chỉ tính GPA/đã đạt/trượt/chưa tính và từng dòng môn để đối chiếu. Cùng snapshot học kỳ/môn/tín chỉ/điểm, đọc theo tài khoản và không tăng version.
 

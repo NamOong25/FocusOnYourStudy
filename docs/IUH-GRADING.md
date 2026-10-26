@@ -8,7 +8,7 @@
 
 ## Nguồn đã đọc
 
-[Tài liệu Khoa Công nghệ Hóa học IUH, năm 2023](https://fce.iuh.edu.vn/wp-content/uploads/2023/10/2023_FCE_faculty_manual.pdf), mục 6, trang in 49–52 và 62 (trang PDF 55–58 và 68). Tài liệu này cùng thời điểm K19, dùng làm căn cứ cho các điều kiện điểm dưới đây; không khẳng định đã xác nhận mọi quy định riêng theo ngành/chương trình hoặc mọi sửa đổi về sau. Không tự lấy quy chế công bố năm 2025 làm mặc định cho K19.
+[Tài liệu Khoa Công nghệ Hóa học IUH, năm 2023](https://fce.iuh.edu.vn/wp-content/uploads/2023/10/2023_FCE_faculty_manual.pdf), mục 6, trang in 49–52 và 62 (trang PDF 55–58 và 68). Tài liệu này cùng thời điểm K19, dùng làm căn cứ cho các điều kiện điểm dưới đây; không khẳng định đã xác nhận mọi quy định riêng theo ngành/chương trình hoặc mọi sửa đổi về sau. Không chọn bản quy chế chỉ dựa trên năm tiêu đề; kiểm tra phạm vi áp dụng. Cập nhật nghiên cứu 5B.2A: trang cẩm nang IUH hiện ghi áp dụng khóa tuyển sinh 2025 trở về trước, có bao gồm K19; cần đối chiếu với profile 2023 trước nghiệm thu toàn khóa. Xem [nguồn và giới hạn xác minh](../backend/docs/COURSE-ATTEMPTS.md).
 
 | Nội dung | Cách thể hiện |
 | --- | --- |
