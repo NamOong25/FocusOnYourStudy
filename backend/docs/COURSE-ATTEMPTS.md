@@ -1,5 +1,7 @@
 # Lịch sử các lần học cùng môn — 5B.2A
 
+> Đã có báo cáo lựa chọn/GPA app riêng ở 5B.2B.2: `GET /api/v1/gpa/cumulative`, xem [hợp đồng](CUMULATIVE-GPA.md). Endpoint history này vẫn giữ nguyên dữ liệu nguồn và không tự chọn điểm. Quy tắc chính thức/khôi phục điểm đã hoãn vẫn chưa được xác nhận.
+
 ## API chỉ đọc
 
 | Yêu cầu | Phạm vi |

@@ -108,6 +108,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/grade-configurations/*/result").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters/*/gpa").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-attempts", "/api/v1/courses/*/attempts").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/gpa/cumulative").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> { }).authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))

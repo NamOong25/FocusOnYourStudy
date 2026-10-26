@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — Cảnh báo môn đạt điểm thấp
+## Mới nhất — 5B.2B.2: API GPA tích lũy trong app
+
+GET `/api/v1/gpa/cumulative` chọn tổng kết đạt cao nhất theo mã/tín chỉ; bằng điểm chọn năm-kỳ gần nhất, chưa có lần đạt giữ F hoàn chỉnh gần nhất với điểm hệ 4 bằng 0. Tín chỉ mỗi nhóm tính một lần; giữ toàn bộ lịch sử, lý do chọn/bỏ và các nhóm thiếu dữ liệu/cần đối chiếu. Null khác GPA 0; PARTIAL khi dữ liệu còn chưa đủ. Chính sách người dùng chọn trong app, không khẳng định GPA chính thức của trường.
+
+Chạy lại backend rồi dùng `backend/scripts/Try-CumulativeGpa.ps1 -Mode Get`. Xem [hướng dẫn 5B.2B.2](docs/BACKEND-PHASE-5B2B2.md), [hợp đồng](backend/docs/CUMULATIVE-GPA.md), `backend/api/cumulative-gpa.http`. Vẫn V9, không migration/seed/dependency/frontend mới. Nối màn Điểm/Dashboard ở 5C; hủy/phục hồi và điểm đặc thù vẫn để sau.
+
+**537 tests/Maven verify qua (33 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 15 test phép tính và 18 test HTTP/PowerShell mới, kiểm tra snapshot đồng thời và mở rộng restart qua ba lần khởi động. Schema test riêng tự dọn; không seed dữ liệu app, vẫn V9.**
+
+## Cảnh báo môn đạt điểm thấp
 
 Môn đã đủ kết quả, đã đạt nhưng tổng kết ≤ 5/10 có màu cam và nhãn “Đạt môn · Điểm thấp”. Môn không đạt/bị chặn thi vẫn đỏ; điểm thiếu vẫn trống. Cùng cách hiển thị trong bảng điểm, chi tiết, xem trước nhập điểm và bảng điểm từ so sánh học kỳ. Giữ môn rớt trong danh sách, không đổi công thức hoặc ngưỡng qua môn/GPA.
 
