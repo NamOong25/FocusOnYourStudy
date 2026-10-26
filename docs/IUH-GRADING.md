@@ -1,3 +1,5 @@
+> Cập nhật 26/10/2026: cảnh báo cam cho môn đã đạt nhưng tổng kết ≤ 5/10 là lựa chọn hiển thị, không đổi ngưỡng qua môn. Người dùng chọn lấy điểm đạt cao nhất cho phần tích lũy sắp làm theo chính sách app; luồng hủy/phục hồi để sau. Xem [phạm vi và nguồn đối chiếu](BACKEND-PHASE-5B2B1.md).
+
 # Giao diện điểm IUH — đối chiếu K19
 
 > Backend 5A.2B đã thêm kết quả từ điểm PostgreSQL với profile `IUH_2023_REPORTED_V1`, đã đối chiếu lại trang PDF 55–58/68. Xem [hướng dẫn backend](BACKEND-PHASE-5A2B.md) và [contract](../backend/docs/GRADE-RESULTS.md). TB nhiều cột thường kỳ được làm tròn một chữ số trước nhân 20%; một cột TK dùng như trung bình đã công bố. Giữa kỳ 0 báo chặn thi, chưa tự kết luận điểm tổng kết/F hoặc gán nhu cầu học lại chính thức. Frontend hiện chưa nối API (5C), nên phần dưới giữ làm lịch sử giao diện; GPA backend ở 5B.

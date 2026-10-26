@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5B.2A: Lịch sử các lần học cùng môn
+## Mới nhất — Cảnh báo môn đạt điểm thấp
+
+Môn đã đủ kết quả, đã đạt nhưng tổng kết ≤ 5/10 có màu cam và nhãn “Đạt môn · Điểm thấp”. Môn không đạt/bị chặn thi vẫn đỏ; điểm thiếu vẫn trống. Cùng cách hiển thị trong bảng điểm, chi tiết, xem trước nhập điểm và bảng điểm từ so sánh học kỳ. Giữ môn rớt trong danh sách, không đổi công thức hoặc ngưỡng qua môn/GPA.
+
+TypeScript và build web qua; đã thử trực tiếp 7 tình huống điểm trên trình duyệt bằng dữ liệu mẫu. Xem [hướng dẫn kiểm tra và phạm vi GPA](docs/BACKEND-PHASE-5B2B1.md). Quy tắc **lấy điểm đạt cao nhất** đã được người dùng chọn cho đợt GPA tích lũy sắp làm; luồng hủy/phục hồi điểm để sau. Đây là quy tắc app, không gắn nhãn đã xác minh toàn bộ quy chế K19.
+
+## 5B.2A: Lịch sử các lần học cùng môn
 
 API chỉ đọc lịch sử theo tài khoản/môn, ghép đúng mã và tín chỉ rồi xếp năm học/kỳ, kể cả hè. Giữ đủ các lần học và kết quả thiếu/F/đạt; khác tín chỉ hoặc cấu hình LT/TH có dấu cần đối chiếu. Nhãn theo kết quả trước không xác nhận đăng ký học lại/cải thiện tại trường; chưa chọn điểm hoặc tính GPA tích lũy.
 

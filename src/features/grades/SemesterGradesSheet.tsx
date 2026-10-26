@@ -1,3 +1,4 @@
+import { gradePresentation } from './gradePresentation';
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Card, Icon, Row, Sheet, T } from '../../shared/components';
@@ -28,8 +29,9 @@ export default function SemesterGradesSheet({ semesterId, onClose }: { semesterI
     {!!report.excludedPassFail && <T style={S.small}>{report.excludedPassFail} môn đạt/không đạt được tách khỏi GPA và tín chỉ GPA.</T>}
     {report.courses.map(course => {
       const result = courseResult(gradeBook[course.id], gradeRules);
+      const presentation = gradePresentation(result);
       return <Pressable key={course.id} accessibilityRole="button" accessibilityLabel={`Mở điểm so sánh: ${course.name} · ${course.code}`} onPress={() => setOpenedCourse(course.id)}>
-        <Card style={{ gap: 12, backgroundColor: result.failed ? C.redSoft : C.card }}><Row between><View style={[S.grow, { gap: 5 }]}><T style={{ fontSize: 10, color: C.primary }}>{course.code} · {course.credits} tín chỉ</T><T style={{ fontFamily: F.bold, fontSize: 15, lineHeight: 23 }}>{course.name}</T></View><T style={{ fontFamily: F.extra, fontSize: 24, color: result.failed ? C.red : C.primary }}>{result.total === null ? '—' : result.total.toFixed(gradeRules.scale === 'iuh' ? 1 : gradeRules.decimals)}</T></Row><Row between><View style={S.grow}><GradeStatus result={result} /></View><Icon name="chevron-forward" size={17} /></Row></Card>
+        <Card style={{ gap: 12, backgroundColor: presentation.attention ? presentation.background : C.card, borderColor: presentation.attention ? presentation.color : C.line }}><Row between><View style={[S.grow, { gap: 5 }]}><T style={{ fontSize: 10, color: C.primary }}>{course.code} · {course.credits} tín chỉ</T><T style={{ fontFamily: F.bold, fontSize: 15, lineHeight: 23 }}>{course.name}</T></View><T style={{ fontFamily: F.extra, fontSize: 24, color: presentation.attention ? presentation.color : C.primary }}>{result.total === null ? '—' : result.total.toFixed(gradeRules.scale === 'iuh' ? 1 : gradeRules.decimals)}</T></Row><Row between><View style={S.grow}><GradeStatus result={result} /></View><Icon name="chevron-forward" size={17} /></Row></Card>
       </Pressable>;
     })}
     {!report.courses.length && <T style={S.small}>Thêm môn vào học kỳ này để bắt đầu nhập điểm.</T>}

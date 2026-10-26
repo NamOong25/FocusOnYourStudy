@@ -53,6 +53,8 @@ Một transaction `readOnly/REPEATABLE_READ` bao trùm quyền môn được ch�
 
 Hai nguồn nêu chọn điểm cao trong phạm vi nhóm môn tự chọn. Đoạn đã đọc **chưa xác nhận quy tắc chọn điểm giữa nhiều lần của đúng cùng một môn**, đặc biệt khi cải thiện thấp hơn lần trước hoặc có trạng thái hủy điểm. Vì vậy `ruleVerification=SAME_COURSE_IMPROVEMENT_SELECTION_NOT_CONFIRMED`.
 
+Cập nhật 5B.2B.1: người dùng chọn chính sách app lấy điểm đạt cao nhất cho API tích lũy sắp làm; nghiệp vụ hủy/phục hồi để sau. Điều này không xác nhận quy tắc K19 hay đổi endpoint history; xem [phạm vi mới](../../docs/BACKEND-PHASE-5B2B1.md). Cần đọc cùng ghi chú chèn điểm 0 sau Điều 21 để làm rõ mẫu số trong từng chỉ số, không chỉ suy từ định nghĩa.
+
 Trang cẩm nang còn phân biệt trung bình tích lũy của các học phần đã đạt với trung bình học lực có cả kết quả không đạt; Điều 21 tách công thức học kỳ và tích lũy. Không lấy kết quả GPA học kỳ 5B.1 rồi cộng mọi tín chỉ/lần học để gọi là tích lũy chính thức.
 
 Trước 5B.2B: xác minh quy tắc chọn/thay điểm cùng môn từ quy chế đầy đủ áp dụng K19; phân biệt trung bình học lực với trung bình tích lũy; xác định môn bắt buộc/tự chọn/nhóm tương đương và dữ liệu hủy/bảo lưu điểm nếu quy chế yêu cầu. Rà lại phạm vi profile kết quả môn 2023 với nguồn hiện hành, không coi nhãn history là căn cứ tự hủy điểm. P/miễn/chuyển điểm vẫn là mục riêng trong checklist. Chưa nghiệm thu GPA toàn khóa.

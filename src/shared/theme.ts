@@ -5,6 +5,7 @@ export const C = {
   canvas: '#F4FAFD', card: '#FFFFFF', ink: '#20282B', muted: '#737383',
   line: '#EBEDF5', track: '#EAF0F3', green: '#008F70', greenSoft: '#DDF9ED',
   red: '#C72632', redSoft: '#FFE1DE', amber: '#A86600', amberSoft: '#FFF2D7',
+  orange: '#A84B00', orangeSoft: '#FFF1E7',
   blue: '#2879B5', blueSoft: '#E5F3FF',
 };
 export const F = { regular: 'Jakarta', medium: 'JakartaMedium', semi: 'JakartaSemi', bold: 'JakartaBold', extra: 'JakartaExtra' };

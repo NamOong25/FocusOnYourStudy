@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**Ghi chú giao diện/GPA:** Đã thêm cảnh báo cam cho môn đạt tổng kết ≤ 5/10; môn rớt vẫn đỏ và vẫn được hiển thị. Nghiệp vụ hủy/phục hồi để sau; người dùng chọn lấy điểm đạt cao nhất cho 5B.2B.2 theo chính sách app. Đối chiếu nguồn và giới hạn trong [5B.2B.1](../docs/BACKEND-PHASE-5B2B1.md); API/công thức backend ở đợt này chưa đổi.
+
 **Mới nhất 5B.2A — Lịch sử các lần học cùng môn:** GET `/api/v1/course-attempts`, GET `/api/v1/courses/{id}/attempts`. Ghép mã/tín chỉ, sắp năm-kỳ, ngữ cảnh lần trước theo kết quả; variant tín chỉ/LT-TH cần đối chiếu. Chỉ đọc, snapshot theo tài khoản, không chọn điểm tích lũy hoặc đổi dữ liệu/version. Vẫn V9, không migration/seed/frontend/dependency. Xem [hướng dẫn](../docs/BACKEND-PHASE-5B2A.md), [hợp đồng và nguồn IUH](docs/COURSE-ATTEMPTS.md), `scripts/Try-CourseAttempts.ps1`, `api/course-attempts.http`. Xác minh quy tắc chọn điểm ở 5B.2B; nối UI 5C. 504 tests/Maven verify qua (27 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 8 test timeline và 19 test HTTP/PowerShell mới; mở rộng restart qua ba lần khởi động, snapshot đồng thời, quyền tài khoản và dữ liệu thiếu/F0. Schema test riêng tự dọn; không seed dữ liệu app, vẫn V9.
 
 

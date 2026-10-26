@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5B.2A — Lịch sử các lần học cùng môn
+## Đợt vừa hoàn thành — Cảnh báo màu cam cho môn đạt điểm thấp
+
+Dùng chung màu/nhãn cho kết quả đạt ≤ 5/10 ở các màn điểm; môn rớt/bị chặn thi giữ đỏ và vẫn trong danh sách, điểm thiếu trung tính. Không đổi ngưỡng đạt hoặc phép tính. TypeScript/build web qua; thử trực tiếp 7 tình huống trên trình duyệt và kiểm tra sau lưu. Tài liệu/checklist ghi lựa chọn lấy điểm đạt cao nhất cho API tích lũy sắp làm; luồng hủy/phục hồi để sau, chưa gắn quy tắc đó thành quy chế IUH đã xác minh. Xem `BACKEND-PHASE-5B2B1.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Thêm cảnh báo màu cam cho môn đạt điểm thấp"
+git push
+```
+
+## 5B.2A — Lịch sử các lần học cùng môn
 
 Ghép cùng mã/tín chỉ, thứ tự năm-kỳ/hè; giữ mọi lần học, phân biệt thiếu điểm/F0 và ngữ cảnh theo kết quả trước. Khác tín chỉ/LT-TH báo cần đối chiếu; API chỉ đọc, ownership/snapshot, không chọn điểm tích lũy/tăng version. Có PowerShell 5.1/IntelliJ/test/restart; vẫn V9, không seed/migration/UI/dependency. Quy tắc lựa chọn điểm còn ở 5B.2B; xem `BACKEND-PHASE-5B2A.md`. 504 tests/Maven verify qua (27 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 8 test timeline và 19 test HTTP/PowerShell mới; mở rộng restart qua ba lần khởi động, snapshot đồng thời, quyền tài khoản và dữ liệu thiếu/F0. Schema test riêng tự dọn; không seed dữ liệu app, vẫn V9.
 

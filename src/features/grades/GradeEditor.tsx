@@ -1,3 +1,4 @@
+import { gradePresentation } from './gradePresentation';
 import React,{useRef,useState} from 'react';
 import {Linking} from 'react-native';
 import {Badge,Button,Card,Row,Segments,Sheet,T} from '../../shared/components';
@@ -26,6 +27,7 @@ export function GradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void
   const rules={...gradeRules,scale:'iuh' as const,decimals:1 as const};
   const parsed:CourseGrades={...record,assessment,practicalCredits:assessment==='practical'?course.credits:record.practicalCredits,parts:rebalanceGradeParts(parts.map(parsePart),assessment)};
   const validation=validateAssessment(parsed),draftError=validateGradeDraft(parsed),result=courseResult(parsed,rules),previous=courseCatalog.find(c=>c.id===record.previousCourseId),columnNote=gradeColumnNote(parsed);
+  const presentation=gradePresentation(result);
   const regular=parts.filter(regularKind),columnCount=course.credits>=3?3:2;
   const changeKind=(id:string,kind:GradeKind)=>{setParts(items=>items.map(p=>{
     if(p.id!==id)return p;
@@ -59,7 +61,7 @@ export function GradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void
     <Button label="Khôi phục bộ cột đề xuất" secondary onPress={()=>setResetConfirm(true)}/>
     {resetConfirm&&<Card style={{backgroundColor:C.amberSoft,gap:10}}><T style={S.small}>Thay các cột và điểm trong bản nháp bằng bộ cột gợi ý trống? Điểm đã lưu được giữ nguyên cho đến khi bấm Lưu.</T><Button label="Xác nhận khôi phục cột đề xuất" onPress={restoreSuggestions}/><Button label="Giữ bản đang nhập" secondary onPress={()=>setResetConfirm(false)}/></Card>}
     {columnNote&&<Card style={{backgroundColor:C.amberSoft}}><T style={S.small}>{columnNote}</T></Card>}
-    <Card style={{backgroundColor:result.failed?C.redSoft:result.passed?C.greenSoft:C.canvas,gap:10}}><Row between><T style={{fontFamily:F.bold}}>Kết quả tính từ điểm đã nhập</T><T testID="grade-editor-total" style={{fontFamily:F.extra,fontSize:24,color:result.failed?C.red:result.passed?C.green:C.muted}}>{result.total===null?'—':result.total.toFixed(1)}</T></Row><GradeStatus result={result} detail/>{result.complete&&<T style={S.small}>{result.letter} · {result.point?.toFixed(1)}/4</T>}</Card>
+    <Card style={{backgroundColor:presentation.attention||result.passed?presentation.background:C.canvas,gap:10}}><Row between><T style={{fontFamily:F.bold}}>Kết quả tính từ điểm đã nhập</T><T testID="grade-editor-total" style={{fontFamily:F.extra,fontSize:24,color:presentation.color}}>{result.total===null?'—':result.total.toFixed(1)}</T></Row><GradeStatus result={result} detail/>{result.complete&&<T style={S.small}>{result.letter} · {result.point?.toFixed(1)}/4</T>}</Card>
     <Card style={{backgroundColor:C.canvas,gap:8}}><T style={{fontFamily:F.bold}}>Lần học · Tự nhận diện</T>{previous?<><Badge label={`${courseResult(gradeBook[previous.id],rules).failed?'Học lại':courseResult(gradeBook[previous.id],rules).passed?'Học cải thiện':'Lần học tiếp theo'} · ${previous.code}`}/><T style={S.small}>{semesters.find(s=>s.id===previous.semesterId)?.name}, {semesters.find(s=>s.id===previous.semesterId)?.academicYear}. Ghép cùng mã môn và tín chỉ.</T></>:<T style={S.small}>Chưa có lần học trước cùng mã môn và số tín chỉ.</T>}</Card>
     </>}
     {!!error&&<T accessibilityRole="alert" style={{color:C.red}}>{error}</T>}<Button label="Lưu điểm môn học" icon="checkmark" onPress={save} actionLabel="Đang lưu" disabled={!supported}/>
