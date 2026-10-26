@@ -2,7 +2,7 @@
 
 V9 thêm `score` và `remainder_score` nullable vào `grade_columns`. Cột hiện có giữ ID/tên/loại/thứ tự/BTL/version; điểm ban đầu là NULL, không phải 0. Không seed và không sửa V1–V8. Lưu điểm qua API riêng; API cấu hình 5A.1 vẫn không nhận giá trị điểm.
 
-Đợt này chưa tính điểm cột sau quy đổi BTL, tổng kết, điều kiện dự thi, đạt/học lại hoặc GPA. `configurationState=READY` chỉ nói bộ cột đủ nhóm, không nói điểm đầy đủ hay qua môn. Màn Điểm/Dashboard React Native nối ở 5C; tính kết quả môn ở 5A.2B, GPA ở 5B.
+Endpoint `/scores` chỉ lưu/đọc điểm gốc; từ 5A.2B, quy đổi BTL/tổng kết/điểm chữ/điều kiện thi/đạt/cần xử lý học lại được đọc qua GET `/grade-configurations/{id}/result`, xem [contract kết quả](GRADE-RESULTS.md). `configurationState=READY` chỉ nói bộ cột đủ nhóm, không nói điểm đầy đủ hay qua môn. Màn Điểm/Dashboard React Native nối ở 5C, GPA ở 5B.
 
 ## Endpoint
 

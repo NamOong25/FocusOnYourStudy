@@ -10,7 +10,7 @@ public record GradeScoresResponse(UUID configurationId, UUID courseId, GradeConf
         boolean hasScores, long version, Instant createdAt, Instant updatedAt) {
     public record Part(String id, String name, GradeConfigurationRequests.Kind kind, GradeConfigurationResponse.Project project,
             int weightNumerator, int weightDenominator, BigDecimal weight, BigDecimal score, BigDecimal remainderScore) { }
-    static GradeScoresResponse from(GradeConfigurationEntity entity) {
+    public static GradeScoresResponse from(GradeConfigurationEntity entity) {
         var config = GradeConfigurationResponse.from(entity);
         var columns = new HashMap<String, GradeColumnEntity>(); entity.getColumns().forEach(column -> columns.put(column.getKey(), column));
         var parts = config.parts().stream().map(part -> {

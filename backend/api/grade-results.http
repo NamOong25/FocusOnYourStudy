@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@refreshToken = THAY_REFRESH_TOKEN
+@configurationId = THAY_CONFIGURATION_ID
+
+### Sao chép vào .local trước khi điền thông tin thật, giữ file gốc không có mật khẩu/token
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL","password":"THAY_MAT_KHAU"}
+
+### Chọn id cấu hình của chính tài khoản
+GET {{baseUrl}}/api/v1/grade-configurations
+Authorization: Bearer {{accessToken}}
+
+### Kết quả tự tính từ điểm PostgreSQL cùng snapshot, gồm scores.version và courseVersion
+GET {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/result
+Authorization: Bearer {{accessToken}}
+
+### Đọc nguyên giá trị điểm; sửa bằng API /scores trong grade-scores.http
+GET {{baseUrl}}/api/v1/grade-configurations/{{configurationId}}/scores
+Authorization: Bearer {{accessToken}}
+
+### Đóng đúng phiên thử này
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{refreshToken}}"}

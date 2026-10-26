@@ -52,6 +52,7 @@ class SessionRestartTests {
         String first, independent, rotated, semesterId, courseId, assignmentId, studyId, classId, examId, gradeConfigurationId;
         Map<?, ?> savedGradeConfiguration;
         Map<?, ?> savedGradeScores;
+        Map<?, ?> savedGradeResult;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -93,6 +94,7 @@ class SessionRestartTests {
                 var projectMark = new HashMap<String, Object>(); projectMark.put("id", "btl"); projectMark.put("score", 0); projectMark.put("remainderScore", null);
                 savedGradeScores = data(app, semester(app, "PUT", "/api/v1/grade-configurations/" + gradeConfigurationId + "/scores", pair.get("accessToken").toString(), Map.of("version", 0, "parts", List.of(regularMark, projectMark))));
                 savedGradeConfiguration = data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId, pair.get("accessToken").toString(), null));
+                savedGradeResult = data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId + "/result", pair.get("accessToken").toString(), null));
                 var change = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), Map.of("kind", "CHANGED", "room", "B2.03", "startTime", "10:00", "endTime", "12:00", "scheduleVersion", 0));
                 assertThat(change.statusCode()).isEqualTo(200);
                 var cancelled = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), Map.of("kind", "CANCELLED", "reason", "Keep cancellation", "scheduleVersion", 1));
@@ -101,6 +103,7 @@ class SessionRestartTests {
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
                 rotated = pair.get("refreshToken").toString();
+                assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId + "/result", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeResult);
                 assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId + "/scores", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeScores);
                 assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId, pair.get("accessToken").toString(), null))).isEqualTo(savedGradeConfiguration);
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("note")).isEqualTo("Persist across restart");
@@ -124,6 +127,7 @@ class SessionRestartTests {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
+                assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId + "/result", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeResult);
                 assertThat(data(app, semester(app, "GET", "/api/v1/grade-configurations/" + gradeConfigurationId + "/scores", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeScores);
                 assertThat(data(app, semester(app, "GET", "/api/v1/courses/" + courseId + "/grade-configuration", pair.get("accessToken").toString(), null))).isEqualTo(savedGradeConfiguration);
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId, pair.get("accessToken").toString(), null)).get("status")).isEqualTo("CURRENT");

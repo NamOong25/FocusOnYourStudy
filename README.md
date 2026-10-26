@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5A.2A: Lưu và đọc điểm thành phần
+## Mới nhất — 5A.2B: Kết quả môn từ điểm đã lưu
+
+GET kết quả môn tính từ cùng snapshot cấu hình/điểm/tín chỉ, theo profile có nguồn `IUH_2023_REPORTED_V1`: BTL, thiếu dữ liệu, giữa kỳ 0/chặn thi, ngoại lệ cuối kỳ lý thuyết dưới 3, tổng kết/điểm chữ/hệ 4 của môn. BigDecimal, làm tròn theo bước thành phần/tổng kết và dấu cần xử lý học lại; không tự gán F/0 khi thiếu điểm. Kết quả chỉ đọc, không tăng version hoặc ghi sẵn vào database.
+
+Chạy lại backend, vẫn V9, không migration/seed/dependency mới. Xem [hướng dẫn 5A.2B](docs/BACKEND-PHASE-5A2B.md), [hợp đồng kết quả](backend/docs/GRADE-RESULTS.md), `backend/scripts/Try-GradeResults.ps1`, `backend/api/grade-results.http`. **GPA học kỳ/tích lũy ở 5B và nối màn Điểm/Dashboard ở 5C**; chưa dùng số RAM của giao diện để nghiệm thu API. Nhiều cột TK được tổng hợp thành TB thường kỳ làm tròn một chữ số trước nhân 20%; một cột TK được hiểu là TB đã công bố.
+
+**448 tests/Maven verify qua (58 mới), không lỗi/bỏ qua; TypeScript qua.** Có 42 test công thức/ngưỡng và 16 test API/PowerShell, snapshot đồng thời, quyền đọc và kết quả qua restart. Không thay frontend, schema hoặc dependency.
+
+## 5A.2A: Lưu và đọc điểm thành phần
 
 V9 thêm điểm nullable theo cột: chưa nhập khác 0, BTL và phần còn lại của cuối kỳ; có GET/PUT riêng với version dùng chung cấu hình. Đổi tên/thứ tự giữ điểm; xóa/đổi vai trò/cách quy BTL của cột đã có điểm hoặc xóa cả cấu hình còn điểm bị chặn, cần xóa điểm rõ ràng bằng null trước. Lưu nguyên tử, đọc cùng snapshot và kiểm tra quyền tài khoản.
 

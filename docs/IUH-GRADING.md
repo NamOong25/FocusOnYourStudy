@@ -1,5 +1,7 @@
 # Giao diện điểm IUH — đối chiếu K19
 
+> Backend 5A.2B đã thêm kết quả từ điểm PostgreSQL với profile `IUH_2023_REPORTED_V1`, đã đối chiếu lại trang PDF 55–58/68. Xem [hướng dẫn backend](BACKEND-PHASE-5A2B.md) và [contract](../backend/docs/GRADE-RESULTS.md). TB nhiều cột thường kỳ được làm tròn một chữ số trước nhân 20%; một cột TK dùng như trung bình đã công bố. Giữa kỳ 0 báo chặn thi, chưa tự kết luận điểm tổng kết/F hoặc gán nhu cầu học lại chính thức. Frontend hiện chưa nối API (5C), nên phần dưới giữ làm lịch sử giao diện; GPA backend ở 5B.
+
 > Cập nhật: giao diện chọn hai loại Lý thuyết/Thực hành, có BTL thay cột hoặc quy vào cuối kỳ; bỏ lựa chọn thang quy đổi mô phỏng. Xem [GRADES-PROJECTS.md](./GRADES-PROJECTS.md) để biết hành vi hiện tại. Các loại khác bên dưới chỉ còn được giữ để đọc bản ghi cũ.
 
 Đợt này chỉ sửa frontend trong `D:\Video OBS\QuanLyHocTap`. Dữ liệu vẫn ở bộ nhớ trong phiên, chưa có Spring Boot, lưu lâu dài hoặc kết nối bảng điểm IUH.
