@@ -12,8 +12,14 @@ import GradeStatus from './GradeStatus';
 import {GradeEditor,GradeRulesDialog} from './GradeEditor';
 import {useApp} from '../../store/model';
 import {C,F,S} from '../../shared/theme';
+import {useAuth} from '../account/auth/AuthProvider';
+import ServerGradesScreen from './components/ServerGradesScreen';
+import {ServerCourseGradeDialog} from './components/ServerGradePanel';
 
 export default function Grades({onCompare}:{onCompare?:()=>void}={}){
+  return useAuth().hasSession?<ServerGradesScreen/>:<PreviewGrades onCompare={onCompare}/>;
+}
+function PreviewGrades({onCompare}:{onCompare?:()=>void}={}){
   const {semesters,courseCatalog,gradeBook,gradeRules,setScheduleMode}=useApp();const [semesterId,setSemesterId]=useState('sem-5');const [filter,setFilter]=useState('Tất cả');const [query,setQuery]=useState('');
   const [rules,setRules]=useState(false);const [forecast,setForecast]=useState(false);const [opened,setOpened]=useState<string|null>(null);
   if(!semesters.length)return <StateView title="Chưa có bảng điểm" message="Bắt đầu bằng một học kỳ và môn học. Điểm chưa nhập sẽ để trống, không tính thành 0." actionLabel="Thêm học kỳ và môn học" onAction={()=>setScheduleMode('Môn & học kỳ')}/>;
@@ -39,7 +45,10 @@ export default function Grades({onCompare}:{onCompare?:()=>void}={}){
   </FlowScope>;
 }
 
-export function CourseGradeDialog({courseId,onClose}:{courseId:string;onClose:()=>void}){const {courseCatalog}=useApp();const [edit,setEdit]=useState(false);const course=courseCatalog.find(c=>c.id===courseId);if(!course)return null;if(edit)return <GradeEditor courseId={courseId} onClose={()=>setEdit(false)}/>;return <Sheet title="Bảng điểm môn học" onClose={onClose}><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/><GradePanel courseId={courseId} onEdit={()=>setEdit(true)}/></Sheet>;}
+export function CourseGradeDialog({courseId,onClose}:{courseId:string;onClose:()=>void}){
+  return useAuth().hasSession?<ServerCourseGradeDialog courseId={courseId} onClose={onClose}/>:<PreviewCourseGradeDialog courseId={courseId} onClose={onClose}/>;
+}
+function PreviewCourseGradeDialog({courseId,onClose}:{courseId:string;onClose:()=>void}){const {courseCatalog}=useApp();const [edit,setEdit]=useState(false);const course=courseCatalog.find(c=>c.id===courseId);if(!course)return null;if(edit)return <GradeEditor courseId={courseId} onClose={()=>setEdit(false)}/>;return <Sheet title="Bảng điểm môn học" onClose={onClose}><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/><GradePanel courseId={courseId} onEdit={()=>setEdit(true)}/></Sheet>;}
 
 export function GpaForecast({onClose}:{onClose:()=>void}){const {courseCatalog,gradeBook,gradeRules}=useApp();const summary=summarizeGrades(courseCatalog,gradeBook,gradeRules,true);const [target,setTarget]=useState('3.5');const [credits,setCredits]=useState('15');const t=/^\d+(?:[.,]\d+)?$/.test(target.trim())?Number(target.replace(',','.')):NaN;const n=/^\d+$/.test(credits)?Number(credits):NaN;const valid=Number.isFinite(t)&&t>=0&&t<=4&&Number.isFinite(n)&&n>0&&n<=100;const required=valid?((t*(summary.scoredCredits+n)-(summary.gpa??0)*summary.scoredCredits)/n):null;
   return <Sheet title="Thử mục tiêu GPA tích lũy" onClose={onClose}><Badge label="Mô phỏng · Không thay đổi bảng điểm" icon="sparkles-outline"/><Card style={{backgroundColor:C.canvas,gap:7}}><T style={S.small}>Dữ liệu đã có trong app</T><T style={{fontFamily:F.extra,fontSize:29,color:C.primary}}>{formatGpa(summary.gpa)}<T style={S.small}> /4.0</T></T><T style={{fontSize:12}}>{summary.scoredCredits} tín chỉ có kết quả sau quy tắc học lại</T></Card><Field label="GPA tích lũy mục tiêu (0–4)" value={target} onChange={setTarget} numeric/><Field label="Số tín chỉ mới dự kiến" value={credits} onChange={setCredits} numeric/><Card style={{backgroundColor:C.soft,gap:9}}><T style={{fontFamily:F.bold}}>GPA trung bình cần cho tín chỉ mới</T>{required===null?<T>Nhập mục tiêu 0–4 và số tín chỉ nguyên từ 1 đến 100.</T>:required>4?<T>Mục tiêu cần GPA trên 4.0 cho số tín chỉ này. Thử hạ mục tiêu hoặc tăng số tín chỉ.</T>:<><T style={{fontFamily:F.extra,fontSize:35,color:C.primary}}>{Math.max(0,required).toFixed(2)} /4.0</T><T style={S.small}>Mức trung bình ước tính, làm tròn 2 chữ số. Chưa phải cam kết đạt được với tổ hợp điểm thực tế.</T></>}</Card><T style={S.small}>Giả sử toàn bộ tín chỉ mới là các môn khác, không học lại và cùng tham gia GPA. Điểm thiếu hiện tại chưa nằm trong số tín chỉ đã có. Môn miễn và điều kiện riêng của chương trình chưa nằm trong mô phỏng.</T></Sheet>;

@@ -8,9 +8,14 @@ import { courseResult, formatGpa } from './grades';
 import { semesterGpaReport } from './gpaComparison';
 import { CourseGradeDialog } from './GradesScreen';
 import GradeStatus from './GradeStatus';
+import { useAuth } from '../account/auth/AuthProvider';
+import { ServerSemesterGradesSheet } from './components/ServerGradesScreen';
 
 // The existing course dialog/editor owns all score edits and grading rules.
 export default function SemesterGradesSheet({ semesterId, onClose }: { semesterId: string; onClose: () => void }) {
+  return useAuth().hasSession?<ServerSemesterGradesSheet semesterId={semesterId} onClose={onClose}/>:<PreviewSemesterGradesSheet semesterId={semesterId} onClose={onClose}/>;
+}
+function PreviewSemesterGradesSheet({ semesterId, onClose }: { semesterId: string; onClose: () => void }) {
   const { semesters, courseCatalog, gradeBook, gradeRules } = useApp();
   const [openedCourse, setOpenedCourse] = useState<string | null>(null);
   const semester = semesters.find(item => item.id === semesterId);

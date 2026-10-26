@@ -155,6 +155,9 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [ ] Nghiệm thu GPA chính thức/toàn khóa — Các phần đang hoàn thành dùng chính sách app do người dùng chọn; xác minh phần quy chế và điểm đặc thù đã hoãn trước khi gắn nhãn GPA chính thức.
 - [ ] GPA đặc thù — Mô hình riêng cho môn P/không tính GPA, miễn/chuyển điểm và trường hợp đặc thù; đối chiếu quy chế trước nghiệm thu toàn khóa, không tự đoán từ tên môn hoặc đổi thành THEORY/PRACTICAL.
 - [ ] 5C — Nối màn Điểm và Dashboard vào API 5A/5B; đồng bộ các tùy chọn quy tắc với policy server, bỏ lựa chọn GPA RAM không tương ứng; đổi kỳ/tài khoản, tải/lỗi/trống/version, lưu/đọc lại sau F5; bỏ kết quả RAM trong tài khoản thật.
+- [x] 5C.1 — Đọc bảng điểm thật: snapshot học kỳ và chi tiết cấu hình/điểm/kết quả từ API; null/0/BTL, màu cảnh báo; chọn kỳ/tìm/lọc, tải/lỗi/trống/thử lại, chống phản hồi cũ khi đổi kỳ/môn/tài khoản. Tài khoản chỉ xem, chặn ghi RAM; mẫu giữ trình nhập riêng. TypeScript/build web/302 tests frontend (23 mới) và QA trình duyệt riêng đạt. Xem `FRONTEND-PHASE-5C1.md`.
+- [ ] 5C.2 — Nhập/lưu cấu hình và điểm thật: sửa/xóa/thêm cột, BTL/phần còn lại, null/0, validation; version/conflict và bảo vệ cột có điểm; đọc lại từ PostgreSQL sau lưu/F5.
+- [ ] 5C.3 — GPA tích lũy/so sánh học kỳ và Dashboard dùng API 5B; cập nhật số liệu sau lưu, bỏ kết quả tính RAM trong tài khoản thật.
 
 Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Đợt 2 tiếp tục chia 2A → 2B → 2C; không làm hết trong một lần. 2A cần access token ngắn hạn để thử hồ sơ có bảo vệ; giữ phiên/refresh/đăng xuất vẫn thuộc 2B. Lộ trình đầy đủ phía dưới giữ Pomodoro, thống kê, tài liệu/AI và hoàn thiện. Chỉ đánh dấu toàn đợt khi đã kiểm tra đầy đủ chức năng thật.
 

@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; nhập/lưu điểm giao diện sẽ làm ở 5C.2. Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5B.2B.2: API GPA tích lũy trong app
+## Mới nhất — 5C.1: Đọc bảng điểm thật
+
+Thống kê → Điểm & GPA dùng snapshot GPA học kỳ và kết quả môn từ backend. Chi tiết hiển thị cột/trọng số/BTL và điểm đã lưu; phân biệt điểm thiếu/0, màu cam môn đạt ≤ 5, đỏ môn trượt. Có tải/lỗi/trống/thử lại, kiểm tra phiên bản danh mục và chống hiển thị nhầm dữ liệu khi đổi kỳ/tài khoản. Tài khoản chỉ xem trong đợt này; dữ liệu mẫu giữ trình nhập thử riêng.
+
+TypeScript, build web và **302 tests frontend (23 mới)** đạt. Đã kiểm tra trình duyệt bằng schema/tài khoản QA riêng, F5 và lỗi/thử lại; không seed tài khoản thật. Xem [hướng dẫn kiểm tra 5C.1](docs/FRONTEND-PHASE-5C1.md). Tiếp theo: 5C.2 ghi điểm; 5C.3 GPA tích lũy/so sánh và Dashboard.
+
+## Backend — 5B.2B.2: API GPA tích lũy trong app
 
 GET `/api/v1/gpa/cumulative` chọn tổng kết đạt cao nhất theo mã/tín chỉ; bằng điểm chọn năm-kỳ gần nhất, chưa có lần đạt giữ F hoàn chỉnh gần nhất với điểm hệ 4 bằng 0. Tín chỉ mỗi nhóm tính một lần; giữ toàn bộ lịch sử, lý do chọn/bỏ và các nhóm thiếu dữ liệu/cần đối chiếu. Null khác GPA 0; PARTIAL khi dữ liệu còn chưa đủ. Chính sách người dùng chọn trong app, không khẳng định GPA chính thức của trường.
 

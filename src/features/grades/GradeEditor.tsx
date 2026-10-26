@@ -8,6 +8,8 @@ import GradeStatus from './GradeStatus';
 import {useApp} from '../../store/model';
 import {C,F,S} from '../../shared/theme';
 import {useFormChanges} from '../../shared/forms/useFormChanges';
+import {useAuth} from '../account/auth/AuthProvider';
+import {ServerCourseGradeDialog} from './components/ServerGradePanel';
 
 const number=(s:string)=>/^\d+(?:[.,]\d+)?$/.test(s.trim())?Number(s.trim().replace(',','.')):NaN;
 const parsePart=(p:DraftPart):GradePart=>({...p,score:p.score.trim()===''?null:number(p.score),project:p.project?{target:p.project.target,share:p.project.share.trim()===''?null:number(p.project.share),remainderScore:p.project.remainderScore.trim()===''?null:number(p.project.remainderScore)}:undefined});
@@ -15,6 +17,9 @@ const toDraft=(p:GradePart):DraftPart=>({...p,kind:partKind(p),score:p.score===n
 const regularKind=(p:DraftPart)=>['Điểm thường kỳ','Kiểm tra thường kỳ'].includes(p.kind);
 
 export function GradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void}){
+  return useAuth().hasSession?<ServerCourseGradeDialog courseId={courseId} onClose={onClose}/>:<PreviewGradeEditor courseId={courseId} onClose={onClose}/>;
+}
+function PreviewGradeEditor({courseId,onClose}:{courseId:string;onClose:()=>void}){
   const {courseCatalog,semesters,gradeBook,gradeRules,setGradeRules,saveGrades,setToast}=useApp();
   const record=gradeBook[courseId]??emptyGrades(),course=courseCatalog.find(c=>c.id===courseId);
   const [parts,setParts]=useState(()=>record.parts.map(toDraft)),[assessment,setAssessment]=useState<Assessment>(record.assessment??'custom');

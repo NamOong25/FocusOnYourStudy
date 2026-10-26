@@ -12,13 +12,15 @@ import { StudyTimeChart } from './components/StudyTimeChart';
 import { CourseDistribution } from './components/CourseDistribution';
 import { TaskProgressCard } from './components/TaskProgressCard';
 import GpaComparisonScreen from './components/GpaComparisonScreen';
+import { useAuth } from '../account/auth/AuthProvider';
 
 export default function Stats() {
+  const auth=useAuth();
   const [view, setView] = useState('Tổng quan');
   return <>
-    <Segments values={['Tổng quan', 'So sánh GPA', 'Điểm & GPA']} value={view} onChange={setView} />
+    <Segments values={auth.hasSession?['Tổng quan', 'Điểm & GPA']:['Tổng quan', 'So sánh GPA', 'Điểm & GPA']} value={view} onChange={setView} />
     <NavigationScope active={view === 'Tổng quan'}><View style={{ display: view === 'Tổng quan' ? 'flex' : 'none', gap: 16 }}><StudyStats /></View></NavigationScope>
-    <NavigationScope active={view === 'So sánh GPA'}><View style={{ display: view === 'So sánh GPA' ? 'flex' : 'none', gap: 16 }}><GpaComparisonScreen /></View></NavigationScope>
+    {!auth.hasSession&&<NavigationScope active={view === 'So sánh GPA'}><View style={{ display: view === 'So sánh GPA' ? 'flex' : 'none', gap: 16 }}><GpaComparisonScreen /></View></NavigationScope>}
     <NavigationScope active={view === 'Điểm & GPA'}><View style={{ display: view === 'Điểm & GPA' ? 'flex' : 'none', gap: 16 }}><Grades onCompare={() => setView('So sánh GPA')} /></View></NavigationScope>
   </>;
 }

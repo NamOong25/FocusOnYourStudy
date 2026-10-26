@@ -69,7 +69,10 @@ function usePrototype(empty: boolean) {
   const [storedGradeBook, setGradeBook] = useState<GradeBook>(empty ? {} : initialGradeBook);
   const gradeBook = React.useMemo(() => autoLinkAttempts(courseCatalog, storedGradeBook, semesters), [courseCatalog, storedGradeBook, semesters]);
   const [gradeRules, setGradeRules] = useState<GradeRules>(defaultRules);
-  const saveGrades = (id: string, record: CourseGrades) => setGradeBook(v => ({ ...v, [id]: record }));
+  const saveGrades = (id: string, record: CourseGrades) => {
+    if(semesterConnection)throw new Error('Điểm tài khoản phải được lưu qua API, không lưu vào dữ liệu thử.');
+    setGradeBook(v => ({ ...v, [id]: record }));
+  };
   const [previewTasks, setPreviewTasks] = useState(empty ? [] : initialTasks);
   const assignmentSource = useServerAssignments();
   const serverAssignments = assignmentSource?.tasks;

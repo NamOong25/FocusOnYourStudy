@@ -4,7 +4,17 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5B.2B.2 — API GPA tích lũy trong app
+## Đợt vừa hoàn thành: 5C.1 — Đọc bảng điểm thật
+
+```powershell
+git add .
+git commit -m "Kết nối bảng điểm và GPA học kỳ với backend"
+git push origin main
+```
+
+Nối snapshot học kỳ/chi tiết môn vào API; xem cột, trọng số, BTL và điểm thật. Tải/lỗi/trống/thử lại, null khác 0, màu cam/đỏ; bảo vệ đổi kỳ/tài khoản và chặn lưu RAM. Tài khoản chỉ xem đến 5C.2; GPA tích lũy/so sánh/Dashboard ở 5C.3. Xem `FRONTEND-PHASE-5C1.md` để kiểm tra; TypeScript/build web/302 tests frontend (23 mới) đạt.
+
+## Đợt trước: 5B.2B.2 — API GPA tích lũy trong app
 
 Chọn tổng kết đạt cao nhất trong nhóm mã/tín chỉ; tie theo năm-kỳ, chưa đạt giữ F hoàn chỉnh gần nhất. Đếm tín chỉ một lần, không bỏ lịch sử F/thấp hơn; lý do chọn/bỏ, null khác 0, tách pending/review. Chính sách app đã chốt với người dùng, không xác nhận GPA chính thức IUH. GET snapshot/ownership/readonly; V9, không migration/seed/frontend/dependency. Có PowerShell 5.1/IntelliJ, 15 test phép tính + 18 test API/PowerShell mới và mở rộng restart. 537 tests/Maven verify qua (33 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 15 test phép tính và 18 test HTTP/PowerShell mới, kiểm tra snapshot đồng thời và mở rộng restart qua ba lần khởi động. Schema test riêng tự dọn; không seed dữ liệu app, vẫn V9. Xem `BACKEND-PHASE-5B2B2.md`.
 
