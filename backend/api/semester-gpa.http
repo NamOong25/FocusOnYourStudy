@@ -1,0 +1,26 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@refreshToken = THAY_REFRESH_TOKEN
+@semesterId = THAY_SEMESTER_ID
+
+### Sao chép vào .local trước khi nhập tài khoản thật; không commit mật khẩu/token
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL","password":"THAY_MAT_KHAU"}
+
+### Chọn id học kỳ của tài khoản, không dùng id môn/cấu hình điểm
+GET {{baseUrl}}/api/v1/semesters
+Authorization: Bearer {{accessToken}}
+
+### GPA, tín chỉ và danh sách môn được tính/chưa được tính của đúng học kỳ này
+GET {{baseUrl}}/api/v1/semesters/{{semesterId}}/gpa
+Authorization: Bearer {{accessToken}}
+
+### Kết thúc đúng phiên thử
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{refreshToken}}"}

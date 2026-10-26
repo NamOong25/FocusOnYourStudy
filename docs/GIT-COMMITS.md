@@ -4,7 +4,21 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5A.2B — Kết quả môn theo điểm đã lưu
+## Đợt vừa hoàn thành: 5B.1 — GPA học kỳ theo tín chỉ
+
+477 tests/Maven verify qua (29 mới), không lỗi/bỏ qua; TypeScript qua. Gồm 8 test phép tính và 21 test API/PowerShell mới; kiểm tra GPA qua restart, dữ liệu đồng thời và hồi quy. Vẫn V9, không seed vào tài khoản app.
+
+GET GPA học kỳ từ kết quả môn 5A.2B và tín chỉ; tính F đủ kết quả, tách môn chưa tính/lý do, GPA null khác 0, PARTIAL và tín chỉ tính GPA/đạt/trượt/chưa tính. Đọc snapshot theo tài khoản, tải bảng điểm theo nhóm, không lưu GPA sẵn/tăng version. Có contract, PowerShell/IntelliJ, test tính tay/F/thiếu điểm/làm tròn/cập nhật/đồng thời/restart. Vẫn V9, không migration/seed/frontend/dependency. Tích lũy/học lại và UI còn ở 5B.2/5C; xem `BACKEND-PHASE-5B1.md`.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Tính GPA học kỳ theo tín chỉ và tách môn chưa đủ điểm"
+git push
+```
+
+## 5A.2B — Kết quả môn theo điểm đã lưu
 
 448 tests/Maven verify qua (58 mới), không lỗi/bỏ qua; TypeScript qua. 42 test công thức và 16 test API/PowerShell mới; kiểm tra kết quả qua restart và ghi đồng thời. Schema test riêng tự dọn; vẫn V9, không seed dữ liệu app.
 

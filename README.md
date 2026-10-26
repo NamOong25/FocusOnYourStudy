@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm và Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5A.2B: Kết quả môn từ điểm đã lưu
+## Mới nhất — 5B.1: GPA học kỳ theo tín chỉ
+
+GET GPA học kỳ dùng điểm hệ 4 từ 5A.2B và tín chỉ từng môn, giữ môn F trong mẫu số; tách môn chưa cấu hình/thiếu điểm/chặn thi. Có GPA trống khác 0, trạng thái PARTIAL khi còn môn chưa tính, tín chỉ tính GPA/đã đạt/trượt/chưa tính và từng dòng môn để đối chiếu. Cùng snapshot học kỳ/môn/tín chỉ/điểm, đọc theo tài khoản và không tăng version.
+
+Chạy lại backend, vẫn V9, không migration/seed/dependency/frontend mới. Xem [hướng dẫn 5B.1](docs/BACKEND-PHASE-5B1.md), [hợp đồng GPA](backend/docs/SEMESTER-GPA.md), `backend/scripts/Try-SemesterGpa.ps1`, `backend/api/semester-gpa.http`. **GPA tích lũy/học lại ở 5B.2; nối màn Điểm/Dashboard ở 5C.**
+
+**477 tests/Maven verify qua (29 mới), không lỗi/bỏ qua; TypeScript qua.** Gồm 8 test phép tính và 21 test API/PowerShell mới; kiểm tra snapshot đồng thời, quyền tài khoản, cập nhật tín chỉ/điểm và GPA qua restart. Schema test riêng tự dọn, không seed dữ liệu app.
+
+## 5A.2B: Kết quả môn từ điểm đã lưu
 
 GET kết quả môn tính từ cùng snapshot cấu hình/điểm/tín chỉ, theo profile có nguồn `IUH_2023_REPORTED_V1`: BTL, thiếu dữ liệu, giữa kỳ 0/chặn thi, ngoại lệ cuối kỳ lý thuyết dưới 3, tổng kết/điểm chữ/hệ 4 của môn. BigDecimal, làm tròn theo bước thành phần/tổng kết và dấu cần xử lý học lại; không tự gán F/0 khi thiếu điểm. Kết quả chỉ đọc, không tăng version hoặc ghi sẵn vào database.
 

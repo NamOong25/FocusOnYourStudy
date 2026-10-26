@@ -7,4 +7,6 @@ public interface GradeConfigurationRepository extends JpaRepository<GradeConfigu
     Optional<GradeConfigurationEntity> findByIdAndUserId(UUID id, UUID userId);
     Optional<GradeConfigurationEntity> findByUserIdAndCourseId(UUID userId, UUID courseId);
     boolean existsByUserIdAndCourseId(UUID userId, UUID courseId);
+    @Query("select distinct g from GradeConfigurationEntity g left join fetch g.columns where g.userId = :userId and g.courseId in :courseIds")
+    List<GradeConfigurationEntity> findForCourses(UUID userId, Collection<UUID> courseIds);
 }
