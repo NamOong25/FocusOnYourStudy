@@ -49,7 +49,7 @@ function ConfigurationForm({course,name,initial,onClose}:{course:CourseRef;name:
     catch(e){if(alive.current)setError(asApiError(e));}
   };
   const replace=(detail:ServerGradeDetail)=>{setBase(detail);setDraft(draftFromDetail(detail));setError(null);setConfirmDelete(false);};
-  return <FlowScope onClose={guardClose}><Sheet title="Cấu hình cột điểm" onClose={guardClose} dirty={!busy&&dirty} scrollKey={course.id}>
+  return <FlowScope onClose={guardClose}><Sheet title="Cấu hình cột điểm" onClose={guardClose} dirty={!busy&&dirty&&!pending} scrollKey={course.id}>
     <T style={{fontFamily:F.extra,fontSize:21,lineHeight:30}}>{name}</T><Badge label={`${course.credits} tín chỉ · Bộ cột của môn học`} icon="list-outline"/>
     <T style={S.small}>Chọn loại học phần và bộ cột theo đề cương. Có thể lưu bộ cột đang thiết lập, kể cả khi chưa đủ nhóm. Trọng số được cập nhật sau khi lưu.</T>
     {state.pending?<>

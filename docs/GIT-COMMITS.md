@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5C.2B — Nhập và lưu điểm số thật
+## Đợt vừa hoàn thành: 5C.2C — Nghiệm thu toàn luồng cấu hình và nhập điểm
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Nghiệm thu luồng cấu hình và nhập điểm"
+git push origin main
+```
+
+Nghiệm thu web từ tài khoản trống đến GPA học kỳ; sửa cảnh báo đóng form đang chờ đối chiếu để không hỏi bỏ bản nháp đã được giữ. Kiểm tra điểm 0/trống, BTL, đổi tên/thứ tự/xóa hợp lệ, hai tab, mất kết nối/khởi động lại backend, mất phản hồi sau commit và tách tài khoản. TypeScript/build web/374 tests frontend và 14 nhóm tích hợp API/PostgreSQL đạt. Không đổi backend/schema/dependency; dữ liệu QA riêng được dọn. Hướng dẫn: `FRONTEND-PHASE-5C2C.md`. Tiếp theo 5C.3; thiết bị thật 2C.3B vẫn để sau.
+
+## Đợt trước: 5C.2B — Nhập và lưu điểm số thật
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

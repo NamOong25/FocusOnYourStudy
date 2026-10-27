@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 5C.2B: Nhập và lưu điểm số thật
+## Mới nhất — 5C.2C: Nghiệm thu toàn luồng điểm trên web
+
+Đã kiểm tra từ tài khoản trống: tạo học kỳ → thêm môn → thiết lập cột → nhập điểm → xem tổng kết/GPA học kỳ. Đổi tên/thứ tự giữ đúng điểm theo mã cột; điểm trống/0, BTL, xóa hợp lệ, hai tab, backend mất kết nối/khởi động lại và đổi tài khoản đã được kiểm tra bằng dữ liệu QA riêng.
+
+Sửa cảnh báo khi đóng form đang chờ đối chiếu: không còn hỏi bỏ thay đổi trong khi bản nháp đã được giữ; mở lại vẫn xem và đối chiếu được. Form sửa thông thường vẫn hỏi trước khi bỏ thay đổi chưa gửi. **TypeScript, build web, 374 tests frontend và 14 nhóm tích hợp API/PostgreSQL đạt.** Không đổi backend/schema/dependency, không seed tài khoản thật. Xem [hướng dẫn nghiệm thu 5C.2C](docs/FRONTEND-PHASE-5C2C.md). Dashboard, GPA tích lũy/so sánh ở **5C.3**; thiết bị thật vẫn để sau theo 2C.3B.
+
+## 5C.2B: Nhập và lưu điểm số thật
 
 Thống kê → Điểm & GPA → mở môn → Nhập / chỉnh sửa điểm. Nhập điểm 0–10, tối đa 4 số thập phân, chấp nhận dấu phẩy; điểm trống khác điểm 0. BTL góp vào cuối kỳ có ô phần còn lại riêng, BTL thay một cột thực hành/toàn bộ cuối kỳ chỉ nhập một điểm. Tổng kết và GPA học kỳ đọc từ backend sau lưu; F5 vẫn giữ điểm.
 

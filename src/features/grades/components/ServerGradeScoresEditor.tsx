@@ -49,7 +49,7 @@ function ScoresForm({course,name,initial,onClose,onConfigure}:{course:CourseRef;
   };
   const replace=(current:ConfiguredGrade)=>{setBase(current);setDraft(draftFromScores(current));setError(null);setClear(false);};
   const issue=error??state.error,result=serverGradeView(base.result);
-  return <FlowScope onClose={guardClose}><Sheet title="Nhập điểm môn học" onClose={guardClose} dirty={!busy&&dirty} scrollKey={'scores-'+course.id}>
+  return <FlowScope onClose={guardClose}><Sheet title="Nhập điểm môn học" onClose={guardClose} dirty={!busy&&dirty&&!pending} scrollKey={'scores-'+course.id}>
     <T style={{fontFamily:F.extra,fontSize:21,lineHeight:30}}>{name}</T><Badge label={`${base.assessment==='THEORY'?'Lý thuyết':'Thực hành'} · ${base.parts.length} cột`}/>
     <T style={S.small}>Nhập điểm đã công bố, từ 0 đến 10, tối đa 4 số thập phân. Để trống khi chưa có điểm; điểm 0 là kết quả thật. Để trống một điểm đang có rồi lưu sẽ xóa điểm đó.</T>
     {state.pending?<>
