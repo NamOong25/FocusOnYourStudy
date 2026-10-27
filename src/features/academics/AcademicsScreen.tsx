@@ -19,6 +19,7 @@ import GradePanel from '../grades/GradePanel';
 import GradeStatus from '../grades/GradeStatus';
 import {courseResult} from '../grades/grades';
 import { GradeEditor } from '../grades/GradeEditor';
+import type {ServerGradeEditMode} from '../grades/components/ServerGradeEditorRouter';
 import { ClassItem, Task, dateLabel, dueLabel, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import {compareTaskDeadlines,taskDeadlineLabel,taskDueLabel} from '../assignments/assignments';
@@ -34,6 +35,7 @@ export default function Academics() {
   const { semesters, semesterConnection, courseCatalog, tasks, classes, gradeBook, gradeRules, academicSemesterId:semesterId, setAcademicSemesterId:setSemesterId } = useApp();
   const [filter, setFilter] = useState('Tất cả'); const [query, setQuery] = useState('');
   const [detailSection, setDetailSection] = useState('Tổng quan');
+  const [gradeEditMode,setGradeEditMode]=useState<ServerGradeEditMode>('scores');
   const [examPeriod, setExamPeriod] = useState<ExamPeriod>('Sắp tới');
   const [sheet, setSheet] = useState<SheetMode>(null); const [courseId, setCourseId] = useState<string | null>(null);
   const [taskItem, setTaskItem] = useState<Task | undefined>(); const [classItem, setClassItem] = useState<ClassItem | undefined>();
@@ -81,16 +83,16 @@ export default function Academics() {
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
     {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm key="semester-editor" item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} onDeleted={() => { setSheet(null); setSemesterId(''); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { if (targetSemesterId !== semester.id) selectSemester(targetSemesterId); if (sheet === 'new-course') setDetailSection('Tổng quan'); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
-    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail examPeriod={examPeriod} onExamPeriod={setExamPeriod} section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onNewExam={() => setSheet('new-exam')} onGrades={() => setSheet('grades')} /></Sheet>}
+    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail examPeriod={examPeriod} onExamPeriod={setExamPeriod} section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onNewExam={() => setSheet('new-exam')} onGrades={(mode='scores') => { setGradeEditMode(mode); setSheet('grades'); }} /></Sheet>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && (classItem ? <ClassDialog id={classItem.id} onClose={() => setSheet('detail')} /> : <ClassForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'exam' && examId && <ExamDialog id={examId} onClose={() => setSheet('detail')} />}
     {sheet === 'new-exam' && openedCourse && <ExamForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} onSaved={id => { setExamId(id); setSheet('exam'); }} />}
-    {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} onClose={() => setSheet('detail')} />}
+    {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} mode={gradeEditMode} onClose={() => setSheet('detail')} />}
   </FlowScope>;
 }
 
-function CourseDetail({ examPeriod, onExamPeriod, section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onNewExam, onGrades }: { examPeriod: ExamPeriod; onExamPeriod: (value: ExamPeriod) => void; section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onNewExam: () => void; onGrades: () => void }) {
+function CourseDetail({ examPeriod, onExamPeriod, section, setSection, course, onEdit, onClose, onTask, onClass, onExam, onNewExam, onGrades }: { examPeriod: ExamPeriod; onExamPeriod: (value: ExamPeriod) => void; section: string; setSection: (s: string) => void; course: Course; onEdit: () => void; onClose: () => void; onTask: (item?: Task) => void; onClass: (item?: ClassItem) => void; onExam: (id: string) => void; onNewExam: () => void; onGrades: (mode?:ServerGradeEditMode) => void }) {
   const now=useCurrentTime();
   const { tasks, classes, exams, semesters, prepareFocus,gradeBook,gradeRules, semesterConnection, setAcademicSemesterId, setScheduleMode } = useApp();
   const overview = useScheduleOverview(semesterConnection ? { semesterId: course.semesterId, courseId: course.id, today: dateKey(now) } : null);

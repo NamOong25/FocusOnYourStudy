@@ -1,7 +1,7 @@
 import React,{createContext,useContext,useEffect,useState,type ReactNode} from 'react';
 import {useAuth} from '../../account/auth/AuthProvider';
 import {API_BASE_URL} from '../../../shared/api/config';
-import {createGradeConfigurationsApi} from './gradeConfigurationsApi';
+import {createGradeWritesApi} from './gradeWritesApi';
 import {GradeConfigurationWriteManager,emptyConfigurationWrite} from './GradeConfigurationWriteManager';
 
 type Snapshot={owner:string|null;manager:GradeConfigurationWriteManager|null;state:ReturnType<typeof emptyConfigurationWrite>};
@@ -11,7 +11,7 @@ export function GradeConfigurationWritesProvider({children}:{children:ReactNode}
   const [snapshot,setSnapshot]=useState<Snapshot>({owner:null,manager:null,state:emptyConfigurationWrite()});
   useEffect(()=>{
     if(!owner)return;
-    const manager=new GradeConfigurationWriteManager(createGradeConfigurationsApi(API_BASE_URL,auth.authorized));
+    const manager=new GradeConfigurationWriteManager(createGradeWritesApi(API_BASE_URL,auth.authorized));
     const update=()=>setSnapshot({owner,manager,state:manager.state});update();const unsubscribe=manager.subscribe(update);
     return()=>{unsubscribe();manager.dispose();};
   },[owner,auth.authorized]);

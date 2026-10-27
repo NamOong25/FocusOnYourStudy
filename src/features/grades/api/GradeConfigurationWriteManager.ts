@@ -2,14 +2,16 @@ import {ApiError,asApiError,cancelledRequest} from '../../../shared/api/http';
 import {configurationInput,type ConfigurationInput} from '../gradeConfigurationDraft';
 import {courseGradeKey,type CourseRef,type ServerGradeDetail} from './gradesReadApi';
 import type {createGradeConfigurationsApi} from './gradeConfigurationsApi';
+import {gradeScoresInput,type ConfiguredGrade,type GradeScoresInput} from '../gradeScoresDraft';
+import type {createGradeScoresApi} from './gradeScoresApi';
 
-export type ConfigurationPending={operation:'create'|'update'|'delete';course:CourseRef;original:ServerGradeDetail;input?:ConfigurationInput;reason:'uncertain'|'stale'|'gone'|'protected'};
+export type ConfigurationPending={operation:'create'|'update'|'delete'|'scores';course:CourseRef;original:ServerGradeDetail;input?:ConfigurationInput;scoreInput?:GradeScoresInput;reason:'uncertain'|'stale'|'gone'|'protected'};
 export type ConfigurationCheck={courseExists:boolean;current:ServerGradeDetail|null};
 export const emptyConfigurationWrite=()=>({busy:false,checking:false,revision:0,error:null as ApiError|null,pending:null as ConfigurationPending|null,checked:null as ConfigurationCheck|null});
 const clone=<T,>(value:T):T=>JSON.parse(JSON.stringify(value));
 export class GradeConfigurationWriteManager {
   state=emptyConfigurationWrite();private disposed=false;private listeners=new Set<()=>void>();private read:AbortController|null=null;
-  constructor(private api:ReturnType<typeof createGradeConfigurationsApi>){}
+  constructor(private api:ReturnType<typeof createGradeConfigurationsApi>&{saveScores?:ReturnType<typeof createGradeScoresApi>['save']}){}
   subscribe=(fn:()=>void)=>{this.listeners.add(fn);return()=>{this.listeners.delete(fn);};};
   private publish(patch:Partial<typeof this.state>){if(!this.disposed){this.state={...this.state,...patch};this.listeners.forEach(fn=>fn());}}
   private async write<T>(pending:Omit<ConfigurationPending,'reason'>,operation:()=>Promise<T>):Promise<T>{
@@ -34,6 +36,12 @@ export class GradeConfigurationWriteManager {
   remove=(course:CourseRef,original:ServerGradeDetail)=>{
     courseGradeKey(course);if(original.kind!=='configured'||original.courseId.toLowerCase()!==course.id.toLowerCase())throw new ApiError('Cần mở bảng điểm đã lưu trước khi xóa.','INVALID_GRADE_QUERY');
     const scope=clone(course),basis=clone(original);return this.write({operation:'delete',course:scope,original:basis},()=>this.api.remove(scope,basis));
+  };
+  saveScores=(course:CourseRef,input:GradeScoresInput,original:ConfiguredGrade)=>{
+    courseGradeKey(course);if(original.courseId.toLowerCase()!==course.id.toLowerCase())throw new ApiError('Bảng điểm không khớp môn đang mở.','INVALID_GRADE_QUERY');
+    const data=gradeScoresInput(input,original),basis=clone(original),scope=clone(course),save=this.api.saveScores;
+    if(!save)throw new ApiError('Chức năng lưu điểm chưa sẵn sàng.','GRADE_SCORES_UNAVAILABLE');
+    return this.write({operation:'scores',course:scope,original:basis,scoreInput:data},()=>save(scope,data,basis));
   };
   check=async(course?:CourseRef):Promise<ConfigurationCheck>=>{
     if(this.disposed)throw cancelledRequest();

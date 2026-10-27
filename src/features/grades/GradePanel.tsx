@@ -8,9 +8,10 @@ import { useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useAuth } from '../account/auth/AuthProvider';
 import ServerGradePanel from './components/ServerGradePanel';
+import type {ServerGradeEditMode} from './components/ServerGradeEditorRouter';
 
-export default function GradePanel({courseId,onEdit}:{courseId:string;onEdit:()=>void}){
-  return useAuth().hasSession?<ServerGradePanel courseId={courseId} onConfigure={onEdit}/>:<PreviewGradePanel courseId={courseId} onEdit={onEdit}/>;
+export default function GradePanel({courseId,onEdit}:{courseId:string;onEdit:(mode?:ServerGradeEditMode)=>void}){
+  return useAuth().hasSession?<ServerGradePanel courseId={courseId} onConfigure={()=>onEdit('configuration')} onScores={()=>onEdit('scores')}/>:<PreviewGradePanel courseId={courseId} onEdit={onEdit}/>;
 }
 function PreviewGradePanel({courseId,onEdit}:{courseId:string;onEdit:()=>void}){
   const {gradeBook,gradeRules,courseCatalog}=useApp();const record=gradeBook[courseId]??emptyGrades();const result=courseResult(record,gradeRules);const presentation=gradePresentation(result);const previous=courseCatalog.find(c=>c.id===record.previousCourseId);

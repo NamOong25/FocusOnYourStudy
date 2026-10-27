@@ -72,7 +72,7 @@ function ConfigurationForm({course,name,initial,onClose}:{course:CourseRef;name:
     {base.kind==='configured'&&!!base.parts.length&&<Card style={{backgroundColor:C.canvas,gap:6}}><T style={{fontFamily:F.semi}}>Trọng số đã lưu trước chỉnh sửa</T>{base.parts.map(p=><T key={p.id} style={S.small}>{p.name} · {gradeNumber(Number(p.weight.toFixed(2)))}%</T>)}</Card>}
     {!state.pending&&(error??state.error)&&<T accessibilityRole="alert" style={{color:C.red,lineHeight:22}}>{Object.values((error??state.error)!.fields).join(' · ')||(error??state.error)!.message}</T>}
     <Button label="Lưu cấu hình cột điểm" icon="checkmark-outline" loading={state.busy} disabled={blocked} onPress={()=>{void save();}}/>
-    <T style={S.small}>Lưu bộ cột và cách quy BTL cho môn học. Chức năng nhập điểm số trực tiếp sẽ được bổ sung sau.</T>
+    <T style={S.small}>Lưu bộ cột và cách quy BTL cho môn học. Nhập điểm số tại Nhập / chỉnh sửa điểm trong bảng điểm môn.</T>
     {base.kind==='configured'&&<>
       <Button label="Xóa cấu hình bảng điểm" secondary disabled={blocked||hasScores} onPress={()=>setConfirmDelete(true)}/>
       {hasScores&&<T style={S.small}>Muốn xóa toàn bộ bảng điểm, cần xử lý các điểm đã nhập trước.</T>}

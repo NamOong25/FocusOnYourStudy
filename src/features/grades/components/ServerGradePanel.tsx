@@ -8,20 +8,20 @@ import GradeStatus from '../GradeStatus';
 import { gradePresentation } from '../gradePresentation';
 import { useServerCourseGrades } from '../api/useServerGrades';
 import { gradeKindLabels, gradeNumber, serverGradeView } from '../serverGradeView';
-import ServerGradeConfigurationEditor from './ServerGradeConfigurationEditor';
+import ServerGradeEditorRouter,{type ServerGradeEditMode} from './ServerGradeEditorRouter';
 import {useGradeConfigurationWrites} from '../api/GradeConfigurationWritesProvider';
 
 export function ServerCourseGradeDialog({courseId,onClose}:{courseId:string;onClose:()=>void}){
   const {state:writes}=useGradeConfigurationWrites();
-  const [edit,setEdit]=useState(()=>writes.pending?.course.id===courseId);
+  const [edit,setEdit]=useState<ServerGradeEditMode|null>(()=>writes.pending?.course.id===courseId?(writes.pending.operation==='scores'?'scores':'configuration'):null);
   const {courseCatalog}=useApp(),course=courseCatalog.find(c=>c.id===courseId);
-  if(edit)return <ServerGradeConfigurationEditor key={courseId} courseId={courseId} onClose={()=>{setEdit(false);if(!course)onClose();}}/>;
+  if(edit)return <ServerGradeEditorRouter key={courseId} courseId={courseId} mode={edit} onClose={()=>{setEdit(null);if(!course)onClose();}}/>;
   return <Sheet title="Bảng điểm môn học" onClose={onClose}>
     {course&&<><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/></>}
-    <ServerGradePanel courseId={courseId} onConfigure={()=>setEdit(true)}/>
+    <ServerGradePanel courseId={courseId} onConfigure={()=>setEdit('configuration')} onScores={()=>setEdit('scores')}/>
   </Sheet>;
 }
-export default function ServerGradePanel({courseId,onConfigure}:{courseId:string;onConfigure?:()=>void}){
+export default function ServerGradePanel({courseId,onConfigure,onScores}:{courseId:string;onConfigure?:()=>void;onScores?:()=>void}){
   const {courseCatalog,courseConnection,semesterConnection}=useApp(),course=courseCatalog.find(c=>c.id===courseId);
   const read=useServerCourseGrades(course??null,useNavigationScope().active);
   const reload=()=>{void Promise.allSettled([read.reload(),courseConnection?.reload(),semesterConnection?.reload()]);};
@@ -49,7 +49,8 @@ export default function ServerGradePanel({courseId,onConfigure}:{courseId:string
     </Card>)}
     {!!data.result.missingGroups.length&&<Card style={{backgroundColor:C.amberSoft,gap:6}}><T style={{fontFamily:F.semi}}>Nhóm điểm còn thiếu</T><T style={S.small}>{data.result.missingGroups.map(g=>({REGULAR:'Thường kỳ',MIDTERM:'Giữa kỳ',FINAL:'Cuối kỳ',PRACTICAL_COLUMNS:'Các cột thực hành'}[g]??g)).join(' · ')}</T></Card>}
     {data.result.notices.map((notice,i)=><Card key={`${notice.code}-${i}`} style={{backgroundColor:C.canvas}}><T style={S.small}>{notice.message}</T></Card>)}
-    {onConfigure&&<Button label="Chỉnh sửa cấu hình cột điểm" icon="options-outline" onPress={onConfigure}/>}
-    <T style={S.small}>Bạn có thể chỉnh bộ cột và cách quy BTL. Chức năng nhập điểm số trực tiếp sẽ được bổ sung tiếp.</T>
+    {onScores&&data.parts.length>0&&<Button label="Nhập / chỉnh sửa điểm" icon="create-outline" onPress={onScores}/>}
+    {onConfigure&&<Button label="Chỉnh sửa cấu hình cột điểm" secondary icon="options-outline" onPress={onConfigure}/>}
+    <T style={S.small}>Điểm trống khác điểm 0. Muốn xóa một điểm đã nhập, để trống ô đó rồi lưu; bộ cột của môn được giữ nguyên.</T>
   </>;
 }

@@ -10,12 +10,12 @@ import {gradeKindLabels} from '../serverGradeView';
 export function GradeConfigurationPendingNotice({onOpen}:{onOpen:(id:string)=>void}){
   const {state}=useGradeConfigurationWrites(),{courseCatalog}=useApp();const pending=state.pending;
   if(!pending)return null;
-  return <Card style={{backgroundColor:C.amberSoft,gap:10}}><T style={{fontFamily:F.bold}}>Có cấu hình bảng điểm cần kiểm tra</T><T style={S.small}>{courseCatalog.find(c=>c.id===pending.course.id)?.name??'Môn của lần lưu trước'} · Bản nháp được giữ, chưa tự gửi lại.</T><Button label="Mở lần lưu cần kiểm tra" secondary onPress={()=>onOpen(pending.course.id)}/></Card>;
+  return <Card style={{backgroundColor:C.amberSoft,gap:10}}><T style={{fontFamily:F.bold}}>{pending.operation==='scores'?'Có lần lưu điểm cần kiểm tra':'Có cấu hình bảng điểm cần kiểm tra'}</T><T style={S.small}>{courseCatalog.find(c=>c.id===pending.course.id)?.name??'Môn của lần lưu trước'} · Bản nháp được giữ, chưa tự gửi lại.</T><Button label="Mở lần lưu cần kiểm tra" secondary onPress={()=>onOpen(pending.course.id)}/></Card>;
 }
 export default function GradeConfigurationReview({courseId,onReplace,onKeepDraft,onClose}:{courseId:string;onReplace:(detail:ServerGradeDetail)=>void;onKeepDraft:()=>void;onClose:()=>void}){
   const {manager,state}=useGradeConfigurationWrites(),{courseConnection,semesterConnection}=useApp();
   const [loading,setLoading]=useState(false),[error,setError]=useState<ApiError|null>(null);const pending=state.pending;
-  if(!pending||pending.course.id!==courseId)return null;
+  if(!pending||pending.course.id!==courseId||pending.operation==='scores')return null;
   const check=async()=>{
     if(!manager||loading||state.checking)return;setLoading(true);setError(null);
     try{const [courses]=await Promise.all([courseConnection?.reload()??Promise.resolve([]),semesterConnection?.reload()??Promise.resolve([])]);await manager.check(courses.find(c=>c.id===courseId)??pending.course);}
