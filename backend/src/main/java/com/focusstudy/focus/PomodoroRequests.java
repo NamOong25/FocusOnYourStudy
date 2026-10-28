@@ -14,4 +14,5 @@ public final class PomodoroRequests {
         public Start { timeZone = timeZone == null ? null : timeZone.strip(); }
     }
     public record Transition(@NotNull @PositiveOrZero Long version) { }
+    public record Goal(@NotNull @Min(1) @Max(12) Integer dailySessions, @NotNull @PositiveOrZero Long version) { }
 }

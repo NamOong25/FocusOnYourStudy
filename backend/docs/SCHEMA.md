@@ -142,7 +142,7 @@ erDiagram
 | Lịch học bổ sung | Chưa cần bảng mới cho kiểm tra trùng | Chuỗi có ở V5, ngoại lệ ở V6; 4E.2B xét lịch hiệu lực sau ngoại lệ trong service. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
 | Điểm, đợt 5 | course_grade_configs, grade_columns, grade_project_allocations | Cột có thể thêm/xóa/đổi tên/đổi loại; score nullable, 0 khác chưa nhập; cấu hình vai trò/tỷ lệ BTL rõ; lưu phiên bản quy tắc. |
-| Pomodoro | pomodoro_sessions (V10); lịch sử/mục tiêu bổ sung sau | 6A.1 lưu phiên thực tế đang chạy/tạm dừng, snapshot môn/kỳ và request/version chống trùng; hoàn tất/hủy/lịch sử/mục tiêu ở 6A.2. |
+| Pomodoro | pomodoro_sessions (V10/V11), pomodoro_preferences (V11) | Phiên thực tế, trạng thái kết thúc và snapshot; lịch sử/tiến độ từ phiên COMPLETED, mục tiêu theo tài khoản có version. |
 | Thông báo | reminder_preferences, notification_receipts, delivery_jobs | Lưu phiên bản nội dung đã đọc; lịch gửi/hủy/cập nhật riêng với danh sách trong app; không coi nhắc trong app là đã gửi push. |
 | Tệp/AI | attachments, ai_plans, ai_plan_items | Quyền truy cập tệp, nguồn/trang, draft/preview/approved; chỉ ghi lịch sau khi duyệt và kiểm tra lại xung đột. |
 
@@ -209,3 +209,12 @@ CHECK bảo vệ enum, khoảng năm, thứ tự giờ, phút nguyên và cùng 
 UNIQUE `(user_id,client_request_id)` chống Start trùng; partial unique index theo user_id ở RUNNING/PAUSED giữ một phiên hoạt động, kể cả đã hết giờ. CHECK bảo vệ trạng thái, thời gian không âm/có giới hạn, anchor RUNNING/PAUSED, snapshot và version. Ghi dùng cùng khóa tài khoản như các nghiệp vụ học tập. GET tính thời gian theo anchor nhưng không UPDATE/tự hoàn tất.
 
 V10 chỉ thêm bảng/index, giữ nguyên dữ liệu V1–V9, không seed. Lịch sử hoàn tất/hủy và mục tiêu ở 6A.2, giao diện ở 6B; xem [POMODORO.md](POMODORO.md).
+
+
+## Đã tạo trong V11 — kết thúc Pomodoro và mục tiêu ngày
+
+Thêm ended_at/finalized_at nullable vào pomodoro_sessions; giữ nguyên phiên V10. Cho phép COMPLETED/CANCELLED, CHECK yêu cầu đủ thời lượng cho COMPLETED, thời lượng chưa đủ cho CANCELLED, mốc kết thúc/xác nhận và anchor đúng trạng thái. Partial unique index phiên hoạt động V10 vẫn áp dụng; index owner/ended_at/id hỗ trợ lịch sử terminal. GET không tự hoàn tất; các lệnh versioned ghi trạng thái và thời gian nguyên tử, terminal giữ nguyên sau đó.
+
+pomodoro_preferences có UUID, user_id FK/UNIQUE, daily_sessions SMALLINT 1–12, timestamps và version. Không seed: mặc định 4/version API 0 khi chưa có row; lần lưu đầu version API 1, sau đó tăng khi thay đổi (version API là version ORM + 1). Khóa tài khoản bảo vệ cả trường hợp chưa có row, chống hai lần ghi đầu cùng version 0. GET default không INSERT; cùng giá trị/version hiện tại là no-op.
+
+Lịch sử/tiến độ được đọc từ các phiên, không có bảng tổng đếm cộng dồn nên gửi lặp không cộng trùng. COMPLETED công nhận đủ thời lượng; CANCELLED giữ phần học dở nhưng công nhận 0. Ngày xét theo ended_at và múi giờ query, không theo finalized_at. Xem [POMODORO.md](POMODORO.md).

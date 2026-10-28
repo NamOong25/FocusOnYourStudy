@@ -58,6 +58,9 @@ class SessionRestartTests {
         Map<?, ?> savedCumulativeGpa;
         Map<?, ?> pausedPomodoro;
         Map<?, ?> runningPomodoro;
+        Map<?, ?> completedPomodoro;
+        Map<?, ?> cancelledPomodoro;
+        Map<?, ?> savedPomodoroGoal;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -107,6 +110,7 @@ class SessionRestartTests {
                 assertThat(focusStart.statusCode()).isEqualTo(201);
                 var focus = (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(focusStart.body(), Map.class).get("data");
                 pausedPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + focus.get("id") + "/pause", pair.get("accessToken").toString(), Map.of("version", focus.get("version"))));
+                savedPomodoroGoal = data(app, semester(app, "PUT", "/api/v1/pomodoro-goal", pair.get("accessToken").toString(), Map.of("dailySessions", 6, "version", 0)));
                 var change = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), Map.of("kind", "CHANGED", "room", "B2.03", "startTime", "10:00", "endTime", "12:00", "scheduleVersion", 0));
                 assertThat(change.statusCode()).isEqualTo(200);
                 var cancelled = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), Map.of("kind", "CANCELLED", "reason", "Keep cancellation", "scheduleVersion", 1));
@@ -119,6 +123,23 @@ class SessionRestartTests {
                 for (String key : List.of("id", "clientRequestId", "startedAt", "stateChangedAt", "version", "context", "remainingMillis", "elapsedMillis")) assertThat(paused.get(key)).as(key).isEqualTo(pausedPomodoro.get(key));
                 assertThat(paused.get("status")).isEqualTo("PAUSED");
                 runningPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + paused.get("id") + "/resume", pair.get("accessToken").toString(), Map.of("version", paused.get("version"))));
+                assertThat(data(app, semester(app, "GET", "/api/v1/pomodoro-goal", pair.get("accessToken").toString(), null))).isEqualTo(savedPomodoroGoal);
+                savedPomodoroGoal = data(app, semester(app, "PUT", "/api/v1/pomodoro-goal", pair.get("accessToken").toString(), Map.of("dailySessions", 5, "version", savedPomodoroGoal.get("version"))));
+                // Only this isolated test schema accelerates the elapsed timer; production API
+                // always obtains timing from the server clock and exposes no time override.
+                var deadline = java.time.Instant.now().minusSeconds(3600);
+                long elapsed = ((Number) runningPomodoro.get("elapsedMillis")).longValue(), pausedMs = ((Number) runningPomodoro.get("pausedMillis")).longValue();
+                var originalStart = java.time.OffsetDateTime.ofInstant(deadline.minusMillis(1500000 + pausedMs), java.time.ZoneOffset.UTC);
+                var anchor = java.time.OffsetDateTime.ofInstant(deadline.minusMillis(1500000 - elapsed), java.time.ZoneOffset.UTC);
+                app.getBean(org.springframework.jdbc.core.JdbcTemplate.class).update("UPDATE pomodoro_sessions SET started_at=?,state_changed_at=?,run_started_at=? WHERE id=?", originalStart, anchor, anchor, UUID.fromString(runningPomodoro.get("id").toString()));
+                completedPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + runningPomodoro.get("id") + "/complete", pair.get("accessToken").toString(), Map.of("version", runningPomodoro.get("version"))));
+                var nextStart = semester(app, "POST", "/api/v1/pomodoro-sessions", pair.get("accessToken").toString(), Map.of("clientRequestId", UUID.randomUUID().toString(), "courseId", courseId, "timeZone", "UTC"));
+                assertThat(nextStart.statusCode()).isEqualTo(201);
+                var toCancel = (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(nextStart.body(), Map.class).get("data");
+                cancelledPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + toCancel.get("id") + "/cancel", pair.get("accessToken").toString(), Map.of("version", toCancel.get("version"))));
+                var thirdStart = semester(app, "POST", "/api/v1/pomodoro-sessions", pair.get("accessToken").toString(), Map.of("clientRequestId", UUID.randomUUID().toString(), "courseId", courseId, "timeZone", "UTC"));
+                assertThat(thirdStart.statusCode()).isEqualTo(201);
+                runningPomodoro = (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(thirdStart.body(), Map.class).get("data");
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId + "/gpa", pair.get("accessToken").toString(), null))).isEqualTo(savedSemesterGpa);
                 assertThat(data(app, semester(app, "GET", "/api/v1/course-attempts", pair.get("accessToken").toString(), null))).isEqualTo(savedCourseAttempts);
                 assertThat(data(app, semester(app, "GET", "/api/v1/gpa/cumulative", pair.get("accessToken").toString(), null))).isEqualTo(savedCumulativeGpa);
@@ -150,6 +171,15 @@ class SessionRestartTests {
                 for (String key : List.of("id", "clientRequestId", "startedAt", "stateChangedAt", "endsAt", "version", "context")) assertThat(restoredFocus.get(key)).as(key).isEqualTo(runningPomodoro.get(key));
                 assertThat(restoredFocus.get("status")).isEqualTo("RUNNING");
                 assertThat(((Number) restoredFocus.get("remainingMillis")).longValue()).isLessThan(((Number) runningPomodoro.get("remainingMillis")).longValue());
+                assertThat(data(app, semester(app, "GET", "/api/v1/pomodoro-goal", pair.get("accessToken").toString(), null))).isEqualTo(savedPomodoroGoal);
+                for (var terminal : List.of(completedPomodoro, cancelledPomodoro)) {
+                    var restored = data(app, semester(app, "GET", "/api/v1/pomodoro-sessions/" + terminal.get("id"), pair.get("accessToken").toString(), null));
+                    for (String key : List.of("id", "status", "version", "context", "endedAt", "finalizedAt", "elapsedMillis", "pausedMillis", "creditedStudyMillis")) assertThat(restored.get(key)).as(key).isEqualTo(terminal.get(key));
+                }
+                assertThat(data(app, semester(app, "GET", "/api/v1/pomodoro-sessions", pair.get("accessToken").toString(), null)).get("totalElements")).isEqualTo(2);
+                var completedDate = java.time.Instant.parse(completedPomodoro.get("endedAt").toString()).atZone(java.time.ZoneOffset.UTC).toLocalDate();
+                var day = data(app, semester(app, "GET", "/api/v1/pomodoro-sessions/daily?date=" + completedDate + "&timeZone=UTC", pair.get("accessToken").toString(), null));
+                assertThat(day.get("completedSessions")).isEqualTo(1); assertThat(day.get("studySeconds")).isEqualTo(1500);
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId + "/gpa", pair.get("accessToken").toString(), null))).isEqualTo(savedSemesterGpa);
                 assertThat(data(app, semester(app, "GET", "/api/v1/course-attempts", pair.get("accessToken").toString(), null))).isEqualTo(savedCourseAttempts);
                 assertThat(data(app, semester(app, "GET", "/api/v1/gpa/cumulative", pair.get("accessToken").toString(), null))).isEqualTo(savedCumulativeGpa);

@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Giao diện Pomodoro vẫn dùng dữ liệu trong phiên.
 
-## Mới nhất — 6A.1: Backend lưu phiên Pomodoro đang học
+## Mới nhất — 6A.2: Hoàn tất/hủy, lịch sử và mục tiêu Pomodoro
+
+V11 giữ các phiên V10 và thêm trạng thái kết thúc/mục tiêu ngày. Hoàn tất chỉ khi đủ 25 phút học thật; gửi lặp không cộng trùng. Hủy lưu phần học dở để tra cứu, công nhận 0 phút; phiên đủ giờ cần Complete. endedAt giữ giờ kết thúc thực tế dù xác nhận muộn; kết quả đã kết thúc được giữ nguyên. Lịch sử phân trang/lọc theo snapshot và thời gian; mục tiêu 1–12, mặc định 4, có version, tiến độ ngày theo múi giờ chỉ tính COMPLETED.
+
+Chạy lại backend để Flyway nâng V10 → V11, giữ dữ liệu cũ. Xem [hướng dẫn test 6A.2](docs/BACKEND-PHASE-6A2.md), [hợp đồng](backend/docs/POMODORO.md), `backend/scripts/Try-Pomodoro.ps1` hoặc `backend/api/pomodoro.http`. Giao diện Pomodoro nối ở 6B, biểu đồ/chuỗi ngày dữ liệu thật ở 6C; thiết bị thật 2C.3B vẫn để sau.
+
+**606 tests/Maven verify đạt (38 test mới), không lỗi/bỏ qua; TypeScript và 403 tests frontend hồi quy đạt.** Đã kiểm tra gửi lặp/đồng thời, tài khoản/Bearer/cookie/CSRF auth, phân trang, DST/ranh giới ngày, PowerShell 5.1, nâng V10 → V11 và ba lần khởi động backend; schema QA riêng tự dọn, không seed tài khoản thật.
+
+## 6A.1: Backend lưu phiên Pomodoro đang học
 
 V10 thêm bảng phiên tập trung thực tế, riêng với kế hoạch tự học. API bắt đầu/tạm dừng/tiếp tục/đọc lại dùng giờ server, 25 phút, giữ phần lẻ ms; mỗi tài khoản chỉ một phiên chạy/tạm dừng. Mã yêu cầu bắt đầu chống tạo trùng, version chống lệnh cũ, snapshot giữ môn/kỳ/bài/buổi lúc bắt đầu. Chạy lại backend để Flyway tự nâng V9 → V10, không reset database.
 

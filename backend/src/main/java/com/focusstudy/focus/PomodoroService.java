@@ -64,16 +64,37 @@ public class PomodoroService {
     public PomodoroResponse pause(UUID owner, UUID id, long version) { return transition(owner, id, version, true); }
     @Transactional
     public PomodoroResponse resume(UUID owner, UUID id, long version) { return transition(owner, id, version, false); }
+    @Transactional
+    public PomodoroResponse complete(UUID owner, UUID id, long version) { return finish(owner, id, version, PomodoroEntity.Status.COMPLETED); }
+    @Transactional
+    public PomodoroResponse cancel(UUID owner, UUID id, long version) { return finish(owner, id, version, PomodoroEntity.Status.CANCELLED); }
+    private PomodoroResponse finish(UUID owner, UUID id, long version, PomodoroEntity.Status target) {
+        lock(owner); var row = owned(owner, id); var time = now();
+        // Terminal rows are immutable. Accept an exact retry of the successful command
+        // (pre-transition version), or a repeated action using the current GET version.
+        if (row.isFinished() && row.getStatus() == target && (version == row.getVersion() || version == row.getVersion() - 1))
+            return PomodoroResponse.from(row, time);
+        checkVersion(row, version);
+        if (row.isFinished()) throw problem(HttpStatus.CONFLICT, "POMODORO_ALREADY_FINISHED", "Phiên đã hoàn tất hoặc hủy; không đổi kết quả đã lưu.");
+        var reading = row.read(time);
+        if (target == PomodoroEntity.Status.COMPLETED && !reading.timeUp()) throw problem(HttpStatus.CONFLICT, "POMODORO_NOT_READY", "Cần học đủ 25 phút, không tính thời gian tạm dừng, để hoàn tất phiên.");
+        if (target == PomodoroEntity.Status.CANCELLED && reading.timeUp()) throw problem(HttpStatus.CONFLICT, "POMODORO_TIME_UP", "Phiên đã đủ thời lượng. Hoàn tất để lưu kết quả thay vì hủy.");
+        row.finish(target, reading); sessions.flush(); return PomodoroResponse.from(row, time);
+    }
     private PomodoroResponse transition(UUID owner, UUID id, long version, boolean pause) {
         lock(owner); var row = owned(owner, id);
-        if (row.getVersion() != version) throw problem(HttpStatus.CONFLICT, "POMODORO_VERSION_CONFLICT", "Phiên đã thay đổi ở nơi khác. Đọc lại trước khi thao tác; không gửi lại với version tự đoán.");
+        checkVersion(row, version);
+        if (row.isFinished()) throw problem(HttpStatus.CONFLICT, "POMODORO_ALREADY_FINISHED", "Phiên đã hoàn tất hoặc hủy, không thể tiếp tục hoặc tạm dừng.");
         var time = now(); var reading = row.read(time);
-        if (reading.timeUp()) throw problem(HttpStatus.CONFLICT, "POMODORO_TIME_UP", "Đã đủ thời lượng. Hoàn tất phiên sẽ được triển khai ở đợt 6A.2.");
+        if (reading.timeUp()) throw problem(HttpStatus.CONFLICT, "POMODORO_TIME_UP", "Đã đủ thời lượng. Hoàn tất để lưu kết quả phiên học.");
         if ((row.getStatus() == PomodoroEntity.Status.RUNNING) != pause) throw problem(HttpStatus.CONFLICT, "POMODORO_INVALID_STATE", "Chỉ tạm dừng phiên đang chạy hoặc tiếp tục phiên đang tạm dừng.");
         if (pause) row.pause(reading); else row.resume(reading);
         sessions.flush(); return PomodoroResponse.from(row, time);
     }
     private PomodoroEntity owned(UUID owner, UUID id) { return sessions.findByIdAndUserId(id, owner).orElseThrow(() -> missing("POMODORO_NOT_FOUND", "Không tìm thấy phiên Pomodoro.")); }
+    private void checkVersion(PomodoroEntity row, long version) {
+        if (row.getVersion() != version) throw problem(HttpStatus.CONFLICT, "POMODORO_VERSION_CONFLICT", "Phiên đã thay đổi ở nơi khác. Đọc lại trước khi thao tác; không gửi lại với version tự đoán.");
+    }
     private void lock(UUID owner) { users.lockForAcademicChanges(owner).orElseThrow(() -> problem(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", "Cần đăng nhập lại để tiếp tục.")); }
     private PomodoroApiException missing(String code, String message) { return problem(HttpStatus.NOT_FOUND, code, message); }
     private PomodoroApiException problem(HttpStatus status, String code, String message) { return new PomodoroApiException(status, code, message); }

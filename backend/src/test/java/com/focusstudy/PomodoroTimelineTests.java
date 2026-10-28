@@ -55,4 +55,21 @@ class PomodoroTimelineTests {
         assertThat(row.matches(new PomodoroRequests.Start(row.getClientRequestId(),UUID.randomUUID(),null,null,"Asia/Ho_Chi_Minh"))).isFalse();
         assertThat(row.matches(new PomodoroRequests.Start(row.getClientRequestId(),context.courseId(),null,null,"UTC"))).isFalse();
     }
+    @Test void terminalCancelledTimeIsFrozenAndDoesNotAccumulatePauseAfterward() {
+        var row=row();row.pause(row.read(start.plusMillis(1234)));
+        row.finish(PomodoroEntity.Status.CANCELLED,row.read(start.plusMillis(2000)));
+        var later=row.read(start.plusSeconds(86400));
+        assertThat(later.elapsedMillis()).isEqualTo(1234);assertThat(later.pausedMillis()).isEqualTo(766);
+        assertThat(row.getEndedAt()).isEqualTo(start.plusMillis(2000));assertThat(later.endsAt()).isNull();assertThat(later.timeUp()).isFalse();
+    }
+    @Test void completionUsesActualDeadlineNotLateAcknowledgementTime() {
+        var row=row();row.finish(PomodoroEntity.Status.COMPLETED,row.read(start.plusSeconds(7200)));
+        assertThat(row.getEndedAt()).isEqualTo(start.plusSeconds(1500));assertThat(row.getFinalizedAt()).isEqualTo(start.plusSeconds(7200));
+        var later=row.read(start.plusSeconds(9000));assertThat(later.elapsedMillis()).isEqualTo(1500000);assertThat(later.pausedMillis()).isZero();assertThat(later.endsAt()).isNull();
+    }
+    @Test void completedPausedTimeIsExcludedAndFrozenAfterLateCompletion() {
+        var row=row();row.pause(row.read(start.plusSeconds(300)));row.resume(row.read(start.plusSeconds(360)));
+        row.finish(PomodoroEntity.Status.COMPLETED,row.read(start.plusSeconds(5000)));
+        assertThat(row.getEndedAt()).isEqualTo(start.plusSeconds(1560));assertThat(row.read(start.plusSeconds(6000)).pausedMillis()).isEqualTo(60000);
+    }
 }

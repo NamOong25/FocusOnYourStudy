@@ -17,4 +17,9 @@ public final class PomodoroTimeline {
         return new Reading(observed, studied, running ? paused : paused + delta, remaining,
                 (remaining + 999) / 1000, running ? changedAt.plusMillis(target - elapsed) : null, remaining == 0);
     }
+    public static Reading stopped(int durationSeconds, long elapsed, long paused, Instant changedAt, Instant now) {
+        long remaining = durationSeconds * 1000L - elapsed;
+        return new Reading(now.isBefore(changedAt) ? changedAt : now, elapsed, paused, remaining,
+                (remaining + 999) / 1000, null, remaining == 0);
+    }
 }

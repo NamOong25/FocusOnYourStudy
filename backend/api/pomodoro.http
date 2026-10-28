@@ -36,3 +36,40 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {"version": 1}
+
+### Complete only after 25 active minutes; use latest version
+POST {{baseUrl}}/api/v1/pomodoro-sessions/{{sessionId}}/complete
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"version": 2}
+
+### Cancel an unfinished running/paused session; use latest version
+POST {{baseUrl}}/api/v1/pomodoro-sessions/{{sessionId}}/cancel
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"version": 0}
+
+### History: both terminal statuses, newest endedAt then ID; no active sessions
+GET {{baseUrl}}/api/v1/pomodoro-sessions?page=0&size=20
+Authorization: Bearer {{accessToken}}
+
+### Completed only, optionally keep original snapshot courseId even after source deletion
+GET {{baseUrl}}/api/v1/pomodoro-sessions?status=COMPLETED&courseId={{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### Daily progress: replace date with a day containing your completed sessions
+GET {{baseUrl}}/api/v1/pomodoro-sessions/daily?date=2026-10-28&timeZone=Asia%2FHo_Chi_Minh
+Authorization: Bearer {{accessToken}}
+
+### Read goal; unsaved default is four sessions, version 0, persisted false
+GET {{baseUrl}}/api/v1/pomodoro-goal
+Authorization: Bearer {{accessToken}}
+
+### Save goal; replace version with latest GET version
+PUT {{baseUrl}}/api/v1/pomodoro-goal
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"dailySessions": 6, "version": 0}

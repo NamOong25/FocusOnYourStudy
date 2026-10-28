@@ -1,12 +1,12 @@
-# Pomodoro — hợp đồng 6A.1
+# Pomodoro — hợp đồng 6A.1/6A.2
 
-Ngày 28/10/2026. API `/api/v1/pomodoro-sessions`, xác thực Bearer theo tài khoản hiện tại; không nhận `userId`. Success dùng `{data,meta}`, lỗi dùng ProblemDetail và `code` hiện có. Response không cache (`Cache-Control: no-store`). V10 chỉ thêm bảng `pomodoro_sessions`, không seed hoặc sửa dữ liệu học tập cũ.
+Ngày 28/10/2026. API `/api/v1/pomodoro-sessions`, xác thực Bearer theo tài khoản hiện tại; không nhận `userId`. Success dùng `{data,meta}`, lỗi dùng ProblemDetail và `code` hiện có. Response không cache (`Cache-Control: no-store`). V10 thêm `pomodoro_sessions`; V11 bổ sung trạng thái kết thúc/mục tiêu và giữ nguyên phiên V10. Không seed hoặc sửa dữ liệu học tập cũ.
 
 ## Phạm vi
 
 Phiên tập trung **25 phút**, bắt đầu → tạm dừng → tiếp tục → đọc lại. Mỗi tài khoản có tối đa một phiên RUNNING/PAUSED, bảo vệ bằng khóa tài khoản trong transaction và unique partial index PostgreSQL. Không tạo bản ghi Pomodoro từ `study_sessions`: bảng cũ lưu kế hoạch; bảng mới lưu thời gian thực tế.
 
-Chưa có hoàn tất/hủy, lịch sử phiên hoàn tất, mục tiêu ngày, chế độ nghỉ hoặc thống kê. **Hết 25 phút vẫn giữ phiên đang hoạt động với `timeUp=true`, không tự cộng phút/hoàn thành bài.** Chỉ đọc dữ liệu không tạo bản ghi, không tăng version. Hoàn tất/hủy sẽ bổ sung ở 6A.2; UI và khôi phục trong frontend ở 6B. Không nghiệm thu native/chạy nền trong đợt này.
+6A.2 có hoàn tất/hủy, lịch sử và mục tiêu ngày. **GET thấy hết giờ vẫn giữ RUNNING/timeUp=true cho đến lệnh Complete**, không tự ghi hoặc tăng version. COMPLETED được công nhận đủ 25 phút; CANCELLED giữ phần học dở nhưng công nhận 0 phút. UI và khôi phục frontend ở 6B, biểu đồ/chuỗi ngày ở 6C; chế độ nghỉ và native/chạy nền chưa nghiệm thu.
 
 ## Endpoints
 
@@ -17,6 +17,17 @@ Chưa có hoàn tất/hủy, lịch sử phiên hoàn tất, mục tiêu ngày, 
 | POST | gốc | Bắt đầu; lần đầu 201 + Location, gửi lại cùng yêu cầu 200 + cùng ID. |
 | POST | `/{id}/pause` | RUNNING chưa hết giờ → PAUSED; body `{ "version": 0 }`. |
 | POST | `/{id}/resume` | PAUSED → RUNNING; body `{ "version": 1 }`. |
+
+Endpoints bổ sung ở 6A.2:
+
+| Method | Path | Nội dung |
+| --- | --- | --- |
+| POST | `/{id}/complete` | RUNNING đã đủ thời lượng → COMPLETED, body `{ "version": n }`. |
+| POST | `/{id}/cancel` | RUNNING/PAUSED chưa hết giờ → CANCELLED, cùng kiểu body version. |
+| GET | gốc | Lịch sử terminal phân trang/lọc. |
+| GET | `/daily` | Tiến độ ngày theo endedAt, múi giờ và mục tiêu hiện tại. |
+| GET | `/api/v1/pomodoro-goal` (đường dẫn tuyệt đối) | Mục tiêu tài khoản; mặc định 4/version 0/persisted=false khi chưa lưu. |
+| PUT | `/api/v1/pomodoro-goal` (đường dẫn tuyệt đối) | Body `{ "dailySessions": 6, "version": n }`, dailySessions 1–12. |
 
 Start body:
 
@@ -43,8 +54,11 @@ Bài tập/buổi tự học tùy chọn phải thuộc tài khoản và môn. N
 - `elapsedMillis`: thời gian học đã tích lũy + đoạn RUNNING hiện tại, tối đa 1.500.000 ms.
 - `pausedMillis`: tổng thời gian PAUSED; đang PAUSED thì cộng cả đoạn tạm dừng hiện tại.
 - `remainingMillis`: `1.500.000 − elapsedMillis`, không âm; `remainingSeconds` làm tròn lên, để 1 ms cuối chưa hiện 0.
-- `endsAt`: deadline đoạn đang chạy, null khi PAUSED; sau resume dịch theo thời gian tạm dừng, không reset về 25 phút.
+- `endsAt`: deadline đoạn đang chạy, null khi PAUSED hoặc đã kết thúc; sau resume dịch theo thời gian tạm dừng, không reset về 25 phút.
 - `timeUp`: true khi đã đủ thời lượng; chưa phải trạng thái hoàn tất/phiên được công nhận.
+- `endedAt`: null khi hoạt động; deadline thật khi COMPLETED, thời điểm hủy khi CANCELLED.
+- `finalizedAt`: thời điểm server thực hiện lệnh kết thúc, có thể sau endedAt.
+- `creditedStudyMillis`: 1.500.000 cho COMPLETED, 0 cho mọi trạng thái khác.
 - `context`: snapshot `courseId/code/name`, `semesterId/term/startYear`, `assignmentId/title`, `studySessionId/title` lúc bắt đầu.
 
 Mốc chuyển trạng thái được chuẩn hóa đến ms và phép cộng giữ ms qua từng pause/resume. Giờ UTC đo khoảng thời gian thật qua nửa đêm/DST; timeZone dành cho ngữ cảnh hiển thị, không dùng phép trừ giờ địa phương. Nếu đồng hồ server lùi trước mốc chuyển trạng thái gần nhất, delta được chặn ở 0. Vận hành cần đồng hồ server ổn định; không có cam kết chống mọi thay đổi đồng hồ hệ thống.
@@ -55,11 +69,37 @@ Snapshot ngữ cảnh được kiểm tra ownership khi bắt đầu và lưu ng
 
 ## Đồng thời và mất phản hồi
 
-Start khóa tài khoản trước tra `clientRequestId`/phiên hoạt động/nguồn. Một `clientRequestId` gắn với nội dung course/assignment/study/zone ban đầu trong tài khoản; cùng UUID ở tài khoản khác độc lập. Gửi lại cùng nội dung trả **trạng thái hiện tại của phiên đó**, kể cả PAUSED; không reset giờ, không tạo phiên mới. Dùng lại UUID với nội dung khác trả 409.
+Start khóa tài khoản trước tra `clientRequestId`/phiên hoạt động/nguồn. Một `clientRequestId` gắn với nội dung course/assignment/study/zone ban đầu trong tài khoản; cùng UUID ở tài khoản khác độc lập. Gửi lại cùng nội dung trả **trạng thái hiện tại của phiên đó**, kể cả PAUSED/COMPLETED/CANCELLED; không reset giờ, không tạo phiên mới. Dùng lại UUID với nội dung khác trả 409.
 
 Pause/resume bắt buộc version hiện tại. Thao tác thành công tăng version; version cũ trả 409 trước thay đổi. Hai lệnh cùng version không cùng ghi thành công. Đúng version nhưng sai trạng thái cũng trả 409, không sửa dữ liệu.
 
 Sau timeout/mất phản hồi: đọc `/active` hoặc `/{id}` để đối chiếu. Chỉ gửi lại Start với **đúng clientRequestId và nội dung cũ**. Không tự tăng version hoặc lặp pause/resume. Script không tự retry thao tác ghi; phiên đăng nhập tạm của script được logout riêng, phiên Pomodoro vẫn còn.
+
+## Hoàn tất/hủy, gửi lại và dữ liệu cuối
+
+Complete chỉ thành công khi RUNNING đã hết thời lượng (đúng deadline trở đi); PAUSED hoặc RUNNING còn thời gian trả POMODORO_NOT_READY. Lưu elapsedMillis=1.500.000, pausedMillis đã tích lũy, endedAt=deadline cuối cùng và finalizedAt=thời điểm xử lý. Không cộng khoảng chậm xác nhận vào phút học/nghỉ. Hủy chỉ khi còn thời gian, lưu phần đã học/nghỉ tới lúc hủy, endedAt=finalizedAt, creditedStudyMillis=0. Phiên đã hết giờ yêu cầu Complete thay vì Cancel.
+
+Lệnh kết thúc khóa tài khoản/kiểm tra owner/version và ghi nguyên tử. Terminal bất biến qua API. Gửi lại cùng hành động được nhận nếu version là **version của lệnh kết thúc đã thành công** hoặc **version hiện tại từ GET**; chỉ trả lại dữ liệu, không tăng version/cộng lần nữa. Version cũ thuộc một chuyển trạng thái trước đó vẫn bị chặn; đổi COMPLETED ↔ CANCELLED bị chặn. Pause/resume terminal bị chặn.
+
+Một hàng COMPLETED tương ứng một phiên công nhận; thống kê truy vấn từ các hàng, không tăng bộ đếm tích lũy riêng. Hai lệnh Complete đồng thời cùng version đều có thể trả 200 nhưng vẫn chỉ một kết quả, một lần công nhận. Terminal giải phóng slot active; có thể Start phiên mới bằng clientRequestId mới. Replay Start cũ vẫn trả đúng phiên cũ, không thay phiên active mới.
+
+## Lịch sử
+
+GET gốc trả `{items,page,size,totalElements,totalPages}`. Page từ 0, mặc định 0; size 1–100, mặc định 20; page × size không vượt 2.147.483.647 (giới hạn offset JPA). Chỉ COMPLETED/CANCELLED; status tùy chọn để lọc một trong hai. Lọc tùy chọn `courseId`, `semesterId`, `assignmentId`, `studySessionId` theo **snapshot ban đầu**, kể cả nguồn đã đổi/xóa; ID ngoài tài khoản/không khớp cho kết quả trống, không tra dữ liệu tài khoản khác.
+
+`from/to` là ISO datetime có offset, từ 1900 đến đầu 2100; from < to khi có cả hai. Lọc endedAt thuộc **[from,to)**. Sắp endedAt DESC, id DESC để xử lý thời điểm bằng nhau. Mỗi request dùng transaction REPEATABLE_READ cho danh sách/đếm; đây là phân trang offset, không giữ snapshot xuyên nhiều request khi có phiên mới được ghi. UI cần tải lại trang đầu khi cập nhật lịch sử.
+
+## Mục tiêu và tiến độ ngày
+
+GET goal mặc định 4/version 0/persisted=false và **không tạo row**. PUT kiểm tra version kể cả lần đầu chưa có row, dùng cùng khóa tài khoản; lần lưu đầu trả version 1/persisted=true. Version API = version ORM + 1 đối với row đã lưu, dành giá trị 0 cho mặc định chưa lưu. Chỉnh giá trị tăng version; cùng giá trị và đúng version là no-op. Version cũ vẫn 409 kể cả muốn ghi lại cùng giá trị. Sau timeout đọc GET để đối chiếu, không tự gửi lại PUT với version đoán.
+
+Đây là cài đặt chung hiện tại cho các ngày; chưa lưu mục tiêu riêng theo ngày hoặc lịch sử thay đổi mục tiêu. Đổi mục tiêu giữ nguyên lịch sử, số phiên và thời gian đã học.
+
+GET `/daily?date=yyyy-MM-dd&timeZone=Asia/Ho_Chi_Minh`: date tùy chọn, mặc định hôm nay tại zone; timeZone tùy chọn, mặc định hồ sơ tài khoản. Zone phải là ZoneId IANA server hỗ trợ. Ngày local trong 1900–2099 được đổi sang [đầu ngày,đầu ngày kế tiếp) UTC, xử lý DST 23/25 giờ. Phân loại theo endedAt và **zone query**, không theo ngày xác nhận hoặc tự gán theo zone từng hàng. Script mặc định luôn gửi Asia/Ho_Chi_Minh.
+
+Trả `date,timeZone,from,to,goal,completedSessions,studyMillis,studySeconds,remainingSessions,progressPercent,goalReached`. Đếm COMPLETED toàn tài khoản trong cửa sổ ngày, tổng elapsedMillis của các phiên đó; CANCELLED/RUNNING/PAUSED không được công nhận. Tiến độ % lấy phần nguyên và chặn tối đa 100; số phiên còn thiếu chặn tối thiểu 0. Goal/số phiên/phút cùng snapshot REPEATABLE_READ; GET không ghi. Đây là tiến độ ngày cơ bản, không phải API biểu đồ/chuỗi ngày 6C.
+
+Hoàn tất giữ liên kết kế hoạch/bài và snapshot gốc để truy vấn, không tự thay trạng thái kế hoạch/bài tập hoặc cập nhật một bộ đếm khác trong study_sessions. Thời gian thực tế cho một buổi có thể truy vấn lịch sử COMPLETED với studySessionId. Giao diện nối các nguồn ở 6B/6C.
 
 ## Lỗi nghiệp vụ
 
@@ -77,4 +117,14 @@ Sau timeout/mất phản hồi: đọc `/active` hoặc `/{id}` để đối chi
 | 409 `POMODORO_INVALID_STATE` | Pause/resume không đúng trạng thái. |
 | 409 `POMODORO_TIME_UP` | Phiên đã đủ thời lượng; không pause/resume nữa. |
 
-Các method/route ngoài phạm vi vẫn bị cấu hình deny-by-default chặn. Web tiếp tục dùng bảo vệ CSRF hiện có khi request có Origin/cookie; không mở endpoint public hoặc bỏ auth để chạy script.
+Lỗi bổ sung 6A.2:
+
+| Status/code | Ý nghĩa |
+| --- | --- |
+| 409 `POMODORO_NOT_READY` | Chưa đủ 25 phút học để Complete. |
+| 409 `POMODORO_ALREADY_FINISHED` | Không thể đổi kết quả/học tiếp phiên terminal. |
+| 409 `POMODORO_TIME_UP` | Không hủy phiên đã đủ giờ; dùng Complete. |
+| 409 `POMODORO_GOAL_VERSION_CONFLICT` | Mục tiêu đã được lưu/sửa ở nơi khác. |
+| 400 `INVALID_POMODORO_HISTORY_FILTER` | Sai page/size/status/range/ngày/múi giờ của lịch sử hoặc Daily. |
+
+Các method/route ngoài phạm vi vẫn bị cấu hình deny-by-default chặn. API Pomodoro yêu cầu Bearer token; cookie đăng nhập riêng lẻ không có quyền truy cập API này. Luồng auth web trong /api/v1/auth/* tiếp tục dùng cookie/CSRF hiện có khi có Origin/cookie. Không mở endpoint public hoặc bỏ auth để chạy script.

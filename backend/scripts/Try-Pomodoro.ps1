@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet('Active','Get','Start','Pause','Resume')][string]$Mode = 'Active',
+    [ValidateSet('Active','Get','Start','Pause','Resume','Complete','Cancel','History','Goal','SetGoal','Daily')][string]$Mode = 'Active',
     [string]$BaseUrl = 'http://localhost:8080',
     [guid]$CourseId = [guid]::Empty,
     [guid]$ClientRequestId = [guid]::Empty,
@@ -7,7 +7,15 @@
     [guid]$StudySessionId = [guid]::Empty,
     [guid]$SessionId = [guid]::Empty,
     [Nullable[long]]$Version,
-    [string]$TimeZone = 'Asia/Ho_Chi_Minh'
+    [string]$TimeZone = 'Asia/Ho_Chi_Minh',
+    [guid]$SemesterId = [guid]::Empty,
+    [ValidateSet('','COMPLETED','CANCELLED')][string]$Status = '',
+    [string]$From = '',
+    [string]$To = '',
+    [string]$Date = '',
+    [ValidateRange(0,2147483647)][int]$Page = 0,
+    [ValidateRange(1,100)][int]$Size = 20,
+    [ValidateRange(1,12)][int]$DailySessions = 4
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Read-ApiProblem.ps1')
@@ -21,7 +29,7 @@ function Invoke-PomodoroApi([string]$Path,[string]$Method,$Payload,[string]$Toke
     $arguments = @{ Uri = "$BaseUrl$Path"; Method = $Method; Headers = @{}; TimeoutSec = 15 }
     if ($Token) { $arguments.Headers.Authorization = "Bearer $Token" }
     if ($Path.StartsWith('/api/v1/auth/')) { $arguments.Headers['X-Auth-Transport'] = 'body' }
-    if ($Method -eq 'POST') {
+    if ($Method -in @('POST','PUT')) {
         $arguments.ContentType = 'application/json; charset=utf-8'
         $arguments.Body = [Text.Encoding]::UTF8.GetBytes(($Payload | ConvertTo-Json -Depth 8 -Compress))
     }
@@ -46,6 +54,26 @@ try {
         $result = Invoke-PomodoroApi "$path/$SessionId" 'GET' $null $login.data.accessToken
     } elseif ($Mode -eq 'Active') {
         $result = Invoke-PomodoroApi "$path/active" 'GET' $null $login.data.accessToken
+    } elseif ($Mode -eq 'History') {
+        $query = New-Object 'System.Collections.Generic.List[string]'
+        $query.Add("page=$Page"); $query.Add("size=$Size")
+        foreach ($entry in @{courseId=$CourseId;semesterId=$SemesterId;assignmentId=$AssignmentId;studySessionId=$StudySessionId}.GetEnumerator()) {
+            if ($entry.Value -ne [guid]::Empty) { $query.Add("$($entry.Key)=$($entry.Value)") }
+        }
+        foreach ($entry in @{status=$Status;from=$From;to=$To}.GetEnumerator()) {
+            if ($entry.Value) { $query.Add("$($entry.Key)=$([Uri]::EscapeDataString($entry.Value))") }
+        }
+        $result = Invoke-PomodoroApi ($path + '?' + ($query -join '&')) 'GET' $null $login.data.accessToken
+    } elseif ($Mode -eq 'Goal') {
+        $result = Invoke-PomodoroApi '/api/v1/pomodoro-goal' 'GET' $null $login.data.accessToken
+    } elseif ($Mode -eq 'SetGoal') {
+        $currentGoal = Invoke-PomodoroApi '/api/v1/pomodoro-goal' 'GET' $null $login.data.accessToken
+        $expected = if ($PSBoundParameters.ContainsKey('Version')) { $Version } else { $currentGoal.data.version }
+        $result = Invoke-PomodoroApi '/api/v1/pomodoro-goal' 'PUT' @{dailySessions=$DailySessions;version=$expected} $login.data.accessToken
+    } elseif ($Mode -eq 'Daily') {
+        $query = 'timeZone=' + [Uri]::EscapeDataString($TimeZone)
+        if ($Date) { $query += '&date=' + [Uri]::EscapeDataString($Date) }
+        $result = Invoke-PomodoroApi ($path + '/daily?' + $query) 'GET' $null $login.data.accessToken
     } else {
         # Read once, then send exactly one versioned command. Never retry a write automatically.
         $readPath = if ($SessionId -eq [guid]::Empty) { "$path/active" } else { "$path/$SessionId" }
@@ -56,12 +84,18 @@ try {
         $result = Invoke-PomodoroApi "$path/$($current.data.id)/$action" 'POST' @{version=$expected} $login.data.accessToken
     }
     $result | ConvertTo-Json -Depth 12
-    if (!$result.data) { Write-Host 'Chưa có phiên Pomodoro đang hoạt động.' -ForegroundColor Cyan }
+    if ($Mode -eq 'History') {
+        Write-Host "Lịch sử: $($result.data.totalElements) phiên đã kết thúc · Trang $($result.data.page)." -ForegroundColor Cyan
+    } elseif ($Mode -in @('Goal','SetGoal')) {
+        Write-Host "Mục tiêu: $($result.data.dailySessions) phiên/ngày · Version $($result.data.version)." -ForegroundColor Cyan
+    } elseif ($Mode -eq 'Daily') {
+        Write-Host "Ngày $($result.data.date): $($result.data.completedSessions)/$($result.data.goal.dailySessions) phiên · $($result.data.studySeconds) giây học được công nhận." -ForegroundColor Cyan
+    } elseif (!$result.data) { Write-Host 'Chưa có phiên Pomodoro đang hoạt động.' -ForegroundColor Cyan }
     else {
         Write-Host "Trạng thái: $($result.data.status) · Còn $($result.data.remainingSeconds) giây · Version $($result.data.version)." -ForegroundColor Cyan
-        if ($result.data.timeUp) { Write-Host 'Đã đủ 25 phút. Hoàn tất/hủy và lịch sử sẽ làm ở 6A.2; hiện vẫn giữ phiên này.' -ForegroundColor Yellow }
+        if ($result.data.timeUp -and $result.data.status -eq 'RUNNING') { Write-Host 'Đã đủ 25 phút. Dùng -Mode Complete để công nhận phiên.' -ForegroundColor Yellow }
     }
-    Write-Host 'Dữ liệu lấy từ PostgreSQL. Giao diện Pomodoro chưa nối API trong 6A.1.'
+    Write-Host 'Dữ liệu lấy từ PostgreSQL. Giao diện Pomodoro sẽ nối API ở 6B.'
 } catch {
     $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) {

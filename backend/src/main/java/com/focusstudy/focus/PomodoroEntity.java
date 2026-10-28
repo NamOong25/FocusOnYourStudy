@@ -7,7 +7,7 @@ import java.util.*;
 
 @Entity @Table(name = "pomodoro_sessions")
 public class PomodoroEntity extends BaseEntity {
-    public enum Status { RUNNING, PAUSED }
+    public enum Status { RUNNING, PAUSED, COMPLETED, CANCELLED }
     public record Context(UUID courseId, String courseCode, String courseName, UUID semesterId,
                           short semesterTerm, int semesterStartYear, UUID assignmentId, String assignmentTitle,
                           UUID studySessionId, String studyTitle) { }
@@ -18,6 +18,8 @@ public class PomodoroEntity extends BaseEntity {
     @Column(name = "started_at", nullable = false) private Instant startedAt;
     @Column(name = "state_changed_at", nullable = false) private Instant stateChangedAt;
     @Column(name = "run_started_at") private Instant runStartedAt;
+    @Column(name = "ended_at") private Instant endedAt;
+    @Column(name = "finalized_at") private Instant finalizedAt;
     @Column(name = "elapsed_millis", nullable = false) private long elapsedMillis;
     @Column(name = "paused_millis", nullable = false) private long pausedMillis;
     @Column(name = "time_zone", nullable = false, length = 100) private String timeZone;
@@ -45,7 +47,14 @@ public class PomodoroEntity extends BaseEntity {
                 && Objects.equals(studySessionId, input.studySessionId()) && timeZone.equals(input.timeZone());
     }
     public PomodoroTimeline.Reading read(Instant now) {
+        if (isFinished()) return PomodoroTimeline.stopped(durationSeconds, elapsedMillis, pausedMillis, stateChangedAt, now);
         return PomodoroTimeline.read(status == Status.RUNNING, durationSeconds, elapsedMillis, pausedMillis, stateChangedAt, now);
+    }
+    public boolean isFinished() { return status == Status.COMPLETED || status == Status.CANCELLED; }
+    public void finish(Status target, PomodoroTimeline.Reading reading) {
+        elapsedMillis = reading.elapsedMillis(); pausedMillis = reading.pausedMillis();
+        endedAt = target == Status.COMPLETED ? reading.endsAt() : reading.serverTime();
+        finalizedAt = reading.serverTime(); stateChangedAt = finalizedAt; runStartedAt = null; status = target;
     }
     public void pause(PomodoroTimeline.Reading reading) {
         elapsedMillis = reading.elapsedMillis(); pausedMillis = reading.pausedMillis(); status = Status.PAUSED;
@@ -59,6 +68,8 @@ public class PomodoroEntity extends BaseEntity {
     public int getDurationSeconds() { return durationSeconds; }
     public Instant getStartedAt() { return startedAt; }
     public Instant getStateChangedAt() { return stateChangedAt; }
+    public Instant getEndedAt() { return endedAt; }
+    public Instant getFinalizedAt() { return finalizedAt; }
     public String getTimeZone() { return timeZone; }
     public Context getContext() { return new Context(courseId, courseCode, courseName, semesterId, semesterTerm, semesterStartYear, assignmentId, assignmentTitle, studySessionId, studyTitle); }
 }

@@ -4,11 +4,17 @@ Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/b
 
 ## Endpoint hiện có
 
-Pomodoro 6A.1 đã có API lưu phiên thực tế theo tài khoản; xem [hợp đồng Pomodoro](POMODORO.md). Giao diện sẽ nối ở 6B, hoàn tất/hủy và lịch sử ở 6A.2.
+Pomodoro 6A.1/6A.2 đã có API lưu phiên thực tế, hoàn tất/hủy, lịch sử và mục tiêu; xem [hợp đồng Pomodoro](POMODORO.md). Giao diện nối ở 6B, biểu đồ/chuỗi ngày ở 6C.
 
 | Method/path | Quyền | Kết quả |
 | --- | --- | --- |
 | GET `/api/v1/health` | Công khai | SELECT 1 thật; 200 khi DB truy cập được, 503 nếu DB mất kết nối sau lúc app khởi động. |
+| GET `/api/v1/pomodoro-sessions` | Bearer và phiên hoạt động | 200, lịch sử terminal phân trang/lọc theo snapshot và endedAt, không gồm RUNNING/PAUSED. |
+| GET `/api/v1/pomodoro-sessions/daily` | Bearer và phiên hoạt động | 200, tiến độ ngày/múi giờ từ COMPLETED và mục tiêu hiện tại; GET không ghi. |
+| POST `/api/v1/pomodoro-sessions/{id}/complete` | Bearer, đúng chủ và version | 200 khi đủ 25 phút; gửi lại đúng thao tác không ghi/cộng trùng, endedAt giữ deadline. |
+| POST `/api/v1/pomodoro-sessions/{id}/cancel` | Bearer, đúng chủ và version | 200 khi chưa hết giờ; lưu phần học dở nhưng công nhận 0 phút; kết quả cuối giữ nguyên. |
+| GET `/api/v1/pomodoro-goal` | Bearer và phiên hoạt động | 200, mục tiêu 1–12, mặc định 4/version 0 khi chưa lưu. |
+| PUT `/api/v1/pomodoro-goal` | Bearer và version mới nhất | 200, lưu mục tiêu; version mặc định 0 bảo vệ cả lần ghi đầu đồng thời. |
 | GET `/api/v1/pomodoro-sessions/active` | Bearer và phiên hoạt động | 200, phiên Pomodoro hiện tại hoặc data:null; không ghi/tăng version. |
 | GET `/api/v1/pomodoro-sessions/{id}` | Bearer và phiên hoạt động | 200, snapshot thời gian/ngữ cảnh của mình; khác chủ 404. |
 | POST `/api/v1/pomodoro-sessions` | Bearer, môn thuộc mình, clientRequestId | 201 lần đầu; 200 nếu gửi lại đúng Start, giữ ID/giờ; 409 nếu đã có phiên khác. |
