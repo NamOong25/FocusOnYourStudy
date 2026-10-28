@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5C.2C — Nghiệm thu toàn luồng cấu hình và nhập điểm
+## Đợt vừa hoàn thành: 5C.3 — GPA tích lũy, so sánh và Dashboard dùng API
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Đồng bộ GPA tích lũy, so sánh và Dashboard qua API"
+git push origin main
+```
+
+GPA tích lũy có lịch sử/lý do chọn từng lần; so sánh A/B và mở bảng điểm để sửa; Dashboard đọc GPA/cảnh báo thật theo học kỳ. Cập nhật sau lưu/F5, tải/lỗi/trống/thử lại, null khác 0 và tách tài khoản. TypeScript/export web/403 tests frontend (29 mới; 124 test điểm) và QA web/PostgreSQL riêng đạt. Không backend/schema/dependency; chính sách app lấy điểm đạt cao nhất, chưa coi là GPA chính thức. Hướng dẫn: `FRONTEND-PHASE-5C3.md`. Native 2C.3B và Pomodoro vẫn để sau.
+
+## Đợt trước: 5C.2C — Nghiệm thu toàn luồng cấu hình và nhập điểm
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

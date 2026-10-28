@@ -17,7 +17,7 @@ import ServerGradesScreen from './components/ServerGradesScreen';
 import {ServerCourseGradeDialog} from './components/ServerGradePanel';
 
 export default function Grades({onCompare}:{onCompare?:()=>void}={}){
-  return useAuth().hasSession?<ServerGradesScreen/>:<PreviewGrades onCompare={onCompare}/>;
+  return useAuth().hasSession?<ServerGradesScreen onCompare={onCompare}/>:<PreviewGrades onCompare={onCompare}/>;
 }
 function PreviewGrades({onCompare}:{onCompare?:()=>void}={}){
   const {semesters,courseCatalog,gradeBook,gradeRules,setScheduleMode}=useApp();const [semesterId,setSemesterId]=useState('sem-5');const [filter,setFilter]=useState('Tất cả');const [query,setQuery]=useState('');

@@ -7,7 +7,7 @@ import { GradeReadManager, emptyGradeRead, visibleGradeRead, type GradeReadState
 import { createGradesReadApi, semesterGradesKey, courseGradeKey, type SemesterGradeQuery, type CourseRef } from './gradesReadApi';
 import {useGradeConfigurationWrites} from './GradeConfigurationWritesProvider';
 
-function useGradeRead<Q,T>(query:Q|null,active:boolean,read:(query:Q,signal:AbortSignal)=>Promise<T>,keyOf:(q:Q)=>string) {
+export function useGradeRead<Q,T>(query:Q|null,active:boolean,read:(query:Q,signal:AbortSignal)=>Promise<T>,keyOf:(q:Q)=>string) {
   const auth=useAuth(),owner=auth.hasSession?`${auth.revision}:${auth.profile?.id??''}`:null;
   const {state:writes}=useGradeConfigurationWrites();
   let key:string|null=null,queryError=null;

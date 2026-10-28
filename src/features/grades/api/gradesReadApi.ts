@@ -35,7 +35,7 @@ function groups(v: unknown) { const a = list(v, 4).map(x => token(x, ['REGULAR',
 const columnId = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(v);
 function missing(v: unknown): MissingScore[] { return list(v, 20).map(x => { const p = obj(x); if (!columnId(p.columnId)) throw invalid(); return { columnId: p.columnId, field: token(p.field, ['SCORE', 'REMAINDER_SCORE']) }; }); }
 function notices(v: unknown): Notice[] { return list(v, 30).map(x => { const n = obj(x); if (!text(n.code, 100) || !text(n.message, 1200)) throw invalid(); return { code: n.code, message: n.message }; }); }
-function core(v: Record<string, unknown>, status: unknown, reason: unknown): ResultCore {
+export function core(v: Record<string, unknown>, status: unknown, reason: unknown): ResultCore {
   const s = status === null ? null : token(status, ['INCOMPLETE_CONFIGURATION', 'INCOMPLETE_SCORES', 'EXAM_BLOCKED', 'FAILED', 'PASSED'] as const);
   if (!text(reason, 100) || typeof v.complete !== 'boolean' || v.passed !== null && typeof v.passed !== 'boolean') throw invalid();
   const total = decimal(v.total, 10), gradePoint = decimal(v.gradePoint, 4);

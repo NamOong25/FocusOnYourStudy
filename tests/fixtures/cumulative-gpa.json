@@ -1,0 +1,798 @@
+{
+  "query": {
+    "semesters": [
+      {
+        "id": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+        "term": 1,
+        "startYear": 2026,
+        "name": "Học kỳ 1",
+        "academicYear": "2026 – 2027",
+        "status": "CURRENT",
+        "note": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:51.917403Z",
+        "updatedAt": "2026-10-27T11:37:51.917403Z"
+      },
+      {
+        "id": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+        "term": 2,
+        "startYear": 2025,
+        "name": "Học kỳ 2",
+        "academicYear": "2025 – 2026",
+        "status": "COMPLETED",
+        "note": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:51.909447Z",
+        "updatedAt": "2026-10-27T11:37:51.909447Z"
+      },
+      {
+        "id": "1b9871cd-7626-4421-82d0-41d403db701a",
+        "term": 1,
+        "startYear": 2025,
+        "name": "Học kỳ 1",
+        "academicYear": "2025 – 2026",
+        "status": "COMPLETED",
+        "note": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:51.900451Z",
+        "updatedAt": "2026-10-27T11:37:51.900451Z"
+      }
+    ],
+    "courses": [
+      {
+        "id": "7dd6a658-d6a8-4944-b7c9-abf392cd47ca",
+        "semesterId": "1b9871cd-7626-4421-82d0-41d403db701a",
+        "code": "BASIC",
+        "name": "Môn 2 tín chỉ",
+        "credits": 2,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:51.975784Z",
+        "updatedAt": "2026-10-27T11:37:51.975784Z"
+      },
+      {
+        "id": "e7566307-45fe-43f7-a34e-33c641698b04",
+        "semesterId": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+        "code": "FAILED",
+        "name": "Môn chỉ có F",
+        "credits": 1,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.065344Z",
+        "updatedAt": "2026-10-27T11:37:52.065344Z"
+      },
+      {
+        "id": "69113d79-6947-4a7d-8617-3af514970277",
+        "semesterId": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+        "code": "LOW",
+        "name": "Môn đạt điểm thấp",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.149347Z",
+        "updatedAt": "2026-10-27T11:37:52.149347Z"
+      },
+      {
+        "id": "937dfe0a-3836-43bb-849e-34c0854f8d82",
+        "semesterId": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+        "code": "PENDING",
+        "name": "Môn chưa nhập điểm",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.190344Z",
+        "updatedAt": "2026-10-27T11:37:52.190344Z"
+      },
+      {
+        "id": "60e6f181-e69a-4bb1-a6ff-c800f9103020",
+        "semesterId": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+        "code": "VAR",
+        "name": "Môn trùng mã 3 tín chỉ",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.238344Z",
+        "updatedAt": "2026-10-27T11:37:52.238344Z"
+      },
+      {
+        "id": "9783498b-e2ea-4424-aae8-a57347f03698",
+        "semesterId": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+        "code": "VAR",
+        "name": "Môn trùng mã 2 tín chỉ",
+        "credits": 2,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.197346Z",
+        "updatedAt": "2026-10-27T11:37:52.197346Z"
+      },
+      {
+        "id": "060709b1-a7c2-4198-a879-5000fdc77c15",
+        "semesterId": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+        "code": "WEB",
+        "name": "WWW lần mới chưa đạt",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.108343Z",
+        "updatedAt": "2026-10-27T11:37:52.108343Z"
+      },
+      {
+        "id": "0c3cceff-8a22-45f9-ba41-69297e08f49e",
+        "semesterId": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+        "code": "WEB",
+        "name": "WWW lần sau đạt thấp hơn",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:52.020350Z",
+        "updatedAt": "2026-10-27T11:37:52.021345Z"
+      },
+      {
+        "id": "705e30b3-0044-45c9-ad96-0ecb35081501",
+        "semesterId": "1b9871cd-7626-4421-82d0-41d403db701a",
+        "code": "WEB",
+        "name": "WWW lần đầu",
+        "credits": 3,
+        "teacher": "",
+        "room": "",
+        "status": "STUDYING",
+        "color": "lavender",
+        "description": "",
+        "version": 0,
+        "createdAt": "2026-10-27T11:37:51.926926Z",
+        "updatedAt": "2026-10-27T11:37:51.926926Z"
+      }
+    ]
+  },
+  "response": {
+    "policy": {
+      "id": "APP_CUMULATIVE_HIGHEST_PASS_V1",
+      "authority": "USER_CONFIRMED_APP_RULES",
+      "officialIuhCumulativeVerified": false,
+      "scope": "RECORDED_NUMERIC_THEORY_PRACTICAL_COURSES",
+      "coursePolicyId": "IUH_2023_REPORTED_V1",
+      "historyPolicyId": "COURSE_ATTEMPTS_V1",
+      "selection": "HIGHEST_PASSED_TOTAL_10",
+      "tieBreak": "LATEST_ACADEMIC_YEAR_THEN_TERM",
+      "noPassRule": "LATEST_COMPLETE_F_WITH_ZERO_POINTS_AND_FULL_CREDITS",
+      "decimals": 2,
+      "rounding": "HALF_UP"
+    },
+    "summary": {
+      "state": "PARTIAL",
+      "complete": false,
+      "gpa": 2.51,
+      "weightedGradePoints": 22.6,
+      "calculatedCredits": 9,
+      "earnedCredits": 8,
+      "failedCredits": 1,
+      "registeredGroups": 7,
+      "recordedAttempts": 9,
+      "repeatedGroups": 1,
+      "calculatedGroups": 4,
+      "passedGroups": 3,
+      "failedGroups": 1,
+      "excludedGroups": 3,
+      "reviewGroups": 2,
+      "pendingAttempts": 1
+    },
+    "groups": [
+      {
+        "history": {
+          "code": "BASIC",
+          "credits": 2,
+          "needsReview": false,
+          "issues": [],
+          "otherCreditVariants": [],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "1b9871cd-7626-4421-82d0-41d403db701a",
+                "term": 1,
+                "startYear": 2025,
+                "name": "Học kỳ 1",
+                "academicYear": "2025 – 2026",
+                "status": "COMPLETED",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.900451Z",
+                "updatedAt": "2026-10-27T11:37:51.900451Z"
+              },
+              "course": {
+                "id": "7dd6a658-d6a8-4944-b7c9-abf392cd47ca",
+                "code": "BASIC",
+                "name": "Môn 2 tín chỉ",
+                "credits": 2,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "2d06eec5-a51c-4e33-b99f-d6915c6275ea",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 8.5,
+                "letter": "A",
+                "gradePoint": 3.8,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": true,
+        "selectedCourseId": "7dd6a658-d6a8-4944-b7c9-abf392cd47ca",
+        "reason": "HIGHEST_PASS",
+        "weightedGradePoints": 7.6,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "7dd6a658-d6a8-4944-b7c9-abf392cd47ca",
+            "use": "SELECTED"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "FAILED",
+          "credits": 1,
+          "needsReview": false,
+          "issues": [],
+          "otherCreditVariants": [],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+                "term": 2,
+                "startYear": 2025,
+                "name": "Học kỳ 2",
+                "academicYear": "2025 – 2026",
+                "status": "COMPLETED",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.909447Z",
+                "updatedAt": "2026-10-27T11:37:51.909447Z"
+              },
+              "course": {
+                "id": "e7566307-45fe-43f7-a34e-33c641698b04",
+                "code": "FAILED",
+                "name": "Môn chỉ có F",
+                "credits": 1,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "e8815394-c380-45d5-aec3-5c32ecd7795a",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": false,
+                "resultStatus": "FAILED",
+                "resultReason": "FINAL_BELOW_3",
+                "total": 1,
+                "letter": "F",
+                "gradePoint": 0,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": true,
+        "selectedCourseId": "e7566307-45fe-43f7-a34e-33c641698b04",
+        "reason": "LATEST_COMPLETE_F",
+        "weightedGradePoints": 0,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "e7566307-45fe-43f7-a34e-33c641698b04",
+            "use": "SELECTED"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "LOW",
+          "credits": 3,
+          "needsReview": false,
+          "issues": [],
+          "otherCreditVariants": [],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+                "term": 1,
+                "startYear": 2026,
+                "name": "Học kỳ 1",
+                "academicYear": "2026 – 2027",
+                "status": "CURRENT",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.917403Z",
+                "updatedAt": "2026-10-27T11:37:51.917403Z"
+              },
+              "course": {
+                "id": "69113d79-6947-4a7d-8617-3af514970277",
+                "code": "LOW",
+                "name": "Môn đạt điểm thấp",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "2ad5ea54-a544-4605-9b7e-326a950e4bc6",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 5,
+                "letter": "D+",
+                "gradePoint": 1.5,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": true,
+        "selectedCourseId": "69113d79-6947-4a7d-8617-3af514970277",
+        "reason": "HIGHEST_PASS",
+        "weightedGradePoints": 4.5,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "69113d79-6947-4a7d-8617-3af514970277",
+            "use": "SELECTED"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "PENDING",
+          "credits": 3,
+          "needsReview": false,
+          "issues": [],
+          "otherCreditVariants": [],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+                "term": 1,
+                "startYear": 2026,
+                "name": "Học kỳ 1",
+                "academicYear": "2026 – 2027",
+                "status": "CURRENT",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.917403Z",
+                "updatedAt": "2026-10-27T11:37:51.917403Z"
+              },
+              "course": {
+                "id": "937dfe0a-3836-43bb-849e-34c0854f8d82",
+                "code": "PENDING",
+                "name": "Môn chưa nhập điểm",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": null,
+                "gradeVersion": null,
+                "assessment": null,
+                "complete": false,
+                "passed": null,
+                "resultStatus": null,
+                "resultReason": "NO_CONFIGURATION",
+                "total": null,
+                "letter": null,
+                "gradePoint": null,
+                "incompleteReason": "NO_CONFIGURATION",
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": []
+              }
+            }
+          ]
+        },
+        "included": false,
+        "selectedCourseId": null,
+        "reason": "NO_COMPLETE_RESULT",
+        "weightedGradePoints": null,
+        "pendingAttempts": 1,
+        "decisions": [
+          {
+            "courseId": "937dfe0a-3836-43bb-849e-34c0854f8d82",
+            "use": "PENDING_RESULT"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "VAR",
+          "credits": 2,
+          "needsReview": true,
+          "issues": [
+            "CREDIT_VARIANTS"
+          ],
+          "otherCreditVariants": [
+            {
+              "credits": 3,
+              "courseIds": [
+                "60e6f181-e69a-4bb1-a6ff-c800f9103020"
+              ]
+            }
+          ],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+                "term": 1,
+                "startYear": 2026,
+                "name": "Học kỳ 1",
+                "academicYear": "2026 – 2027",
+                "status": "CURRENT",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.917403Z",
+                "updatedAt": "2026-10-27T11:37:51.917403Z"
+              },
+              "course": {
+                "id": "9783498b-e2ea-4424-aae8-a57347f03698",
+                "code": "VAR",
+                "name": "Môn trùng mã 2 tín chỉ",
+                "credits": 2,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "c53aed8e-9b53-4cc1-9131-2ab38deabd7d",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 8,
+                "letter": "B+",
+                "gradePoint": 3.5,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": false,
+        "selectedCourseId": null,
+        "reason": "REVIEW_REQUIRED",
+        "weightedGradePoints": null,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "9783498b-e2ea-4424-aae8-a57347f03698",
+            "use": "GROUP_REQUIRES_REVIEW"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "VAR",
+          "credits": 3,
+          "needsReview": true,
+          "issues": [
+            "CREDIT_VARIANTS"
+          ],
+          "otherCreditVariants": [
+            {
+              "credits": 2,
+              "courseIds": [
+                "9783498b-e2ea-4424-aae8-a57347f03698"
+              ]
+            }
+          ],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+                "term": 2,
+                "startYear": 2025,
+                "name": "Học kỳ 2",
+                "academicYear": "2025 – 2026",
+                "status": "COMPLETED",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.909447Z",
+                "updatedAt": "2026-10-27T11:37:51.909447Z"
+              },
+              "course": {
+                "id": "60e6f181-e69a-4bb1-a6ff-c800f9103020",
+                "code": "VAR",
+                "name": "Môn trùng mã 3 tín chỉ",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "beac3e08-797d-407e-9b0f-63ffdb353b8b",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 9,
+                "letter": "A+",
+                "gradePoint": 4,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": false,
+        "selectedCourseId": null,
+        "reason": "REVIEW_REQUIRED",
+        "weightedGradePoints": null,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "60e6f181-e69a-4bb1-a6ff-c800f9103020",
+            "use": "GROUP_REQUIRES_REVIEW"
+          }
+        ]
+      },
+      {
+        "history": {
+          "code": "WEB",
+          "credits": 3,
+          "needsReview": false,
+          "issues": [],
+          "otherCreditVariants": [],
+          "attempts": [
+            {
+              "recordedAttemptNumber": 1,
+              "previousCourseId": null,
+              "previousCandidates": [],
+              "relation": "FIRST_RECORDED",
+              "semester": {
+                "id": "1b9871cd-7626-4421-82d0-41d403db701a",
+                "term": 1,
+                "startYear": 2025,
+                "name": "Học kỳ 1",
+                "academicYear": "2025 – 2026",
+                "status": "COMPLETED",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.900451Z",
+                "updatedAt": "2026-10-27T11:37:51.900451Z"
+              },
+              "course": {
+                "id": "705e30b3-0044-45c9-ad96-0ecb35081501",
+                "code": "WEB",
+                "name": "WWW lần đầu",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "43ff7bda-2dce-463c-bc0b-f459ac49c221",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 8,
+                "letter": "B+",
+                "gradePoint": 3.5,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            },
+            {
+              "recordedAttemptNumber": 2,
+              "previousCourseId": "705e30b3-0044-45c9-ad96-0ecb35081501",
+              "previousCandidates": [
+                "705e30b3-0044-45c9-ad96-0ecb35081501"
+              ],
+              "relation": "FOLLOWUP_AFTER_PASSED_RESULT",
+              "semester": {
+                "id": "e673a40f-b0e3-49a9-9cbe-bdf001ae7cb5",
+                "term": 2,
+                "startYear": 2025,
+                "name": "Học kỳ 2",
+                "academicYear": "2025 – 2026",
+                "status": "COMPLETED",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.909447Z",
+                "updatedAt": "2026-10-27T11:37:51.909447Z"
+              },
+              "course": {
+                "id": "0c3cceff-8a22-45f9-ba41-69297e08f49e",
+                "code": "WEB",
+                "name": "WWW lần sau đạt thấp hơn",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "b4026cae-5dee-430b-8fd9-d89ee6471fd1",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": true,
+                "resultStatus": "PASSED",
+                "resultReason": "TOTAL_AT_LEAST_4",
+                "total": 6,
+                "letter": "C+",
+                "gradePoint": 2.5,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            },
+            {
+              "recordedAttemptNumber": 3,
+              "previousCourseId": "0c3cceff-8a22-45f9-ba41-69297e08f49e",
+              "previousCandidates": [
+                "0c3cceff-8a22-45f9-ba41-69297e08f49e"
+              ],
+              "relation": "FOLLOWUP_AFTER_PASSED_RESULT",
+              "semester": {
+                "id": "0aee7c5a-6418-4aa1-a0ca-0a41fed5c87d",
+                "term": 1,
+                "startYear": 2026,
+                "name": "Học kỳ 1",
+                "academicYear": "2026 – 2027",
+                "status": "CURRENT",
+                "note": "",
+                "version": 0,
+                "createdAt": "2026-10-27T11:37:51.917403Z",
+                "updatedAt": "2026-10-27T11:37:51.917403Z"
+              },
+              "course": {
+                "id": "060709b1-a7c2-4198-a879-5000fdc77c15",
+                "code": "WEB",
+                "name": "WWW lần mới chưa đạt",
+                "credits": 3,
+                "status": "STUDYING",
+                "version": 0,
+                "configurationId": "9559e2ee-43ac-4a54-ba82-0039877ce164",
+                "gradeVersion": 1,
+                "assessment": "THEORY",
+                "complete": true,
+                "passed": false,
+                "resultStatus": "FAILED",
+                "resultReason": "FINAL_BELOW_3",
+                "total": 1,
+                "letter": "F",
+                "gradePoint": 0,
+                "incompleteReason": null,
+                "missingGroups": [],
+                "missingScores": [],
+                "notices": [
+                  {
+                    "code": "REPORTED_REGULAR_AVERAGE",
+                    "message": "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "included": true,
+        "selectedCourseId": "705e30b3-0044-45c9-ad96-0ecb35081501",
+        "reason": "HIGHEST_PASS",
+        "weightedGradePoints": 10.5,
+        "pendingAttempts": 0,
+        "decisions": [
+          {
+            "courseId": "705e30b3-0044-45c9-ad96-0ecb35081501",
+            "use": "SELECTED"
+          },
+          {
+            "courseId": "0c3cceff-8a22-45f9-ba41-69297e08f49e",
+            "use": "NOT_SELECTED_LOWER_PASS"
+          },
+          {
+            "courseId": "060709b1-a7c2-4198-a879-5000fdc77c15",
+            "use": "NOT_SELECTED_FAILED_ATTEMPT"
+          }
+        ]
+      }
+    ]
+  }
+}

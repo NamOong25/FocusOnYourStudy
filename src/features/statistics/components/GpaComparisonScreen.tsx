@@ -9,7 +9,11 @@ import SemesterGradesSheet from '../../grades/SemesterGradesSheet';
 import { GpaSemesterCard } from './GpaSemesterCard';
 import { GpaComparisonChart, GpaDifferenceCard } from './GpaComparisonChart';
 
-export default function GpaComparisonScreen() {
+import {useAuth} from '../../account/auth/AuthProvider';
+import ServerGpaComparison from './ServerGpaComparison';
+
+export default function GpaComparisonScreen(){return useAuth().hasSession?<ServerGpaComparison/>:<PreviewGpaComparison/>;}
+function PreviewGpaComparison() {
   const { semesters, courseCatalog, gradeBook, gradeRules, setScheduleMode } = useApp();
   const [selected, setSelected] = useState<{ base?: string; target?: string }>({});
   const [picker, setPicker] = useState<'base' | 'target' | null>(null), [openedSemester, setOpenedSemester] = useState<string | null>(null);
