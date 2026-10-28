@@ -12,6 +12,7 @@ import type {PomodoroAction} from '../api/pomodoroApi';
 import FocusTimerFace from './FocusTimerFace';
 import {useFeedback} from '../../../shared/feedback/FeedbackProvider';
 import {asApiError} from '../../../shared/api/http';
+import ServerFocusInsights from './ServerFocusInsights';
 
 export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
   const {manager,state}=usePomodoro(),clock=usePomodoroClock(),auth=useAuth(),{showNotice}=useFeedback();
@@ -48,6 +49,7 @@ export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
     {!!state.notice&&<T accessibilityLiveRegion="polite" testID="server-pomodoro-notice" style={{color:C.primary,lineHeight:22}}>{state.notice}</T>}
     {state.last&&<Card style={{gap:9,backgroundColor:state.last.status==='COMPLETED'?C.greenSoft:C.canvas}}><Badge label={state.last.status==='COMPLETED'?'ĐÃ LƯU HOÀN TẤT':'ĐÃ LƯU HỦY PHIÊN'}/><T style={{fontFamily:F.bold}}>{state.last.context.courseName}</T><T style={S.small}>{state.last.status==='COMPLETED'?'25 phút học được công nhận.':'Phần học dở được giữ để tra cứu, không cộng vào phút học hoàn tất.'}</T></Card>}
     <T style={S.small}>Tạm dừng để học tiếp cùng phiên. Khi cần đổi nội dung, hãy hoàn tất hoặc hủy phiên hiện tại.</T>
+    <ServerFocusInsights/>
     <Button label="Xem kế hoạch tự học" secondary icon="calendar-outline" onPress={onStudyPlan}/>
     {choose&&<Sheet title="Chọn môn để tập trung" onClose={()=>setChoose(false)}><CourseChoices disabled={!canWrite||!!row} value={focusCourseId} onChange={id=>{prepareFocus({courseId:id});setChoose(false);}}/></Sheet>}
     {cancel&&<Sheet title="Hủy phiên đang học?" onClose={()=>setCancel(null)}><T style={{lineHeight:23}}>Phiên {cancel.name} sẽ kết thúc. Phần học dở được giữ để tra cứu và không cộng vào phút học hoàn tất.</T>{(row?.id!==cancel.id||row.version!==cancel.version)&&<T accessibilityRole="alert" style={{color:C.red}}>Phiên đã thay đổi. Đóng bảng này và kiểm tra lại.</T>}<Button label="Giữ phiên học" secondary onPress={()=>setCancel(null)}/><Button label="Xác nhận hủy phiên" danger loading={state.busy} disabled={!canWrite||row?.id!==cancel.id||row.version!==cancel.version||due} onPress={()=>{if(manager){const target=cancel;setCancel(null);perform(()=>manager.change('cancel',target.id,target.version));}}}/></Sheet>}

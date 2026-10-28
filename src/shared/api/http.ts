@@ -10,6 +10,8 @@ export const asApiError = (error: unknown) => error instanceof ApiError ? error
 export function assertNotCancelled(signal?: AbortSignal) { if (signal?.aborted) throw cancelledRequest(); }
 
 const messages: Record<string, string> = {
+  POMODORO_GOAL_VERSION_CONFLICT: 'Mục tiêu đã thay đổi ở nơi khác. Đọc mục tiêu mới rồi chọn lại trước khi lưu.',
+  INVALID_POMODORO_HISTORY_FILTER: 'Kiểm tra khoảng ngày và bộ lọc lịch sử tập trung.',
   POMODORO_NOT_FOUND: 'Phiên học không còn tồn tại hoặc bạn không được truy cập. Hãy đối chiếu phiên đã lưu.',
   POMODORO_ALREADY_ACTIVE: 'Đang có phiên học hoặc tạm dừng. Kiểm tra phiên hiện tại trước khi bắt đầu phiên mới.',
   POMODORO_VERSION_CONFLICT: 'Phiên đã thay đổi ở nơi khác. Đối chiếu trước khi thao tác tiếp.',

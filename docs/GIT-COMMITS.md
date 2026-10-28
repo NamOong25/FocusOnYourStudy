@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6B.1 — Đồng hồ Pomodoro dùng phiên học thật
+## Đợt vừa hoàn thành: 6B.2 — Lịch sử, mục tiêu và tiến độ Pomodoro
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối lịch sử, mục tiêu và tiến độ Pomodoro"
+git push origin main
+```
+
+Lịch sử tài khoản có lọc trạng thái/môn/khoảng ngày và phân trang; mục tiêu 1–12 lưu backend, tiến độ lấy từ phiên hoàn tất theo múi giờ. Phiên hủy không cộng phút; đổi mục tiêu không đổi số phiên/phút học. Xung đột và mất phản hồi giữ lựa chọn để GET đối chiếu; không tự gửi lại PUT. **504 tests frontend (48 mới), TypeScript/export web và 19 tình huống frontend manager/API/PostgreSQL QA đạt.** Công cụ browser chưa khởi tạo được nên nghiệm thu thao tác UI vẫn ở 6B.3. Hướng dẫn `FRONTEND-PHASE-6B2.md`; không backend/schema/dependency mới.
+
+## 6B.1 — Đồng hồ Pomodoro dùng phiên học thật
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
