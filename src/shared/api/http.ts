@@ -10,6 +10,16 @@ export const asApiError = (error: unknown) => error instanceof ApiError ? error
 export function assertNotCancelled(signal?: AbortSignal) { if (signal?.aborted) throw cancelledRequest(); }
 
 const messages: Record<string, string> = {
+  POMODORO_NOT_FOUND: 'Phiên học không còn tồn tại hoặc bạn không được truy cập. Hãy đối chiếu phiên đã lưu.',
+  POMODORO_ALREADY_ACTIVE: 'Đang có phiên học hoặc tạm dừng. Kiểm tra phiên hiện tại trước khi bắt đầu phiên mới.',
+  POMODORO_VERSION_CONFLICT: 'Phiên đã thay đổi ở nơi khác. Đối chiếu trước khi thao tác tiếp.',
+  POMODORO_INVALID_STATE: 'Trạng thái phiên đã thay đổi. Đối chiếu lại để chọn thao tác phù hợp.',
+  POMODORO_ALREADY_FINISHED: 'Phiên đã hoàn tất hoặc hủy. Kết quả đã lưu được giữ nguyên.',
+  POMODORO_TIME_UP: 'Phiên đã đủ thời lượng. Xác nhận hoàn tất để lưu kết quả.',
+  POMODORO_NOT_READY: 'Chưa đủ 25 phút học thực tế để hoàn tất. Thời gian tạm dừng được loại trừ.',
+  POMODORO_CONTEXT_MISMATCH: 'Môn, bài và buổi tự học không còn khớp. Cập nhật dữ liệu rồi chọn lại nội dung.',
+  POMODORO_REQUEST_REUSED: 'Yêu cầu bắt đầu cũ có nội dung khác. Giữ thông tin đối chiếu và kiểm tra phiên đã lưu.',
+  INVALID_POMODORO_TIME_ZONE: 'Múi giờ của tài khoản chưa hợp lệ. Kiểm tra thông tin tài khoản.',
   INVALID_CREDENTIALS: 'Email hoặc mật khẩu chưa đúng.',
   EMAIL_ALREADY_EXISTS: 'Email này đã được đăng ký. Bạn có thể đăng nhập bằng tài khoản đó.',
   VALIDATION_FAILED: 'Kiểm tra các trường được báo lỗi.',

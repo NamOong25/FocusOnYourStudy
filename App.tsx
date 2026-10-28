@@ -9,6 +9,7 @@ import { ScheduleMode, routeLabel, viewKey } from './src/navigation/navigationSt
 import ExamList from './src/features/exams/Exams';
 import { ExamWritesProvider } from './src/features/exams/api/ExamWritesProvider';
 import { GradeConfigurationWritesProvider } from './src/features/grades/api/GradeConfigurationWritesProvider';
+import {PomodoroProvider} from './src/features/focus/api/PomodoroProvider';
 import LearningNavigation from './src/navigation/components/LearningNavigation';
 import { AssignmentSyncStatus } from './src/features/assignments/components/AssignmentSyncStatus';
 import { StudySyncStatus } from './src/features/study/components/StudySyncStatus';
@@ -117,7 +118,7 @@ function AppShell() {
     </FlowScope></NavigationScope>
     <NavigationScope active={current === panelOrigin && !taskForm}><FlowScope onClose={() => setPanel(null)}>
       {panel === 'preview' && <PreviewPanel onClose={() => setPanel(null)} onLoad={loadPreview} onGuide={() => setPanel('guide')} />}
-      {panel === 'guide' && <Sheet title="Bắt đầu cùng FocusYourStudy" onClose={() => setPanel('preview')}><T style={S.small}>1. Tạo học kỳ → 2. Thêm môn → 3. Ghi bài tập và lịch học. {auth.hasSession ? 'Học kỳ, môn học, bài tập và buổi tự học được lưu vào tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi đã thêm, sửa và xóa được trong mục Kỳ thi. Điểm và Pomodoro vẫn thử trong phiên.' : 'Các thay đổi chỉ giữ trong phiên thử này.'}</T><Button label="Đến Môn & học kỳ" onPress={() => { setPanel(null); setScheduleMode('Môn & học kỳ'); }} /><Button label="Quay lại bản xem trước" secondary onPress={() => setPanel('preview')} /></Sheet>}
+      {panel === 'guide' && <Sheet title="Bắt đầu cùng FocusYourStudy" onClose={() => setPanel('preview')}><T style={S.small}>1. Tạo học kỳ → 2. Thêm môn → 3. Ghi bài tập và lịch học. {auth.hasSession ? 'Học kỳ, môn học, bài tập và buổi tự học được lưu vào tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi đã thêm, sửa và xóa được trong mục Kỳ thi. Điểm số và đồng hồ Pomodoro được lưu vào tài khoản.' : 'Các thay đổi chỉ giữ trong phiên thử này.'}</T><Button label="Đến Môn & học kỳ" onPress={() => { setPanel(null); setScheduleMode('Môn & học kỳ'); }} /><Button label="Quay lại bản xem trước" secondary onPress={() => setPanel('preview')} /></Sheet>}
       {panel === 'profile' && <Account onClose={() => setPanel(null)} />}
       {panel === 'notifications' && <NotificationsCenter schedule={notifications.schedule} onSavedClass={target => { setPanel(null); openSavedSchedule(target.semesterId, target.date); }} items={notifications.items} unread={notifications.unread} sources={notifications.sources} now={date} onRead={notifications.markRead} onReadAll={notifications.markAllRead} onClose={() => setPanel(null)} />}
     </FlowScope></NavigationScope>
@@ -127,7 +128,7 @@ function Workspace() {
   const auth = useAuth();
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
   return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
-    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
+    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><PomodoroProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></PomodoroProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
 }
 export default function App() {
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });

@@ -1,8 +1,16 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Giao diện Pomodoro vẫn dùng dữ liệu trong phiên.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử/mục tiêu UI và thống kê còn các đợt sau.
 
-## Mới nhất — 6A.2: Hoàn tất/hủy, lịch sử và mục tiêu Pomodoro
+## Mới nhất — 6B.1: Đồng hồ Pomodoro dùng API thật
+
+Tài khoản có đồng hồ 25 phút bắt đầu/tạm dừng/tiếp tục/hoàn tất/hủy qua API, đọc lại phiên khi tải trang/trở về foreground và đồng bộ liên tab. Giữ snapshot ngữ cảnh; xác nhận hủy đúng id/version, khóa thao tác lặp, giữ yêu cầu chưa rõ kết quả theo tài khoản để đối chiếu sau F5. Mốc 0 chỉ là hết giờ trên đồng hồ; chỉ báo đã lưu sau xác nhận server. Dữ liệu mẫu giữ riêng.
+
+**TypeScript, export web và 456 tests frontend đạt (53 mới), không lỗi/bỏ qua; 15 tình huống Manager/API/PostgreSQL QA thật đạt.** Bao gồm mất phản hồi sau commit, khôi phục manager, version cũ, tự hoàn tất/không trùng, tài khoản riêng và kho đối chiếu. Thao tác UI trình duyệt/điện thoại chưa nghiệm thu.
+
+Xem [hướng dẫn test 6B.1 và giới hạn nghiệm thu UI](docs/FRONTEND-PHASE-6B1.md). Chưa kiểm tra thao tác trình duyệt vì công cụ điều khiển không khởi tạo được; cần thực hiện các bước UI trong hướng dẫn. Lịch sử/mục tiêu UI ở 6B.2, kiểm tra liên thông ở 6B.3, thống kê thời gian ở 6C; native vẫn hoãn theo 2C.3B. Backend/schema/dependency không đổi.
+
+## 6A.2: Hoàn tất/hủy, lịch sử và mục tiêu Pomodoro
 
 V11 giữ các phiên V10 và thêm trạng thái kết thúc/mục tiêu ngày. Hoàn tất chỉ khi đủ 25 phút học thật; gửi lặp không cộng trùng. Hủy lưu phần học dở để tra cứu, công nhận 0 phút; phiên đủ giờ cần Complete. endedAt giữ giờ kết thúc thực tế dù xác nhận muộn; kết quả đã kết thúc được giữ nguyên. Lịch sử phân trang/lọc theo snapshot và thời gian; mục tiêu 1–12, mặc định 4, có version, tiến độ ngày theo múi giờ chỉ tính COMPLETED.
 

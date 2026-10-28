@@ -11,9 +11,14 @@ import { focusDurations, focusSummary } from './focus';
 import { FocusGoalCard, FocusGoalSheet } from './components/FocusGoalCard';
 import { FocusStreakCard } from './components/FocusStreakCard';
 import { FocusHistorySheet } from './components/FocusHistorySheet';
+import {useAuth} from '../account/auth/AuthProvider';
+import ServerFocusScreen from './components/ServerFocusScreen';
 
 const modes = ["Tập trung 25′", "Nghỉ ngắn 5′", "Nghỉ dài 15′"];
 export default function Focus({ onStudyPlan }: { onStudyPlan: () => void }) {
+  const auth=useAuth();return auth.hasSession?<ServerFocusScreen onStudyPlan={onStudyPlan}/>:<PreviewFocus onStudyPlan={onStudyPlan}/>;
+}
+function PreviewFocus({ onStudyPlan }: { onStudyPlan: () => void }) {
   const { mode, setMode, seconds, running, toggleTimer, resetTimer, focusCourse, focusCourseId, prepareFocus, focusTaskId, focusSessionId, tasks, studySessions, focusRecords, dailyFocusGoal, setDailyFocusGoal, timerProgress, setTab, courseCatalog, setScheduleMode, setToast } = useApp();
   const clock = useCurrentTime();
   // Refresh immediately on completion and at midnight, without deriving dates from a fixed sample day.
