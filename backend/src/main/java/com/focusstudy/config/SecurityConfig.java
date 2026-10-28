@@ -109,6 +109,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters/*/gpa").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-attempts", "/api/v1/courses/*/attempts").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/gpa/cumulative").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pomodoro-sessions/active", "/api/v1/pomodoro-sessions/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*/pause", "/api/v1/pomodoro-sessions/*/resume").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> { }).authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))

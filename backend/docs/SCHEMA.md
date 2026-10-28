@@ -142,7 +142,7 @@ erDiagram
 | Lịch học bổ sung | Chưa cần bảng mới cho kiểm tra trùng | Chuỗi có ở V5, ngoại lệ ở V6; 4E.2B xét lịch hiệu lực sau ngoại lệ trong service. |
 | Lịch thi | exams | Gắn môn/người; ngày thi và giờ bắt đầu/kết thúc, hình thức, phòng, ghi chú; kiểm tra trùng với lịch học/tự học. |
 | Điểm, đợt 5 | course_grade_configs, grade_columns, grade_project_allocations | Cột có thể thêm/xóa/đổi tên/đổi loại; score nullable, 0 khác chưa nhập; cấu hình vai trò/tỷ lệ BTL rõ; lưu phiên bản quy tắc. |
-| Pomodoro | focus_records, focus_preferences | Định danh phiên để không ghi trùng; mốc bắt đầu/kết thúc/tạm dừng, thời gian học thực; lưu snapshot môn/học kỳ. |
+| Pomodoro | pomodoro_sessions (V10); lịch sử/mục tiêu bổ sung sau | 6A.1 lưu phiên thực tế đang chạy/tạm dừng, snapshot môn/kỳ và request/version chống trùng; hoàn tất/hủy/lịch sử/mục tiêu ở 6A.2. |
 | Thông báo | reminder_preferences, notification_receipts, delivery_jobs | Lưu phiên bản nội dung đã đọc; lịch gửi/hủy/cập nhật riêng với danh sách trong app; không coi nhắc trong app là đã gửi push. |
 | Tệp/AI | attachments, ai_plans, ai_plan_items | Quyền truy cập tệp, nguồn/trang, draft/preview/approved; chỉ ghi lịch sau khi duyệt và kiểm tra lại xung đột. |
 
@@ -201,3 +201,11 @@ Flyway là nơi duy nhất tạo/đổi schema. Đã có V1 nền tảng, V2 phi
 CHECK bảo vệ enum, khoảng năm, thứ tự giờ, phút nguyên và cùng ngày địa phương, độ dài notes/version. Hàm `exam_reminders_valid` kiểm tra mảng một chiều bắt đầu từ 1, tối đa 10 mốc riêng biệt 0–10080 và không có phần tử null; CHECK giữ mảng rỗng khi tắt nhắc và không rỗng khi bật. Java normalize mốc giảm dần.
 
 `update_revision` nội bộ làm bản ghi dirty cho mọi PUT, kể cả nội dung giống hệt; @Version tăng một lần, không trả counter ra client. V7 không sửa V1–V6, không seed. Ghi lịch thi cùng khóa tài khoản với các nghiệp vụ học tập; môn còn lịch thi chặn xóa/chuyển kỳ. Chi tiết `EXAMS.md`. Kiểm tra trùng thuộc 4H.1B; UI thuộc 4H.2.
+
+## Đã tạo trong V10 — phiên Pomodoro thực tế
+
+`pomodoro_sessions` lưu user FK, client_request_id, status RUNNING/PAUSED, duration_seconds=1500; started_at/state_changed_at/run_started_at UTC và elapsed_millis/paused_millis BIGINT, time_zone, version/timestamps. Snapshot course/code/name, semester/term/year, assignment/title và study/title được kiểm tra theo tài khoản khi tạo; không có FK tới nguồn học tập để giữ lịch sử sau đổi/xóa nguồn.
+
+UNIQUE `(user_id,client_request_id)` chống Start trùng; partial unique index theo user_id ở RUNNING/PAUSED giữ một phiên hoạt động, kể cả đã hết giờ. CHECK bảo vệ trạng thái, thời gian không âm/có giới hạn, anchor RUNNING/PAUSED, snapshot và version. Ghi dùng cùng khóa tài khoản như các nghiệp vụ học tập. GET tính thời gian theo anchor nhưng không UPDATE/tự hoàn tất.
+
+V10 chỉ thêm bảng/index, giữ nguyên dữ liệu V1–V9, không seed. Lịch sử hoàn tất/hủy và mục tiêu ở 6A.2, giao diện ở 6B; xem [POMODORO.md](POMODORO.md).

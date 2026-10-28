@@ -1,0 +1,38 @@
+### IntelliJ HTTP Client: set accessToken in your PRIVATE environment; never commit a real token.
+@baseUrl = http://localhost:8080
+@courseId = REPLACE_WITH_OWN_COURSE_UUID
+@sessionId = REPLACE_WITH_SESSION_UUID
+@clientRequestId = REPLACE_WITH_NEW_UUID_AND_KEEP_IT_FOR_RETRY
+
+### Read active; data:null means no active session
+GET {{baseUrl}}/api/v1/pomodoro-sessions/active
+Authorization: Bearer {{accessToken}}
+
+### Start once; replay same body with same clientRequestId -> 200, same session
+POST {{baseUrl}}/api/v1/pomodoro-sessions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "clientRequestId": "{{clientRequestId}}",
+  "courseId": "{{courseId}}",
+  "timeZone": "Asia/Ho_Chi_Minh"
+}
+
+### Read persisted session
+GET {{baseUrl}}/api/v1/pomodoro-sessions/{{sessionId}}
+Authorization: Bearer {{accessToken}}
+
+### Pause: replace version with latest GET version
+POST {{baseUrl}}/api/v1/pomodoro-sessions/{{sessionId}}/pause
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"version": 0}
+
+### Resume: replace version with latest GET version
+POST {{baseUrl}}/api/v1/pomodoro-sessions/{{sessionId}}/resume
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"version": 1}

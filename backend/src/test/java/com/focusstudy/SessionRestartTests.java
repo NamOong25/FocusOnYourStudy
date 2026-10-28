@@ -56,6 +56,8 @@ class SessionRestartTests {
         Map<?, ?> savedSemesterGpa;
         Map<?, ?> savedCourseAttempts;
         Map<?, ?> savedCumulativeGpa;
+        Map<?, ?> pausedPomodoro;
+        Map<?, ?> runningPomodoro;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -101,6 +103,10 @@ class SessionRestartTests {
                 savedSemesterGpa = data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId + "/gpa", pair.get("accessToken").toString(), null));
                 savedCourseAttempts = data(app, semester(app, "GET", "/api/v1/course-attempts", pair.get("accessToken").toString(), null));
                 savedCumulativeGpa = data(app, semester(app, "GET", "/api/v1/gpa/cumulative", pair.get("accessToken").toString(), null));
+                var focusStart = semester(app, "POST", "/api/v1/pomodoro-sessions", pair.get("accessToken").toString(), Map.of("clientRequestId", UUID.randomUUID().toString(), "courseId", courseId, "assignmentId", assignmentId, "studySessionId", studyId, "timeZone", "Asia/Ho_Chi_Minh"));
+                assertThat(focusStart.statusCode()).isEqualTo(201);
+                var focus = (Map<?, ?>) app.getBean(ObjectMapper.class).readValue(focusStart.body(), Map.class).get("data");
+                pausedPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + focus.get("id") + "/pause", pair.get("accessToken").toString(), Map.of("version", focus.get("version"))));
                 var change = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-26", pair.get("accessToken").toString(), Map.of("kind", "CHANGED", "room", "B2.03", "startTime", "10:00", "endTime", "12:00", "scheduleVersion", 0));
                 assertThat(change.statusCode()).isEqualTo(200);
                 var cancelled = semester(app, "PUT", "/api/v1/class-schedules/" + classId + "/exceptions/2026-10-28", pair.get("accessToken").toString(), Map.of("kind", "CANCELLED", "reason", "Keep cancellation", "scheduleVersion", 1));
@@ -109,6 +115,10 @@ class SessionRestartTests {
             try (var app = start(schema)) {
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)));
                 rotated = pair.get("refreshToken").toString();
+                var paused = data(app, semester(app, "GET", "/api/v1/pomodoro-sessions/active", pair.get("accessToken").toString(), null));
+                for (String key : List.of("id", "clientRequestId", "startedAt", "stateChangedAt", "version", "context", "remainingMillis", "elapsedMillis")) assertThat(paused.get(key)).as(key).isEqualTo(pausedPomodoro.get(key));
+                assertThat(paused.get("status")).isEqualTo("PAUSED");
+                runningPomodoro = data(app, semester(app, "POST", "/api/v1/pomodoro-sessions/" + paused.get("id") + "/resume", pair.get("accessToken").toString(), Map.of("version", paused.get("version"))));
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId + "/gpa", pair.get("accessToken").toString(), null))).isEqualTo(savedSemesterGpa);
                 assertThat(data(app, semester(app, "GET", "/api/v1/course-attempts", pair.get("accessToken").toString(), null))).isEqualTo(savedCourseAttempts);
                 assertThat(data(app, semester(app, "GET", "/api/v1/gpa/cumulative", pair.get("accessToken").toString(), null))).isEqualTo(savedCumulativeGpa);
@@ -136,6 +146,10 @@ class SessionRestartTests {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
+                var restoredFocus = data(app, semester(app, "GET", "/api/v1/pomodoro-sessions/active", pair.get("accessToken").toString(), null));
+                for (String key : List.of("id", "clientRequestId", "startedAt", "stateChangedAt", "endsAt", "version", "context")) assertThat(restoredFocus.get(key)).as(key).isEqualTo(runningPomodoro.get(key));
+                assertThat(restoredFocus.get("status")).isEqualTo("RUNNING");
+                assertThat(((Number) restoredFocus.get("remainingMillis")).longValue()).isLessThan(((Number) runningPomodoro.get("remainingMillis")).longValue());
                 assertThat(data(app, semester(app, "GET", "/api/v1/semesters/" + semesterId + "/gpa", pair.get("accessToken").toString(), null))).isEqualTo(savedSemesterGpa);
                 assertThat(data(app, semester(app, "GET", "/api/v1/course-attempts", pair.get("accessToken").toString(), null))).isEqualTo(savedCourseAttempts);
                 assertThat(data(app, semester(app, "GET", "/api/v1/gpa/cumulative", pair.get("accessToken").toString(), null))).isEqualTo(savedCumulativeGpa);

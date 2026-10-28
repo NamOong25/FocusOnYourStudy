@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 5C.3 — GPA tích lũy, so sánh và Dashboard dùng API
+## Đợt vừa hoàn thành: 6A.1 — Backend lưu phiên Pomodoro
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Lưu phiên Pomodoro và hỗ trợ tạm dừng, tiếp tục qua API"
+git push origin main
+```
+
+V10 + API phiên học 25 phút theo giờ server, bắt đầu/tạm dừng/tiếp tục/đọc lại; một phiên hoạt động/tài khoản, Start chống trùng, version, snapshot ngữ cảnh và khôi phục qua restart. Không seed/reset dữ liệu cũ, không dependency/frontend mới. Hướng dẫn: `BACKEND-PHASE-6A1.md`; hợp đồng `backend/docs/POMODORO.md`. Hoàn tất/hủy/lịch sử/mục tiêu ở 6A.2, UI ở 6B. **568 tests/Maven verify đạt (31 test mới), không lỗi/bỏ qua; TypeScript và 403 test frontend hồi quy đạt.** Đã kiểm tra API/PostgreSQL, PowerShell 5.1, đồng thời, nâng V9 → V10 và đóng/mở toàn backend ba lần; schema test riêng tự dọn, không seed tài khoản thật.
+
+## Đợt trước: 5C.3 — GPA tích lũy, so sánh và Dashboard dùng API
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

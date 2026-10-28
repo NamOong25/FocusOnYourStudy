@@ -162,7 +162,16 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 5C.2C — Nghiệm thu web từ tài khoản trống: tạo kỳ/môn → cấu hình → nhập điểm → GPA học kỳ, đổi tên/thứ tự giữ đúng mã/điểm, trống/0/BTL và xóa hợp lệ. Hai tab thật, đóng/mở đối chiếu, backend mất kết nối/khởi động lại, mất phản hồi sau commit và đổi tài khoản đều đã kiểm tra. Sửa cảnh báo bỏ thay đổi khi form đã giữ bản nháp trong đối chiếu; bản nháp chưa gửi vẫn được bảo vệ. TypeScript/build web/374 tests frontend và 14 nhóm API/PostgreSQL riêng đạt. Không backend/schema/dependency/seed thật; xem `FRONTEND-PHASE-5C2C.md`.
 - [x] 5C.3 — GPA tích lũy có lịch sử/lý do chọn-bỏ; so sánh hai kỳ, đổi chỗ và mở bảng điểm; Dashboard GPA/cảnh báo theo kỳ dùng API thật. Sau lưu/F5 cập nhật cả ba màn, null khác 0, tải/lỗi/thử lại, phiên bản và tách tài khoản; mẫu giữ riêng. TypeScript/export web/403 tests frontend (29 mới; 124 test điểm) và QA web/API/PostgreSQL riêng đạt. Không backend/schema/dependency; xem `FRONTEND-PHASE-5C3.md`. Chính sách app lấy điểm đạt cao nhất, chưa xác nhận GPA chính thức; native 2C.3B và Pomodoro vẫn để sau.
 
+
 Đây là 5 đợt backend lõi được tách để dễ triển khai từng phần. Đợt 2 tiếp tục chia 2A → 2B → 2C; không làm hết trong một lần. 2A cần access token ngắn hạn để thử hồ sơ có bảo vệ; giữ phiên/refresh/đăng xuất vẫn thuộc 2B. Lộ trình đầy đủ phía dưới giữ Pomodoro, thống kê, tài liệu/AI và hoàn thiện. Chỉ đánh dấu toàn đợt khi đã kiểm tra đầy đủ chức năng thật.
+
+## Backend 6 — Pomodoro thực tế, triển khai từng phần
+
+- [ ] 6 — Hoàn thiện lưu/khôi phục phiên học thực tế, lịch sử, mục tiêu và thống kê dùng API. Giao diện hiện có không đồng nghĩa đã lưu backend; chỉ đánh dấu cả đợt sau nghiệm thu liên thông.
+- [x] 6A.1 — V10 + API bắt đầu/tạm dừng/tiếp tục/đọc phiên 25 phút, thời gian server và giữ ms; một phiên RUNNING/PAUSED mỗi tài khoản, khóa/unique index, clientRequestId chống Start trùng và version chống lệnh cũ. Snapshot môn/kỳ/bài/buổi được giữ; GET không ghi, giữ phiên qua restart, quyền tài khoản và script PowerShell 5.1. 568 tests/Maven verify (31 mới), TypeScript và 403 tests frontend hồi quy đạt. Không seed/reset dữ liệu thật/dependency/frontend. Xem `BACKEND-PHASE-6A1.md`; hoàn tất/hủy/lịch sử/mục tiêu còn ở 6A.2.
+- [ ] 6A.2 — API hoàn tất/hủy, lịch sử và mục tiêu ngày; quy tắc công nhận phiên, không ghi trùng/cộng giờ nghỉ, liên kết đúng kế hoạch/bài nhưng không tự hoàn thành bài tập. Phiên hết giờ 6A.1 vẫn chờ bước này.
+- [ ] 6B — Nối giao diện Pomodoro vào API, khôi phục trạng thái sau tải lại; lỗi/thử lại/đồng thời/tách tài khoản, thời gian thực tế thống nhất với lịch sử. Native/chạy nền thật vẫn nghiệm thu riêng theo 2C.3B.
+- [ ] 6C — Thời gian học, số phiên, mục tiêu ngày, chuỗi ngày và biểu đồ đọc dữ liệu thật; thống nhất Dashboard/lịch sử/Thống kê.
 
 ## Các đợt giao diện đã hoàn thành
 

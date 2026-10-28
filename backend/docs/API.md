@@ -4,9 +4,16 @@ Base URL cục bộ: `http://localhost:8080`. **Đã mở CRUD học kỳ/môn/b
 
 ## Endpoint hiện có
 
+Pomodoro 6A.1 đã có API lưu phiên thực tế theo tài khoản; xem [hợp đồng Pomodoro](POMODORO.md). Giao diện sẽ nối ở 6B, hoàn tất/hủy và lịch sử ở 6A.2.
+
 | Method/path | Quyền | Kết quả |
 | --- | --- | --- |
 | GET `/api/v1/health` | Công khai | SELECT 1 thật; 200 khi DB truy cập được, 503 nếu DB mất kết nối sau lúc app khởi động. |
+| GET `/api/v1/pomodoro-sessions/active` | Bearer và phiên hoạt động | 200, phiên Pomodoro hiện tại hoặc data:null; không ghi/tăng version. |
+| GET `/api/v1/pomodoro-sessions/{id}` | Bearer và phiên hoạt động | 200, snapshot thời gian/ngữ cảnh của mình; khác chủ 404. |
+| POST `/api/v1/pomodoro-sessions` | Bearer, môn thuộc mình, clientRequestId | 201 lần đầu; 200 nếu gửi lại đúng Start, giữ ID/giờ; 409 nếu đã có phiên khác. |
+| POST `/api/v1/pomodoro-sessions/{id}/pause` | Bearer, đúng chủ và version | 200, tạm dừng phiên RUNNING chưa hết giờ; không cộng thời gian nghỉ vào học. |
+| POST `/api/v1/pomodoro-sessions/{id}/resume` | Bearer, đúng chủ và version | 200, tiếp tục PAUSED, giữ thời gian đã học; lệnh cũ/sai trạng thái 409. |
 | GET `/actuator/health` | Công khai | Chỉ status, không lộ components/địa chỉ DB. |
 | POST `/api/v1/auth/register` | Công khai | 201, hồ sơ mới; không tự đăng nhập. |
 | POST `/api/v1/auth/login` | Mật khẩu; web có CSRF | 200, cặp token và hồ sơ; web giữ refresh token trong cookie. |
