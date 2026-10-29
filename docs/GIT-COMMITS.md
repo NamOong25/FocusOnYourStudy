@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6B.2 — Lịch sử, mục tiêu và tiến độ Pomodoro
+## Đợt vừa hoàn thành: 6B.3 — Nghiệm thu Pomodoro trên web
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Hoàn thiện và kiểm tra luồng Pomodoro trên web"
+git push origin main
+```
+
+Đã nghiệm thu thao tác web/F5/hai tab/lỗi mạng/backend khởi động lại/A-B, lịch sử/mục tiêu và bố cục 360px; sửa lỗi phát hiện, bổ sung test PUT đã commit nhưng thử lại gặp 409, ảnh và hướng dẫn 6B.3. TypeScript, 505 tests frontend và export web đạt. Điện thoại/chạy nền vẫn để 2C.3B. Chưa tự commit hoặc push.
+
+## 6B.2 — Lịch sử, mục tiêu và tiến độ Pomodoro
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

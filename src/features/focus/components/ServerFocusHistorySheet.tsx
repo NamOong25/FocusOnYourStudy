@@ -23,7 +23,7 @@ function HistoryRow({ row, timeZone, onCourse }: { row: PomodoroSession; timeZon
   </Card>;
 }
 function Choice<T extends string>({ values, value, onChange }: { values: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
-  return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{values.map(option => <Pressable key={option.value} accessibilityRole="radio" accessibilityLabel={option.label} accessibilityState={{ checked: value === option.value }} onPress={() => onChange(option.value)} style={{ paddingHorizontal: 13, minHeight: 44, borderRadius: 15, justifyContent: 'center', backgroundColor: value === option.value ? C.primary : C.canvas }}><T style={{ fontSize: 12, color: value === option.value ? 'white' : C.muted }}>{option.label}</T></Pressable>)}</View>;
+  return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{values.map(option => <Pressable key={option.value} accessibilityRole="radio" accessibilityLabel={option.label} accessibilityState={{ checked: value === option.value }} aria-checked={value === option.value} onPress={() => onChange(option.value)} style={{ paddingHorizontal: 13, minHeight: 44, borderRadius: 15, justifyContent: 'center', backgroundColor: value === option.value ? C.primary : C.canvas }}><T style={{ fontSize: 12, color: value === option.value ? 'white' : C.muted }}>{option.label}</T></Pressable>)}</View>;
 }
 export default function ServerFocusHistorySheet({ timeZone, today, revision, onClose }: { timeZone: string; today: string; revision: string; onClose: () => void }) {
   const api = usePomodoroInsightsApi(), { courseCatalog, semesters } = useApp();

@@ -74,7 +74,7 @@ Không sửa đồng hồ máy để ép hoàn tất. Kiểm thử tự động 
 1. Mở hai tab cùng địa chỉ ứng dụng, đăng nhập cùng tài khoản; cả hai mở **Sửa mục tiêu** từ cùng một phiên bản.
 2. Tab A chọn **5** nhưng chưa lưu. Tab B chọn **8** rồi lưu.
 3. Tab A bấm lưu: báo mục tiêu đã thay đổi, giữ lựa chọn **5**; không ghi đè mục tiêu **8**.
-4. Bấm **Nạp mục tiêu mới và chọn lại**: hiện **8**; sau khi xem, có thể chọn giá trị khác và lưu theo phiên bản mới.
+4. Nếu đang hiện **Đối chiếu mục tiêu đã lưu**, bấm để đọc kết quả trước (đã siết ở 6B.3 vì trình duyệt có thể tự gửi lại PUT sau mất phản hồi). Khi giá trị đã lưu khác lựa chọn cũ, bấm **Nạp mục tiêu mới và chọn lại**: hiện **8**; sau khi xem, có thể chọn giá trị khác và lưu theo phiên bản mới. Nếu giá trị đã lưu đã bằng lựa chọn đang chờ, app xác nhận kết quả hiện tại và không gửi lại.
 5. Tab không đang mở biểu mẫu đọc lại tiến độ sau tín hiệu cập nhật hoặc khi quay lại foreground. Không yêu cầu hai tab cập nhật ngay trong cùng một mili giây.
 
 ### 6. Lỗi mạng và tài khoản riêng
@@ -90,6 +90,6 @@ Không sửa đồng hồ máy để ép hoàn tất. Kiểm thử tự động 
 
 **19 tình huống frontend manager/API/PostgreSQL thật đạt trong schema QA biệt lập:** mục tiêu lưu/đọc lại, default không ghi, version cũ, mất phản hồi giả lập sau một commit thật, retry thủ công, no-op; phiên hủy không cộng phút, hoàn tất 1/6–25 phút và 10 phiên–250 phút; endedAt khác finalizedAt; 12 phiên/phân trang và bộ lọc, múi giờ UTC/tài khoản, đổi mục tiêu không sửa minutes; hai tài khoản, tên nguồn đổi/xóa và trang vượt giới hạn. Tất cả tài khoản/phiên test nằm trong schema tạm; đã dọn schema sau kiểm tra.
 
-**Chưa nghiệm thu thao tác UI bằng browser:** cả công cụ điều khiển trình duyệt và runtime dự phòng vẫn lỗi khởi tạo `failed to write kernel assets ... os error 3`. Kiểm thử API/manager không được coi là bằng chứng F5/hai tab/click/scroll/viewport trên trình duyệt. Các bước UI ở trên được giữ cho **6B.3**; điện thoại thật/chạy nền vẫn hoãn theo **2C.3B**.
+**Cập nhật 6B.3: đã nghiệm thu thao tác UI trên browser**, gồm F5/hai tab/đổi tài khoản/lỗi mạng/backend khởi động lại và viewport. Xem [biên bản 6B.3](FRONTEND-PHASE-6B3.md) để biết kết quả và ảnh. Điện thoại thật/chạy nền vẫn hoãn theo **2C.3B**.
 
 Biểu đồ tuần/tháng, chuỗi ngày và thời gian học trên các màn tổng hợp sẽ nối ở **6C**. Chưa dùng thẻ tuần/chuỗi ngày RAM của bản mẫu trong màn Tập trung tài khoản; tài khoản hiện vẫn chỉ có phiên tập trung 25 phút, chưa thêm chế độ nghỉ ngắn/dài thật.

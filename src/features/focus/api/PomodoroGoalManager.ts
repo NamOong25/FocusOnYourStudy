@@ -70,7 +70,9 @@ export class PomodoroGoalManager {
       this.announce(); return goal;
     }).catch(failure => {
       if (!this.disposed) {
-        const error = asApiError(failure), keep = previouslyUncertain || uncertain(error);
+        // A browser may retry a PUT after losing its reply. The retry can return
+        // 409 even though the original write committed; GET must resolve it.
+        const error = asApiError(failure), keep = previouslyUncertain || uncertain(error) || error.status === 409;
         this.publish({ error, pending: keep ? { ...attempt } : null, needsReload: keep || error.status === 409, needsReview: error.status === 409 });
       }
       throw failure;

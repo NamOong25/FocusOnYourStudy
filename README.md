@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; thống kê thời gian còn ở 6C.
 
-## Mới nhất — 6B.2: Lịch sử, mục tiêu và tiến độ Pomodoro
+## Mới nhất — 6B.3: Nghiệm thu Pomodoro trên web
+
+Đã kiểm tra trực tiếp Start/Pause/Resume/Complete/Cancel, F5, hai tab, mục tiêu, lịch sử/bộ lọc/phân trang, lỗi mạng, backend khởi động lại và đổi tài khoản A/B trên database QA riêng. Sửa thẻ mục tiêu tràn ở 360px, trạng thái chọn cho trợ năng, nhãn dữ liệu cũ và hồ sơ tự mở sau F5. Giữ yêu cầu mục tiêu qua lỗi 409 để đối chiếu khi trình duyệt tự gửi lại PUT sau mất phản hồi.
+
+**TypeScript, 505 tests frontend và export web đạt.** Xem [biên bản nghiệm thu, ảnh và hướng dẫn test 6B.3](docs/FRONTEND-PHASE-6B3.md). Đã bổ sung phần nghiệm thu UI còn thiếu của 6B.1/6B.2. Điện thoại/chạy nền vẫn để 2C.3B; thống kê thời gian/chuỗi ngày làm tiếp ở 6C. Không backend/schema/dependency mới.
+
+## 6B.2: Lịch sử, mục tiêu và tiến độ Pomodoro
 
 Màn Tập trung tài khoản có mục tiêu 1–12 phiên/ngày, tiến độ và phút học lấy từ backend; lưu mục tiêu giữ qua lần mở lại. Lịch sử có phiên hoàn tất/hủy, chi tiết môn/bài/buổi học, lọc trạng thái/môn/khoảng ngày và phân trang 10 phiên. Phiên hủy không được cộng tiến độ; ngày tính theo giờ kết thúc thực tế và múi giờ tài khoản. Thay đổi mục tiêu giữ nguyên số phiên/phút đã hoàn tất. Lỗi lưu hoặc xung đột giữ lựa chọn để đối chiếu, không tự ghi đè.
 
