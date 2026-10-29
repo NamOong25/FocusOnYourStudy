@@ -1,4 +1,4 @@
-# Pomodoro — hợp đồng 6A.1/6A.2/6C.1
+# Pomodoro — hợp đồng 6A.1/6A.2/6C.1/6C.3A
 
 Ngày 28/10/2026. API `/api/v1/pomodoro-sessions`, xác thực Bearer theo tài khoản hiện tại; không nhận `userId`. Success dùng `{data,meta}`, lỗi dùng ProblemDetail và `code` hiện có. Response không cache (`Cache-Control: no-store`). V10 thêm `pomodoro_sessions`; V11 bổ sung trạng thái kết thúc/mục tiêu và giữ nguyên phiên V10. Không seed hoặc sửa dữ liệu học tập cũ.
 
@@ -155,3 +155,40 @@ Một transaction chỉ đọc REPEATABLE_READ lấy múi giờ hồ sơ (nếu 
 Query kỳ/ngày/zone không hợp lệ trả 400 `INVALID_POMODORO_STATISTICS_FILTER`; UUID sai định dạng dùng lỗi binding 400 hiện có. Thiếu Bearer trả 401. Hướng dẫn tại [6C.1](../../docs/BACKEND-PHASE-6C1.md), request `api/pomodoro-statistics.http`. Script `Try-Pomodoro.ps1 -Mode Statistics` chuẩn hóa Period sang chữ hoa và chỉ gửi timeZone khi người dùng truyền rõ, nên bỏ tham số zone sẽ theo hồ sơ (khác chế độ Daily cũ luôn gửi zone mặc định).
 
 Đợt 6C.1 chưa có API chuỗi ngày hoặc thay biểu đồ/Dashboard. Hai phần giao diện tiếp tục ở 6C.2/6C.3.
+
+## Chuỗi ngày học — 6C.3A
+
+Bổ sung ngày 29/10/2026: **GET `/api/v1/pomodoro-streak`**, Bearer theo tài khoản, `{data,meta}`, `Cache-Control: no-store`. Chỉ mở method GET trong SecurityConfig. Không nhận userId; các method/route khác giữ deny-by-default. Không thêm bảng/migration hoặc lưu bộ đếm chuỗi.
+
+| Query | Quy tắc |
+| --- | --- |
+| `month` | Tùy chọn `yyyy-MM`, tháng 1900–2099; bỏ qua thì dùng tháng chứa hôm nay trong múi giờ đã chọn. Chuỗi vẫn tính trên toàn lịch sử đến hôm nay. |
+| `timeZone` | ZoneId IANA được Java server hỗ trợ; bỏ qua thì dùng hồ sơ tài khoản. |
+
+Ngày tham chiếu **today lấy từ đồng hồ server trong timeZone**, không lấy từ thiết bị hoặc tháng lịch đang xem. API này tính chuỗi toàn tài khoản, không lọc theo môn/học kỳ và không có tham số giả lập ngày hiện tại.
+
+Một ngày đã học khi có ít nhất một phiên COMPLETED với endedAt thuộc ngày đó. Ngày dùng quy tắc ZoneId Java, thống nhất Daily/Statistics: không theo ngày bắt đầu, ngày xác nhận finalizedAt hoặc zone lưu trên từng phiên. RUNNING/PAUSED/CANCELLED và phiên hết giờ chưa Complete không đánh dấu ngày. Số phiên lớn hơn một trong cùng ngày vẫn chỉ tăng một ngày học; mục tiêu ngày 1–12 không thay điều kiện này.
+
+`data` gồm:
+
+| Field | Ý nghĩa |
+| --- | --- |
+| `today`, `timeZone` | Ngày tham chiếu và múi giờ thực sự sử dụng. |
+| `currentStreakDays` | Độ dài chuỗi kết thúc hôm nay; nếu hôm nay chưa học nhưng hôm qua đã học thì giữ chuỗi kết thúc hôm qua. Nếu cả hôm nay/hôm qua chưa học thì 0. |
+| `longestStreakDays` | Chuỗi dài nhất trong lịch sử được hỗ trợ, đến hết ngày today. |
+| `totalStudiedDays` | Số ngày học khác nhau trong toàn bộ lịch sử đến today; không phải tổng số phiên. |
+| `studiedToday` | Hôm nay có ít nhất một phiên hoàn tất hay chưa. |
+| `firstStudyDate`, `lastStudyDate` | Ngày học đầu/cuối; null nếu chưa có ngày học. |
+| `currentStreakStartDate`, `currentStreakEndDate` | Khoảng chuỗi hiện tại; cả hai null khi currentStreakDays = 0. End có thể là hôm qua. |
+| `longestStreakStartDate`, `longestStreakEndDate` | Khoảng chuỗi dài nhất; null nếu chưa học. Nếu nhiều chuỗi dài bằng nhau, chọn chuỗi có ngày kết thúc gần nhất. |
+| `calendar` | Dữ liệu tháng đang chọn, không ảnh hưởng các field chuỗi/toàn lịch sử phía trên. |
+
+`calendar` gồm `month,fromDate,toDate,from,to,studiedDays,completedSessions,studyMillis,studySeconds,days`. Date đầu/cuối bao gồm cả ngày; instant from/to là **[from,to)**. Có đủ 28–31 dòng ngày tăng dần, mỗi dòng `{date,from,to,studied,completedSessions,studyMillis,studySeconds}`. Ngày không học là false/0; ngày tương lai false/0. Tháng tương lai có lịch trống nhưng chuỗi hiện tại/dài nhất giữ nguyên. Các tổng calendar bằng tổng các dòng ngày; đơn vị giây là ms/1000, mỗi phiên công nhận 1.500 giây.
+
+Lịch sử chỉ xét các ngày local từ 1900-01-01 đến today, bằng khoảng instant `[historyFrom,today.to)`. Có thể xem lịch 1900–2099 nhưng dữ liệu tương lai chưa được tính. Một snapshot đồng hồ xác định đồng thời today/tháng mặc định/cutoff, tránh lệch khi qua nửa đêm. DST 23/25 giờ vẫn tính một ngày. Nếu một ngày local bị bỏ qua hoàn toàn do thay đổi múi giờ lịch sử (ví dụ Pacific/Apia 30/12/2011), lịch vẫn trả bucket false/0/from=to; ngày không có cơ hội học đó không cộng vào chuỗi và không làm đứt chuỗi giữa hai ngày thực tế liền kề. Ngày bình thường không học vẫn làm đứt chuỗi.
+
+Transaction chỉ đọc REPEATABLE_READ lấy zone hồ sơ (nếu cần) và một truy vấn hai cột `ended_at,elapsed_millis` của các phiên COMPLETED thuộc owner. JDBC forward-only/fetchSize 256, gộp bằng Java theo local date; không tải entity/metadata đầy đủ hoặc toàn bộ danh sách phiên vào bộ nhớ. Bộ nhớ theo số ngày khác nhau, tối đa phạm vi ngày được hỗ trợ; chi phí đọc tăng theo số phiên hoàn tất. Dùng chỉ mục lịch sử V11 hiện có. Không đổi timezone session database hoặc phụ thuộc timezone alias của PostgreSQL. Mọi chuỗi và calendar được tính từ cùng tập dữ liệu; không query riêng từng ngày, không join môn/kỳ đã đổi/xóa và không tạo mục tiêu/cài đặt khi GET.
+
+Month/zone sai trả 400 `INVALID_POMODORO_STREAK_FILTER`; thiếu Bearer trả 401, cookie riêng lẻ không cấp quyền. Đọc đồng thời Complete có thể thấy trước hoặc sau commit, nhưng một response không có tổng/ngày/chuỗi khác snapshot. Các lần GET riêng có thể thấy dữ liệu mới hơn; frontend cần tải lại sau hoàn tất và khi qua ngày.
+
+Xem [hướng dẫn 6C.3A](../../docs/BACKEND-PHASE-6C3A.md), `api/pomodoro-streak.http`, `scripts/Try-Pomodoro.ps1 -Mode Streak [-Month yyyy-MM] [-TimeZone IANA]`. Script bỏ zone thì theo hồ sơ, dùng phiên đăng nhập tạm và logout đúng phiên đó; chặn các tham số Date/Period/course/semester không thuộc chế độ Streak trước khi hỏi mật khẩu. Giao diện/Dashboard nối ở **6C.3B**.

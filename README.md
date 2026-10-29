@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày/Dashboard tiếp tục ở 6C.3.
 
-## Mới nhất — 6C.2: Thống kê dùng dữ liệu tài khoản
+## Mới nhất — 6C.3A: API chuỗi ngày học
+
+Backend có `GET /api/v1/pomodoro-streak`: chuỗi hiện tại, chuỗi dài nhất, tổng ngày đã học và lịch đánh dấu từng ngày trong tháng. Một ngày có ít nhất một phiên COMPLETED được tính một lần; chưa học hôm nay vẫn giữ chuỗi đến hôm qua. Đổi tháng xem lịch không làm đổi chuỗi của toàn tài khoản. Tính theo ngày kết thúc thực tế và múi giờ hồ sơ hoặc múi giờ đã chọn; phiên hủy/đang học/tạm dừng không được cộng.
+
+Chạy lại backend rồi dùng `scripts/Try-Pomodoro.ps1 -Mode Streak` trong thư mục `backend`, tùy chọn `-Month '2026-10' -TimeZone 'Asia/Ho_Chi_Minh'`. Xem [hướng dẫn test 6C.3A](docs/BACKEND-PHASE-6C3A.md) và [hợp đồng](backend/docs/POMODORO.md#chuỗi-ngày-học--6c3a). Dùng các bảng/chỉ mục V11 hiện có; không thêm migration hoặc dependency. **Giao diện chuỗi ngày và Dashboard sẽ nối ở 6C.3B.**
+
+**686 tests backend/Maven verify đạt (47 mới), TypeScript và 529 tests frontend hồi quy đạt, không lỗi/bỏ qua.** Gồm HTTP/PostgreSQL, PowerShell 5.1, giữ/mất chuỗi qua ngày, lịch khớp Daily/Statistics, tách tài khoản, DST/ngày bị bỏ qua, đọc nhiều batch và Complete đồng thời. Schema test riêng tự dọn; không seed/reset tài khoản đang dùng.
+
+## 6C.2: Thống kê dùng dữ liệu tài khoản
 
 **Thống kê → Tổng quan** đọc số phiên/phút thật từ backend: chọn tuần/tháng, lùi/tiến hoặc chọn ngày bằng lịch, lọc học kỳ và môn. Biểu đồ tháng giữ đủ từng ngày, cuộn ngang và chạm cột để xem chi tiết; phân bố môn giữ tên/học kỳ từ phiên học. Số liệu đọc lại sau hoàn tất Pomodoro, F5, quay lại màn hoặc đồng bộ tab. Có tải/lỗi/trống/thử lại; phản hồi của tài khoản/bộ lọc cũ không được hiển thị vào lựa chọn mới. Chế độ xem thử giữ luồng riêng.
 

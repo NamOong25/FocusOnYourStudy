@@ -1,0 +1,19 @@
+### Store accessToken only in your PRIVATE HTTP-client environment.
+@baseUrl = http://localhost:8080
+@month = 2026-10
+
+### Current streak and calendar month, using the profile time zone
+GET {{baseUrl}}/api/v1/pomodoro-streak
+Authorization: Bearer {{accessToken}}
+
+### Choose a calendar month; current/longest streak still use all history up to today
+GET {{baseUrl}}/api/v1/pomodoro-streak?month={{month}}&timeZone=Asia%2FHo_Chi_Minh
+Authorization: Bearer {{accessToken}}
+
+### UTC can assign an overnight session to a different local date
+GET {{baseUrl}}/api/v1/pomodoro-streak?month={{month}}&timeZone=UTC
+Authorization: Bearer {{accessToken}}
+
+### Invalid month -> 400 INVALID_POMODORO_STREAK_FILTER
+GET {{baseUrl}}/api/v1/pomodoro-streak?month=2026-13
+Authorization: Bearer {{accessToken}}

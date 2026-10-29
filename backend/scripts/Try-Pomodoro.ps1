@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet('Active','Get','Start','Pause','Resume','Complete','Cancel','History','Goal','SetGoal','Daily','Statistics')][string]$Mode = 'Active',
+    [ValidateSet('Active','Get','Start','Pause','Resume','Complete','Cancel','History','Goal','SetGoal','Daily','Statistics','Streak')][string]$Mode = 'Active',
     [string]$BaseUrl = 'http://localhost:8080',
     [guid]$CourseId = [guid]::Empty,
     [guid]$ClientRequestId = [guid]::Empty,
@@ -16,7 +16,8 @@
     [ValidateRange(0,2147483647)][int]$Page = 0,
     [ValidateRange(1,100)][int]$Size = 20,
     [ValidateRange(1,12)][int]$DailySessions = 4,
-    [ValidateSet('WEEK','MONTH')][string]$Period = 'WEEK'
+    [ValidateSet('WEEK','MONTH')][string]$Period = 'WEEK',
+    [string]$Month = ''
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Read-ApiProblem.ps1')
@@ -26,6 +27,10 @@ if (![Uri]::TryCreate($BaseUrl,[UriKind]::Absolute,[ref]$parsedBase) -or $parsed
 if ($Mode -eq 'Start' -and ($CourseId -eq [guid]::Empty -or $ClientRequestId -eq [guid]::Empty)) { throw 'Start cần -CourseId và -ClientRequestId. Giữ cùng ClientRequestId nếu cần đối chiếu/gửi lại đúng yêu cầu bắt đầu.' }
 if ($Mode -eq 'Get' -and $SessionId -eq [guid]::Empty) { throw 'Get cần -SessionId.' }
 if ($PSBoundParameters.ContainsKey('Version') -and ($null -eq $Version -or $Version -lt 0)) { throw 'Version phải là số nguyên không âm.' }
+if ($Mode -eq 'Streak') {
+    $unrelated = @('Date','Period','CourseId','SemesterId','Status','From','To','Page','Size','DailySessions','SessionId','AssignmentId','StudySessionId','Version','ClientRequestId') | Where-Object { $PSBoundParameters.ContainsKey($_) }
+    if ($unrelated) { throw 'Streak tính chuỗi ngày toàn tài khoản tới hôm nay trên server. Chỉ chọn -Month yyyy-MM và -TimeZone; không lọc môn/kỳ hoặc chọn ngày giả định.' }
+}
 function Invoke-PomodoroApi([string]$Path,[string]$Method,$Payload,[string]$Token) {
     $arguments = @{ Uri = "$BaseUrl$Path"; Method = $Method; Headers = @{}; TimeoutSec = 15 }
     if ($Token) { $arguments.Headers.Authorization = "Bearer $Token" }
@@ -74,6 +79,12 @@ try {
             if ($entry.Value -ne [guid]::Empty) { $query.Add("$($entry.Key)=$($entry.Value)") }
         }
         $result = Invoke-PomodoroApi ('/api/v1/pomodoro-statistics?' + ($query -join '&')) 'GET' $null $login.data.accessToken
+    } elseif ($Mode -eq 'Streak') {
+        $query = New-Object 'System.Collections.Generic.List[string]'
+        if ($PSBoundParameters.ContainsKey('Month')) { $query.Add('month=' + [Uri]::EscapeDataString($Month)) }
+        if ($PSBoundParameters.ContainsKey('TimeZone')) { $query.Add('timeZone=' + [Uri]::EscapeDataString($TimeZone)) }
+        $suffix = if ($query.Count) { '?' + ($query -join '&') } else { '' }
+        $result = Invoke-PomodoroApi ('/api/v1/pomodoro-streak' + $suffix) 'GET' $null $login.data.accessToken
     } elseif ($Mode -eq 'Goal') {
         $result = Invoke-PomodoroApi '/api/v1/pomodoro-goal' 'GET' $null $login.data.accessToken
     } elseif ($Mode -eq 'SetGoal') {
@@ -97,6 +108,10 @@ try {
     if ($Mode -eq 'Statistics') {
         Write-Host "Thống kê: $($result.data.completedSessions) phiên · $($result.data.studySeconds / 60) phút." -ForegroundColor Cyan
         Write-Host "$($result.data.fromDate) - $($result.data.toDate) · $($result.data.timeZone) · $($result.data.courses.Count) nhóm môn/học kỳ."
+    } elseif ($Mode -eq 'Streak') {
+        Write-Host "Chuỗi hiện tại: $($result.data.currentStreakDays) ngày · Dài nhất: $($result.data.longestStreakDays) ngày." -ForegroundColor Cyan
+        Write-Host "Hôm nay: $($result.data.today) · $($result.data.timeZone) · Đã học: $($result.data.studiedToday)."
+        Write-Host "Lịch tháng $($result.data.calendar.month): $($result.data.calendar.studiedDays) ngày học · $($result.data.calendar.completedSessions) phiên."
     } elseif ($Mode -eq 'History') {
         Write-Host "Lịch sử: $($result.data.totalElements) phiên đã kết thúc · Trang $($result.data.page)." -ForegroundColor Cyan
     } elseif ($Mode -in @('Goal','SetGoal')) {
@@ -108,7 +123,8 @@ try {
         Write-Host "Trạng thái: $($result.data.status) · Còn $($result.data.remainingSeconds) giây · Version $($result.data.version)." -ForegroundColor Cyan
         if ($result.data.timeUp -and $result.data.status -eq 'RUNNING') { Write-Host 'Đã đủ 25 phút. Dùng -Mode Complete để công nhận phiên.' -ForegroundColor Yellow }
     }
-    if ($Mode -eq 'Statistics') { Write-Host 'Thống kê lấy từ PostgreSQL. Biểu đồ sẽ nối dữ liệu này ở 6C.2.' }
+    if ($Mode -eq 'Streak') { Write-Host 'Chuỗi ngày lấy từ PostgreSQL. Giao diện chuỗi ngày và Dashboard sẽ nối ở 6C.3B.' }
+    elseif ($Mode -eq 'Statistics') { Write-Host 'Thống kê lấy từ PostgreSQL. Biểu đồ đã nối dữ liệu này ở 6C.2.' }
     else { Write-Host 'Dữ liệu lấy từ PostgreSQL. Giao diện Pomodoro đã nối API ở 6B.' }
 } catch {
     $failure = $_; $problem = Read-ApiProblem $failure
@@ -117,6 +133,7 @@ try {
         foreach ($item in $problem.errors) { Write-Host "  $($item.field): $($item.message)" }
     } else { Write-Host "Chưa hoàn thành thao tác Pomodoro. Kiểm tra backend/cổng/tham số. Mã lỗi: $($failure.FullyQualifiedErrorId)" -ForegroundColor Red }
     if ($Mode -eq 'Statistics') { throw 'Chưa đọc được thống kê. Kiểm tra backend, múi giờ và khoảng thống kê rồi chạy lại.' }
+    if ($Mode -eq 'Streak') { throw 'Chưa đọc được chuỗi ngày. Kiểm tra backend, tháng và múi giờ rồi chạy lại.' }
     throw 'Không tự gửi lại thao tác ghi. Dùng -Mode Active hoặc Get để đối chiếu trước.'
 } finally {
     if ($login -and $login.data.refreshToken) {
