@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6B.3 — Nghiệm thu Pomodoro trên web
+## Đợt vừa hoàn thành: 6C.1 — API thống kê thời gian học
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Bổ sung API thống kê thời gian học Pomodoro"
+git push origin main
+```
+
+API tuần/tháng theo tài khoản và múi giờ, trả tổng phiên/phút, dữ liệu từng ngày và phân bố môn/học kỳ từ phiên COMPLETED. Có script đọc, bộ request HTTP, kiểm thử API/PostgreSQL và hướng dẫn `BACKEND-PHASE-6C1.md`. Không thay giao diện, schema hoặc dependency; biểu đồ nối ở 6C.2, chuỗi ngày/Dashboard ở 6C.3. Chưa tự commit hoặc push.
+
+## 6B.3 — Nghiệm thu Pomodoro trên web
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

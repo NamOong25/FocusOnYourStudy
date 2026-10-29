@@ -177,6 +177,10 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [ ] Nghỉ ngắn/dài cho tài khoản — Chốt lưu/khôi phục chế độ nghỉ và hành vi F5/chuyển tab, không cộng giờ nghỉ vào phút tập trung. Hiện API/tài khoản chỉ có phiên tập trung 25 phút; bản mẫu giữ chế độ nghỉ cũ.
 
 - [ ] 6C — Thời gian học, số phiên, mục tiêu ngày, chuỗi ngày và biểu đồ đọc dữ liệu thật; thống nhất Dashboard/lịch sử/Thống kê.
+- [x] 6C.1 — API thống kê tuần/tháng theo tài khoản và múi giờ: tổng phiên/phút, từng ngày và từng môn/học kỳ; chỉ COMPLETED, theo endedAt, ngày trống bằng 0 và giữ snapshot nguồn đã đổi/xóa. Có bộ lọc môn/kỳ, script PowerShell 5.1, request HTTP và đối chiếu lịch sử/Daily; GET không ghi. Xem `BACKEND-PHASE-6C1.md`. Dùng V11 hiện có, chưa đổi UI.
+- Kiểm tra 6C.1: **639 tests backend/Maven verify đạt (33 mới), TypeScript và 505 tests frontend hồi quy đạt, không lỗi/bỏ qua.** Các test HTTP/PostgreSQL dùng schema biệt lập tự dọn, không seed tài khoản thật.
+- [ ] 6C.2 — Nối màn Thống kê với API: tuần/tháng, biểu đồ theo ngày, phân bố môn, tải/lỗi/trống/thử lại; đồng bộ sau hoàn tất phiên và chống nhầm dữ liệu khi đổi tài khoản/bộ lọc.
+- [ ] 6C.3 — Chuỗi ngày và Dashboard dùng số liệu thật, đối chiếu với lịch sử/Thống kê; nghiệm thu liên thông. Điện thoại/chạy nền vẫn thuộc 2C.3B đã hoãn.
 
 ## Các đợt giao diện đã hoàn thành
 

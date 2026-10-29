@@ -1,0 +1,25 @@
+### IntelliJ HTTP Client: configure accessToken in your PRIVATE environment only.
+@baseUrl = http://localhost:8080
+@date = 2026-10-29
+@courseId = REPLACE_WITH_OWN_ORIGINAL_COURSE_UUID
+@semesterId = REPLACE_WITH_OWN_ORIGINAL_SEMESTER_UUID
+
+### Current ISO week, using the account profile time zone
+GET {{baseUrl}}/api/v1/pomodoro-statistics
+Authorization: Bearer {{accessToken}}
+
+### Week containing the chosen local date, Monday through Sunday
+GET {{baseUrl}}/api/v1/pomodoro-statistics?period=WEEK&date={{date}}&timeZone=Asia%2FHo_Chi_Minh
+Authorization: Bearer {{accessToken}}
+
+### Whole calendar month; days with no completed sessions remain zero buckets
+GET {{baseUrl}}/api/v1/pomodoro-statistics?period=MONTH&date={{date}}&timeZone=Asia%2FHo_Chi_Minh
+Authorization: Bearer {{accessToken}}
+
+### Optional original snapshot semester/course filters (even after source deletion)
+GET {{baseUrl}}/api/v1/pomodoro-statistics?period=MONTH&date={{date}}&semesterId={{semesterId}}&courseId={{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### Invalid period -> 400 INVALID_POMODORO_STATISTICS_FILTER
+GET {{baseUrl}}/api/v1/pomodoro-statistics?period=DAY
+Authorization: Bearer {{accessToken}}

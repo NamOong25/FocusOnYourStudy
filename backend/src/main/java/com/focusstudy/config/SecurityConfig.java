@@ -109,7 +109,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters/*/gpa").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/course-attempts", "/api/v1/courses/*/attempts").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/gpa/cumulative").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*", "/api/v1/pomodoro-goal").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*", "/api/v1/pomodoro-goal", "/api/v1/pomodoro-statistics").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*/pause", "/api/v1/pomodoro-sessions/*/resume", "/api/v1/pomodoro-sessions/*/complete", "/api/v1/pomodoro-sessions/*/cancel").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pomodoro-goal").authenticated()
                         .anyRequest().denyAll())

@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet('Active','Get','Start','Pause','Resume','Complete','Cancel','History','Goal','SetGoal','Daily')][string]$Mode = 'Active',
+    [ValidateSet('Active','Get','Start','Pause','Resume','Complete','Cancel','History','Goal','SetGoal','Daily','Statistics')][string]$Mode = 'Active',
     [string]$BaseUrl = 'http://localhost:8080',
     [guid]$CourseId = [guid]::Empty,
     [guid]$ClientRequestId = [guid]::Empty,
@@ -15,7 +15,8 @@
     [string]$Date = '',
     [ValidateRange(0,2147483647)][int]$Page = 0,
     [ValidateRange(1,100)][int]$Size = 20,
-    [ValidateRange(1,12)][int]$DailySessions = 4
+    [ValidateRange(1,12)][int]$DailySessions = 4,
+    [ValidateSet('WEEK','MONTH')][string]$Period = 'WEEK'
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Read-ApiProblem.ps1')
@@ -64,6 +65,15 @@ try {
             if ($entry.Value) { $query.Add("$($entry.Key)=$([Uri]::EscapeDataString($entry.Value))") }
         }
         $result = Invoke-PomodoroApi ($path + '?' + ($query -join '&')) 'GET' $null $login.data.accessToken
+    } elseif ($Mode -eq 'Statistics') {
+        $query = New-Object 'System.Collections.Generic.List[string]'
+        $query.Add('period=' + $Period.ToUpperInvariant())
+        if ($Date) { $query.Add('date=' + [Uri]::EscapeDataString($Date)) }
+        if ($PSBoundParameters.ContainsKey('TimeZone')) { $query.Add('timeZone=' + [Uri]::EscapeDataString($TimeZone)) }
+        foreach ($entry in @{courseId=$CourseId;semesterId=$SemesterId}.GetEnumerator()) {
+            if ($entry.Value -ne [guid]::Empty) { $query.Add("$($entry.Key)=$($entry.Value)") }
+        }
+        $result = Invoke-PomodoroApi ('/api/v1/pomodoro-statistics?' + ($query -join '&')) 'GET' $null $login.data.accessToken
     } elseif ($Mode -eq 'Goal') {
         $result = Invoke-PomodoroApi '/api/v1/pomodoro-goal' 'GET' $null $login.data.accessToken
     } elseif ($Mode -eq 'SetGoal') {
@@ -84,7 +94,10 @@ try {
         $result = Invoke-PomodoroApi "$path/$($current.data.id)/$action" 'POST' @{version=$expected} $login.data.accessToken
     }
     $result | ConvertTo-Json -Depth 12
-    if ($Mode -eq 'History') {
+    if ($Mode -eq 'Statistics') {
+        Write-Host "Thống kê: $($result.data.completedSessions) phiên · $($result.data.studySeconds / 60) phút." -ForegroundColor Cyan
+        Write-Host "$($result.data.fromDate) - $($result.data.toDate) · $($result.data.timeZone) · $($result.data.courses.Count) nhóm môn/học kỳ."
+    } elseif ($Mode -eq 'History') {
         Write-Host "Lịch sử: $($result.data.totalElements) phiên đã kết thúc · Trang $($result.data.page)." -ForegroundColor Cyan
     } elseif ($Mode -in @('Goal','SetGoal')) {
         Write-Host "Mục tiêu: $($result.data.dailySessions) phiên/ngày · Version $($result.data.version)." -ForegroundColor Cyan
@@ -95,13 +108,15 @@ try {
         Write-Host "Trạng thái: $($result.data.status) · Còn $($result.data.remainingSeconds) giây · Version $($result.data.version)." -ForegroundColor Cyan
         if ($result.data.timeUp -and $result.data.status -eq 'RUNNING') { Write-Host 'Đã đủ 25 phút. Dùng -Mode Complete để công nhận phiên.' -ForegroundColor Yellow }
     }
-    Write-Host 'Dữ liệu lấy từ PostgreSQL. Giao diện Pomodoro sẽ nối API ở 6B.'
+    if ($Mode -eq 'Statistics') { Write-Host 'Thống kê lấy từ PostgreSQL. Biểu đồ sẽ nối dữ liệu này ở 6C.2.' }
+    else { Write-Host 'Dữ liệu lấy từ PostgreSQL. Giao diện Pomodoro đã nối API ở 6B.' }
 } catch {
     $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) {
         Write-Host "$($problem.code): $($problem.detail)" -ForegroundColor Red
         foreach ($item in $problem.errors) { Write-Host "  $($item.field): $($item.message)" }
     } else { Write-Host "Chưa hoàn thành thao tác Pomodoro. Kiểm tra backend/cổng/tham số. Mã lỗi: $($failure.FullyQualifiedErrorId)" -ForegroundColor Red }
+    if ($Mode -eq 'Statistics') { throw 'Chưa đọc được thống kê. Kiểm tra backend, múi giờ và khoảng thống kê rồi chạy lại.' }
     throw 'Không tự gửi lại thao tác ghi. Dùng -Mode Active hoặc Get để đối chiếu trước.'
 } finally {
     if ($login -and $login.data.refreshToken) {

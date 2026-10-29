@@ -1,4 +1,4 @@
-# Pomodoro — hợp đồng 6A.1/6A.2
+# Pomodoro — hợp đồng 6A.1/6A.2/6C.1
 
 Ngày 28/10/2026. API `/api/v1/pomodoro-sessions`, xác thực Bearer theo tài khoản hiện tại; không nhận `userId`. Success dùng `{data,meta}`, lỗi dùng ProblemDetail và `code` hiện có. Response không cache (`Cache-Control: no-store`). V10 thêm `pomodoro_sessions`; V11 bổ sung trạng thái kết thúc/mục tiêu và giữ nguyên phiên V10. Không seed hoặc sửa dữ liệu học tập cũ.
 
@@ -128,3 +128,30 @@ Lỗi bổ sung 6A.2:
 | 400 `INVALID_POMODORO_HISTORY_FILTER` | Sai page/size/status/range/ngày/múi giờ của lịch sử hoặc Daily. |
 
 Các method/route ngoài phạm vi vẫn bị cấu hình deny-by-default chặn. API Pomodoro yêu cầu Bearer token; cookie đăng nhập riêng lẻ không có quyền truy cập API này. Luồng auth web trong /api/v1/auth/* tiếp tục dùng cookie/CSRF hiện có khi có Origin/cookie. Không mở endpoint public hoặc bỏ auth để chạy script.
+
+## Thống kê tuần/tháng — 6C.1
+
+Bổ sung ngày 29/10/2026: **GET `/api/v1/pomodoro-statistics`**, Bearer theo tài khoản, `Cache-Control: no-store`, `{data,meta}`. Không nhận `userId`; chỉ đọc các bảng hiện có ở V11. Các method khác không được mở trong SecurityConfig.
+
+| Query | Quy tắc |
+| --- | --- |
+| `period` | `WEEK` mặc định hoặc `MONTH`, phân biệt hoa/thường tại API. |
+| `date` | Ngày neo `yyyy-MM-dd`; bỏ qua thì lấy hôm nay tại múi giờ đã chọn. |
+| `timeZone` | Múi giờ IANA server hỗ trợ; bỏ qua thì lấy hồ sơ tài khoản. |
+| `courseId`, `semesterId` | UUID tùy chọn; lọc theo snapshot nguồn ban đầu. Hai bộ lọc kết hợp bằng AND. |
+
+WEEK là thứ Hai đến Chủ nhật chứa ngày neo, có thể qua tháng/năm. MONTH là toàn bộ tháng chứa ngày neo. Ngày neo và mọi ngày local trong khoảng phải nằm ở 1900–2099; ví dụ tuần chứa 2099-12-31 vượt năm 2099 nên trả 400, tháng 12/2099 vẫn hợp lệ. `fromDate/toDate` bao gồm ngày đầu/cuối local; `from/to` là instant UTC với khoảng **[from,to)**. Mỗi ngày dùng quy tắc ZoneId thực tế, không giả định luôn 24 giờ.
+
+`data` có `period,date,timeZone,fromDate,toDate,from,to,filters`, các tổng `completedSessions,studyMillis,studySeconds`, mảng `days` và `courses`. `filters` trả lại courseId/semesterId đã chọn, null khi không lọc.
+
+- `days`: đủ 7 ngày hoặc 28–31 ngày, tăng dần theo ngày; mỗi dòng có `date,from,to,completedSessions,studyMillis,studySeconds`. Ngày không học là 0; ngày bị bỏ qua do đổi múi giờ lịch sử vẫn có bucket 0.
+- `courses`: mỗi nhóm `(courseId,semesterId)` snapshot có `courseCode,courseName,semesterTerm,semesterStartYear` và ba tổng như trên. Một môn chuyển kỳ được giữ thành hai nhóm đúng kỳ gốc. Nhãn lấy từ phiên kết thúc gần nhất trong khoảng/bộ lọc đang xem; nếu cùng endedAt thì UUID dạng chuỗi lớn hơn quyết định, độc lập thứ tự truy vấn. Nhóm sắp thời gian giảm dần, rồi courseId/semesterId tăng dần để ổn định.
+- Chỉ `COMPLETED`, dùng `elapsedMillis` đã công nhận; RUNNING/PAUSED/CANCELLED không được cộng. Không có phiên hoàn tất thì ba tổng bằng 0, `days` đủ ngày và `courses:[]`. Đơn vị giây là phần nguyên của tổng ms / 1000; UI đổi sang phút khi trình bày.
+- Phân ngày theo **endedAt trong timeZone query**, thống nhất API Daily/lịch sử; không theo startedAt, finalizedAt hoặc múi giờ lưu trên từng phiên. Xác nhận muộn không dời thời gian học sang ngày/tháng khác.
+- Không nối lại bảng môn/học kỳ hiện tại. Đổi tên/chuyển kỳ/xóa nguồn không làm mất phút học cũ; ID khác tài khoản/không tồn tại cho kết quả 0, không tra hoặc trả thông tin nguồn của người khác.
+
+Một transaction chỉ đọc REPEATABLE_READ lấy múi giờ hồ sơ (nếu cần) và một truy vấn scalar trong cửa sổ tối đa 31 ngày. Mọi tổng/ngày/môn cùng tổng hợp từ tập phiên đó; không có truy vấn riêng từng ngày và không tạo cài đặt/mục tiêu. Nếu vừa có phiên hoàn tất đồng thời, một response thấy trước hoặc sau commit nhưng các tổng trong response luôn thống nhất. Nhiều request riêng có thể thấy dữ liệu mới hơn; UI cần tải lại sau hoàn tất phiên.
+
+Query kỳ/ngày/zone không hợp lệ trả 400 `INVALID_POMODORO_STATISTICS_FILTER`; UUID sai định dạng dùng lỗi binding 400 hiện có. Thiếu Bearer trả 401. Hướng dẫn tại [6C.1](../../docs/BACKEND-PHASE-6C1.md), request `api/pomodoro-statistics.http`. Script `Try-Pomodoro.ps1 -Mode Statistics` chuẩn hóa Period sang chữ hoa và chỉ gửi timeZone khi người dùng truyền rõ, nên bỏ tham số zone sẽ theo hồ sơ (khác chế độ Daily cũ luôn gửi zone mặc định).
+
+Đợt 6C.1 chưa có API chuỗi ngày hoặc thay biểu đồ/Dashboard. Hai phần giao diện tiếp tục ở 6C.2/6C.3.
