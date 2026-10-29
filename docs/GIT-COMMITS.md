@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6C.3A — API chuỗi ngày học
+## Đợt vừa hoàn thành: 6C.3B — Chuỗi ngày và Dashboard
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối chuỗi ngày học và Dashboard với dữ liệu Pomodoro"
+git push origin main
+```
+
+Tiến độ Pomodoro hôm nay dùng chung cho Trang chủ/Tập trung/Thống kê; chuỗi hiện tại/dài nhất và lịch ngày học đọc API. Lịch giữ tháng đang chọn khi refresh, đóng đúng luồng, có chi tiết ngày và trạng thái tải/lỗi/trống/thử lại. 557 tests frontend (28 mới), TypeScript/export web và nghiệm thu UI với API/PostgreSQL QA riêng đạt; ảnh/hướng dẫn `FRONTEND-PHASE-6C3B.md`. Không backend/schema/dependency mới; máy thật 2C.3B vẫn hoãn. Chưa tự commit hoặc push.
+
+## 6C.3A — API chuỗi ngày học
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Badge, Button, Card, IconButton, IconTile, Row, Segments, StateView, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
@@ -14,10 +14,15 @@ import { StatisticsRangeCaption } from './StatisticsFilters';
 import { StatisticsAnchorSheet, StatisticsFilterButton, StatisticsFilterSheet, type StatisticsOption } from './ServerStatisticsFilters';
 import { StudyTimeChart } from './StudyTimeChart';
 import { CourseDistribution } from './CourseDistribution';
+import { usePomodoroProgress } from '../../focus/api/PomodoroProgressProvider';
+import ServerFocusStreakCard from '../../focus/components/ServerFocusStreakCard';
 
 export default function ServerStudyStats() {
   const auth = useAuth(), app = useApp(), timeZone = auth.profile?.timeZone ?? 'Asia/Ho_Chi_Minh';
-  const { now } = usePomodoroToday(timeZone), today = pomodoroDay(now, timeZone);
+  const progress = usePomodoroProgress();
+  const { now } = usePomodoroToday(timeZone), confirmedToday = useRef<string | null>(null);
+  if (progress.data) confirmedToday.current = progress.data.streak.today;
+  const today = confirmedToday.current ?? pomodoroDay(now, timeZone);
   const [period, setPeriod] = useState<StatisticsPeriod>('WEEK'), [anchor, setAnchor] = useState<string | null>(null);
   const [semester, setSemester] = useState<StatisticsOption | null>(null), [course, setCourse] = useState<StatisticsOption | null>(null);
   const [sheet, setSheet] = useState<'semester' | 'course' | 'date' | null>(null);
@@ -63,6 +68,7 @@ export default function ServerStudyStats() {
           {!!chart.distribution.length && <CourseDistribution courses={chart.distribution} />}
           <T style={S.small}>Thời gian được tính vào ngày kết thúc phiên. Phiên đang học, tạm dừng hoặc đã hủy không được cộng. Phiên học cũ vẫn được giữ khi môn thay đổi hoặc bị xóa.</T>
         </>}
+    <ServerFocusStreakCard />
     {sheet === 'date' && <StatisticsAnchorSheet date={query.date} period={period} onApply={date => { setAnchor(date); setSheet(null); }} onClose={() => setSheet(null)} />}
     {sheet === 'semester' && <StatisticsFilterSheet title="Học kỳ thống kê" allLabel="Tất cả học kỳ" options={[...semesters.values()]} selected={semester} loading={!!app.semesterConnection && !app.semesterConnection.loaded && !app.semesterConnection.error} error={app.semesterConnection?.error?.message} onRetry={reloadCatalog} onSelect={value => { setSemester(value); setCourse(null); setSheet(null); }} onClose={() => setSheet(null)} />}
     {sheet === 'course' && <StatisticsFilterSheet title="Môn học thống kê" allLabel="Tất cả môn học" options={[...courses.values()]} selected={course} loading={!!app.courseConnection && !app.courseConnection.loaded && !app.courseConnection.error} error={app.courseConnection?.error?.message} onRetry={reloadCatalog} onSelect={value => { setCourse(value); setSheet(null); }} onClose={() => setSheet(null)} />}

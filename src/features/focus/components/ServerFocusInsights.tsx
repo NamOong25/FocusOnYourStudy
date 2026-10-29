@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, IconTile, Row, StateView, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
-import { useAuth } from '../../account/auth/AuthProvider';
 import { usePomodoro } from '../api/PomodoroProvider';
-import { dailyKey, pomodoroDay } from '../api/pomodoroInsightsApi';
-import { usePomodoroGoal, usePomodoroInsightsApi, usePomodoroRead, usePomodoroToday } from '../api/usePomodoroInsights';
+import { pomodoroDay } from '../api/pomodoroInsightsApi';
+import { usePomodoroGoal } from '../api/usePomodoroInsights';
+import { usePomodoroProgress } from '../api/PomodoroProgressProvider';
+import ServerFocusStreakCard from './ServerFocusStreakCard';
 import ServerFocusGoalSheet from './ServerFocusGoalSheet';
 import ServerFocusHistorySheet from './ServerFocusHistorySheet';
 
 export default function ServerFocusInsights() {
-  const auth = useAuth(), api = usePomodoroInsightsApi(), goal = usePomodoroGoal(), { state: timer } = usePomodoro();
-  const zone = auth.profile?.timeZone ?? 'Asia/Ho_Chi_Minh', { now } = usePomodoroToday(zone), date = pomodoroDay(now, zone);
+  const goal = usePomodoroGoal(), { state: timer } = usePomodoro();
+  const progress = usePomodoroProgress(), { state, reload, timeZone: zone } = progress;
+  const data = progress.data?.daily ?? null, date = data?.date ?? pomodoroDay(Date.now(), zone);
   const mutation = [timer.active?.row.id, timer.active?.row.version, timer.active?.row.status, timer.last?.id, timer.last?.version, timer.last?.status].join(':');
-  const { state, reload } = usePomodoroRead(api.daily, dailyKey, { date, timeZone: zone }, `${mutation}:${goal.state.revision}:${goal.state.needsReload}`);
   const [editGoal, setEditGoal] = useState(false), [history, setHistory] = useState(false);
-  const data = state.loaded && !state.loading && !state.error ? state.value : null;
-  const closeGoal = () => { goal.manager?.close(); setEditGoal(false); };
+  const closeGoal = () => { goal.manager?.close(); setEditGoal(false); void reload().catch(() => {}); };
   return <>
     <Card style={{ gap: 15 }}><Row between style={{ gap: 10, flexWrap: 'wrap' }}><Row style={{ gap: 10, flexGrow: 1, flexShrink: 1, minWidth: 150 }}><IconTile name="flag-outline" size={40}/><T style={{ fontFamily: F.bold, fontSize: 17, flexShrink: 1 }}>Mục tiêu hôm nay</T></Row><Button label="Sửa mục tiêu" secondary style={{ paddingHorizontal: 14 }} disabled={!goal.manager || !!goal.state.busy} onPress={() => setEditGoal(true)}/></Row>
       <T style={S.small}>{date.split('-').reverse().join('/')} · {zone}</T>
@@ -29,6 +29,7 @@ export default function ServerFocusInsights() {
             <T style={S.small}>Tính theo ngày kết thúc phiên. Phiên đang học, tạm dừng hoặc đã hủy chưa được cộng.</T></>}
     </Card>
     <Button label="Xem lịch sử tập trung" secondary icon="time-outline" onPress={() => setHistory(true)}/>
+    <ServerFocusStreakCard />
     {editGoal && goal.manager && <ServerFocusGoalSheet manager={goal.manager} state={goal.state} onClose={closeGoal}/>}
     {history && <ServerFocusHistorySheet timeZone={zone} today={date} revision={mutation} onClose={() => setHistory(false)}/>}
   </>;

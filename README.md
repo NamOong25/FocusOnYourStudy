@@ -1,8 +1,14 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày/Dashboard tiếp tục ở 6C.3.
+Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 6C.3A: API chuỗi ngày học
+## Mới nhất — 6C.3B: Chuỗi ngày học và nhịp học trên Dashboard
+
+Trang chủ hiển thị phút học hôm nay, số phiên/mục tiêu, tiến độ ngày, chuỗi hiện tại/dài nhất và lịch ngày đã học. Tập trung/Thống kê dùng cùng tiến độ tài khoản; đổi học kỳ hoặc bộ lọc môn không làm đổi chuỗi toàn tài khoản. Lịch tháng chọn được tháng/ngày, giữ lựa chọn qua lần tự cập nhật, có chi tiết phiên/phút và trạng thái trống/lỗi/thử lại. Dữ liệu đọc lại sau hoàn tất/F5/foreground/qua ngày/đồng bộ tab; ngày tham chiếu lấy từ server.
+
+**TypeScript, 557 tests frontend (28 mới) và export web đạt, không lỗi/bỏ qua.** Đã kiểm tra UI/API/PostgreSQL QA riêng: mục tiêu 4 → 6, phiên đầu tăng 25 phút và chuỗi 2 → 3, phiên thứ hai tăng phút nhưng không tăng chuỗi; ba màn, lịch tháng, F5, backend ngắt/khôi phục và A → B → A. Bố cục 320/360/430px đạt; đã sửa lịch tự đóng khi refresh và luồng đóng lịch từ Trang chủ. Xem [hướng dẫn và ảnh 6C.3B](docs/FRONTEND-PHASE-6C3B.md). Không đổi backend/schema/dependency; máy thật/chạy nền vẫn giữ ở 2C.3B đã hoãn.
+
+## 6C.3A: API chuỗi ngày học
 
 Backend có `GET /api/v1/pomodoro-streak`: chuỗi hiện tại, chuỗi dài nhất, tổng ngày đã học và lịch đánh dấu từng ngày trong tháng. Một ngày có ít nhất một phiên COMPLETED được tính một lần; chưa học hôm nay vẫn giữ chuỗi đến hôm qua. Đổi tháng xem lịch không làm đổi chuỗi của toàn tài khoản. Tính theo ngày kết thúc thực tế và múi giờ hồ sơ hoặc múi giờ đã chọn; phiên hủy/đang học/tạm dừng không được cộng.
 
