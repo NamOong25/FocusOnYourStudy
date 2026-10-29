@@ -1,5 +1,9 @@
 # Backend — FocusYourStudy
 
+**Kiểm tra 7A.1:** 723 tests/Maven verify đạt (37 mới), không lỗi/bỏ qua; TypeScript và 557 tests frontend hồi quy đạt. Tests HTTP dùng PostgreSQL/schema riêng tự dọn; script PowerShell 5.1 đã kiểm tra cả thành công/lỗi và không thu hồi phiên app.
+
+**7A.1 — API thống kê tiến độ bài tập:** `GET /api/v1/assignment-statistics?semesterId=<UUID>`, lọc môn/zone tùy chọn; tổng, trạng thái, phần trăm HALF_UP, quá hạn/còn hạn/sắp hạn 7 ngày lịch theo một mốc server. Bài COMPLETED không quá hạn, mẫu số 0 trả 0/0%; Bearer/ownership, readOnly/REPEATABLE_READ và một câu aggregate. Không migration/dependency/seed, vẫn V11; không sửa UI. **37 test mới HTTP/PostgreSQL/PowerShell 5.1 đã qua**, gồm microsecond/DST/A-B/đồng thời/GET không ghi. Khởi động lại backend; dùng `scripts/Try-AssignmentStatistics.ps1 -SemesterId '<ID học kỳ>'` hoặc `api/assignment-statistics.http`. [Hướng dẫn 7A.1](../docs/BACKEND-PHASE-7A1.md), [hợp đồng](docs/ASSIGNMENT-STATISTICS.md); UI ở 7A.2, liên thông ở 7A.3.
+
 **Kiểm tra 6C.3A:** 686 tests/Maven verify đạt (47 mới), không lỗi/bỏ qua; TypeScript và 529 tests frontend hồi quy đạt. Đã kiểm tra HTTP/PostgreSQL, script Windows PowerShell 5.1, phân ngày/múi giờ, chuỗi/lịch/Statistics/Daily khớp, đồng thời và quyền tài khoản. Schema test biệt lập tự dọn; không seed dữ liệu app.
 
 **Mới nhất 6C.3A — API chuỗi ngày học:** GET `/api/v1/pomodoro-streak` theo tài khoản/Bearer, trả chuỗi hiện tại, dài nhất, tổng ngày học và lịch tháng. Một ngày có phiên COMPLETED được công nhận một lần, giữ chuỗi đến hôm qua nếu hôm nay chưa học; đổi tháng chỉ đổi lịch. Theo endedAt và ZoneId Java, chỉ đọc trong transaction; không sửa phiên/mục tiêu, không thêm schema/dependency. Xem [hướng dẫn](../docs/BACKEND-PHASE-6C3A.md), [hợp đồng](docs/POMODORO.md#chuỗi-ngày-học--6c3a), `api/pomodoro-streak.http`, `scripts/Try-Pomodoro.ps1 -Mode Streak`. Nối UI/Dashboard ở 6C.3B.

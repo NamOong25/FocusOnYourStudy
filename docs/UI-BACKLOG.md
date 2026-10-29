@@ -185,6 +185,14 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - Kiểm tra 6C.3A: **686 tests backend/Maven verify đạt (47 mới), TypeScript và 529 tests frontend hồi quy đạt, không lỗi/bỏ qua.** HTTP/PostgreSQL, PowerShell 5.1, DST/ngày bị bỏ qua, snapshot đồng thời và dữ liệu tài khoản riêng; schema test tự dọn.
 - [x] 6C.3B — Chuỗi hiện tại/dài nhất và lịch tháng đọc API; Dashboard có phút/số phiên/mục tiêu/tiến độ ngày, dùng chung snapshot với Tập trung/Thống kê. Đọc lại sau hoàn tất/F5/foreground/qua ngày, guard owner/query/cancel và đối chiếu hai lượt đọc nếu có phiên vừa thay đổi. Lịch có chọn ngày/tháng, chi tiết, tải/lỗi/trống/thử lại; giữ tháng qua refresh, đóng đúng luồng Trang chủ. TypeScript, 557 tests frontend (28 mới), export web và UI/API/PostgreSQL QA riêng đạt: mục tiêu, hai phiên cùng ngày, F5, backend ngắt/khôi phục, A → B → A và 320/360/430px. Xem `FRONTEND-PHASE-6C3B.md`. Backend/schema/dependency không đổi; native vẫn hoãn 2C.3B.
 
+## Backend 7 — Dashboard, thống kê và thông báo
+
+- [ ] 7 — Hoàn thiện tổng hợp Dashboard/Thống kê và thông báo bằng dữ liệu thật; các phần GPA, lịch thi, lịch học và Pomodoro đã nối trước vẫn giữ biên bản riêng. Không đánh dấu cả đợt chỉ vì có một API thống kê.
+- [ ] 7A — Thống kê tiến độ bài tập: API → nối UI → nghiệm thu liên thông.
+- [x] 7A.1 — API thống kê bài tập theo học kỳ, môn tùy chọn: tổng/TODO/IN_PROGRESS/COMPLETED, pending, overdue/notDue/dueSoon, phần trăm HALF_UP. Server asOf/zone hồ sơ/IANA, 7 ngày lịch và ranh giới microsecond; COMPLETED không quá hạn, kỳ trống 0/0%. Ownership, readOnly/REPEATABLE_READ và một aggregate PostgreSQL, không N+1/entity/notes, không migration/dependency/UI. **723 tests/Maven verify (37 mới), TypeScript và 557 tests frontend hồi quy qua, không lỗi/bỏ qua**; HTTP/PostgreSQL/PowerShell 5.1, DST/đồng thời/A-B/GET không ghi. Hướng dẫn `BACKEND-PHASE-7A1.md`, contract và IntelliJ HTTP; 7A.2/7A.3 vẫn mở.
+- [ ] 7A.2 — Đưa API tiến độ bài tập lên Thống kê, chọn kỳ/môn và bấm nhóm để tới danh sách đúng bộ lọc; cùng mốc/zone để không lệch deadline. Tải/lỗi/trống/thử lại và chống phản hồi cũ/tách tài khoản.
+- [ ] 7A.3 — Nghiệm thu sửa deadline/trạng thái/xóa/chuyển môn, F5, đổi tài khoản và đối chiếu Dashboard/danh sách/Thống kê; ranh giới thời gian tính theo dữ liệu server. Chỉ đánh dấu 7A khi đã kiểm tra liên thông.
+
 ## Các đợt giao diện đã hoàn thành
 
 - [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.

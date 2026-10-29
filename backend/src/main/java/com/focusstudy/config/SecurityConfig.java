@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/courses/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/courses/*").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/assignments", "/api/v1/assignments/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/assignment-statistics").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/assignments").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/assignments/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/assignments/*").authenticated()

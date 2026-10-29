@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 6C.3B: Chuỗi ngày học và nhịp học trên Dashboard
+## Mới nhất — 7A.1: API thống kê tiến độ bài tập
+
+`GET /api/v1/assignment-statistics?semesterId=<UUID>` tổng hợp bài theo học kỳ: chưa làm/đang làm/hoàn thành, phần trăm, quá hạn/còn hạn/sắp hạn 7 ngày lịch. Có lọc môn, zone hồ sơ hoặc IANA chọn riêng; thời điểm tính do server xác định. Đã kiểm tra 37 test mới qua HTTP/PostgreSQL và PowerShell 5.1, gồm dữ liệu trống, deadline chính xác, DST, cập nhật/xóa/chuyển môn và dữ liệu riêng A/B. GET chỉ đọc, cùng snapshot và một câu aggregate, không tải toàn bộ bài/ghi chú; không migration/dependency mới, vẫn V11.
+
+**723 tests/Maven verify (37 mới), TypeScript và 557 tests frontend hồi quy đạt, không lỗi/bỏ qua.** Chạy lại backend, lấy ID bằng `backend/scripts/Try-Semesters.ps1 -Mode List`, rồi thử `backend/scripts/Try-AssignmentStatistics.ps1 -SemesterId '<ID>'`. Hướng dẫn [7A.1](docs/BACKEND-PHASE-7A1.md), [hợp đồng](backend/docs/ASSIGNMENT-STATISTICS.md), [IntelliJ HTTP](backend/api/assignment-statistics.http). Giao diện giữ nguyên; nối màn Thống kê ở 7A.2, nghiệm thu liên thông ở 7A.3.
+
+## 6C.3B: Chuỗi ngày học và nhịp học trên Dashboard
 
 Trang chủ hiển thị phút học hôm nay, số phiên/mục tiêu, tiến độ ngày, chuỗi hiện tại/dài nhất và lịch ngày đã học. Tập trung/Thống kê dùng cùng tiến độ tài khoản; đổi học kỳ hoặc bộ lọc môn không làm đổi chuỗi toàn tài khoản. Lịch tháng chọn được tháng/ngày, giữ lựa chọn qua lần tự cập nhật, có chi tiết phiên/phút và trạng thái trống/lỗi/thử lại. Dữ liệu đọc lại sau hoàn tất/F5/foreground/qua ngày/đồng bộ tab; ngày tham chiếu lấy từ server.
 

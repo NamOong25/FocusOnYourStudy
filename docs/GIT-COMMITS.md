@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6C.3B — Chuỗi ngày và Dashboard
+## Đợt vừa hoàn thành: 7A.1 — API thống kê bài tập
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Bổ sung API thống kê tiến độ bài tập theo học kỳ"
+git push origin main
+```
+
+API đọc tổng/trạng thái/phần trăm và các nhóm deadline theo học kỳ/môn; thời điểm server, zone hồ sơ/IANA, sắp hạn 7 ngày lịch. Cùng snapshot, một aggregate; không thay bài tập, migration/dependency/UI. **723 tests/Maven verify (37 mới), TypeScript và 557 tests frontend qua, không lỗi/bỏ qua**; HTTP/PostgreSQL/PowerShell 5.1. Hướng dẫn `BACKEND-PHASE-7A1.md`, contract và IntelliJ HTTP. Tiếp theo 7A.2 nối UI, 7A.3 nghiệm thu liên thông; chưa tự commit/push.
+
+## 6C.3B — Chuỗi ngày và Dashboard
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

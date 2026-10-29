@@ -1,0 +1,35 @@
+### IntelliJ HTTP Client: accessToken chỉ lưu trong HTTP Client private environment.
+@baseUrl = http://localhost:8080
+@semesterId = REPLACE_WITH_OWN_SEMESTER_UUID
+@courseId = REPLACE_WITH_OWN_COURSE_UUID
+
+### Cả học kỳ; ngày và múi giờ mặc định từ server/hồ sơ tài khoản
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId={{semesterId}}
+Authorization: Bearer {{accessToken}}
+
+### Chọn múi giờ; sắp hạn trong 7 ngày lịch, không phải 7 x 24 giờ khi có DST
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId={{semesterId}}&timeZone=Asia%2FHo_Chi_Minh
+Authorization: Bearer {{accessToken}}
+
+### Một môn thuộc học kỳ; giữ đúng cả hai điều kiện
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId={{semesterId}}&courseId={{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### Đối chiếu danh sách gốc cùng học kỳ
+GET {{baseUrl}}/api/v1/assignments?semesterId={{semesterId}}
+Authorization: Bearer {{accessToken}}
+
+### Thiếu semesterId -> 400 INVALID_REQUEST
+GET {{baseUrl}}/api/v1/assignment-statistics
+Authorization: Bearer {{accessToken}}
+
+### UUID sai -> 400 INVALID_REQUEST
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId=bad
+Authorization: Bearer {{accessToken}}
+
+### Múi giờ sai -> 400 INVALID_ASSIGNMENT_STATISTICS_FILTER
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId={{semesterId}}&timeZone=Bad%2FZone
+Authorization: Bearer {{accessToken}}
+
+### Thiếu Bearer token -> 401
+GET {{baseUrl}}/api/v1/assignment-statistics?semesterId={{semesterId}}
