@@ -12,6 +12,8 @@ import { StudyTimeChart } from './components/StudyTimeChart';
 import { CourseDistribution } from './components/CourseDistribution';
 import { TaskProgressCard } from './components/TaskProgressCard';
 import GpaComparisonScreen from './components/GpaComparisonScreen';
+import { useAuth } from '../account/auth/AuthProvider';
+import ServerStudyStats from './components/ServerStudyStats';
 
 export default function Stats() {
   const [view, setView] = useState('Tổng quan');
@@ -24,6 +26,11 @@ export default function Stats() {
 }
 
 function StudyStats() {
+  const auth = useAuth();
+  return auth.hasSession ? <ServerStudyStats key={`${auth.revision}:${auth.profile?.id ?? ''}`} /> : <PreviewStudyStats />;
+}
+
+function PreviewStudyStats() {
   const { tasks, courseCatalog, focusRecords, semesters, setScheduleMode, setAcademicSemesterId, setTab } = useApp();
   const clock = useCurrentTime();
   const now = useMemo(() => new Date(), [clock, focusRecords]);

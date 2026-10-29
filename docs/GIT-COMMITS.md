@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 6C.1 — API thống kê thời gian học
+## Đợt vừa hoàn thành: 6C.2 — Nối giao diện Thống kê
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối thống kê thời gian học với dữ liệu backend"
+git push origin main
+```
+
+Thống kê tài khoản đọc API tuần/tháng, chọn ngày bằng lịch, lọc kỳ/môn, tổng phiên/phút, biểu đồ từng ngày và phân bố môn. Cập nhật sau hoàn tất, chặn phản hồi cũ/khác tài khoản; có tải/lỗi/trống/thử lại. TypeScript, 529 tests frontend (24 mới), export web và kiểm tra UI với API/PostgreSQL QA riêng đạt. Hướng dẫn/ảnh tại `FRONTEND-PHASE-6C2.md`; backend/schema/dependency không đổi. Chuỗi ngày/Dashboard ở 6C.3. Chưa tự commit hoặc push.
+
+## 6C.1 — API thống kê thời gian học
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
