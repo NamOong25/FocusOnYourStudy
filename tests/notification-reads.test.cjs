@@ -117,6 +117,23 @@ test('empty inbox is confirmed without network and never writes',async()=>{
  const f=fixture();await load(f,[]);assert.equal(f.manager.state.loaded,true);assert.equal(f.calls.queries.length,0);await f.manager.mark([]);assert.equal(f.calls.writes.length,0);
 });
 function many(n){return Array.from({length:n},(_,i)=>desc('id'+i,{target:{kind:'ASSIGNMENT',sourceId:`00000000-0000-4000-8000-${String(i).padStart(12,'0')}`,occurrenceDate:null}}));}
+test('old write success is removed when completed/deleted sources change the visible inbox',async()=>{
+ const f=fixture();await load(f);await f.manager.mark([seen(desc())]);assert.match(f.manager.state.message,/1\/1/);
+ f.manager.setFrame([]);assert.equal(f.manager.state.message,'');await f.manager.reload();assert.equal(f.manager.state.loaded,true);assert.equal(f.manager.state.message,'');
+});
+test('manual reconciliation success does not describe a later source revision',async()=>{
+ const f=fixture();await load(f);await f.manager.reload(true);assert.match(f.manager.state.message,/Đã đối chiếu/);
+ f.manager.setFrame([desc('two')]);assert.equal(f.manager.state.message,'');
+});
+test('new query clears a prior success while its result is still pending',async()=>{
+ const f=fixture(),gate=deferred();await load(f);await f.manager.mark([seen(desc())]);f.api.query=()=>gate.promise;
+ const work=f.manager.reload();assert.equal(f.manager.state.loading,true);assert.equal(f.manager.state.message,'');gate.resolve(snapshot([state(desc(),true)]));await work;
+});
+test('changing source frames and failed manual reconciliation keep unresolved write outcome',async()=>{
+ const f=fixture();await load(f);f.api.mark=async()=>{throw new ApiError('lost','NETWORK_ERROR')};await assert.rejects(f.manager.mark([seen(desc())]));
+ const message=f.manager.state.message;assert.match(message,/Chưa xác nhận/);f.manager.setFrame([desc('two')]);assert.equal(f.manager.state.message,message);assert.equal(f.manager.state.needsReload,true);
+ f.api.query=async()=>{throw new ApiError('still offline','NETWORK_ERROR')};await assert.rejects(f.manager.reload(true));assert.equal(f.manager.state.message,message);assert.equal(f.manager.state.needsReload,true);
+});
 test('large inbox queries and marks in bounded batches of200 with explicit partial outcome',async()=>{
  const items=many(405),f=fixture();await load(f,items);assert.deepEqual(f.calls.queries.map(x=>x.length),[200,200,5]);
  const original=f.api.mark;let n=0;f.api.mark=async(...args)=>{if(++n===2)throw new ApiError('lost','NETWORK_ERROR');return original(...args)};

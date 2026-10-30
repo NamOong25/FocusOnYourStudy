@@ -26,14 +26,15 @@ export class NotificationReadManager {
     if(key === this.state.key)return;
     this.readController?.abort();this.generation++;this.readPromise=null;
     this.frame=items?.map(x => ({...x,target:{...x.target},basis:{...x.basis}})) ?? null;
-    this.publish({key,rows:{},loaded:false,loading:false,sourceMismatch:false,error:this.state.needsReload ? this.state.error : null});
+    this.publish({key,rows:{},loaded:false,loading:false,sourceMismatch:false,error:this.state.needsReload ? this.state.error : null,
+      message:this.state.needsReload || this.state.busy ? this.state.message : ''});
   }
   reload=(manual=false): Promise<void> => {
     if(this.disposed || !this.frame)return Promise.reject(cancelledRequest());
     if(this.state.busy || !manual && (this.state.needsReload || this.state.sourceMismatch))return Promise.resolve();
     if(this.readPromise)return this.readPromise;
     const frame=this.frame,key=this.state.key,seq=++this.generation,controller=new AbortController();this.readController=controller;
-    this.publish({loading:true,error:null});
+    this.publish({loading:true,error:null,message:this.state.needsReload ? this.state.message : ''});
     const run=(async()=>{
       const rows: Record<string,ReceiptView>={};
       try {

@@ -1,10 +1,23 @@
 # Tên commit cho từng đợt
 
+## 7B.3 — Nghiệm thu vòng đời thông báo trên web
+
+Hoàn thành/mở lại, nghỉ/khôi phục, đổi phòng/giờ/mốc nhắc, tắt nhắc/xóa; hai tab/F5/tài khoản và lỗi ghi. Xóa kết quả đọc cũ khi nguồn thay đổi, giữ khóa đối chiếu sau lỗi. Chi tiết và phạm vi test ở [FRONTEND-PHASE-7B3.md](FRONTEND-PHASE-7B3.md).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Hoàn tất kiểm tra và đồng bộ thông báo trên web"
+git push origin main
+```
+
+Chưa tự commit/push; 7B hoàn tất trên web, thông báo hệ điều hành/điện thoại thật còn riêng.
+
 Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt và lệnh push. Đây là hướng dẫn để bạn tự chạy; Codex chưa tự commit hoặc push.
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 7B.2 — Nối trạng thái đã đọc thông báo
+## 7B.2 — Nối trạng thái đã đọc thông báo
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
