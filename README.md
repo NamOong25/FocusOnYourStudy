@@ -2,7 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 7B.1: Trạng thái đã đọc thông báo
+## Mới nhất — 7B.2: Chuông và thông báo giữ trạng thái tài khoản
+
+Góc nhắc nhở đọc/lưu trạng thái đã đọc qua API, giữ sau F5/đăng nhập lại, đồng bộ hai tab và tách tài khoản. Đối chiếu phiên bản nguồn với nội dung đang hiển thị; lỗi/chưa xác nhận không bị coi là 0 và không tự gửi lại ghi. Đọc tất cả gửi đúng tập mục đã xem, chia lô 200 với kết quả từng lô. Giữ mốc nhắc lịch thi qua bổ sung milestone vào revision server; vẫn V12, không dependency mới. **TypeScript, 626 tests frontend (32 mới), 42 tests backend liên quan/Maven verify và export web đạt.** UI/API/PostgreSQL QA đã thử 4→3→0, F5, hai tab, deadline, offline/restart, A→B→A và 320/360/430px. Không gọi test Manager thành UI hoặc 42 test thành toàn bộ backend.
+
+Xem [hướng dẫn và ảnh 7B.2](docs/FRONTEND-PHASE-7B2.md). Khởi động lại backend trước khi kiểm tra; 7B.3/nghiệm thu đầy đủ và điện thoại thật vẫn mở. Chưa tự commit/push.
+
+## 7B.1: Trạng thái đã đọc thông báo
 
 Backend lưu biên nhận đã đọc theo tài khoản/nguồn/ngày buổi học. Query theo lô chỉ đọc; PUT dùng revision server cấp, kiểm tra toàn lô và khóa cùng owner với dữ liệu học tập. Không ghi đè trạng thái khi nội dung đã đổi; lặp cùng revision giữ readAt. V12 thêm bảng/FK/CHECK/cascade, giữ dữ liệu cũ; không dependency/frontend mới. Giao diện chuông/thông báo sẽ nối ở **7B.2**, nghiệm thu ở **7B.3**.
 

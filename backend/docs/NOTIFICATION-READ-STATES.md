@@ -1,6 +1,6 @@
 # Trạng thái đã đọc thông báo — 7B.1
 
-API này lưu **biên nhận đã đọc** theo tài khoản. Danh sách lời nhắc/nội dung vẫn được lấy từ bài tập, lịch thi và lịch học. Đây không phải API gửi push, hàng đợi thông báo hoặc lịch sử thông báo đã phát. Giao diện sẽ nối ở 7B.2.
+API này lưu **biên nhận đã đọc** theo tài khoản. Danh sách lời nhắc/nội dung vẫn được lấy từ bài tập, lịch thi và lịch học. Đây không phải API gửi push, hàng đợi thông báo hoặc lịch sử thông báo đã phát. Giao diện đã nối ở 7B.2; xem docs/FRONTEND-PHASE-7B2.md từ gốc project.
 
 ## Đối tượng
 
@@ -55,6 +55,10 @@ Client vẫn áp dụng bộ lọc ngày/giờ nhắc đã có và không tạo 
 Đối với lịch học được khôi phục về đúng nội dung đã từng đọc, revision có thể trở lại giá trị cũ. Đây là trạng thái đọc theo nội dung hiện tại, không phải nhật ký giao nhận của mọi thay đổi.
 
 `basis` là phiên bản nguồn/môn/học kỳ dùng khi tính nội dung. **Hợp đồng cho 7B.2:** client phải đối chiếu basis với nguồn đã render trước khi cho đánh dấu đã đọc; nếu query mới hơn nội dung đang hiển thị, đọc lại và hiển thị nội dung mới rồi mới cho đánh dấu. Không lấy revision mới ghép với UI cũ. Với CLASS, `sourceVersion` là `scheduleVersion`; parent đổi vì buổi khác có thể yêu cầu đối chiếu nguồn nhưng không tự làm mất biên nhận của buổi không đổi.
+
+## Bổ sung mốc lịch thi ở 7B.2
+
+Với EXAM, basis có thêm `milestoneMinutes` khi đã tới một mốc cấu hình: mốc có số phút nhỏ nhất đã chạm theo asOf server, gồm 0 nếu đã cấu hình. Trước mọi mốc, trường này được bỏ qua (available vẫn chỉ là nguồn hợp lệ). Mốc tham gia revision: đến mốc tiếp theo thì biên nhận cũ không khớp và PUT mốc cũ trả 409, dù sourceVersion không đổi. Đếm ngược từng phút hoặc bắt đầu thi không có mốc 0 không tự reset đã đọc. Client phải đối chiếu cả milestone với nội dung/mốc đang hiển thị. Không migration mới; revision EXAM lưu từ 7B.1 có thể không khớp một lần sau cập nhật này.
 
 ## Đánh dấu đã đọc / tất cả mục đang xem
 

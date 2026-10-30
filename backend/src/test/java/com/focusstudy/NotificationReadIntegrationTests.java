@@ -180,6 +180,26 @@ class NotificationReadIntegrationTests {
         var f=fixture();var old=state(f.owner,exam(f));jdbc.update("UPDATE exams SET reminder=false,reminder_minutes=ARRAY[]::integer[] WHERE id=?",f.exam);
         assertThat(state(f.owner,exam(f)).get("available")).isEqualTo(false);error(mark(f.owner,old),404,"NOTIFICATION_SOURCE_UNAVAILABLE");
     }
+    @Test void newExamMilestoneIsUnreadAndRejectsOldMilestoneWriteWithoutVersionChange()throws Exception {
+        var f=fixture();WHEN.set(Instant.parse("2026-10-31T01:00:00Z"));var old=state(f.owner,exam(f));mark(f.owner,old);
+        assertThat(((Map<?,?>)old.get("basis")).get("milestoneMinutes")).isEqualTo(1440);
+        WHEN.set(Instant.parse("2026-10-31T22:00:00Z"));var next=state(f.owner,exam(f));
+        assertThat(next.get("read")).isEqualTo(false);assertThat(((Map<?,?>)next.get("basis")).get("milestoneMinutes")).isEqualTo(180);
+        assertThat(((Map<?,?>)next.get("basis")).get("sourceVersion")).isEqualTo(0);
+        error(mark(f.owner,old),409,"NOTIFICATION_REVISION_CONFLICT");assertThat(items(mark(f.owner,next)).getFirst().get("read")).isEqualTo(true);
+    }
+    @Test void examMilestoneRemainsReadAcrossMinuteTicksAndStartIfZeroNotConfigured()throws Exception {
+        var f=fixture();WHEN.set(Instant.parse("2026-10-31T22:00:00Z"));var old=state(f.owner,exam(f));mark(f.owner,old);
+        WHEN.set(Instant.parse("2026-11-01T01:01:00Z"));var next=state(f.owner,exam(f));
+        assertThat(next.get("read")).isEqualTo(true);assertThat(next.get("revision")).isEqualTo(old.get("revision"));
+    }
+    @Test void zeroMilestoneStartsExactlyAtExamStartAndIsUnreadAgain()throws Exception {
+        var f=fixture();jdbc.update("UPDATE exams SET reminder_minutes=ARRAY[180,0] WHERE id=?",f.exam);
+        WHEN.set(Instant.parse("2026-11-01T00:59:59.999999Z"));var old=state(f.owner,exam(f));mark(f.owner,old);
+        WHEN.set(Instant.parse("2026-11-01T01:00:00Z"));var next=state(f.owner,exam(f));
+        assertThat(next.get("read")).isEqualTo(false);assertThat(((Map<?,?>)next.get("basis")).get("milestoneMinutes")).isEqualTo(0);
+        error(mark(f.owner,old),409,"NOTIFICATION_REVISION_CONFLICT");
+    }
     @Test void markingObservedBatchDoesNotMarkNewlyCreatedReminder()throws Exception {
         var f=fixture();var observed=items(query(f.owner,List.of(task(f),exam(f),lesson(f,"2026-10-30"))));
         UUID extra=UUID.randomUUID();jdbc.update("INSERT INTO assignments(id,user_id,course_id,title,due_at) VALUES (?,?,?,'Vừa tạo','2026-11-01T00:00:00Z')",extra,f.owner.id,f.course);

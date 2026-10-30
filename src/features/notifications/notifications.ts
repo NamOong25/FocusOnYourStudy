@@ -13,7 +13,7 @@ export type InAppReminder = {
   origin?: string; reason?: string;
 };
 export type ReadReceipts = Record<string, string>;
-export type ReminderWithRead = InAppReminder & { read: boolean };
+export type ReminderWithRead = InAppReminder & { read: boolean; readKnown?: boolean };
 export type ReminderSources = { tasks: Task[]; classes: ClassItem[]; exceptions: ClassException[]; exams: Exam[]; courses: Course[] };
 const timestamp = (date: string, time: string) => isValidDate(date) && /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? new Date(`${date}T${time}:00`).getTime() : NaN;
 const fullDate = (date: string) => `${dateLabel(date)}/${date.slice(0, 4)}`;

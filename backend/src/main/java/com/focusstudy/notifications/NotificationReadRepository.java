@@ -32,6 +32,8 @@ public class NotificationReadRepository {
             coalesce(x.end_time,s.end_time) AS class_end, x.kind AS exception_kind,
             c.id AS course_id,coalesce(a.version,e.version,s.version) AS source_version,
             c.version AS course_version,sem.version AS semester_version,
+            CASE WHEN r.kind='EXAM' THEN (SELECT min(m) FROM unnest(e.reminder_minutes) m
+                WHERE e.starts_at - m * interval '1 minute' <= :now) END AS milestone_minutes,
             jsonb_build_array('notification-content-v1',r.kind,r.source_id,r.occurrence_date,
                 c.id,c.name,c.code,sem.id,sem.term,sem.start_year,
                 CASE r.kind
@@ -58,7 +60,7 @@ public class NotificationReadRepository {
         var refs = targets.stream().map(t -> Map.of("kind",t.kind().name(),"source_id",t.sourceId().toString(),
                 "occurrence_date", day(t).toString())).toList();
         var found = new HashMap<Target,NotificationState>();
-        jdbc.query(LOOKUP, Map.of("targets", json.writeValueAsString(refs), "owner", owner), (rs, row) -> {
+        jdbc.query(LOOKUP, Map.of("targets", json.writeValueAsString(refs), "owner", owner, "now", Timestamp.from(now)), (rs, row) -> {
             Kind kind = Kind.valueOf(rs.getString("kind"));
             LocalDate date = rs.getObject("occurrence_date", LocalDate.class);
             var target = new Target(kind, rs.getObject("source_id",UUID.class), kind == Kind.CLASS ? date.toString() : null);
@@ -68,9 +70,11 @@ public class NotificationReadRepository {
                 case CLASS -> scheduled(rs, date) && !"CANCELLED".equals(rs.getString("exception_kind"))
                         && date.atTime(rs.getObject("class_end",LocalTime.class)).atZone(ZoneId.of(rs.getString("time_zone"))).toInstant().isAfter(now);
             };
-            String revision = available ? hash(rs.getString("content")) : null;
+            Integer milestone = rs.getObject("milestone_minutes",Integer.class);
+            String content = rs.getString("content") + (kind == Kind.EXAM ? ":exam-milestone-v2:" + milestone : "");
+            String revision = available ? hash(content) : null;
             boolean read = available && revision.equals(rs.getString("saved_revision"));
-            var basis = available ? new NotificationState.Basis(rs.getLong("source_version"),rs.getLong("course_version"),rs.getLong("semester_version")) : null;
+            var basis = available ? new NotificationState.Basis(rs.getLong("source_version"),rs.getLong("course_version"),rs.getLong("semester_version"),milestone) : null;
             var state = new NotificationState(target,available,revision,basis,read,read ? rs.getTimestamp("read_at").toInstant() : null);
             found.put(target,state);
             return state;

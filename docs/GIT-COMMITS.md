@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 7B.1 — Lưu trạng thái đã đọc thông báo
+## Đợt vừa hoàn thành: 7B.2 — Nối trạng thái đã đọc thông báo
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối trạng thái đã đọc thông báo với tài khoản"
+git push origin main
+```
+
+Query/PUT/chuông/trung tâm thông báo theo tài khoản, F5/hai tab, basis/source/owner guard, lỗi không báo thành 0 và không tự gửi lại ghi. API thêm milestone lịch thi vào revision, vẫn V12. TypeScript, 626 tests frontend (32 mới), 42 tests backend liên quan/Maven verify/export web và UI/API/PostgreSQL QA qua. Hướng dẫn/ảnh tại FRONTEND-PHASE-7B2.md; 7B.3 vẫn mở. Chưa tự commit/push.
+
+## 7B.1 — Lưu trạng thái đã đọc thông báo
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'
