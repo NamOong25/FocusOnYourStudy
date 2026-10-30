@@ -16,6 +16,7 @@ import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, au
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from '../features/account/account';
 import { AiProposal, proposalSessions, validateProposal } from '../features/assistant/aiPlanner';
 import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from '../navigation/navigationState';
+import type { AssignmentStatisticsLink } from '../features/assignments/assignmentStatisticsLink';
 import { createFocusState, creditFocusRecords, focusDurations, focusReducer, sampleFocusRecords } from '../features/focus/focus';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from '../shared/utils/dates';
 
@@ -58,6 +59,7 @@ function usePrototype(empty: boolean) {
   const semesterConnection = useServerSemesters();
   const semesters = semesterConnection?.semesters ?? previewSemesters;
   const [academicSemesterId, setAcademicSemesterId] = useState('sem-5');
+  const [assignmentDestination, setAssignmentDestination] = useState<{ key: string; link: AssignmentStatisticsLink } | null>(null);
   const [scheduleRevision, setScheduleRevision] = useState(0);
   const invalidateSchedule = React.useCallback(() => setScheduleRevision(value => value + 1), []);
   const [scheduleDestination, setScheduleDestination] = useState<{ key: string; semesterId: string; date: string } | null>(null);
@@ -83,7 +85,8 @@ function usePrototype(empty: boolean) {
   const [routeTrail, setRouteTrail] = useState<AppRoute[]>([homeRoute]);
   const route = routeTrail[routeTrail.length - 1]!; const tab = route.tab; const scheduleMode = route.scheduleMode;
   const setTab = (next: Tab) => setRouteTrail(v => next === 'home' ? [{ ...v[v.length - 1]!, tab: 'home' }] : pushRoute(v, { ...v[v.length - 1]!, tab: next }));
-  const setScheduleMode = (next: ScheduleMode) => setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: next }));
+  const setScheduleMode = (next: ScheduleMode) => { if (next === 'Bài tập') setAssignmentDestination(null); setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: next })); };
+  const openAssignmentStatistics = (link: AssignmentStatisticsLink) => { setAssignmentDestination({ key: uid(), link }); setRouteTrail(v => pushRoute(v, { tab: 'schedule', scheduleMode: 'Bài tập' })); };
   const openSavedSchedule = (semesterId: string, date = dateKey(new Date())) => { setAcademicSemesterId(semesterId); setScheduleDestination({ key: uid(), semesterId, date }); setScheduleMode('Thời khóa biểu'); };
   const goBackRoute = () => setRouteTrail(previousRoute);
   const [focusCourseId, setFocusCourseId] = useState(empty ? '' : 'course-dsa');
@@ -257,7 +260,7 @@ function usePrototype(empty: boolean) {
     if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
+  return { assignmentDestination, openAssignmentStatistics, scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }

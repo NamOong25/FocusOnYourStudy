@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 7A.1 — API thống kê bài tập
+## Đợt vừa hoàn thành: 7A.2 — Giao diện tiến độ bài tập
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Kết nối thống kê tiến độ bài tập với giao diện"
+git push origin main
+```
+
+Thẻ tiến độ đọc API 7A.1, chọn kỳ/môn riêng với Pomodoro; bấm năm nhóm mở danh sách đúng bộ lọc và mốc API, không giữ từ khóa cũ, quay lại cập nhật/giữ lựa chọn. Loading/lỗi/trống/thử lại, guard owner/query, deadline microsecond/zone, đọc lại danh sách trước khi hiển thị hàng liên kết. **581 tests frontend (24 mới), TypeScript/export web và UI/API/PostgreSQL QA riêng đạt**, gồm 320/360/430px, F5, offline/restart và A → B → A. Không backend/schema/dependency; 7A.3 còn mở. Hướng dẫn `FRONTEND-PHASE-7A2.md`. Chưa tự commit/push.
+
+## 7A.1 — API thống kê bài tập
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

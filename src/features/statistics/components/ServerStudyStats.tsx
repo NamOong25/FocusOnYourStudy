@@ -16,6 +16,7 @@ import { StudyTimeChart } from './StudyTimeChart';
 import { CourseDistribution } from './CourseDistribution';
 import { usePomodoroProgress } from '../../focus/api/PomodoroProgressProvider';
 import ServerFocusStreakCard from '../../focus/components/ServerFocusStreakCard';
+import ServerAssignmentProgressCard from './ServerAssignmentProgressCard';
 
 export default function ServerStudyStats() {
   const auth = useAuth(), app = useApp(), timeZone = auth.profile?.timeZone ?? 'Asia/Ho_Chi_Minh';
@@ -44,7 +45,7 @@ export default function ServerStudyStats() {
   const choosePeriod = (value: string) => { const p = value === 'Tuần' ? 'WEEK' : 'MONTH'; try { statisticsWindow(p, query.date); } catch { setAnchor(null); } setPeriod(p); };
   return <>
     <View style={{ gap: 6 }}><T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 26, lineHeight: 37 }}>Thống kê học tập</T><T style={S.small}>Nhìn lại thời gian bạn dành cho việc học</T></View>
-    <Badge label="Từ các phiên học đã hoàn tất" icon="checkmark-circle-outline" />
+    <Badge label="Thời gian học từ các phiên đã hoàn tất" icon="checkmark-circle-outline" />
     <Segments values={['Tuần', 'Tháng']} value={period === 'WEEK' ? 'Tuần' : 'Tháng'} onChange={choosePeriod} />
     <Card style={{ padding: 15, gap: 13 }}>
       <Row between style={{ gap: 5 }}><IconButton label={period === 'WEEK' ? 'Xem tuần trước' : 'Xem tháng trước'} name="chevron-back" disabled={!previous} onPress={() => { if (previous) setAnchor(previous); }} />
@@ -68,6 +69,7 @@ export default function ServerStudyStats() {
           {!!chart.distribution.length && <CourseDistribution courses={chart.distribution} />}
           <T style={S.small}>Thời gian được tính vào ngày kết thúc phiên. Phiên đang học, tạm dừng hoặc đã hủy không được cộng. Phiên học cũ vẫn được giữ khi môn thay đổi hoặc bị xóa.</T>
         </>}
+    <ServerAssignmentProgressCard />
     <ServerFocusStreakCard />
     {sheet === 'date' && <StatisticsAnchorSheet date={query.date} period={period} onApply={date => { setAnchor(date); setSheet(null); }} onClose={() => setSheet(null)} />}
     {sheet === 'semester' && <StatisticsFilterSheet title="Học kỳ thống kê" allLabel="Tất cả học kỳ" options={[...semesters.values()]} selected={semester} loading={!!app.semesterConnection && !app.semesterConnection.loaded && !app.semesterConnection.error} error={app.semesterConnection?.error?.message} onRetry={reloadCatalog} onSelect={value => { setSemester(value); setCourse(null); setSheet(null); }} onClose={() => setSheet(null)} />}
