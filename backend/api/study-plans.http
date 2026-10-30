@@ -1,0 +1,77 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@courseId = THAY_COURSE_ID
+@assignmentId = THAY_ASSIGNMENT_ID
+@examId = THAY_EXAM_ID
+@fromDate = 2026-11-02
+@toDate = 2026-11-03
+
+### Đăng nhập tài khoản thật của bạn tại máy; không commit thông tin đăng nhập
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"THAY_EMAIL","password":"THAY_MAT_KHAU"}
+
+### Lấy ID môn của tài khoản từ data
+GET {{baseUrl}}/api/v1/courses
+Authorization: Bearer {{accessToken}}
+
+### Xem trước tự học độc lập; sửa ngày sang hôm nay/tương lai, tối đa 14 ngày
+POST {{baseUrl}}/api/v1/study-plans/preview
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId":"{{courseId}}",
+  "goal":"Hoàn thành bài tập lớn React",
+  "fromDate":"{{fromDate}}",
+  "toDate":"{{toDate}}",
+  "timeZone":"Asia/Ho_Chi_Minh",
+  "availableStart":"19:00",
+  "availableEnd":"21:00",
+  "weekdays":[1,2,3,4,5,6,7],
+  "totalMinutes":180,
+  "sessionMinutes":45,
+  "breakMinutes":10
+}
+
+### Gắn bài tập: backend đọc deadline/trạng thái/version hiện tại, không nhận deadline từ client
+POST {{baseUrl}}/api/v1/study-plans/preview
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId":"{{courseId}}",
+  "assignmentId":"{{assignmentId}}",
+  "goal":"Làm bài tập lớn",
+  "fromDate":"{{fromDate}}",
+  "toDate":"{{toDate}}",
+  "timeZone":"Asia/Ho_Chi_Minh",
+  "availableStart":"19:00",
+  "availableEnd":"21:00",
+  "totalMinutes":180,
+  "sessionMinutes":45
+}
+
+### Ôn thi: kết thúc không sau thời điểm bắt đầu thi; chỉ chọn bài HOẶC kỳ thi
+POST {{baseUrl}}/api/v1/study-plans/preview
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseId":"{{courseId}}",
+  "examId":"{{examId}}",
+  "goal":"Ôn thi cuối kỳ",
+  "fromDate":"{{fromDate}}",
+  "toDate":"{{toDate}}",
+  "timeZone":"Asia/Ho_Chi_Minh",
+  "availableStart":"19:00",
+  "availableEnd":"21:00",
+  "totalMinutes":90,
+  "sessionMinutes":45
+}
+
+### Không có API duyệt/lưu nhiều buổi trong 8A.1. Mở trước và sau để xác nhận không có buổi tự sinh.
+GET {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{accessToken}}

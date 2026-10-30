@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**8A.1 — Đề xuất kế hoạch học:** POST `/api/v1/study-plans/preview` đọc lịch thật toàn tài khoản và mục tiêu bài/thi tùy chọn, xếp theo giờ rảnh/thứ/tổng phút/buổi/nghỉ. Trả phần xếp được và còn thiếu; `RULE_BASED_V1`, `persisted:false`. Không LLM, không ghi buổi, không migration/dependency/UI; V12 hiện có. 804 tests backend/Maven verify/đóng gói đạt (40 mới gồm HTTP/PostgreSQL/thuật toán/PowerShell 5.1), không lỗi/bỏ qua; TypeScript và 630 frontend hồi quy đạt. [Cách chạy và kết quả hồi quy](../docs/BACKEND-PHASE-8A1.md), [hợp đồng](docs/STUDY-PLANS.md), `scripts/Try-StudyPlan.ps1`, `api/study-plans.http`. Khởi động lại backend; UI và duyệt/lưu ở các đợt sau.
+
 **7B.1 — Trạng thái đã đọc thông báo:** Query `POST /api/v1/notification-read-states/query`, PUT `/api/v1/notification-read-states` theo tập mục/revision đã xem. Biên nhận PostgreSQL theo owner/nguồn/ngày; kiểm tra cả lô, khóa owner, retry không trùng và giữ readAt. V12 thêm bảng/FK composite/cascade, không đổi dữ liệu học tập hoặc dependency; frontend nối ở 7B.2. [Hướng dẫn](../docs/BACKEND-PHASE-7B1.md), [hợp đồng](docs/NOTIFICATION-READ-STATES.md), `scripts/Try-NotificationReadStates.ps1`, `api/notification-read-states.http`. Khởi động lại backend để áp dụng V12.
 
 

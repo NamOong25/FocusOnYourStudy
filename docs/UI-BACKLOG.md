@@ -2,6 +2,10 @@
 
 Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F đã làm bộ chọn ngày/giờ (3A) và điều hướng (3B) theo yêu cầu. Đã hoàn thành các đợt trạng thái (3C) và Dashboard theo học kỳ (3D). Đây là checklist trong project, không phải lịch nhắc tự động.
 
+## Điều chỉnh phạm vi — bỏ đính kèm tài liệu
+
+Theo yêu cầu ngày 30/10/2026: bỏ triển khai upload/lưu/tải/xóa tệp đính kèm bài tập; không thực hiện đề xuất 8A.1–8A.3 về tài liệu PDF. Giữ AI gợi ý kế hoạch học và luồng xem trước/sửa/duyệt. Tóm tắt PDF và tạo câu hỏi từ tệp không nằm trong đợt tiếp theo; chỉ mở lại khi người dùng yêu cầu riêng. Các màn tài liệu mẫu hiện có chưa bị thay đổi trong lần điều chỉnh checklist này.
+
 ## Hoàn thiện giao diện sau đợt rà soát — làm từng đợt
 
 Theo yêu cầu ngày 20/10/2026: ưu tiên hai phần điều hướng và bài tập trước; các đề xuất còn lại ghi dưới đây để làm khi có thời gian. Chưa chuyển sang backend trong đợt này.
@@ -198,6 +202,14 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 7B.2 — Chuông/trung tâm thông báo nối query/PUT, đối chiếu basis với nguồn đã hiển thị, đọc một/tất cả đúng tập mục; F5, tách owner, đồng bộ tab, tải/lỗi/retry và đối chiếu sau lost response. Bổ sung milestone lịch thi vào revision API (vẫn V12). TypeScript, 626 tests frontend (32 mới), 42 tests backend liên quan/Maven verify/export web đạt. UI/API/PostgreSQL QA: 4→3→0, F5, deadline, hai tab, offline/restart, A→B→A, 320/360/430px. Xem FRONTEND-PHASE-7B2.md; nghiệm thu web đã hoàn thành ở 7B.3, native chưa nghiệm thu.
 - [x] 7B.3 — Nghiệm thu UI/API/PostgreSQL: hoàn thành/mở lại bài, nghỉ/khôi phục/đổi phòng-giờ/xóa chuỗi, phòng-giờ thi/tắt nhắc/bật lại/xóa/mốc 10→0, hai tab/F5/restart/A→B→A và số chưa đọc khớp. Proxy QA tái hiện 409 và mất phản hồi sau commit; khóa ghi/đối chiếu, không tự PUT lại. Sửa kết quả đọc cũ khi nguồn đổi, giữ thông báo chưa xác nhận; 630 tests frontend (4 mới), TypeScript, 42 tests backend liên quan và export web đạt. Maven đóng gói lại thành công sau dừng QA giữ JAR; không chạy full backend. QA đã dọn, 320/360/430px; xem `FRONTEND-PHASE-7B3.md` để phân biệt sửa bằng UI/API và giới hạn proxy. Không backend/schema/dependency mới.
 
+## Backend 8 — Đề xuất kế hoạch học
+
+**Tên 8A.1–8A.3 dưới đây thay cho đề xuất PDF cũ đã bỏ.** Người dùng tiếp tục chọn triển khai 8A.1 ngày 31/10/2026; đề xuất hoãn AI để chốt bản cá nhân chưa thay thế yêu cầu này. Bộ xếp lịch theo quy tắc chưa gọi LLM/API ngoài; không khôi phục phạm vi upload/tài liệu.
+
+- [x] 8A.1 — API POST `/api/v1/study-plans/preview`, Bearer/owner, snapshot readOnly/REPEATABLE_READ từ lịch học/ngoại lệ/thi/tự học toàn tài khoản. Khung rảnh/thứ/zone/tổng phút/buổi/nghỉ; gắn môn và tùy chọn bài hoặc thi; kiểm tra trạng thái/deadline, DST/ranh giới phút/microsecond. Trả phần xếp được/còn thiếu, `persisted:false`, không ghi/giữ chỗ/LLM. Package planning, PowerShell 5.1 và IntelliJ HTTP; V12 hiện có, không dependency/UI mới. 804 tests backend/Maven verify/đóng gói đạt (40 mới: 13 thuật toán + 27 HTTP/PostgreSQL/script), TypeScript và 630 frontend hồi quy đạt, không lỗi/bỏ qua. Xem `BACKEND-PHASE-8A1.md` để thử; dữ liệu người dùng không seed/reset.
+- [ ] 8A.2 — Nối UI với đề xuất thật; xem/sửa/bỏ chọn, rõ thiếu thời gian và chưa lưu, loading/lỗi/thử lại; duyệt cần backend kiểm tra lại dữ liệu trước ghi.
+- [ ] 8A.3 — Hoàn thiện API duyệt/lưu nhiều buổi và nghiệm thu liên thông: quyền/version/deadline/trùng lịch tại lúc ghi, không tự ghi đè hoặc tạo trùng sau mất phản hồi; giữ đề xuất để đối chiếu khi nguồn đổi. Chỉ đánh dấu luồng kế hoạch hoàn tất khi việc duyệt thực sự lưu được.
+
 ## Các đợt giao diện đã hoàn thành
 
 - [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.
@@ -309,7 +321,7 @@ Lộ trình dưới đây ghi lại thứ tự trong ảnh. Đã chuyển sang b
 | 5. Điểm và GPA | Điểm thành phần, điểm môn, GPA, tín chỉ, dự đoán mục tiêu | Kết quả khớp bộ ví dụ tính tay; xử lý đúng điểm thiếu và học lại. |
 | 6. Pomodoro | Đồng hồ, tạm dừng, liên kết môn/bài tập, lưu phiên | Đưa app ra nền rồi quay lại vẫn tính đúng; không ghi trùng phiên học. |
 | 7. Dashboard và thống kê | Tổng hợp deadline, lịch thi, GPA, thời gian học; hoàn thiện thông báo | Số liệu và biểu đồ lấy từ dữ liệu thật, khớp các màn chi tiết. |
-| 8. Tài liệu và AI | Làm lần lượt: đính kèm tài liệu → AI lập kế hoạch → tóm tắt PDF/trắc nghiệm | Tệp có quyền truy cập; đề xuất AI được duyệt/hủy; lỗi dịch vụ có cách xử lý rõ. |
+| 8. AI lập kế hoạch | Gợi ý kế hoạch theo môn/bài tập, deadline và giờ rảnh; xem trước/sửa/duyệt. Bỏ triển khai đính kèm tài liệu theo điều chỉnh phạm vi ở đầu checklist. | Đề xuất AI được duyệt/hủy; kiểm tra trùng lịch và deadline; lỗi dịch vụ không tự áp dụng kế hoạch. |
 | 9. Hoàn thiện để sử dụng | Khôi phục mật khẩu, cài đặt, xuất dữ liệu, triển khai và kiểm thử liên thông | Có bản cài/chạy được và hướng dẫn sử dụng; xác định rõ phạm vi hoạt động offline. |
 
 - [ ] Nghiệm thu bản lõi sau giai đoạn 4: tài khoản, học kỳ/môn, bài tập/kế hoạch và lịch dùng được liền mạch, dữ liệu được lưu thật.

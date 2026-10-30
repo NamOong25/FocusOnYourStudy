@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 8A.1 — Backend đề xuất kế hoạch học
+
+Tạo bản xem trước từ lịch/mục tiêu thật, kiểm tra giờ rảnh/trùng/deadline và số phút còn thiếu. Thuật toán theo quy tắc, chưa gọi AI hoặc tự lưu buổi; có hợp đồng/script/IntelliJ HTTP và test. Xem [BACKEND-PHASE-8A1.md](BACKEND-PHASE-8A1.md).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Thêm API đề xuất kế hoạch học từ lịch thực tế"
+git push origin main
+```
+
+Chưa commit/push. Thay đổi bỏ phần đính kèm tài liệu trong checklist được giữ lại.
+
 ## 7B.3 — Nghiệm thu vòng đời thông báo trên web
 
 Hoàn thành/mở lại, nghỉ/khôi phục, đổi phòng/giờ/mốc nhắc, tắt nhắc/xóa; hai tab/F5/tài khoản và lỗi ghi. Xóa kết quả đọc cũ khi nguồn thay đổi, giữ khóa đối chiếu sau lỗi. Chi tiết và phạm vi test ở [FRONTEND-PHASE-7B3.md](FRONTEND-PHASE-7B3.md).
