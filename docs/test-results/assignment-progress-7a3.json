@@ -1,0 +1,126 @@
+[
+  {
+    "label": "initial",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 1,
+    "soon": 1
+  },
+  {
+    "label": "overdue_to_tomorrow",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 0,
+    "soon": 2
+  },
+  {
+    "label": "tomorrow_to_distant",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "completed",
+    "total": 5,
+    "completed": 3,
+    "percent": 60,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "reopened",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "reassigned_within_semester",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "moved_out_of_semester",
+    "total": 4,
+    "completed": 2,
+    "percent": 50,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "moved_into_semester",
+    "total": 2,
+    "completed": 0,
+    "percent": 0,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "deleted_from_second_semester",
+    "total": 1,
+    "completed": 0,
+    "percent": 0,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "deleted_completed",
+    "total": 3,
+    "completed": 1,
+    "percent": 33,
+    "overdue": 0,
+    "soon": 1
+  },
+  {
+    "label": "restored_fixture",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 1,
+    "soon": 1
+  },
+  {
+    "label": "version_conflict_and_manual_rebase",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 1,
+    "soon": 1
+  },
+  {
+    "label": "lost_response_reconciled_without_duplicate",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 1,
+    "soon": 1
+  },
+  {
+    "label": "linked_plan_guards_preserve_all_counts",
+    "total": 5,
+    "completed": 2,
+    "percent": 40,
+    "overdue": 1,
+    "soon": 1
+  },
+  {
+    "label": "account_isolation_and_empty_semester",
+    "total": 0
+  },
+  {
+    "label": "half_up_29_of_200",
+    "total": 200,
+    "completed": 29,
+    "percent": 15,
+    "overdue": 0,
+    "soon": 0
+  }
+]

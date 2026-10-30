@@ -2,6 +2,7 @@ import type { Course } from '../academics/academic';
 import { taskIsOverdue, type Task } from '../assignments/assignments';
 import { focusSummary, uniqueFocusRecords, type FocusRecord } from '../focus/focus';
 import { addDays, dateKey, isValidDate, parseDay } from '../../shared/utils/dates';
+import { completionPercent } from '../../shared/utils/completionPercent';
 
 export const statisticsPeriods = ['7 ngày', '30 ngày', 'Tùy chọn'] as const;
 export type StatisticsPeriod = typeof statisticsPeriods[number];
@@ -60,7 +61,7 @@ export function statisticsData({ semesterId, catalog, records, tasks, range, now
     sampleCount: entries.filter(record => record.source === 'sample').length,
     streak: focusSummary(semesterRecords, 4, now).streak,
     distribution: [...byCourse.values()].sort((a, b) => b.seconds - a.seconds || a.name.localeCompare(b.name)).map(course => ({ ...course, percent: totalSeconds ? course.seconds / totalSeconds * 100 : 0 })),
-    tasks: { total: semesterTasks.length, done, overdue, notDue: semesterTasks.length - done - overdue, percent: semesterTasks.length ? Math.round(done / semesterTasks.length * 100) : 0 },
+    tasks: { total: semesterTasks.length, done, overdue, notDue: semesterTasks.length - done - overdue, percent: completionPercent(done, semesterTasks.length) },
   };
 }
 export type StatisticsData = ReturnType<typeof statisticsData>;

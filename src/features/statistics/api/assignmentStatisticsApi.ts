@@ -1,5 +1,6 @@
 import { ApiError, createHttpClient } from '../../../shared/api/http';
 import { instantMicros } from '../../../shared/utils/instantMicros';
+import { completionPercent } from '../../../shared/utils/completionPercent';
 import { uuid, type Authorized } from '../../focus/api/pomodoroApi';
 import { dailyKey, pomodoroDay, validPomodoroDate } from '../../focus/api/pomodoroInsightsApi';
 
@@ -31,7 +32,7 @@ export function parseAssignmentStatistics(value: unknown, q: AssignmentStatistic
     || n.pendingAssignments + n.completedAssignments !== n.totalAssignments
     || n.overdueAssignments + n.notDueAssignments !== n.pendingAssignments || n.dueSoonAssignments > n.notDueAssignments) throw invalid();
   // Match Java's HALF_UP exactly, including half points such as 29/200 = 14.5%.
-  const percent = n.totalAssignments ? Number((BigInt(n.completedAssignments) * BigInt(200) + BigInt(n.totalAssignments)) / (BigInt(n.totalAssignments) * BigInt(2))) : 0;
+  const percent = completionPercent(n.completedAssignments, n.totalAssignments);
   if (n.completionPercent !== percent) throw invalid();
   return { semesterId: n.semesterId, courseId: n.courseId, asOf: n.asOf, date: n.date, timeZone: n.timeZone, dueSoonThrough: n.dueSoonThrough,
     totalAssignments: n.totalAssignments, todoAssignments: n.todoAssignments, inProgressAssignments: n.inProgressAssignments, completedAssignments: n.completedAssignments,

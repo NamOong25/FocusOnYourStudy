@@ -4,7 +4,19 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 7A.2 — Giao diện tiến độ bài tập
+## Đợt vừa hoàn thành: 7A.3 — Liên thông tiến độ bài tập
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Hoàn thiện liên thông thống kê tiến độ bài tập"
+git push origin main
+```
+
+Nghiệm thu Dashboard–Bài tập–Thống kê qua đổi deadline/trạng thái, chuyển môn/kỳ, xóa, version/mất phản hồi và hai tab. Sửa HALF_UP 29/200 = 15%, thêm đồng bộ đọc theo tài khoản/endpoint, giữ bản nháp và khóa đối chiếu. **594 tests frontend (13 mới), TypeScript/export web, 16 mốc Manager/API/PostgreSQL QA và UI hai tab qua**; không backend/schema/dependency. Phạm vi 7A hoàn tất trên web; native và các phần hoãn giữ nguyên. Hướng dẫn `FRONTEND-PHASE-7A3.md`, số liệu/ảnh kèm theo. Chưa tự commit/push.
+
+## 7A.2 — Giao diện tiến độ bài tập
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

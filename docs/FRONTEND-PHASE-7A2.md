@@ -1,5 +1,7 @@
 # 7A.2 — Tiến độ bài tập trên Thống kê
 
+Cập nhật 30/10/2026: đã nghiệm thu liên thông ở [7A.3](FRONTEND-PHASE-7A3.md). Nội dung bên dưới ghi lại kết quả của đợt 7A.2 ngày 29/10/2026.
+
 Ngày 29/10/2026. Đã nối API 7A.1 vào **Thống kê → Tổng quan → Tiến độ bài tập**. Không thay backend/schema/dependency; vẫn API và Flyway V11 hiện có.
 
 ## Đã bổ sung

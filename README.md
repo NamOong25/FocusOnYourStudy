@@ -2,11 +2,17 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 7A.2: Tiến độ bài tập trên Thống kê
+## Mới nhất — 7A.3: Hoàn tất liên thông tiến độ bài tập trên web
+
+Dashboard–Bài tập–Thống kê đã đối chiếu deadline/trạng thái/chuyển môn-kỳ/xóa, F5 và hai tab. Sửa Dashboard làm tròn 29/200 thành **15%** khớp API, thêm đồng bộ đọc danh mục kỳ/môn/bài giữa các tab cùng tài khoản/endpoint và khi trở lại app. Giữ bản nháp/version và khóa đối chiếu, không tự gửi lại ghi hoặc tự bỏ yêu cầu kiểm tra sau lỗi. **TypeScript, 594 tests frontend (13 mới), export web, 16 mốc Manager/API/PostgreSQL QA và kiểm tra UI hai tab đạt.** Không backend/schema/dependency mới; phạm vi 7A hoàn tất trên web, native và các mục hoãn giữ nguyên.
+
+Xem [hướng dẫn và biên bản 7A.3](docs/FRONTEND-PHASE-7A3.md), [số liệu QA](docs/test-results/assignment-progress-7a3.json). Checklist và tên commit đã cập nhật; chưa tự commit/push.
+
+## 7A.2: Tiến độ bài tập trên Thống kê
 
 **Thống kê → Tổng quan** có thẻ tiến độ đọc API: chọn kỳ/môn, phần trăm/hoàn thành/tổng bài và các nhóm chưa làm/đang làm/hoàn thành/quá hạn/sắp hạn. Bấm nhóm mở đúng danh sách/bộ lọc và mốc thời gian server; quay lại giữ lựa chọn, đọc lại sau lưu. Bộ chọn riêng với tuần/tháng biểu đồ Pomodoro; tải/lỗi/trống/thử lại và tách tài khoản. **TypeScript, export web và 581 tests frontend đạt (24 mới), không lỗi/bỏ qua.** Đã kiểm tra UI/API/PostgreSQL QA riêng: 2/5 → 3/5, năm nhóm, kỳ/môn, F5, offline/restart, A → B → A, 320/360/430px. Không backend/schema/dependency mới.
 
-Xem [hướng dẫn và ảnh 7A.2](docs/FRONTEND-PHASE-7A2.md). Kiểm tra liên thông đầy đủ 7A.3 vẫn mở; điện thoại thật 2C.3B vẫn hoãn.
+Xem [hướng dẫn và ảnh 7A.2](docs/FRONTEND-PHASE-7A2.md). Kiểm tra liên thông đã hoàn thành ở 7A.3; điện thoại thật 2C.3B vẫn hoãn.
 
 ## 7A.1: API thống kê tiến độ bài tập
 
