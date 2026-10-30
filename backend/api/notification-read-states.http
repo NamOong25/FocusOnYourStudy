@@ -1,0 +1,57 @@
+### IntelliJ HTTP Client. accessToken chỉ lưu trong private environment, không commit token.
+@baseUrl = http://localhost:8080
+@assignmentId = REPLACE_WITH_OWN_ASSIGNMENT_UUID
+@examId = REPLACE_WITH_OWN_EXAM_UUID
+@scheduleId = REPLACE_WITH_OWN_SCHEDULE_UUID
+@occurrenceDate = 2026-11-02
+@revision = REPLACE_WITH_REVISION_FROM_QUERY_AFTER_READING_CURRENT_CONTENT
+@examRevision = REPLACE_WITH_EXAM_REVISION_FROM_QUERY
+
+### Đọc trạng thái; chỉ đọc database dù dùng POST
+POST {{baseUrl}}/api/v1/notification-read-states/query
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"targets":[{"kind":"ASSIGNMENT","sourceId":"{{assignmentId}}"}]}
+
+### Đánh dấu đúng phiên bản vừa xem; chạy lại cùng revision không đổi readAt
+PUT {{baseUrl}}/api/v1/notification-read-states
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"items":[{"target":{"kind":"ASSIGNMENT","sourceId":"{{assignmentId}}"},"revision":"{{revision}}"}]}
+
+### Query hai nguồn; đọc nội dung hiện tại trước khi copy hai revision
+POST {{baseUrl}}/api/v1/notification-read-states/query
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"targets":[{"kind":"ASSIGNMENT","sourceId":"{{assignmentId}}"},{"kind":"EXAM","sourceId":"{{examId}}"}]}
+
+### Đọc tất cả hai mục đã xem; một mục stale/không khả dụng thì cả lô không ghi
+PUT {{baseUrl}}/api/v1/notification-read-states
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"items":[{"target":{"kind":"ASSIGNMENT","sourceId":"{{assignmentId}}"},"revision":"{{revision}}"},{"target":{"kind":"EXAM","sourceId":"{{examId}}"},"revision":"{{examRevision}}"}]}
+
+### Hai buổi cùng chuỗi có trạng thái độc lập
+POST {{baseUrl}}/api/v1/notification-read-states/query
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"targets":[{"kind":"CLASS","sourceId":"{{scheduleId}}","occurrenceDate":"{{occurrenceDate}}"}]}
+
+### Mảng query rỗng hợp lệ, không seed dữ liệu
+POST {{baseUrl}}/api/v1/notification-read-states/query
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"targets":[]}
+
+### Thiếu ngày CLASS -> 400
+POST {{baseUrl}}/api/v1/notification-read-states/query
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{"targets":[{"kind":"CLASS","sourceId":"{{scheduleId}}"}]}

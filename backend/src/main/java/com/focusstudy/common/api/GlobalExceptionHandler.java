@@ -31,6 +31,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     public record FieldError(String field, String message) { }
+    @ExceptionHandler(com.focusstudy.notifications.NotificationApiException.class)
+    ResponseEntity<ProblemDetail> notificationProblem(com.focusstudy.notifications.NotificationApiException ex, HttpServletRequest request) {
+        return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore())
+                .body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));
+    }
     @ExceptionHandler(PomodoroApiException.class)
     ResponseEntity<ProblemDetail> pomodoroProblem(PomodoroApiException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.status()).cacheControl(CacheControl.noStore()).body(ApiProblems.of(ex.status(), ex.code(), ex.getMessage(), request));

@@ -4,7 +4,21 @@ Theo yêu cầu: mỗi đợt làm xong đều kèm tên commit tiếng Việt v
 
 Điều chỉnh lộ trình: người dùng chọn để **2C.3B kiểm tra thiết bị thật làm sau**, ưu tiên 3A → 3B → 3C. Tên commit riêng cho thay đổi tài liệu này nếu cần: **Cập nhật lộ trình backend và hoãn kiểm tra điện thoại**.
 
-## Đợt vừa hoàn thành: 7A.3 — Liên thông tiến độ bài tập
+## Đợt vừa hoàn thành: 7B.1 — Lưu trạng thái đã đọc thông báo
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git status
+git add .
+git commit -m "Lưu trạng thái đã đọc thông báo theo tài khoản"
+git push origin main
+```
+
+Backend/query/PUT/biên nhận PostgreSQL theo tài khoản và ngày buổi học; revision server, chống stale/đánh dấu nhầm, nguyên tử theo lô và retry giữ readAt. V12 thêm bảng/FK/cascade, giữ dữ liệu V11; 38 tests mới và mở rộng restart. Giao diện nối ở 7B.2; xem `BACKEND-PHASE-7B1.md`. Không dependency mới, chưa tự commit/push.
+
+Kiểm tra: báo cáo cuối 761 tests backend (38 mới), TypeScript và 594 tests frontend đạt; lượt full có một timeout tạo tài khoản thử, đã chạy lại 51 tests liên quan bằng Maven verify và đóng gói thành công. Chi tiết phân biệt lượt full/rerun tại hướng dẫn 7B.1.
+
+## 7A.3 — Liên thông tiến độ bài tập
 
 ```powershell
 cd 'D:\Video OBS\QuanLyHocTap'

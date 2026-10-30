@@ -1,5 +1,10 @@
 # Backend — FocusYourStudy
 
+**7B.1 — Trạng thái đã đọc thông báo:** Query `POST /api/v1/notification-read-states/query`, PUT `/api/v1/notification-read-states` theo tập mục/revision đã xem. Biên nhận PostgreSQL theo owner/nguồn/ngày; kiểm tra cả lô, khóa owner, retry không trùng và giữ readAt. V12 thêm bảng/FK composite/cascade, không đổi dữ liệu học tập hoặc dependency; frontend nối ở 7B.2. [Hướng dẫn](../docs/BACKEND-PHASE-7B1.md), [hợp đồng](docs/NOTIFICATION-READ-STATES.md), `scripts/Try-NotificationReadStates.ps1`, `api/notification-read-states.http`. Khởi động lại backend để áp dụng V12.
+
+
+Kiểm tra: báo cáo cuối 761 tests backend (38 mới), TypeScript và 594 tests frontend đạt; lượt full có một timeout tạo tài khoản thử, đã chạy lại 51 tests liên quan bằng Maven verify và đóng gói thành công. Chi tiết phân biệt lượt full/rerun tại hướng dẫn 7B.1.
+
 **Kiểm tra 7A.1:** 723 tests/Maven verify đạt (37 mới), không lỗi/bỏ qua; TypeScript và 557 tests frontend hồi quy đạt. Tests HTTP dùng PostgreSQL/schema riêng tự dọn; script PowerShell 5.1 đã kiểm tra cả thành công/lỗi và không thu hồi phiên app.
 
 **7A.1 — API thống kê tiến độ bài tập:** `GET /api/v1/assignment-statistics?semesterId=<UUID>`, lọc môn/zone tùy chọn; tổng, trạng thái, phần trăm HALF_UP, quá hạn/còn hạn/sắp hạn 7 ngày lịch theo một mốc server. Bài COMPLETED không quá hạn, mẫu số 0 trả 0/0%; Bearer/ownership, readOnly/REPEATABLE_READ và một câu aggregate. Không migration/dependency/seed, vẫn V11; không sửa UI. **37 test mới HTTP/PostgreSQL/PowerShell 5.1 đã qua**, gồm microsecond/DST/A-B/đồng thời/GET không ghi. Khởi động lại backend; dùng `scripts/Try-AssignmentStatistics.ps1 -SemesterId '<ID học kỳ>'` hoặc `api/assignment-statistics.http`. [Hướng dẫn 7A.1](../docs/BACKEND-PHASE-7A1.md), [hợp đồng](docs/ASSIGNMENT-STATISTICS.md); UI ở 7A.2, liên thông ở 7A.3.

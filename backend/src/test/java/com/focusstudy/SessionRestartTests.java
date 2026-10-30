@@ -61,6 +61,7 @@ class SessionRestartTests {
         Map<?, ?> completedPomodoro;
         Map<?, ?> cancelledPomodoro;
         Map<?, ?> savedPomodoroGoal;
+        Map<?, ?> savedNotificationRead;
         try {
             try (var app = start(schema)) {
                 assertThat(post(app, "/api/v1/auth/register", Map.of("email", email, "fullName", "Kiểm thử khởi động lại", "password", password, "confirmPassword", password)).statusCode()).isEqualTo(201);
@@ -77,6 +78,12 @@ class SessionRestartTests {
                         "title", "Bài lưu qua khởi động lại", "dueAt", "2026-10-30T23:59:00+07:00", "notes", "Giữ nguyên dữ liệu"));
                 assertThat(assignment.statusCode()).isEqualTo(201);
                 assignmentId = ((Map<?, ?>) app.getBean(ObjectMapper.class).readValue(assignment.body(), Map.class).get("data")).get("id").toString();
+                var notificationQuery = data(app, semester(app, "POST", "/api/v1/notification-read-states/query", pair.get("accessToken").toString(),
+                        Map.of("targets", List.of(Map.of("kind", "ASSIGNMENT", "sourceId", assignmentId)))));
+                var notificationState = (Map<?, ?>) ((List<?>) notificationQuery.get("items")).getFirst();
+                savedNotificationRead = (Map<?, ?>) ((List<?>) data(app, semester(app, "PUT", "/api/v1/notification-read-states", pair.get("accessToken").toString(),
+                        Map.of("items", List.of(Map.of("target", notificationState.get("target"), "revision", notificationState.get("revision")))))).get("items")).getFirst();
+                assertThat(savedNotificationRead.get("read")).isEqualTo(true);
                 var study = semester(app, "POST", "/api/v1/study-sessions", pair.get("accessToken").toString(), Map.of("courseId", courseId,
                         "assignmentId", assignmentId, "title", "Buổi học giữ qua restart", "startsAt", "2026-10-30T19:00:00+07:00",
                         "timeZone", "Asia/Ho_Chi_Minh", "durationMinutes", 45, "notes", "Giữ kế hoạch"));
@@ -167,6 +174,9 @@ class SessionRestartTests {
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", rotated)).statusCode()).isEqualTo(401);
                 assertThat(post(app, "/api/v1/auth/refresh", Map.of("refreshToken", first)).statusCode()).isEqualTo(401);
                 var pair = data(app, post(app, "/api/v1/auth/refresh", Map.of("refreshToken", independent)));
+                var restoredNotification = data(app, semester(app, "POST", "/api/v1/notification-read-states/query", pair.get("accessToken").toString(),
+                        Map.of("targets", List.of(Map.of("kind", "ASSIGNMENT", "sourceId", assignmentId)))));
+                assertThat(((List<?>) restoredNotification.get("items")).getFirst()).isEqualTo(savedNotificationRead);
                 var restoredFocus = data(app, semester(app, "GET", "/api/v1/pomodoro-sessions/active", pair.get("accessToken").toString(), null));
                 for (String key : List.of("id", "clientRequestId", "startedAt", "stateChangedAt", "endsAt", "version", "context")) assertThat(restoredFocus.get(key)).as(key).isEqualTo(runningPomodoro.get(key));
                 assertThat(restoredFocus.get("status")).isEqualTo("RUNNING");
