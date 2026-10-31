@@ -12,11 +12,11 @@ const integer=(v:unknown,min:number,max:number):v is number=>Number.isSafeIntege
 const sameId=(a:unknown,b:string)=>typeof a==='string'&&a.toLowerCase()===b.toLowerCase();
 const badInput=(message:string)=>new ApiError(message,'INVALID_STUDY_PLAN');
 const invalid=()=>new ApiError('Bản đề xuất từ server chưa hợp lệ. Giữ điều kiện và thử tạo lại.','INVALID_PLAN_RESPONSE');
-export function validatePlanInput(input:PlanInput,now=Date.now()) {
+export function validatePlanInput(input:PlanInput,now:number|null=Date.now()) {
   if(!planId(input.courseId)||input.assignmentId!==undefined&&!planId(input.assignmentId)||input.examId!==undefined&&!planId(input.examId)||input.assignmentId&&input.examId)throw badInput('Chọn môn và tối đa một bài tập hoặc kỳ thi.');
   if(!input.goal.trim()||input.goal.trim().length>120)throw badInput('Mục tiêu cần từ 1 đến 120 ký tự.');
   if(!planZone(input.timeZone))throw badInput('Múi giờ chưa hợp lệ. Ví dụ Asia/Ho_Chi_Minh.');
-  if(!isValidDate(input.fromDate)||!isValidDate(input.toDate)||input.fromDate<planDay(now,input.timeZone)||input.toDate<input.fromDate||input.toDate>'2099-12-31'||(Date.parse(input.toDate+'T00:00:00Z')-Date.parse(input.fromDate+'T00:00:00Z'))/86400000>13)throw badInput('Chọn tối đa 14 ngày từ hôm nay theo múi giờ kế hoạch.');
+  if(!isValidDate(input.fromDate)||!isValidDate(input.toDate)||now!==null&&input.fromDate<planDay(now,input.timeZone)||input.toDate<input.fromDate||input.toDate>'2099-12-31'||(Date.parse(input.toDate+'T00:00:00Z')-Date.parse(input.fromDate+'T00:00:00Z'))/86400000>13)throw badInput('Chọn tối đa 14 ngày từ hôm nay theo múi giờ kế hoạch.');
   if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(input.availableStart)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(input.availableEnd)||input.availableStart>=input.availableEnd)throw badInput('Giờ rảnh kết thúc phải sau bắt đầu trong cùng ngày.');
   if(!Array.isArray(input.weekdays)||!input.weekdays.length||input.weekdays.length>7||input.weekdays.some(x=>!integer(x,1,7))||new Set(input.weekdays).size!==input.weekdays.length)throw badInput('Chọn ít nhất một thứ trong tuần, không lặp.');
   if(!integer(input.totalMinutes,1,1440)||!integer(input.sessionMinutes,15,240)||!integer(input.breakMinutes,0,60))throw badInput('Tổng phút cần 1–1440; mỗi buổi 15–240; nghỉ 0–60 phút.');

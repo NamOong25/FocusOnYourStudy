@@ -2,7 +2,11 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 8A.3A: API lưu nhóm buổi học
+## Mới nhất — 8A.3B: Duyệt và lưu kế hoạch trên app
+
+Trợ lý AI có nút **Lưu các buổi đã chọn**: kiểm tra bản chỉnh, lưu nhóm thật, báo số buổi/phút và mở đúng ngày trên danh sách Tự học mới đọc. Giữ key/body trước gửi để đối chiếu sau lỗi/F5 trong cùng tab; không tự POST lại sau lỗi mạng. Tách endpoint/tài khoản, kiểm tra biên nhận khớp từng buổi, giữ thành công nếu tải danh sách lỗi. **TypeScript, 702 tests frontend (37 mới) và export web đạt.** Có UI/API/PostgreSQL QA riêng về lưu phần chọn, sửa tên, F5, mất xác nhận sau commit, A→B→A, nguồn đổi, lỗi GET danh sách và 320/360/430px. [Cách test và phạm vi 8A.3B](docs/FRONTEND-PHASE-8A3B.md). Không đổi backend/schema/dependency; không chạy lại full backend trong đợt này. 8A.3C/native còn mở; chưa tự commit/push.
+
+## 8A.3A: API lưu nhóm buổi học
 
 Backend lưu các buổi đã duyệt trong một transaction, kiểm tra lại lịch/deadline/version và giữ biên nhận chống tạo trùng theo mã yêu cầu. Có POST apply, GET đối chiếu và script **Prepare → Apply → Get**. Khởi động lại backend để Flyway áp dụng V13; không xóa database. **Giao diện chưa có nút lưu nhóm**, phần đó còn 8A.3B. [Hướng dẫn thử 8A.3A](docs/BACKEND-PHASE-8A3A.md), [hợp đồng API](backend/docs/STUDY-PLAN-APPLICATIONS.md). **844 tests backend/Maven verify/đóng gói đạt (40 mới), TypeScript và 665 tests frontend đạt, không lỗi/bỏ qua.** QA riêng đã thử ba lần mở backend, gửi lại giữ nguyên biên nhận và không tạo lại buổi đã xóa. Chưa tự commit/push.
 

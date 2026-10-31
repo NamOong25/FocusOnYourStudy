@@ -5,7 +5,7 @@
 | POST | `/api/v1/study-plans/apply` | 201 khi lưu mới; 200 khi cùng mã/nội dung đã lưu trước đó. `Location` trỏ tới biên nhận theo mã yêu cầu. |
 | GET | `/api/v1/study-plans/applications/{clientRequestId}` | 200 biên nhận của chính tài khoản; 404 như nhau cho mã lạ hoặc mã của tài khoản khác. Chỉ đọc. |
 
-Cần Bearer; cookie đăng nhập không thay thế Bearer. Thành công dùng envelope `data/meta` và `Cache-Control: no-store`. Không gọi LLM, không thay đổi API preview và không tự POST từng buổi. Giao diện xem/chỉnh hiện có chưa nối nút lưu nhóm; phần đó thuộc 8A.3B.
+Cần Bearer; cookie đăng nhập không thay thế Bearer. Thành công dùng envelope `data/meta` và `Cache-Control: no-store`. Không gọi LLM, không thay đổi API preview và không tự POST từng buổi. Giao diện duyệt/lưu nhóm đã nối ở 8A.3B; xem [hướng dẫn web](../../docs/FRONTEND-PHASE-8A3B.md).
 
 ## Body Apply
 

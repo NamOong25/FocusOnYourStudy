@@ -1,0 +1,47 @@
+{
+  "phase": "8A.3B",
+  "checkedAt": "2026-10-31T16:48:01.320Z",
+  "environment": "isolated QA schema",
+  "frontendTests": 702,
+  "newTests": 37,
+  "typecheck": true,
+  "webExports": {
+    "qa": true,
+    "normal": true,
+    "qaEndpointAbsentInNormal": true
+  },
+  "apiApplyStatuses": [
+    201,
+    201,
+    409,
+    201
+  ],
+  "postCommitFault": "QA proxy returned 503 after backend 201",
+  "storedStudyCounts": [
+    3,
+    7,
+    7,
+    11
+  ],
+  "finalAccountA": {
+    "rows": 11,
+    "minutes": 495,
+    "uniqueIds": 11
+  },
+  "finalAccountB": {
+    "rows": 0
+  },
+  "f5Recovery": true,
+  "accountSwitchRecovery": true,
+  "receiptLookupDidNotCreateRows": true,
+  "sourceChangeRejected": true,
+  "confirmedSaveRetainedAfterListReadFailure": true,
+  "navigationToSavedDay": true,
+  "widthsWithoutHorizontalOverflow": [
+    320,
+    360,
+    430
+  ],
+  "nativeDeviceTested": false,
+  "backendFullRerun": false
+}

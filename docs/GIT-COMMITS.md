@@ -1,5 +1,19 @@
 # Tên commit cho từng đợt
 
+## 8A.3B — Nối duyệt và lưu kế hoạch học
+
+Lưu nhóm đã chọn/chỉnh, giữ key/body đối chiếu sau lỗi/F5, biên nhận khớp lệnh, tải danh sách thật và mở đúng ngày. Có hướng dẫn [FRONTEND-PHASE-8A3B.md](FRONTEND-PHASE-8A3B.md); 8A.3C vẫn để riêng.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Kết nối duyệt và lưu kế hoạch học trên giao diện"
+git push origin main
+```
+
+Chưa tự commit/push 8A.3B.
+
+
 ## 8A.3A — API lưu nhóm buổi học và chống gửi trùng
 
 Lưu nguyên khối sau kiểm tra lại lịch/deadline/version, biên nhận theo owner/key, retry không tạo trùng và không khôi phục buổi đã xóa. V13, Prepare/Apply/Get PowerShell 5.1 và IntelliJ HTTP; giao diện lưu còn 8A.3B. Xem [BACKEND-PHASE-8A3A.md](BACKEND-PHASE-8A3A.md).

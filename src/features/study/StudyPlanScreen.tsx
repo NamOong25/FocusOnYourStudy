@@ -13,9 +13,9 @@ import { StudySessionCard } from './components';
 import TaskDialog from '../assignments/TaskDialog';
 import { C, F, S } from '../../shared/theme';
 
-export default function StudyPlan() {
+export default function StudyPlan({initialDate}:{initialDate?:string}) {
   const { studySessions, prepareFocus } = useApp();
-  const [period, setPeriod] = useState('Theo ngày'); const [selected, setSelected] = useState(dateKey(today));
+  const [period, setPeriod] = useState('Theo ngày'); const [selected, setSelected] = useState(initialDate??dateKey(today));
   const [filter, setFilter] = useState('Tất cả'); const [create, setCreate] = useState(false); const [choosingDate, setChoosingDate] = useState(false);
   const [opened, setOpened] = useState<string | null>(null); const [taskId, setTaskId] = useState<string | null>(null);
   const monday = addDays(parseDay(selected), -((parseDay(selected).getDay() + 6) % 7));

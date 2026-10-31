@@ -56,6 +56,7 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
   { id: 'ai', label: 'Trợ lý AI', icon: 'sparkles-outline', activeIcon: 'sparkles' },
 ];
 function AppShell() {
+  const [studyOpen,setStudyOpen]=useState<{key:number;date?:string}>({key:0});
   const auth = useAuth();
   const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute, assignmentDestination, semesterConnection, courseConnection, assignmentConnection, studyConnection, openSavedSchedule } = useApp(); const inset = useSafeAreaInsets();
   const current = viewKey(route); const visited = useRef(new Set<string>()); visited.current.add(current);
@@ -85,7 +86,7 @@ function AppShell() {
   const openClass = (item: ClassItem | 'new', date?: string) => { setClassOrigin(current); setClassForm(item); setClassDate(date); };
   const openPanel = (value: 'profile' | 'notifications' | 'preview' | 'guide') => { setPanelOrigin(current); setPanel(value); };
   const closeTaskFlow = () => setTaskForm(null);
-  const study = () => setScheduleMode('Tự học');
+  const study = (date?:string) => { if(typeof date==='string')setStudyOpen(v=>({key:v.key+1,date}));setScheduleMode('Tự học'); };
   const renderPage = (key: string) => {
     if (auth.hasSession && (!semesterConnection?.loaded || !courseConnection?.loaded)) return <SemesterSyncStatus />;
     if (auth.hasSession && !assignmentConnection?.loaded) return <AssignmentSyncStatus />;
@@ -94,7 +95,7 @@ function AppShell() {
     if (key === 'focus') return <Focus onStudyPlan={study} />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant onStudyPlan={study} />;
-    return <><LearningNavigation value={key as ScheduleMode} onChange={setScheduleMode} />{key === 'Thời khóa biểu' ? <Schedule onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Bài tập' ? <AssignmentsScreen key={assignmentDestination?.key ?? 'regular'} initialStatisticsLink={assignmentDestination?.link} onTask={openTask} onNewTask={() => openTask('new')} /> : key === 'Kỳ thi' ? <ExamList /> : key === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}</>;
+    return <><LearningNavigation value={key as ScheduleMode} onChange={setScheduleMode} />{key === 'Thời khóa biểu' ? <Schedule onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Bài tập' ? <AssignmentsScreen key={assignmentDestination?.key ?? 'regular'} initialStatisticsLink={assignmentDestination?.link} onTask={openTask} onNewTask={() => openTask('new')} /> : key === 'Kỳ thi' ? <ExamList /> : key === 'Môn & học kỳ' ? <Academics /> : <StudyPlan key={studyOpen.key} initialDate={studyOpen.date} />}</>;
   };
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
     <Row between style={styles.header}>

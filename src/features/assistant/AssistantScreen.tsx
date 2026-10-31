@@ -17,7 +17,7 @@ const features: { icon: IconName; title: string; description: string; action: st
   { icon: 'help-circle-outline', title: 'Tạo câu hỏi trắc nghiệm', description: 'Tự kiểm tra kiến thức với câu hỏi ngắn và lời giải thích cho từng lựa chọn.', action: 'Luyện thử', color: C.green, bg: C.greenSoft },
   { icon: 'analytics-outline', title: 'Điều chỉnh kế hoạch học', description: 'Chọn một buổi chưa bắt đầu, xem giờ mới phù hợp và duyệt thay đổi.', action: 'Xem đề xuất', color: C.primary, bg: C.soft },
 ];
-export default function Assistant({ onStudyPlan }: { onStudyPlan: () => void }) {
+export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string) => void }) {
   const { tasks, setTab } = useApp(); const auth = useAuth();
   const [feature, setFeature] = useState<number | null>(null); const [prompt, setPrompt] = useState(''); const [sent, setSent] = useState('');
   const pending = tasks.filter(t => t.status !== 'Hoàn thành' && (!auth.hasSession || deadlineTimestamp(t)>Date.now())).sort(compareTaskDeadlines);
@@ -35,7 +35,7 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: () => void }) 
     <Section title="Bắt đầu bằng một câu hỏi" />
     <View style={{ gap: 8 }}>{['Lập kế hoạch ôn thi tuần này', 'Giúp mình ưu tiên bài tập'].map(q => <Pressable key={q} onPress={() => { setSent(q); setFeature(0); }} accessibilityRole="button" style={{ backgroundColor: '#fff', minHeight: 44, borderRadius: 22, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}><Icon name="chatbubble-outline" size={16} /><T style={{ fontSize: 12 }}>{q}</T></Pressable>)}</View>
     <Card style={{ padding: 10 }}><Row><TextInput maxLength={120} value={prompt} onChangeText={setPrompt} onSubmitEditing={send} returnKeyType="send" accessibilityLabel="Câu hỏi cho trợ lý" placeholder="Bạn đang muốn học gì?" placeholderTextColor={C.muted} style={{ flex: 1, minWidth: 0, padding: 9, fontFamily: F.regular, fontSize: 13, color: C.ink }} /><IconButton name="send" label="Gửi câu hỏi" bg={C.primary} color="#fff" onPress={send} /></Row></Card>
-    <T style={{ textAlign: 'center', fontSize: 11, lineHeight: 18, color: C.muted }}>{auth.hasSession ? 'Kế hoạch đọc lịch tài khoản và xếp theo quy tắc, chưa gọi AI. Bản xem trước chưa tự lưu vào lịch; các công cụ tài liệu vẫn là mẫu.' : 'Đang dùng đề xuất mẫu để bạn trải nghiệm giao diện. Bạn luôn xem và chọn trước khi thêm vào kế hoạch.'}</T>
+    <T style={{ textAlign: 'center', fontSize: 11, lineHeight: 18, color: C.muted }}>{auth.hasSession ? 'Kế hoạch đọc lịch tài khoản và xếp theo quy tắc, chưa gọi AI. Bạn xem, chọn và duyệt trước khi lưu các buổi vào lịch; các công cụ tài liệu vẫn là mẫu.' : 'Đang dùng đề xuất mẫu để bạn trải nghiệm giao diện. Bạn luôn xem và chọn trước khi thêm vào kế hoạch.'}</T>
     {(feature === 0 || feature === 1 || feature === 4) && <AIPlanFlow variant={feature === 4 ? 'adjust' : feature === 1 ? 'free' : 'deadline'} request={sent} onClose={() => setFeature(null)} onStudyPlan={onStudyPlan} />}
     {(feature === 2 || feature === 3) && <AIDocumentFlow initialMode={feature === 2 ? 'summary' : 'quiz'} onClose={() => setFeature(null)} />}
   </FlowScope>;
