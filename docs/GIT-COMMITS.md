@@ -1,5 +1,19 @@
 # Tên commit cho từng đợt
 
+## 8A.3A — API lưu nhóm buổi học và chống gửi trùng
+
+Lưu nguyên khối sau kiểm tra lại lịch/deadline/version, biên nhận theo owner/key, retry không tạo trùng và không khôi phục buổi đã xóa. V13, Prepare/Apply/Get PowerShell 5.1 và IntelliJ HTTP; giao diện lưu còn 8A.3B. Xem [BACKEND-PHASE-8A3A.md](BACKEND-PHASE-8A3A.md).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Thêm API lưu nhóm buổi học và chống gửi trùng"
+git push origin main
+```
+
+Chưa tự commit/push 8A.3A.
+
+
 ## 8A.2 — Giao diện đề xuất kế hoạch từ lịch thật
 
 Chọn môn/mục tiêu/giờ rảnh, xem/sửa/bỏ chọn kết quả API, rõ phần thiếu và chưa lưu; tải/lỗi/thử lại/tách tài khoản. 665 tests frontend, TypeScript, export và QA web đạt. Xem [FRONTEND-PHASE-8A2.md](FRONTEND-PHASE-8A2.md). Duyệt/lưu nhiều buổi còn 8A.3.

@@ -1,0 +1,30 @@
+{
+  "phase": "8A.3A",
+  "checkedAt": "2026-10-31T06:38:14.265Z",
+  "environment": "isolated QA schema",
+  "backendProcessStarts": 3,
+  "initialStatus": 201,
+  "replayAfterRestartStatus": 200,
+  "receiptAfterRestartIdentical": true,
+  "initialStudyRows": 2,
+  "studyRowsAfterRetry": 2,
+  "studyRowsAfterDeleteAndSecondRestart": 1,
+  "reusedKeyDifferentBody": 409,
+  "newKeyConflictingTime": 409,
+  "recreatedDeletedRows": false,
+  "validation": {
+    "relatedBackendTests": 92,
+    "newHttpPostgresTests": 40,
+    "fullBackendTests": 844,
+    "fullBackendSuites": 54,
+    "fullBackendFailures": 0,
+    "fullBackendErrors": 0,
+    "fullBackendSkipped": 0,
+    "mavenVerify": true,
+    "jarPackaged": true,
+    "frontendTypecheck": true,
+    "frontendTests": 665,
+    "frontendFailures": 0,
+    "frontendSkipped": 0
+  }
+}

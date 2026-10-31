@@ -116,7 +116,7 @@ class StudyPlanIntegrationTests {
     }
     @Test void explicitBearerAndExactPostRouteAreRequired()throws Exception{
         var f=fixture();error(send("POST",ROOT,null,one(f)),401,"AUTHENTICATION_REQUIRED");assertThat(send("POST",ROOT,"invalid",one(f)).statusCode()).isEqualTo(401);
-        for(String method:List.of("GET","PUT","DELETE","PATCH"))error(send(method,ROOT,f.owner.token,null),403,"ACCESS_DENIED");error(send("POST","/api/v1/study-plans/apply",f.owner.token,one(f)),403,"ACCESS_DENIED");
+        for(String method:List.of("GET","PUT","DELETE","PATCH"))error(send(method,ROOT,f.owner.token,null),403,"ACCESS_DENIED");error(send("PUT","/api/v1/study-plans/apply",f.owner.token,one(f)),403,"ACCESS_DENIED");
     }
     @Test void invalidCalendarAndZoneFieldsAreRejected()throws Exception{
         var f=fixture();var cases=List.of(Map.entry("fromDate","2026-02-30"),Map.entry("fromDate","2026-11-01"),Map.entry("toDate","2026-11-16"),Map.entry("toDate","2026-11-01"),Map.entry("timeZone","+07:00"),Map.entry("timeZone","Bad/Zone"),Map.entry("availableStart","9:00"),Map.entry("availableEnd","24:00"),Map.entry("availableEnd","18:00"));

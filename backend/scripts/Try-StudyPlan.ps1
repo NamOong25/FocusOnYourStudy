@@ -48,7 +48,7 @@ try {
     $result = Invoke-PlanApi '/api/v1/study-plans/preview' 'POST' $inputPlan $login.data.accessToken
     $result | ConvertTo-Json -Depth 9
     Write-Host "Xếp được $($result.data.scheduledMinutes)/$($result.data.requestedMinutes) phút; còn thiếu $($result.data.unscheduledMinutes) phút." -ForegroundColor Cyan
-    Write-Host 'Đây là đề xuất theo quy tắc từ dữ liệu PostgreSQL, chưa lưu buổi học và chưa gọi dịch vụ AI. Giao diện sẽ nối ở 8A.2.'
+    Write-Host 'Đây là đề xuất theo quy tắc từ dữ liệu PostgreSQL, chưa lưu buổi học và chưa gọi dịch vụ AI. Giao diện đã xem/chỉnh ở 8A.2. Lưu nhóm chỉ khi duyệt riêng qua API 8A.3A.'
 } catch {
     $failure = $_; $problem = Read-ApiProblem $failure
     if ($problem.code) { Write-Host "$($problem.code): $($problem.detail)" -ForegroundColor Red }

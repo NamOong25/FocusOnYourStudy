@@ -218,3 +218,7 @@ Thêm ended_at/finalized_at nullable vào pomodoro_sessions; giữ nguyên phiê
 pomodoro_preferences có UUID, user_id FK/UNIQUE, daily_sessions SMALLINT 1–12, timestamps và version. Không seed: mặc định 4/version API 0 khi chưa có row; lần lưu đầu version API 1, sau đó tăng khi thay đổi (version API là version ORM + 1). Khóa tài khoản bảo vệ cả trường hợp chưa có row, chống hai lần ghi đầu cùng version 0. GET default không INSERT; cùng giá trị/version hiện tại là no-op.
 
 Lịch sử/tiến độ được đọc từ các phiên, không có bảng tổng đếm cộng dồn nên gửi lặp không cộng trùng. COMPLETED công nhận đủ thời lượng; CANCELLED giữ phần học dở nhưng công nhận 0. Ngày xét theo ended_at và múi giờ query, không theo finalized_at. Xem [POMODORO.md](POMODORO.md).
+
+## Đã tạo trong V13 — biên nhận lưu kế hoạch
+
+`study_plan_applications`: id UUID, user_id FK app_users ON DELETE CASCADE, client_request_id UUID, SHA-256 request_hash, applied_at timestamptz, response_json jsonb. Unique (user_id, client_request_id), CHECK hash 64 hex/response object. Chỉ ghi cùng transaction thành công với nhóm study_sessions. Không FK tới môn/bài/buổi: giữ biên nhận sau khi nguồn bị sửa/xóa để retry không tạo lại. Không TTL/cleanup tự động; chưa lưu draft. V13 additive, không reset dữ liệu V1–V12. Xem [hợp đồng](STUDY-PLAN-APPLICATIONS.md).

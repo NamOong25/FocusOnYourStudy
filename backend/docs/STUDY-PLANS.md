@@ -1,6 +1,6 @@
 # Hợp đồng đề xuất kế hoạch học — 8A.1
 
-`POST /api/v1/study-plans/preview`, Bearer bắt buộc, trả 200 trong envelope `data/meta`, `Cache-Control: no-store`. POST là phép đọc dữ liệu riêng tư, không tạo kế hoạch/buổi học, không gọi AI. Chưa có `/apply` hay API sửa/lưu bản đề xuất. Không migration, dependency, dữ liệu seed hoặc thay đổi API lịch đang có; database vẫn V12.
+`POST /api/v1/study-plans/preview`, Bearer bắt buộc, trả 200 trong envelope `data/meta`, `Cache-Control: no-store`. POST là phép đọc dữ liệu riêng tư, không tạo kế hoạch/buổi học, không gọi AI. API duyệt/lưu nhóm và biên nhận đã có ở **8A.3A**, xem [STUDY-PLAN-APPLICATIONS.md](STUDY-PLAN-APPLICATIONS.md). Preview vẫn chỉ đọc, không giữ chỗ; V13 chỉ bổ sung bảng biên nhận cho thao tác Apply, không seed dữ liệu.
 
 ## Request
 
@@ -66,11 +66,11 @@ Ví dụ rút gọn `sessions` chỉ minh họa buổi 1: thực tế lịch tr�
 | --- | --- |
 | 400 | `VALIDATION_FAILED` cho trường bắt buộc/giới hạn số; `INVALID_REQUEST` cho JSON/UUID sai; `INVALID_STUDY_PLAN` cho ngày/giờ/zone/thứ trùng/hai mục tiêu. |
 | 401 | `AUTHENTICATION_REQUIRED` / `INVALID_ACCESS_TOKEN`. Cookie auth không thay thế Bearer ở endpoint này. |
-| 403 | `ACCESS_DENIED` cho method/route ngoài allowlist, bao gồm `/apply` chưa triển khai. |
+| 403 | `ACCESS_DENIED` cho method/route ngoài allowlist, không bao gồm POST `/apply` đã triển khai ở 8A.3A. |
 | 404 | `COURSE_NOT_FOUND`, `ASSIGNMENT_NOT_FOUND`, `EXAM_NOT_FOUND`; ID lạ và ID người khác trả cùng loại lỗi. |
 | 409 | `STUDY_PLAN_TARGET_COURSE_MISMATCH`, `STUDY_PLAN_TARGET_COMPLETED`, `STUDY_PLAN_DEADLINE_PASSED`. |
 | 422 | `STUDY_PLAN_SOURCE_LIMIT`. |
 
-Đề xuất không có hiệu lực như reservation hay token cho phép lưu. Sau khi người dùng xem/sửa/duyệt, backend phải đọc và kiểm tra quyền, trạng thái, deadline, trùng lịch và version lại. API tự học hiện có vẫn chặn ghi trùng/qua deadline; chưa có duyệt nhiều buổi nguyên tử/chống gửi trùng trong đợt 8A.1. Không tự POST từng buổi từ frontend chỉ vì preview trả 200.
+Đề xuất không có hiệu lực như reservation hay token cho phép lưu. Sau khi người dùng xem/sửa/duyệt, backend phải đọc và kiểm tra quyền, trạng thái, deadline, trùng lịch và version lại. API tự học hiện có vẫn chặn ghi trùng/qua deadline; duyệt nhiều buổi nguyên tử/chống gửi trùng đã có qua API riêng ở 8A.3A; frontend duyệt/lưu còn 8A.3B. Không tự POST từng buổi từ frontend chỉ vì preview trả 200.
 
 Thử bằng `scripts/Try-StudyPlan.ps1` hoặc [IntelliJ HTTP](../api/study-plans.http). [Hướng dẫn người dùng](../../docs/BACKEND-PHASE-8A1.md).

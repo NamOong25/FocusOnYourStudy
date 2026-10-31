@@ -1,0 +1,55 @@
+@baseUrl = http://localhost:8080
+# Điền trong biến môi trường HTTP Client riêng, không commit thông tin thật.
+@email = {{planEmail}}
+@password = {{planPassword}}
+@courseId = {{ownedCourseId}}
+@clientRequestId = {{reviewedClientRequestId}}
+@fromDate = {{futureFromDate}}
+@toDate = {{futureToDate}}
+@startUtc = {{reviewedStartUtc}}
+
+### Đăng nhập; chỉ lưu token trong phiên HTTP Client hiện tại
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"email":"{{email}}","password":"{{password}}"}
+
+> {% client.global.set("planApplyToken", response.body.data.accessToken); client.global.set("planApplyRefresh", response.body.data.refreshToken); %}
+
+### Xem đề xuất trước, KHÔNG ghi buổi học
+POST {{baseUrl}}/api/v1/study-plans/preview
+Authorization: Bearer {{planApplyToken}}
+Content-Type: application/json
+
+{"courseId":"{{courseId}}","goal":"Ôn tập môn học","fromDate":"{{fromDate}}","toDate":"{{toDate}}","timeZone":"Asia/Ho_Chi_Minh","availableStart":"19:00","availableEnd":"21:00","totalMinutes":180,"sessionMinutes":45,"breakMinutes":10}
+
+### GHI THẬT: thay courseVersion theo preview, chọn các buổi đã xem/chỉnh. Giữ key trước khi gửi.
+POST {{baseUrl}}/api/v1/study-plans/apply
+Authorization: Bearer {{planApplyToken}}
+Content-Type: application/json
+
+{
+  "clientRequestId":"{{clientRequestId}}",
+  "conditions":{"courseId":"{{courseId}}","goal":"Ôn tập môn học","fromDate":"{{fromDate}}","toDate":"{{toDate}}","timeZone":"Asia/Ho_Chi_Minh","availableStart":"19:00","availableEnd":"21:00","totalMinutes":180,"sessionMinutes":45,"breakMinutes":10},
+  "courseVersion":0,
+  "targetVersion":null,
+  "sessions":[{"index":1,"title":"Buổi đã duyệt","startsAt":"{{startUtc}}","durationMinutes":45}]
+}
+
+### Đối chiếu sau mất phản hồi; không tạo key khác. Replay đúng body/key ở trên không tạo thêm buổi.
+GET {{baseUrl}}/api/v1/study-plans/applications/{{clientRequestId}}
+Authorization: Bearer {{planApplyToken}}
+
+### Danh sách Tự học hiện tại (biên nhận ở trên là snapshot lúc lưu)
+GET {{baseUrl}}/api/v1/study-sessions
+Authorization: Bearer {{planApplyToken}}
+
+### Đóng phiên HTTP Client này
+POST {{baseUrl}}/api/v1/auth/logout
+Content-Type: application/json
+X-Auth-Transport: body
+
+{"refreshToken":"{{planApplyRefresh}}"}
+
+> {% client.global.clear("planApplyToken"); client.global.clear("planApplyRefresh"); %}
