@@ -1,0 +1,15 @@
+{
+  "phase": "8A.2",
+  "checkedAt": "2026-10-31T06:07:22.884Z",
+  "environment": "isolated QA schema",
+  "engine": "RULE_BASED_V1",
+  "persisted": false,
+  "scheduledMinutes": 180,
+  "firstLocalTime": "20:00",
+  "busyOtherCourse": "19:00–20:00",
+  "studyRowsAfterPreviewAndUIEdits": {
+    "accountA": 0,
+    "accountB": 0
+  },
+  "accountBCourses": 0
+}

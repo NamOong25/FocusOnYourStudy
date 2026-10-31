@@ -2,11 +2,17 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 8A.1: Đề xuất kế hoạch học từ dữ liệu thật
+## Mới nhất — 8A.2: Giao diện đề xuất kế hoạch học
+
+Đăng nhập rồi vào **Trợ lý AI → Tìm lịch trống / Tạo lộ trình / Xem kế hoạch**: chọn môn, bài/thi hoặc tự học, ngày/giờ rảnh, thứ, tổng phút/buổi/nghỉ; đọc đề xuất thật, số phút còn thiếu, xem/sửa/bỏ chọn từng buổi. Có tải/lỗi/thử lại, giờ đúng múi giờ, tách tài khoản. **Bản xem trước chưa lưu buổi học**; duyệt/lưu nhiều buổi và kiểm tra toàn bộ lịch lại lúc ghi còn ở 8A.3. Thuật toán theo quy tắc, chưa gọi AI; phần tài liệu đã bỏ không được mở lại.
+
+**TypeScript, 665 tests frontend (35 mới) và export web đạt.** Đã kiểm tra UI/API/PostgreSQL QA riêng: 180 phút, thiếu do deadline, kỳ thi, không đủ khoảng trống, sửa/bỏ chọn, lỗi mạng/thử lại, lịch bận môn khác, tài khoản trống/đổi chủ và 320/360/430px. Xem [hướng dẫn test 8A.2](docs/FRONTEND-PHASE-8A2.md). Không đổi backend/schema/dependency; không chạy lại toàn bộ backend trong đợt này. Chưa tự commit/push.
+
+## 8A.1: Đề xuất kế hoạch học từ dữ liệu thật
 
 Backend có POST `/api/v1/study-plans/preview`: chọn môn, bài/thi tùy chọn, ngày/giờ rảnh/thứ, tổng phút và độ dài buổi/nghỉ. Tìm khoảng trống từ lịch thật toàn tài khoản sau ngoại lệ, xét hiện tại/deadline/múi giờ; trả các buổi và số phút chưa xếp. Đây là thuật toán `RULE_BASED_V1`, chưa gọi AI; preview chỉ đọc, không tự lưu buổi học. Bearer/ownership, snapshot readOnly/REPEATABLE_READ, vẫn V12, không dependency/UI mới.
 
-**804 tests backend/Maven verify/đóng gói đạt (40 mới), TypeScript và 630 tests frontend đạt, không lỗi/bỏ qua.** Chi tiết kiểm tra ở [hướng dẫn 8A.1](docs/BACKEND-PHASE-8A1.md). Chạy lại backend rồi dùng `backend/scripts/Try-StudyPlan.ps1 -CourseId '<ID môn>'` hoặc [IntelliJ HTTP](backend/api/study-plans.http); [hợp đồng API](backend/docs/STUDY-PLANS.md). Giao diện và duyệt/lưu nhiều buổi còn ở các đợt sau; không khôi phục phần đính kèm tài liệu đã bỏ. Chưa commit/push.
+**804 tests backend/Maven verify/đóng gói đạt (40 mới), TypeScript và 630 tests frontend đạt, không lỗi/bỏ qua.** Chi tiết kiểm tra ở [hướng dẫn 8A.1](docs/BACKEND-PHASE-8A1.md). Chạy lại backend rồi dùng `backend/scripts/Try-StudyPlan.ps1 -CourseId '<ID môn>'` hoặc [IntelliJ HTTP](backend/api/study-plans.http); [hợp đồng API](backend/docs/STUDY-PLANS.md). Giao diện xem/chỉnh đã nối ở 8A.2; duyệt/lưu nhiều buổi còn ở 8A.3; không khôi phục phần đính kèm tài liệu đã bỏ. Commit 8A.1: `37f2846`.
 
 ## 7B.3: Hoàn tất nghiệm thu thông báo trên web
 

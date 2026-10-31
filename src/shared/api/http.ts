@@ -71,6 +71,11 @@ const messages: Record<string, string> = {
   STUDY_ASSIGNMENT_COURSE_MISMATCH: 'Bài tập cần thuộc đúng môn của buổi học. Kiểm tra lại bài đã chọn.',
   STUDY_AFTER_DEADLINE: 'Buổi học kết thúc sau hạn bài đã lưu. Đổi giờ hoặc gỡ liên kết bài tập.',
   INVALID_STUDY_RANGE: 'Khoảng thời gian lọc chưa hợp lệ. Chọn lại ngày và giờ.',
+  INVALID_STUDY_PLAN: 'Điều kiện lập kế hoạch chưa hợp lệ. Kiểm tra ngày, giờ rảnh và thời lượng.',
+  STUDY_PLAN_TARGET_COURSE_MISMATCH: 'Mục tiêu cần thuộc đúng môn đang chọn. Tải lại danh mục và chọn lại.',
+  STUDY_PLAN_TARGET_COMPLETED: 'Bài tập đã hoàn thành. Chọn bài khác hoặc tự học độc lập.',
+  STUDY_PLAN_DEADLINE_PASSED: 'Bài đã đến hạn hoặc kỳ thi đã bắt đầu. Chọn mục tiêu khác.',
+  STUDY_PLAN_SOURCE_LIMIT: 'Lịch bận quá lớn cho một đề xuất. Thu hẹp khoảng ngày rồi thử lại.',
   DATA_CONFLICT: 'Dữ liệu đã thay đổi hoặc còn liên kết. Hãy tải lại trước khi thử tiếp.',
 };
 function object(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
@@ -79,7 +84,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && (['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
+      && (['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');

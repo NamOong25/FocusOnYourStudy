@@ -1,5 +1,19 @@
 # Tên commit cho từng đợt
 
+## 8A.2 — Giao diện đề xuất kế hoạch từ lịch thật
+
+Chọn môn/mục tiêu/giờ rảnh, xem/sửa/bỏ chọn kết quả API, rõ phần thiếu và chưa lưu; tải/lỗi/thử lại/tách tài khoản. 665 tests frontend, TypeScript, export và QA web đạt. Xem [FRONTEND-PHASE-8A2.md](FRONTEND-PHASE-8A2.md). Duyệt/lưu nhiều buổi còn 8A.3.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Kết nối giao diện đề xuất kế hoạch học với backend"
+git push origin main
+```
+
+Chưa tự commit/push đợt 8A.2.
+
+
 ## 8A.1 — Backend đề xuất kế hoạch học
 
 Tạo bản xem trước từ lịch/mục tiêu thật, kiểm tra giờ rảnh/trùng/deadline và số phút còn thiếu. Thuật toán theo quy tắc, chưa gọi AI hoặc tự lưu buổi; có hợp đồng/script/IntelliJ HTTP và test. Xem [BACKEND-PHASE-8A1.md](BACKEND-PHASE-8A1.md).
@@ -11,7 +25,7 @@ git commit -m "Thêm API đề xuất kế hoạch học từ lịch thực tế
 git push origin main
 ```
 
-Chưa commit/push. Thay đổi bỏ phần đính kèm tài liệu trong checklist được giữ lại.
+Đợt 8A.1 đã có commit `37f2846`; local main và GitHub main đã được đối chiếu. Thay đổi bỏ phần đính kèm tài liệu trong checklist được giữ lại.
 
 ## 7B.3 — Nghiệm thu vòng đời thông báo trên web
 
