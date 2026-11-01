@@ -28,7 +28,7 @@ export default function ServerStudyPlanFlow({variant,request='',onClose,onStudyP
   const app=useApp(),auth=useAuth(),exams=useServerAllExams(variant!=='adjust'),preview=usePlanPreview(),application=usePlanApplication();
   const [listReady,setListReady]=useState(false),[listLoading,setListLoading]=useState(false),[listError,setListError]=useState(''),[serverStale,setServerStale]=useState(false);
   const live=useRef(true);useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
-  const reloadList=async()=>{setListLoading(true);setListError('');try{if(!app.studyConnection)throw new ApiError('Danh sách tự học chưa sẵn sàng.','STUDY_READ_UNAVAILABLE');await app.studyConnection.reload();if(live.current)setListReady(true);}catch(e){if(live.current){setListReady(false);setListError(asApiError(e).message);}}finally{if(live.current)setListLoading(false);}};
+  const reloadList=async()=>{setListLoading(true);setListReady(false);setListError('');try{if(!app.studyConnection)throw new ApiError('Danh sách tự học chưa sẵn sàng.','STUDY_READ_UNAVAILABLE');await app.studyConnection.reloadFresh();if(live.current)setListReady(true);}catch(e){if(live.current){setListReady(false);setListError(asApiError(e).message);}}finally{if(live.current)setListLoading(false);}};
   const savedId=application.state.receipt?.applicationId;
   useEffect(()=>{if(savedId){setTouched(false);app.invalidateSchedule();void reloadList();}},[savedId]);
   const [form,setForm]=useState<Form>(()=>{const zone=auth.profile?.timeZone||'Asia/Ho_Chi_Minh',day=planDay(Date.now(),zone),pending=app.tasks.find(t=>t.status!=='Hoàn thành'&&deadlineTimestamp(t)>Date.now());

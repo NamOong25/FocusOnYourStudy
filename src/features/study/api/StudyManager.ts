@@ -19,6 +19,13 @@ export class StudyManager {
     if (this.state.busy) return Promise.reject(new ApiError('Đang lưu buổi tự học. Hãy đợi một chút.', 'REQUEST_BUSY'));
     return this.load();
   };
+  /** An external writer has committed: an already-running GET may precede it. */
+  reloadFresh = async (): Promise<StudySession[]> => {
+    if (this.flight) {
+      try { await this.flight; } catch { /* Only the new read determines freshness. */ }
+    }
+    return this.reload();
+  };
   private load(): Promise<StudySession[]> {
     if (this.disposed) return Promise.reject(cancelledRequest());
     if (this.flight) return this.flight;

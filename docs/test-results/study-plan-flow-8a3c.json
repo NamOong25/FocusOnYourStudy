@@ -1,0 +1,21 @@
+{
+  "phase": "8A.3C",
+  "checkedAt": "2026-11-01T03:01:19Z",
+  "status": "AUTOMATED_COMPLETE_UI_PENDING",
+  "typecheck": "passed",
+  "frontend": { "tests": 706, "newRegressionTests": 4, "failures": 0, "skipped": 0 },
+  "realHttpFrontendBackendIntegration": { "tests": 10, "failures": 0, "skipped": 0, "databaseStudyRows": 31, "databaseReceipts": 9, "syntheticAccounts": 11 },
+  "backendRelated": { "tests": 80, "failures": 0, "errors": 0, "skipped": 0, "suites": ["StudyPlanEngineTests", "StudyPlanIntegrationTests", "StudyPlanApplyIntegrationTests"] },
+  "fullBackendRerun": false,
+  "webExport": "passed",
+  "freshReadRaceFixed": true,
+  "historicalReceiptDoesNotResurrectDeletedRows": true,
+  "uncertainResultRetryUsesSameKey": true,
+  "twoAccountIsolation": "passed via real HTTP adapters",
+  "browserUiThisPhase": "not run: browser and fallback tools failed to initialize kernel assets",
+  "f5ThisPhase": "not exercised in browser; simulated remount with file recovery exercised",
+  "nativeDeviceTested": false,
+  "cleanup": { "ownBackendStopped": true, "ownSchemaDropped": true, "temporaryRecoveryRemoved": true, "jarCopyRemoved": true, "sharedPostgresRetained": true },
+  "userDataSeededOrReset": false,
+  "scope": "Rule-based proposal/review/apply; no external AI, PDF, upload or APK work"
+}

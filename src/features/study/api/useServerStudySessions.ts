@@ -19,6 +19,7 @@ export function useServerStudySessions() {
     return () => { unsubscribe(); manager.dispose(); if (ref.current === manager) ref.current = null; };
   }, [auth.hasSession, auth.authorized]);
   const reload = useCallback(() => ref.current?.reload() ?? Promise.reject(cancelledRequest()), []);
+  const reloadFresh = useCallback(() => ref.current?.reloadFresh() ?? Promise.reject(cancelledRequest()), []);
   const save = useCallback(async (input: StudyInput, original?: StudySession) => {
     const manager = ref.current; if (!manager) throw cancelledRequest();
     const saved = await manager.save(input, original);
@@ -29,5 +30,5 @@ export function useServerStudySessions() {
     const manager = ref.current; if (!manager) throw cancelledRequest();
     await manager.remove(original); if (ref.current === manager) showNotice('Đã xóa buổi tự học khỏi tài khoản.');
   }, [showNotice]);
-  return auth.hasSession ? { ...state, reload, save, remove } : null;
+  return auth.hasSession ? { ...state, reload, reloadFresh, save, remove } : null;
 }

@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 8A.3C — Kiểm tra và sửa luồng lưu kế hoạch học
+
+Sửa danh sách nhận GET cũ sau commit; thêm runner liên thông frontend/API/PostgreSQL riêng và hướng dẫn nghiệm thu. 706 frontend, 10 liên thông, 80 backend liên quan, TypeScript/export đạt. UI trực tiếp chưa chốt do công cụ điều khiển lỗi; xem [ACCEPTANCE-PHASE-8A3C.md](ACCEPTANCE-PHASE-8A3C.md).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Kiểm tra và hoàn thiện luồng lưu kế hoạch học"
+git push origin main
+```
+
+Chưa tự commit/push 8A.3C; commit không đồng nghĩa đã nghiệm thu UI/điện thoại.
+
 ## 8A.3B — Nối duyệt và lưu kế hoạch học
 
 Lưu nhóm đã chọn/chỉnh, giữ key/body đối chiếu sau lỗi/F5, biên nhận khớp lệnh, tải danh sách thật và mở đúng ngày. Có hướng dẫn [FRONTEND-PHASE-8A3B.md](FRONTEND-PHASE-8A3B.md); 8A.3C vẫn để riêng.
