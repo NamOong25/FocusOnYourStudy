@@ -1,6 +1,7 @@
 import { useFeedback } from '../shared/feedback/FeedbackProvider';
 import { useServerSemesters } from '../features/academics/api/useServerSemesters';
 import { useServerStudySessions } from '../features/study/api/useServerStudySessions';
+import { createStudyView, studyViewReducer } from '../features/study/studyView';
 import { focusLinkInvalid, withLocalFocus } from '../features/study/studyLinks';
 import { useServerAssignments } from '../features/assignments/api/useServerAssignments';
 import { reconcileAssignmentLinks } from '../features/assignments/assignmentLinks';
@@ -102,6 +103,7 @@ function usePrototype(empty: boolean) {
   const appliedAiProposals = useRef(new Set<string>());
   const [previewStudySessions, setPreviewStudySessions] = useState(empty ? [] : initialStudySessions);
   const studyConnection = useServerStudySessions();
+  const [studyView, dispatchStudyView] = useReducer(studyViewReducer, dateKey(new Date()), createStudyView);
   const serverStudies = studyConnection?.sessions;
   const studySessions = React.useMemo(() => serverStudies ? withLocalFocus(serverStudies, focusRecords) : previewStudySessions, [serverStudies, focusRecords, previewStudySessions]);
   // Deleting an assignment detaches persisted plans and increments their versions on the server.
@@ -260,7 +262,7 @@ function usePrototype(empty: boolean) {
     if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { assignmentDestination, openAssignmentStatistics, scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
+  return { studyView, dispatchStudyView, assignmentDestination, openAssignmentStatistics, scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }

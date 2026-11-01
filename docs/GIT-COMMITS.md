@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## Sửa ngày xem Tự học sau lưu kế hoạch — 01/11/2026
+
+Lưu thành công chọn ngay ngày của buổi đầu trong tập đã lưu và bộ lọc Tất cả, kể cả đóng biên nhận bằng ×; vẫn GET dữ liệu hiện tại. Hiện ngày thống kê trên các con số. TypeScript, 714 frontend tests (8 mới), export web đạt; UI trực tiếp chưa chốt. Xem [cách test](STUDY-PLAN-SAVE-VIEW-FIX.md).
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Cập nhật lịch tự học ngay sau khi lưu kế hoạch"
+git push origin main
+```
+
+Chưa tự commit/push.
+
 ## 8A.3C — Kiểm tra và sửa luồng lưu kế hoạch học
 
 Sửa danh sách nhận GET cũ sau commit; thêm runner liên thông frontend/API/PostgreSQL riêng và hướng dẫn nghiệm thu. 706 frontend, 10 liên thông, 80 backend liên quan, TypeScript/export đạt. UI trực tiếp chưa chốt do công cụ điều khiển lỗi; xem [ACCEPTANCE-PHASE-8A3C.md](ACCEPTANCE-PHASE-8A3C.md).
