@@ -2,7 +2,11 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9B.1: API đổi mật khẩu
+## Mới nhất — 9B.2: Form đổi mật khẩu
+
+**Hồ sơ → Đổi mật khẩu** có ba ô, hiện/ẩn, validation/loading/lỗi và cảnh báo bản nháp. Nối API thật; thành công đóng phiên và mở đăng nhập với email điền sẵn; mất phản hồi báo chưa xác nhận, không PUT lại. Không lưu mật khẩu trong journal/storage. **TypeScript, 771 tests frontend (33 mới), export web QA/thông thường đạt.** UI đã kiểm tra form/validation/bố cục; SessionManager/API/PostgreSQL thật đã thử thành công/mất phản hồi/đăng nhập xác nhận/tách tài khoản. Chưa nghiệm thu bước nhập mới và bấm đổi thật trên UI/native. [Hướng dẫn test và ảnh 9B.2](docs/FRONTEND-PHASE-9B2.md). Không đổi backend/schema/dependency, không chạy lại full backend; QA riêng đã dọn, chưa commit/push.
+
+## 9B.1: API đổi mật khẩu
 
 PUT `/api/v1/users/me/password` kiểm tra mật khẩu hiện tại, băm mật khẩu mới và thu hồi mọi phiên của tài khoản trong cùng transaction. Login kiểm tra hash dưới cùng khóa owner; phiên cũ không dùng được dù JWT chưa hết hạn. V14 chỉ mở rộng lý do thu hồi, giữ dữ liệu cũ. Có script nhập ẩn và [hướng dẫn terminal/Postman](docs/BACKEND-PHASE-9B1.md). **báo cáo cuối 884 tests backend/58 bộ không lỗi/bỏ qua; TypeScript và 738 tests frontend đạt.** Có 21 tests mới, gồm rollback, race, nâng V13 → V14 và restart thật. Lượt full có hai kiểm tra phụ thuộc mốc V13 cũ: Foundation cần mốc mới V14; kiểm tra nâng V12 → V13 cần chỉ rõ target 13 thay vì chạy đến bản mới nhất. Đã sửa và chạy lại 52 tests Foundation/StudyPlanApply bằng Maven verify, đóng gói thành công. Không chạy full lần hai; báo cáo cuối tổng hợp lượt full và lượt chạy lại hai bộ liên quan. Chưa có form đổi mật khẩu (9B.2), không dependency mới; chưa commit/push.
 

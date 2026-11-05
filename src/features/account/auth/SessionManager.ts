@@ -2,27 +2,29 @@ import { ApiError, asApiError, assertNotCancelled, cancelledRequest } from '../.
 import type { createAccountApi } from '../api/accountApi';
 import type { AccountProfile, LoginInput, LoginResult } from '../api/types';
 import type { ProfileUpdate } from '../profile/profileData';
+import { passwordUpdate, passwordChangeMessage, type PasswordUpdate, type PasswordChangeOutcome } from '../password/passwordData';
 import type { SessionCoordinator, SessionRecord, SessionState, SessionStore } from './sessionTypes';
 
 type Api = ReturnType<typeof createAccountApi>;
 export class SessionManager {
   state: SessionState = { phase: 'restoring', hasSession: false, profile: null, profileError: null,
-    email: '', notice: '', logoutPending: false, canRestore: false, revision: 0 };
+    email: '', notice: '', logoutPending: false, canRestore: false, revision: 0, passwordChange: null };
   private listeners = new Set<() => void>();
   private current: { pair: LoginResult; expiresAt: number } | null = null;
   private owner: string | null = null;
   private epoch = 0;
   private refreshFlight: Promise<LoginResult> | null = null;
   private restoreFlight: Promise<void> | null = null;
+  private passwordFlight: Promise<PasswordChangeOutcome> | null = null;
   constructor(private api: Api, private store: SessionStore, private coordinator: SessionCoordinator, private now = Date.now) {}
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   private publish(change: Partial<SessionState>) { this.state = { ...this.state, ...change }; this.listeners.forEach(listener => listener()); }
   private identity(id: string | null) {
     if (this.owner !== id) { this.owner = id; this.state = { ...this.state, revision: this.state.revision + 1 }; }
   }
-  private clear(notice = '', pending = false, phase: SessionState['phase'] = 'ready') {
+  private clear(notice = '', pending = false, phase: SessionState['phase'] = 'ready', extra: Partial<SessionState> = {}) {
     this.epoch++; this.current = null; this.identity(null);
-    this.publish({ phase, hasSession: false, profile: null, profileError: null, email: '', notice, logoutPending: pending, canRestore: false });
+    this.publish({ phase, hasSession: false, profile: null, profileError: null, email: '', notice, logoutPending: pending, canRestore: false, passwordChange: null, ...extra });
   }
   private record(pair: LoginResult): SessionRecord { return { kind: 'active', userId: pair.user.id, refreshToken: pair.refreshToken }; }
   private async accept(pair: LoginResult, readProfile = true) {
@@ -32,11 +34,11 @@ export class SessionManager {
     try {
       const profile = await this.api.profile(pair.accessToken);
       this.checkProfile(profile, pair);
-      this.publish({ phase: 'ready', hasSession: true, profile, profileError: null, email: profile.email, notice: '', canRestore: false, logoutPending: false });
+      this.publish({ phase: 'ready', hasSession: true, profile, profileError: null, email: profile.email, notice: '', canRestore: false, logoutPending: false, passwordChange: null });
       return true;
     } catch (error) {
       if (asApiError(error).status === 401) throw error;
-      this.publish({ phase: 'ready', hasSession: true, profile: null, profileError: asApiError(error), email: pair.user.email, notice: '', canRestore: false, logoutPending: false });
+      this.publish({ phase: 'ready', hasSession: true, profile: null, profileError: asApiError(error), email: pair.user.email, notice: '', canRestore: false, logoutPending: false, passwordChange: null });
       return false;
     }
   }
@@ -112,7 +114,9 @@ export class SessionManager {
   }
   private refresh(failedToken: string): Promise<LoginResult> {
     if (this.refreshFlight) return this.refreshFlight;
+    const epoch = this.epoch;
     const work = this.coordinator.run(async () => {
+      if (epoch !== this.epoch) throw cancelledRequest();
       if (this.current && this.current.pair.accessToken !== failedToken) return this.current.pair;
       const record = await this.store.read();
       if (!record || record.kind !== 'active') {
@@ -207,6 +211,52 @@ export class SessionManager {
       throw new ApiError('Chưa xác nhận được đúng hồ sơ đã lưu. Hãy đọc lại để đối chiếu.', 'PROFILE_MISMATCH');
     this.publishProfile(profile);
     return profile;
+  };
+  private async endPasswordChange(record: SessionRecord, email: string, outcome: PasswordChangeOutcome) {
+    let storageFailed = false;
+    const pending = outcome === 'unconfirmed';
+    try { await this.store.write(pending ? { ...record, kind: 'logout-pending' } : { kind: 'signed-out' }); }
+    catch { storageFailed = true; } // Durable inflight journal already prevents silent restore/replay.
+    const notice = passwordChangeMessage(outcome) + (storageFailed ? ' Chưa dọn được trạng thái lưu trên thiết bị; hãy kiểm tra quyền lưu trữ.' : '');
+    this.clear(notice, pending, 'ready', { passwordChange: { outcome, email, storageFailed } });
+    this.coordinator.notify(); return outcome;
+  }
+  changePassword = (input: PasswordUpdate, signal: AbortSignal, expectedOwner: string): Promise<PasswordChangeOutcome> => {
+    if (this.passwordFlight) return Promise.reject(new ApiError('Một lần đổi mật khẩu đang được xử lý.', 'PASSWORD_CHANGE_BUSY'));
+    let body: PasswordUpdate;
+    try { body = passwordUpdate(input); assertNotCancelled(signal); } catch (e) { return Promise.reject(e); }
+    const epoch = this.epoch;
+    const work = this.coordinator.run(async () => {
+      const valid = () => { assertNotCancelled(signal); if (epoch !== this.epoch || !this.current || this.current.pair.user.id !== expectedOwner) throw cancelledRequest(); };
+      valid();
+      let record = await this.store.read(); valid();
+      if (!record || record.kind !== 'active' || record.userId !== expectedOwner) throw cancelledRequest();
+      if (this.current!.expiresAt <= this.now() + 30_000) {
+        // Already holding the coordinator: rotate directly rather than deadlock
+        // by calling authorized()/refresh(), which would acquire it again.
+        await this.rotate(record); valid();
+        record = this.record(this.current!.pair);
+      }
+      const email = this.current!.pair.user.email, token = this.current!.pair.accessToken;
+      try { await this.store.write({ ...record, kind: 'inflight' }); }
+      catch (e) { this.clear('Không lưu được trạng thái phiên. Chưa gửi yêu cầu đổi mật khẩu. Hãy đăng nhập lại.'); this.coordinator.notify(); throw e; }
+      // From here, closing the UI must not cancel response handling: the server
+      // may commit. No retry, including on 401; never store passwords in journal.
+      try { await this.api.changePassword(token, body); }
+      catch (e) {
+        const error = asApiError(e);
+        if (error.status === 401) return this.endPasswordChange(record, email, 'signin-required');
+        if (error.status >= 400 && error.status < 500 && ![408, 409].includes(error.status)) {
+          try { await this.store.write(record); }
+          catch { return this.endPasswordChange(record, email, 'signin-required'); }
+          throw error;
+        }
+        return this.endPasswordChange(record, email, 'unconfirmed');
+      }
+      return this.endPasswordChange(record, email, 'changed');
+    });
+    const flight = work.finally(() => { if (this.passwordFlight === flight) this.passwordFlight = null; });
+    this.passwordFlight = flight; return flight;
   };
   authorized = async <T,>(operation: (accessToken: string) => Promise<T>, signal?: AbortSignal): Promise<T> => {
     assertNotCancelled(signal);

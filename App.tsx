@@ -128,7 +128,7 @@ function AppShell() {
 function Workspace() {
   const auth = useAuth();
   const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
-  return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
+  return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession && !auth.passwordChange ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
     : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><PomodoroProvider><PomodoroProgressProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></PomodoroProgressProvider></PomodoroProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
 }
 export default function App() {

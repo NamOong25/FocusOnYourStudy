@@ -7,7 +7,7 @@ import { sessionCoordinator, sessionStore } from './sessionPlatform';
 import type { SessionState } from './sessionTypes';
 
 export const accountApi = createAccountApi(API_BASE_URL, AUTH_TRANSPORT);
-type AuthContextValue = SessionState & Pick<SessionManager, 'signIn' | 'reloadProfile' | 'updateProfile' | 'restore' | 'skipRestore' | 'logout' | 'authorized'>;
+type AuthContextValue = SessionState & Pick<SessionManager, 'signIn' | 'reloadProfile' | 'updateProfile' | 'changePassword' | 'restore' | 'skipRestore' | 'logout' | 'authorized'>;
 const Context = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const ref = useRef<SessionManager | null>(null);
@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { unsubscribe(); stopListening(); clearInterval(timer); native.remove(); if (Platform.OS === 'web') document.removeEventListener('visibilitychange', check); };
   }, [manager]);
   return <Context.Provider value={{ ...state, signIn: manager.signIn, reloadProfile: manager.reloadProfile, updateProfile: manager.updateProfile,
+    changePassword: manager.changePassword,
     restore: manager.restore, skipRestore: manager.skipRestore, logout: manager.logout, authorized: manager.authorized }}>{children}</Context.Provider>;
 }
 export function useAuth() { const value = useContext(Context); if (!value) throw new Error('Missing AuthProvider'); return value; }

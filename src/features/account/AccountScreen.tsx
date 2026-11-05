@@ -14,6 +14,7 @@ import { AccountRow, StudentAvatar } from './components';
 import AuthForm from './components/AuthForm';
 import AccountProfile from './components/AccountProfile';
 import AccountProfileEditor from './components/AccountProfileEditor';
+import PasswordChangeForm from './components/PasswordChangeForm';
 import { Appearance, ProfileEditor, ReminderEditor } from './components/PreferenceEditors';
 import { AuthHero } from './components/AuthHero';
 import LogoutForm from './components/LogoutForm';
@@ -31,8 +32,9 @@ function AccountContent({ onClose }: { onClose: () => void }) {
   const auth = useAuth(), inset = useSafeAreaInsets(), picker = useDateTimePicker(), scope = useNavigationScope(), action = useActionState();
   const { showNotice } = useFeedback();
   const sessionAction = useApiAction();
-  const [page, setPage] = useState<Page>('hub'), [email, setEmail] = useState(auth.email), [message, setMessage] = useState('');
+  const [page, setPage] = useState<Page>(auth.passwordChange ? 'login' : 'hub'), [email, setEmail] = useState(auth.passwordChange?.email ?? auth.email), [message, setMessage] = useState('');
   const [editing, setEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const open = (next: Page) => { action?.cancel(); setMessage(''); setPage(next); };
   const back = () => { if (page === 'hub') onClose(); else open(page === 'register' || page === 'forgot' ? 'login' : 'hub'); };
   useBackAction(true, picker.active ? picker.cancel : back, picker.active ? 1000 + scope.depth : undefined);
@@ -70,6 +72,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               </Card>
               {auth.hasSession && <>
                 <Section title="Tài khoản" /><Card style={{ paddingVertical: 4 }}>
+                  {auth.profile && <AccountRow title="Đổi mật khẩu" detail="Bảo vệ tài khoản và đăng nhập lại trên các thiết bị" icon="key-outline" onPress={() => setChangingPassword(true)} />}
                   <AccountRow title="Đăng nhập tài khoản khác" detail="Hồ sơ chỉ đổi sau khi đăng nhập thành công" icon="log-in-outline" onPress={() => { setEmail(''); open('login'); }} />
                   <AccountRow title="Tạo tài khoản khác" detail="Đăng ký tài khoản mới" icon="person-add-outline" onPress={() => { setEmail(''); open('register'); }} />
                   <AccountRow title="Đăng xuất" detail="Đóng phiên đăng nhập này" icon="log-out-outline" onPress={() => open('logout')} danger />
@@ -82,6 +85,10 @@ function AccountContent({ onClose }: { onClose: () => void }) {
             {page === 'preview-profile' && <ProfileEditor onSave={next => { saveProfile(next); open('hub'); showNotice('Đã lưu hồ sơ mẫu trong phiên thử, không thay đổi tài khoản.'); }} />}
             {page === 'appearance' && <Appearance preferences={accountPreferences} onSave={next => { setAccountPreferences(next); showNotice('Đã lưu lựa chọn xem trước trong phiên dùng thử.'); }} />}
             {page === 'reminders' && <ReminderEditor preferences={accountPreferences} onSave={next => { setAccountPreferences(next); showNotice('Đã lưu tùy chọn mẫu. Chưa gửi thông báo trên thiết bị.'); }} />}
+            {page === 'login' && auth.passwordChange && <Card style={{ gap: 8, backgroundColor: auth.passwordChange.outcome === 'changed' ? C.greenSoft : C.amberSoft }}>
+              <T style={{ fontFamily: F.bold }}>{auth.passwordChange.outcome === 'changed' ? 'Đã đổi mật khẩu' : auth.passwordChange.outcome === 'unconfirmed' ? 'Cần kiểm tra kết quả' : 'Cần đăng nhập lại'}</T>
+              <T accessibilityLiveRegion="polite" style={S.small}>{auth.notice}</T>
+            </Card>}
             {(page === 'login' || page === 'register') && <AuthForm key={page} mode={page} initialEmail={email} message={message}
               onMode={open} onForgot={() => open('forgot')}
               onRegistered={value => { setEmail(value); open('login'); setMessage('Tạo tài khoản thành công. Đăng nhập để tiếp tục.'); }}
@@ -91,6 +98,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
         </RememberedScrollView>
         <ActionStatus /><NoticeToast modal bottom={Math.max(20, inset.bottom)} />
         {editing && auth.hasSession && <FlowScope onClose={() => setEditing(false)}><AccountProfileEditor onClose={() => setEditing(false)} /></FlowScope>}
+        {changingPassword && auth.hasSession && <FlowScope onClose={() => setChangingPassword(false)}><PasswordChangeForm onClose={() => setChangingPassword(false)} /></FlowScope>}
         {picker.active && <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 30 + inset.bottom }}><DateTimePanel /></ScrollView>}
       </KeyboardAvoidingView>
     </View>

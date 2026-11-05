@@ -37,4 +37,4 @@ Nếu ghi phiên lỗi, hash và phiên cùng rollback. Mất phản hồi khôn
 
 V14 chỉ mở rộng CHECK lý do thu hồi thêm `PASSWORD_CHANGED`; không thay hàng dữ liệu cũ, không seed hay dependency mới. Khởi động lại backend để Flyway áp dụng; không chỉnh/xóa migration cũ và không xóa database.
 
-[Hướng dẫn thử terminal/Postman](../../docs/BACKEND-PHASE-9B1.md), [mẫu IntelliJ HTTP](../api/password-change.http). Giao diện đổi mật khẩu sẽ nối ở 9B.2.
+[Hướng dẫn thử terminal/Postman](../../docs/BACKEND-PHASE-9B1.md), [mẫu IntelliJ HTTP](../api/password-change.http). Giao diện đổi mật khẩu đã nối ở [9B.2](../../docs/FRONTEND-PHASE-9B2.md); hướng dẫn ghi rõ phần đã kiểm tra tự động/UI và bước nghiệm thu form còn lại.

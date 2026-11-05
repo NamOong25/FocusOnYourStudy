@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 9B.2 — Giao diện đổi mật khẩu
+
+Form ba ô, validation/hiện-ẩn/bản nháp, nối API, đóng phiên và mở đăng nhập sau kết quả; phân biệt chưa xác nhận và không tự gửi lại. TypeScript, 771 frontend tests, export và SessionManager/API/PostgreSQL đạt; UI form/layout đã kiểm tra, bước đổi thật trên form còn nghiệm thu thủ công. [Hướng dẫn](FRONTEND-PHASE-9B2.md). Không đổi backend/schema/dependency.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Kết nối giao diện đổi mật khẩu với API"
+git push origin main
+```
+
+Chưa tự commit/push 9B.2.
+
 ## 9B.1 — API đổi mật khẩu và thu hồi phiên
 
 Đổi mật khẩu dưới khóa owner, ghi hash/thu hồi mọi phiên nguyên tử; chặn race đăng nhập bằng hash cũ. V14 mở rộng CHECK lý do thu hồi, giữ dữ liệu hiện có; script nhập ẩn, mẫu HTTP và hướng dẫn Postman. **báo cáo cuối 884 tests backend/58 bộ không lỗi/bỏ qua; TypeScript và 738 tests frontend đạt.** [Cách kiểm tra](BACKEND-PHASE-9B1.md). Giao diện còn 9B.2.

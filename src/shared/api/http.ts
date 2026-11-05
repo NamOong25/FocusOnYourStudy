@@ -10,6 +10,8 @@ export const asApiError = (error: unknown) => error instanceof ApiError ? error
 export function assertNotCancelled(signal?: AbortSignal) { if (signal?.aborted) throw cancelledRequest(); }
 
 const messages: Record<string, string> = {
+  CURRENT_PASSWORD_INCORRECT: 'Mật khẩu hiện tại chưa đúng.',
+  PASSWORD_UNCHANGED: 'Mật khẩu mới cần khác mật khẩu hiện tại.',
   PROFILE_VERSION_CONFLICT: 'Hồ sơ đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
   NOTIFICATION_REVISION_CONFLICT: 'Nội dung hoặc mốc nhắc đã thay đổi. Tải lại nhắc việc rồi xem bản mới trước khi đánh dấu đã đọc.',
   NOTIFICATION_SOURCE_UNAVAILABLE: 'Lời nhắc không còn khả dụng. Tải lại để đối chiếu danh sách hiện tại.',
@@ -90,9 +92,11 @@ function object(value: unknown): value is Record<string, unknown> { return typeo
 function errorFromResponse(status: number, value: unknown, retryAfter: string | null) {
   const code = object(value) && typeof value.code === 'string' ? value.code : 'HTTP_ERROR';
   const fields: FieldErrors = {};
+  if (code === 'CURRENT_PASSWORD_INCORRECT') fields.currentPassword = messages[code]!;
+  if (code === 'PASSWORD_UNCHANGED') fields.newPassword = messages[code]!;
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && (['email', 'password', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
+      && (['email', 'password', 'currentPassword', 'newPassword', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');

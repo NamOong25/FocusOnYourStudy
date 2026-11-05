@@ -1,6 +1,7 @@
 import { ApiError, createHttpClient } from '../../../shared/api/http';
 import type { AccountProfile, LoginInput, LoginResult, RegisterInput } from './types';
 import { editableProfile, profileUpdate, sameProfileFields, profileVersion, type ProfileUpdate } from '../profile/profileData';
+import { passwordUpdate, type PasswordUpdate } from '../password/passwordData';
 
 const isProfile = (p: unknown): p is AccountProfile => {
   if (typeof p !== 'object' || p === null) return false;
@@ -28,6 +29,11 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
     return value;
   }
   return {
+    async changePassword(accessToken: string, input: PasswordUpdate): Promise<void> {
+      const body = passwordUpdate(input);
+      await request<void>('/api/v1/users/me/password', { method: 'PUT', body, credentials: 'omit',
+        headers: { Authorization: `Bearer ${accessToken}` }, empty: true });
+    },
     async register(input: RegisterInput, signal?: AbortSignal) {
       const headers = await authHeaders(signal);
       const profile = await request<unknown>('/api/v1/auth/register', { method: 'POST', body: input, signal, credentials, headers });
