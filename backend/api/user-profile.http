@@ -1,0 +1,25 @@
+### Thay token/version bằng kết quả thật; không commit token hoặc mật khẩu cá nhân.
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@profileVersion = 0
+
+### Đọc hồ sơ trước khi sửa; lấy data.version.
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Chỉ gửi khi đã xem và muốn lưu thật; school/major trống sẽ xóa nội dung ô.
+PUT {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyễn Văn A",
+  "school": "Đại học Công nghiệp TP.HCM",
+  "major": "Công nghệ thông tin",
+  "version": {{profileVersion}}
+}
+
+### Đọc lại dữ liệu hiện tại; không tăng profileVersion theo phỏng đoán.
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{accessToken}}

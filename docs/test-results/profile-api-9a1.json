@@ -1,0 +1,38 @@
+{
+  "phase": "9A.1",
+  "checkedAt": "2026-11-05T15:05:46.3918061Z",
+  "backend": {
+    "Suites": 55,
+    "Tests": 863.0,
+    "Failures": 0.0,
+    "Errors": 0.0,
+    "Skipped": 0.0
+  },
+  "newProfileTests": 19,
+  "targetedAuthSessionProfileTests": 47,
+  "mavenVerify": "passed",
+  "jarPackaged": true,
+  "frontendTests": 714,
+  "frontendFailures": 0,
+  "typecheck": "passed",
+  "profileFields": [
+    "fullName",
+    "school",
+    "major"
+  ],
+  "versionInProfileResponse": true,
+  "twoAccountIsolation": "passed",
+  "staleAndConcurrentVersionProtection": "passed",
+  "realBrowserCookieRequiresBearer": "passed",
+  "loginRefreshReadUpdatedProfile": "passed",
+  "powershell51UnicodeGetUpdateGet": "passed",
+  "ownScriptSessionLogout": "passed",
+  "migrationAdded": false,
+  "schemaVersion": 13,
+  "dependenciesAdded": false,
+  "userDataSeededOrReset": false,
+  "testSchemas": "backend_it_UUID, cleanup guarded by schema prefix and UUID",
+  "profileUiSaveConnected": false,
+  "nativeDeviceTested": false,
+  "processRestartTested": false
+}

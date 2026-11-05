@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**9A.1 — Cập nhật hồ sơ thật:** PUT `/api/v1/users/me`, Bearer/owner, fullName/school/major và version; 409 PROFILE_VERSION_CONFLICT khi bản cũ. GET/login/register/refresh thêm version hồ sơ, dùng cột/khóa owner hiện có; không migration/dependency mới. Script `scripts/Try-Profile.ps1 -Mode Get|Update`, [hướng dẫn terminal](../docs/BACKEND-PHASE-9A1.md), [hợp đồng](docs/USER-PROFILE.md), [HTTP](api/user-profile.http). **863 tests backend/55 bộ, Maven verify và đóng gói đạt; TypeScript và 714 tests frontend đạt, không lỗi/bỏ qua**. UI sửa/lưu ở 9A.2.
+
 **8A.3A — Lưu nhóm buổi đã duyệt:** POST `/api/v1/study-plans/apply`, GET `/api/v1/study-plans/applications/{clientRequestId}`; kiểm tra lại quyền/version/deadline/lịch bận sau khóa owner, lưu nguyên khối và biên nhận chống tạo trùng. V13 additive, không dependency/frontend mới; giao diện lưu còn 8A.3B. [Hướng dẫn Prepare → Apply → Get](../docs/BACKEND-PHASE-8A3A.md), [hợp đồng](docs/STUDY-PLAN-APPLICATIONS.md), `scripts/Try-StudyPlanApply.ps1` và `api/study-plan-applications.http`. **844 tests backend/Maven verify/đóng gói đạt (40 mới), TypeScript và 665 tests frontend đạt, không lỗi/bỏ qua.** QA riêng đã thử ba lần mở backend, gửi lại giữ nguyên biên nhận và không tạo lại buổi đã xóa.
 
 

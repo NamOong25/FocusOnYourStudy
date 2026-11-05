@@ -2,7 +2,11 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 8A.3C: Kiểm tra liên thông kế hoạch học
+## Mới nhất — 9A.1: API cập nhật hồ sơ tài khoản
+
+Backend có PUT `/api/v1/users/me` lưu họ tên/trường/ngành, lấy owner từ Bearer và chặn bản cũ bằng version hiện có. GET và hồ sơ register/login/refresh thêm version; không migration/dependency mới, vẫn V13. Có script `backend/scripts/Try-Profile.ps1 -Mode Get|Update` giữ tiếng Việt trên PowerShell 5.1, không in token/mật khẩu và chỉ đóng phiên thử riêng. [Hướng dẫn từng bước 9A.1](docs/BACKEND-PHASE-9A1.md), [hợp đồng API](backend/docs/USER-PROFILE.md). **863 tests backend/55 bộ, Maven verify và đóng gói đạt; TypeScript và 714 tests frontend đạt, không lỗi/bỏ qua**. Nút Lưu hồ sơ trong giao diện sẽ nối ở 9A.2; chưa tự commit/push.
+
+## 8A.3C: Kiểm tra liên thông kế hoạch học
 
 Sửa lỗi GET danh sách cũ có thể làm thiếu buổi vừa lưu: sau commit, màn biên nhận đợi GET cũ rồi đọc mới trước khi bật Xem lịch tự học. **TypeScript, 706 tests frontend, 10 ca frontend/API/PostgreSQL thật, 80 tests backend liên quan và export web đạt.** Bộ liên thông có runner riêng, tự tạo/dọn schema và backend QA, không dùng dữ liệu của bạn. Không chạy lại full backend. [Cách test một vòng, chạy lại bộ tự động và giới hạn](docs/ACCEPTANCE-PHASE-8A3C.md). **UI trực tiếp 8A.3C chưa chốt vì công cụ trình duyệt lỗi khởi tạo; native vẫn để riêng**, đã ghi các bước còn lại trong checklist. Chưa tự commit/push.
 

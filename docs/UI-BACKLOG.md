@@ -218,6 +218,12 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] UI Test 3, xóa rồi F5 — Người dùng xác nhận ngày 05/11/2026: sau xóa buổi TEST, F5 và mở lại đúng ngày/bộ lọc, buổi không còn xuất hiện. Ảnh trước đó có tên Test 3 đã sửa ở ngày 06/11/2026, Tất cả và thông báo xóa khỏi tài khoản. Đổi tên đã thấy trên UI; độ bền tên sau F5 chưa được xác nhận riêng. Không gộp phần xóa đã đạt thành hoàn tất toàn bộ vòng UI.
 - [x] Sửa sau phản hồi UI 01/11/2026 — Khi có biên nhận xác nhận, cập nhật ngày xem Tự học về buổi sớm nhất trong tập đã lưu, Theo ngày/Tất cả ngay sau lưu; tải lại danh sách thật, không phụ thuộc nút Xem lịch. Ngày/khoảng/bộ lọc giữ trong workspace, hiện ngày thống kê trên số liệu. TypeScript, 714 frontend tests (8 mới), export web đạt. Không API/schema/dependency mới; vòng UI trực tiếp vẫn chưa chốt.
 
+## Backend 9 — Hoàn thiện để sử dụng
+
+- [x] 9A.1 — PUT `/api/v1/users/me` lưu họ tên/trường/ngành chính tài khoản Bearer; chuẩn hóa/giới hạn như đăng ký, GET và hồ sơ login/register/refresh thêm version hiện có. Khóa owner và kiểm tra version sau chờ khóa, 409 PROFILE_VERSION_CONFLICT, cookie không tự xác thực, thuộc tính danh tính/mật khẩu/múi giờ ngoài DTO được giữ. Không migration/dependency mới; V13. 19 tests mới, Auth/Session liên quan 47/47, TypeScript và 714 frontend đạt. **863 tests backend/55 bộ, Maven verify và đóng gói đạt; TypeScript và 714 tests frontend đạt, không lỗi/bỏ qua**. Có Get/Update PowerShell 5.1 giữ Unicode, đóng phiên thử riêng, hướng dẫn `BACKEND-PHASE-9A1.md` và hợp đồng/HTTP; UI chờ 9A.2.
+- [ ] 9A.2 — Nối form Hồ sơ với API mới: đọc version, lưu họ tên/trường/ngành, loading/lỗi/409/giữ bản nháp, cập nhật tên sau lưu, F5/đăng nhập lại và tách tài khoản. Không coi form hồ sơ mẫu là đã nối thật.
+- [ ] Các đợt còn lại — Khôi phục/đổi mật khẩu, tùy chọn thật, xuất dữ liệu, triển khai backend và bản cài; chốt phạm vi từng đợt trước khi làm. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
+
 ## Các đợt giao diện đã hoàn thành
 
 - [x] UI 3A: Thay nhập chuỗi ngày/giờ bằng lịch và đồng hồ 24 giờ trên bài tập, lịch học/ngoại lệ, lịch thi, tự học, AI và giờ yên lặng. Có xác nhận/hủy, hiển thị dd/mm/yyyy và phút chính xác. Xem `UI-POLISH-3A.md`; chưa nghiệm thu cảm ứng/Back/screen reader trên điện thoại thật.

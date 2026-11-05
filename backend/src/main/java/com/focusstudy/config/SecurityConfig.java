@@ -72,6 +72,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters", "/api/v1/semesters/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/semesters").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/semesters/*").authenticated()

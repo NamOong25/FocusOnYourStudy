@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 9A.1 — API cập nhật hồ sơ tài khoản
+
+PUT hồ sơ chính mình, kiểm tra/chuẩn hóa họ tên-trường-ngành, dùng version chống ghi đè bản cũ; GET/login/refresh đọc giá trị mới. Có kiểm thử HTTP/PostgreSQL/PowerShell 5.1, script Get/Update và hướng dẫn. UI lưu hồ sơ ở 9A.2; không migration/dependency mới.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Thêm API cập nhật hồ sơ tài khoản"
+git push origin main
+```
+
+Chưa tự commit/push 9A.1.
+
 ## Ghi nhận UI Test 2 và phần xóa của Test 3 — 05/11/2026
 
 Người dùng gửi ảnh cảnh báo nguồn đổi/nút lưu bị khóa và xác nhận sau xóa buổi TEST rồi F5, buổi không xuất hiện lại. Ghi nhận nhánh chặn nguồn đổi và xóa bền vững đạt; các phần UI chưa xác nhận vẫn để mở. Chỉ cập nhật tài liệu.
