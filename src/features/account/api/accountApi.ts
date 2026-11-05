@@ -1,10 +1,12 @@
 import { ApiError, createHttpClient } from '../../../shared/api/http';
 import type { AccountProfile, LoginInput, LoginResult, RegisterInput } from './types';
+import { editableProfile, profileUpdate, sameProfileFields, profileVersion, type ProfileUpdate } from '../profile/profileData';
 
 const isProfile = (p: unknown): p is AccountProfile => {
   if (typeof p !== 'object' || p === null) return false;
   const v = p as Record<string, unknown>;
-  return ['id', 'email', 'fullName', 'school', 'major', 'timeZone'].every(key => typeof v[key] === 'string') && !!v.id && !!v.email && !!v.fullName;
+  return ['id', 'email', 'fullName', 'school', 'major', 'timeZone'].every(key => typeof v[key] === 'string') && !!v.id && !!v.email && !!v.fullName
+    && (v.version === undefined || profileVersion(v.version));
 };
 const invalidResponse = () => new ApiError('Phản hồi tài khoản chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
 type BeforeSend = () => Promise<void>;
@@ -54,6 +56,15 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
         headers: { Authorization: `Bearer ${accessToken}` } });
       if (!isProfile(profile)) throw invalidResponse();
       return profile;
+    },
+    async updateProfile(accessToken: string, input: ProfileUpdate, signal?: AbortSignal) {
+      const body = profileUpdate(input, input.version);
+      const value = await request<unknown>('/api/v1/users/me', { method: 'PUT', body, signal, credentials: 'omit',
+        headers: { Authorization: `Bearer ${accessToken}` } });
+      if (!isProfile(value)) throw invalidResponse();
+      const result = editableProfile(value);
+      if (result.version < body.version || !sameProfileFields(result, body)) throw invalidResponse();
+      return result;
     },
   };
 }

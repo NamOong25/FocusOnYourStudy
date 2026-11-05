@@ -5,7 +5,7 @@ import { ActionScope, InteractionBlock, useActionState } from '../../shared/feed
 import { useFeedback } from '../../shared/feedback/FeedbackProvider';
 import { ActionStatus, Badge, Button, Card, Icon, IconButton, NoticeToast, Row, Section, T } from '../../shared/components';
 import { DateTimePanel, DateTimeProvider, useDateTimePicker } from '../../shared/components/DateTimePicker';
-import { RememberedScrollView, useBackAction, useNavigationScope } from '../../navigation/Navigation';
+import { FlowScope, RememberedScrollView, useBackAction, useNavigationScope } from '../../navigation/Navigation';
 import { C, F, S } from '../../shared/theme';
 import { useApp } from '../../store/model';
 import { useAuth } from './auth/AuthProvider';
@@ -13,6 +13,7 @@ import { accountDisplayProfile } from './auth/displayProfile';
 import { AccountRow, StudentAvatar } from './components';
 import AuthForm from './components/AuthForm';
 import AccountProfile from './components/AccountProfile';
+import AccountProfileEditor from './components/AccountProfileEditor';
 import { Appearance, ProfileEditor, ReminderEditor } from './components/PreferenceEditors';
 import { AuthHero } from './components/AuthHero';
 import LogoutForm from './components/LogoutForm';
@@ -31,6 +32,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
   const { showNotice } = useFeedback();
   const sessionAction = useApiAction();
   const [page, setPage] = useState<Page>('hub'), [email, setEmail] = useState(auth.email), [message, setMessage] = useState('');
+  const [editing, setEditing] = useState(false);
   const open = (next: Page) => { action?.cancel(); setMessage(''); setPage(next); };
   const back = () => { if (page === 'hub') onClose(); else open(page === 'register' || page === 'forgot' ? 'login' : 'hub'); };
   useBackAction(true, picker.active ? picker.cancel : back, picker.active ? 1000 + scope.depth : undefined);
@@ -52,7 +54,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               {auth.logoutPending && <><Button label="Hoàn tất đăng xuất" secondary loading={sessionAction.busy} onPress={() => { void sessionAction.run(() => auth.logout()); }} /><T style={S.small}>Phiên trên thiết bị đã đóng. Cần kết nối lại để xác nhận thu hồi với máy chủ.</T></>}
               {auth.canRestore && <Button label="Khôi phục đăng nhập" secondary onPress={() => { void auth.restore(); }} />}
               {auth.hasSession ? <>
-                <AccountProfile onLogin={() => { setEmail(auth.email); open('login'); }} />
+                <AccountProfile onLogin={() => { setEmail(auth.email); open('login'); }} onEdit={() => setEditing(true)} />
                 <Card style={{ backgroundColor: C.soft, gap: 8 }}><Row><Icon name="leaf-outline" /><T style={{ fontFamily: F.bold }}>Góc học tập đang được hoàn thiện</T></Row><T style={S.small}>Hồ sơ, học kỳ, môn học, bài tập và buổi tự học đã lưu trong tài khoản. Thời khóa biểu đã lưu và quản lý cả chuỗi lịch. Lịch thi đã thêm, sửa và xóa được trong mục Kỳ thi. Bạn có thể cấu hình bộ cột, nhập điểm và xem GPA học kỳ tại Thống kê → Điểm & GPA. Đồng hồ, lịch sử, mục tiêu và tiến độ Pomodoro đã lưu trong tài khoản.</T></Card>
               </> : <Card style={{ gap: 16 }}>
                 <Badge label="CÙNG BẮT ĐẦU NHÉ" icon="school-outline" />
@@ -75,7 +77,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               </>}
               {!auth.hasSession && <View style={{ alignItems: 'center', gap: 7 }}><StudentAvatar profile={display} size={44} /><T style={{ fontFamily: F.semi }}>{display.name}</T><T style={S.small}>Hồ sơ minh họa chỉ dùng trong các màn học tập thử.</T></View>}
             </>}
-            {page === 'profile' && <AccountProfile onLogin={() => open('login')} />}
+            {page === 'profile' && <AccountProfile onLogin={() => open('login')} onEdit={() => setEditing(true)} />}
             {page === 'logout' && <LogoutForm onCancel={() => open('hub')} />}
             {page === 'preview-profile' && <ProfileEditor onSave={next => { saveProfile(next); open('hub'); showNotice('Đã lưu hồ sơ mẫu trong phiên thử, không thay đổi tài khoản.'); }} />}
             {page === 'appearance' && <Appearance preferences={accountPreferences} onSave={next => { setAccountPreferences(next); showNotice('Đã lưu lựa chọn xem trước trong phiên dùng thử.'); }} />}
@@ -88,6 +90,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
           </InteractionBlock>
         </RememberedScrollView>
         <ActionStatus /><NoticeToast modal bottom={Math.max(20, inset.bottom)} />
+        {editing && auth.hasSession && <FlowScope onClose={() => setEditing(false)}><AccountProfileEditor onClose={() => setEditing(false)} /></FlowScope>}
         {picker.active && <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 30 + inset.bottom }}><DateTimePanel /></ScrollView>}
       </KeyboardAvoidingView>
     </View>

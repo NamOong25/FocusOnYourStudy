@@ -1,0 +1,30 @@
+{
+  "phase": "9A.2",
+  "date": "2026-11-05",
+  "frontend": { "tests": 738, "newTests": 24, "failed": 0, "skipped": 0, "typecheck": "passed" },
+  "exports": { "qa": "passed", "normal": "passed", "normalContainsQaEndpoint": false },
+  "liveQa": {
+    "surface": "desktop browser",
+    "realBackendAndPostgresql": true,
+    "isolatedDisposableSchema": true,
+    "syntheticAccounts": 2,
+    "blankNameValidation": "passed",
+    "unicodeSaveAndReload": "passed",
+    "twoTabConflictAndExplicitReview": "passed",
+    "lostConfirmationThenGetWithoutSecondPut": "passed",
+    "unsavedDraftWarning": "passed",
+    "accountSwitchAToBToA": "passed",
+    "widthsWithoutHorizontalOverflow": [320, 360, 430],
+    "backendPutStatuses": [200, 200, 409, 200, 200, 200],
+    "lostConfirmationCommits": 1,
+    "profileAVersion": 5,
+    "profileBVersion": 0,
+    "accountIsolation": true,
+    "nativeTested": false,
+    "faultInjection": "QA proxy returned 503 after backend committed one PUT with 200"
+  },
+  "backendFullSuiteRerun": false,
+  "backendSchemaOrDependenciesChanged": false,
+  "cleanup": { "qaTabsClosed": true, "ownQaProcessesStopped": true, "ownSchemaRemoved": true, "sharedPostgresqlKeptRunning": true },
+  "committedOrPushedByAgent": false
+}

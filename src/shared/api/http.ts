@@ -10,6 +10,7 @@ export const asApiError = (error: unknown) => error instanceof ApiError ? error
 export function assertNotCancelled(signal?: AbortSignal) { if (signal?.aborted) throw cancelledRequest(); }
 
 const messages: Record<string, string> = {
+  PROFILE_VERSION_CONFLICT: 'Hồ sơ đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
   NOTIFICATION_REVISION_CONFLICT: 'Nội dung hoặc mốc nhắc đã thay đổi. Tải lại nhắc việc rồi xem bản mới trước khi đánh dấu đã đọc.',
   NOTIFICATION_SOURCE_UNAVAILABLE: 'Lời nhắc không còn khả dụng. Tải lại để đối chiếu danh sách hiện tại.',
   INVALID_NOTIFICATION_TARGET: 'Thông tin lời nhắc chưa hợp lệ. Tải lại nhắc việc để đối chiếu.',

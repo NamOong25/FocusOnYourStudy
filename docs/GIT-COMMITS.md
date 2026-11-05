@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 9A.2 — Nối giao diện sửa hồ sơ với API
+
+Đọc/lưu ba trường hồ sơ, giữ bản nháp khi lỗi, đối chiếu xung đột hoặc chưa xác nhận và cập nhật tên trong app. 738 tests frontend, TypeScript, export và UI/API/PostgreSQL QA đạt; xem [hướng dẫn](FRONTEND-PHASE-9A2.md). Không sửa backend/schema/dependency.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Kết nối giao diện hồ sơ với API cập nhật tài khoản"
+git push origin main
+```
+
+Chưa tự commit/push 9A.2.
+
 ## 9A.1 — API cập nhật hồ sơ tài khoản
 
 PUT hồ sơ chính mình, kiểm tra/chuẩn hóa họ tên-trường-ngành, dùng version chống ghi đè bản cũ; GET/login/refresh đọc giá trị mới. Có kiểm thử HTTP/PostgreSQL/PowerShell 5.1, script Get/Update và hướng dẫn. UI lưu hồ sơ ở 9A.2; không migration/dependency mới.

@@ -1,6 +1,7 @@
 import { ApiError, asApiError, assertNotCancelled, cancelledRequest } from '../../../shared/api/http';
 import type { createAccountApi } from '../api/accountApi';
 import type { AccountProfile, LoginInput, LoginResult } from '../api/types';
+import type { ProfileUpdate } from '../profile/profileData';
 import type { SessionCoordinator, SessionRecord, SessionState, SessionStore } from './sessionTypes';
 
 type Api = ReturnType<typeof createAccountApi>;
@@ -41,6 +42,14 @@ export class SessionManager {
   }
   private checkProfile(profile: AccountProfile, pair: LoginResult) {
     if (profile.id !== pair.user.id) throw new ApiError('Chưa xác nhận được đúng hồ sơ. Hãy đăng nhập lại.', 'PROFILE_MISMATCH');
+  }
+  private publishProfile(profile: AccountProfile) {
+    const existing = this.state.profile;
+    // A GET started before PUT must not undo a newer confirmed profile.
+    if (existing?.id === profile.id && existing.version !== undefined && profile.version !== undefined && existing.version > profile.version) {
+      this.publish({ profileError: null }); return;
+    }
+    this.publish({ profile, profileError: null, email: profile.email });
   }
   private async pending(record: SessionRecord, notice: string) {
     await this.store.write({ ...record, kind: 'logout-pending' });
@@ -153,7 +162,7 @@ export class SessionManager {
       throw failure;
     }
   });
-  reloadProfile = async (signal: AbortSignal): Promise<void> => {
+  reloadProfile = async (signal: AbortSignal): Promise<AccountProfile> => {
     assertNotCancelled(signal);
     const version = this.epoch;
     let renewed = false;
@@ -175,17 +184,29 @@ export class SessionManager {
       }
       if (!current || version !== this.epoch) throw cancelledRequest();
       this.checkProfile(profile, current.pair); assertNotCancelled(signal);
-      this.publish({ profile, profileError: null });
+      this.publishProfile(profile);
+      return this.state.profile!;
     } catch (error) {
       if (!signal.aborted && version === this.epoch && this.current) {
         if (asApiError(error).status === 401) await this.coordinator.run(async () => {
           if (version !== this.epoch) return;
           await this.pending(this.record(this.current!.pair), 'Phiên đăng nhập không còn hợp lệ. Hãy đăng nhập lại.');
         });
-        else this.publish({ profile: null, profileError: asApiError(error) });
+        else this.publish({ profileError: asApiError(error) });
       }
       throw error;
     }
+  };
+  updateProfile = async (input: ProfileUpdate, signal: AbortSignal, expectedOwner: string): Promise<AccountProfile> => {
+    if (!this.current || this.current.pair.user.id !== expectedOwner) throw cancelledRequest();
+    const profile = await this.authorized(token => this.api.updateProfile(token, input, signal), signal);
+    assertNotCancelled(signal);
+    if (!this.current) throw cancelledRequest();
+    this.checkProfile(profile, this.current.pair);
+    if (profile.email !== this.current.pair.user.email || profile.timeZone !== this.current.pair.user.timeZone)
+      throw new ApiError('Chưa xác nhận được đúng hồ sơ đã lưu. Hãy đọc lại để đối chiếu.', 'PROFILE_MISMATCH');
+    this.publishProfile(profile);
+    return profile;
   };
   authorized = async <T,>(operation: (accessToken: string) => Promise<T>, signal?: AbortSignal): Promise<T> => {
     assertNotCancelled(signal);

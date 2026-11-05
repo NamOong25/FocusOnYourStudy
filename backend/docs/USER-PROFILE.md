@@ -40,4 +40,4 @@ Mất phản hồi sau PUT: dùng GET đối chiếu. Nếu lần trước đã 
 | 409 | `PROFILE_VERSION_CONFLICT` | Bản hồ sơ đã đọc cũ; đọc và xem lại trước khi sửa tiếp. |
 | 409/503 | `DATA_CONFLICT`, `DATABASE_UNAVAILABLE` | Lỗi DB theo hợp đồng lỗi chung; không có xác nhận lưu giả. |
 
-Không migration hoặc dependency mới, vẫn V13. Chưa nối form sửa hồ sơ React Native, chưa mở sửa email/mật khẩu/avatar/múi giờ/cài đặt; UI ở 9A.2. [Hướng dẫn terminal](../../docs/BACKEND-PHASE-9A1.md), [mẫu HTTP](../api/user-profile.http).
+Không migration hoặc dependency mới, vẫn V13. Form sửa họ tên/trường/ngành React Native đã nối ở [9A.2](../../docs/FRONTEND-PHASE-9A2.md); chưa mở sửa email/mật khẩu/avatar/múi giờ/cài đặt. [Hướng dẫn terminal](../../docs/BACKEND-PHASE-9A1.md), [mẫu HTTP](../api/user-profile.http).

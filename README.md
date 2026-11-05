@@ -2,9 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9A.1: API cập nhật hồ sơ tài khoản
+## Mới nhất — 9A.2: Sửa hồ sơ trên giao diện
 
-Backend có PUT `/api/v1/users/me` lưu họ tên/trường/ngành, lấy owner từ Bearer và chặn bản cũ bằng version hiện có. GET và hồ sơ register/login/refresh thêm version; không migration/dependency mới, vẫn V13. Có script `backend/scripts/Try-Profile.ps1 -Mode Get|Update` giữ tiếng Việt trên PowerShell 5.1, không in token/mật khẩu và chỉ đóng phiên thử riêng. [Hướng dẫn từng bước 9A.1](docs/BACKEND-PHASE-9A1.md), [hợp đồng API](backend/docs/USER-PROFILE.md). **863 tests backend/55 bộ, Maven verify và đóng gói đạt; TypeScript và 714 tests frontend đạt, không lỗi/bỏ qua**. Nút Lưu hồ sơ trong giao diện sẽ nối ở 9A.2; chưa tự commit/push.
+**Hồ sơ → Chỉnh sửa hồ sơ** đọc/lưu họ tên, trường và ngành qua API thật, cập nhật tên ngay và giữ sau F5. Có validation, trạng thái đang lưu, cảnh báo bản nháp, đối chiếu 409/lỗi mạng và tách tài khoản. **TypeScript, 738 tests frontend (24 mới), export web QA/thông thường đạt.** Đã kiểm tra trực tiếp UI/API/PostgreSQL: hai tab, mất xác nhận sau commit, A → B → A và 320/360/430px. [Hướng dẫn test và ảnh 9A.2](docs/FRONTEND-PHASE-9A2.md). Không đổi backend/schema/dependency, không chạy lại full backend; chưa nghiệm thu native. Đã dọn QA riêng; chưa commit/push.
+
+## 9A.1: API cập nhật hồ sơ tài khoản
+
+Backend có PUT `/api/v1/users/me` lưu họ tên/trường/ngành, lấy owner từ Bearer và chặn bản cũ bằng version hiện có. GET và hồ sơ register/login/refresh thêm version; không migration/dependency mới, vẫn V13. Có script `backend/scripts/Try-Profile.ps1 -Mode Get|Update` giữ tiếng Việt trên PowerShell 5.1, không in token/mật khẩu và chỉ đóng phiên thử riêng. [Hướng dẫn từng bước 9A.1](docs/BACKEND-PHASE-9A1.md), [hợp đồng API](backend/docs/USER-PROFILE.md). **863 tests backend/55 bộ, Maven verify và đóng gói đạt; TypeScript và 714 tests frontend đạt, không lỗi/bỏ qua**. Nút Lưu hồ sơ trong giao diện đã nối ở 9A.2; chưa tự commit/push.
 
 ## 8A.3C: Kiểm tra liên thông kế hoạch học
 
