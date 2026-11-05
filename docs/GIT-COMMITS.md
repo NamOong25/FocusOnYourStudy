@@ -1,5 +1,17 @@
 # Tên commit cho từng đợt
 
+## Ghi nhận UI Test 2 và phần xóa của Test 3 — 05/11/2026
+
+Người dùng gửi ảnh cảnh báo nguồn đổi/nút lưu bị khóa và xác nhận sau xóa buổi TEST rồi F5, buổi không xuất hiện lại. Ghi nhận nhánh chặn nguồn đổi và xóa bền vững đạt; các phần UI chưa xác nhận vẫn để mở. Chỉ cập nhật tài liệu.
+
+```powershell
+git add docs/UI-BACKLOG.md docs/ACCEPTANCE-PHASE-8A3C.md docs/GIT-COMMITS.md
+git commit -m "Ghi nhận kiểm tra nguồn đổi và xóa buổi tự học sau tải lại"
+git push origin main
+```
+
+Chưa tự commit/push.
+
 ## Sửa ngày xem Tự học sau lưu kế hoạch — 01/11/2026
 
 Lưu thành công chọn ngay ngày của buổi đầu trong tập đã lưu và bộ lọc Tất cả, kể cả đóng biên nhận bằng ×; vẫn GET dữ liệu hiện tại. Hiện ngày thống kê trên các con số. TypeScript, 714 frontend tests (8 mới), export web đạt; UI trực tiếp chưa chốt. Xem [cách test](STUDY-PLAN-SAVE-VIEW-FIX.md).

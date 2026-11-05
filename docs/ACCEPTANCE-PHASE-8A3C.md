@@ -2,6 +2,14 @@
 
 Ngày kiểm tra: **01/11/2026**. Phần kiểm thử tự động frontend → HTTP → Spring Boot → PostgreSQL đã đạt. Đã sửa lỗi danh sách có thể dùng kết quả GET bắt đầu trước lúc lưu kế hoạch. **Chưa chốt nghiệm thu UI trực tiếp trong đợt này**: cả công cụ trình duyệt và công cụ dự phòng đều lỗi khởi tạo `failed to write kernel assets: The system cannot find the path specified`. Không gọi kiểm thử Manager/API là thao tác UI; ảnh và kết quả UI 8A.3B thuộc lần kiểm tra trước.
 
+## Bổ sung kết quả người dùng kiểm tra — 05/11/2026
+
+**Test 2 đạt ở nhánh chặn trên UI.** Người dùng thực hiện hướng dẫn giữ đề xuất ở tab A, đổi deadline ở tab B rồi gửi hai ảnh: cảnh báo dữ liệu môn/lịch/mục tiêu đã cập nhật, giữ bản cũ để xem và yêu cầu tạo lại; nút Lưu các buổi đã chọn bị khóa. Đây là kết quả đúng khi frontend phát hiện nguồn đổi trước POST. Không khẳng định ảnh này chứng minh một POST bị 409 hoặc đã đối chiếu DB.
+
+Ảnh Test 1 trước đó cho thấy buổi TEST LƯU RỒI ĐÓNG, 19:00–19:45, 45 phút, trạng thái Đã lên lịch đã hiển thị trong danh sách. Ảnh không bao gồm ngày/bộ lọc hoặc thao tác đóng ×, nên chỉ ghi nhận phần hiển thị buổi. Các mục UI chưa được xác nhận vẫn giữ mở; chưa chốt toàn bộ 8A.3C.
+
+**Test 3 — phần xóa rồi F5 đạt theo xác nhận người dùng ngày 05/11/2026.** Ảnh trước đó hiển thị tên “Test 3 đã sửa” ở ngày 06/11/2026, bộ lọc Tất cả, 19:00–19:45 và thông báo đã xóa khỏi tài khoản. Sau hướng dẫn tải lại trang, chọn lại đúng ngày và bộ lọc, người dùng xác nhận “mình test rồi không còn xuất hiện”. Ghi nhận buổi đã xóa không xuất hiện lại sau F5. Phần đổi tên đã thấy trên UI; chưa có xác nhận riêng tên mới giữ sau F5. Đây là kết quả người dùng thao tác, không phải agent đã điều khiển trình duyệt. Không chạy thêm test hoặc thay mã trong lần cập nhật tài liệu này.
+
 ## Đã sửa
 
 Khi app đang tải danh sách Tự học, người dùng có thể lưu một kế hoạch trước lúc GET cũ trả về. Trước đây `reload()` gộp với lượt GET đang chạy, nên nút Xem lịch tự học có thể được bật với dữ liệu cũ, chưa có buổi vừa lưu.
