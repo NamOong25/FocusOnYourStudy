@@ -26,7 +26,7 @@ public class RefreshSessionService {
 
     @Transactional
     public LoginResponse start(UUID userId, SessionTransport transport) {
-        var user = users.findById(userId).orElseThrow(AuthApiException::invalidCredentials);
+        var user = users.lockForAcademicChanges(userId).orElseThrow(AuthApiException::invalidCredentials);
         Instant now = clock.instant().truncatedTo(ChronoUnit.MICROS);
         var session = sessions.saveAndFlush(RefreshSessionEntity.start(userId, transport, now, now.plus(properties.absoluteTtl())));
         return issue(session, user, now);

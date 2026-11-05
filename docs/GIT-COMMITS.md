@@ -1,5 +1,18 @@
 # Tên commit cho từng đợt
 
+## 9B.1 — API đổi mật khẩu và thu hồi phiên
+
+Đổi mật khẩu dưới khóa owner, ghi hash/thu hồi mọi phiên nguyên tử; chặn race đăng nhập bằng hash cũ. V14 mở rộng CHECK lý do thu hồi, giữ dữ liệu hiện có; script nhập ẩn, mẫu HTTP và hướng dẫn Postman. **báo cáo cuối 884 tests backend/58 bộ không lỗi/bỏ qua; TypeScript và 738 tests frontend đạt.** [Cách kiểm tra](BACKEND-PHASE-9B1.md). Giao diện còn 9B.2.
+
+```powershell
+cd 'D:\Video OBS\QuanLyHocTap'
+git add .
+git commit -m "Thêm API đổi mật khẩu và thu hồi phiên đăng nhập"
+git push origin main
+```
+
+Chưa tự commit/push 9B.1.
+
 ## 9A.2 — Nối giao diện sửa hồ sơ với API
 
 Đọc/lưu ba trường hồ sơ, giữ bản nháp khi lỗi, đối chiếu xung đột hoặc chưa xác nhận và cập nhật tên trong app. 738 tests frontend, TypeScript, export và UI/API/PostgreSQL QA đạt; xem [hướng dẫn](FRONTEND-PHASE-9A2.md). Không sửa backend/schema/dependency.

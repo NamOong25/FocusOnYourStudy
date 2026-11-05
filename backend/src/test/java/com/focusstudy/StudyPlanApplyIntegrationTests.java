@@ -258,7 +258,7 @@ class StudyPlanApplyIntegrationTests {
         var f=fixture();var r=command(f);data(apply(f,r));String schema="backend_it_"+UUID.randomUUID().toString().replace("-","");
         try{Flyway.configure().dataSource(URL,USER,PASSWORD).schemas(schema).defaultSchema(schema).target("12").load().migrate();
             for(String table:List.of("app_users","semesters","courses","study_sessions"))jdbc.execute("INSERT INTO "+schema+"."+table+" SELECT * FROM "+SCHEMA+"."+table+" WHERE "+(table.equals("app_users")?"id":"user_id")+"='"+f.owner.id+"'");
-            Flyway.configure().dataSource(URL,USER,PASSWORD).schemas(schema).defaultSchema(schema).load().migrate();assertThat(jdbc.queryForObject("SELECT count(*) FROM "+schema+".study_sessions",Long.class)).isEqualTo(4);assertThat(jdbc.queryForObject("SELECT count(*) FROM "+schema+".study_plan_applications",Long.class)).isZero();assertThat(jdbc.queryForObject("SELECT max(version::int) FROM "+schema+".flyway_schema_history WHERE success AND version IS NOT NULL",Integer.class)).isEqualTo(13);
+            Flyway.configure().dataSource(URL,USER,PASSWORD).schemas(schema).defaultSchema(schema).target("13").load().migrate();assertThat(jdbc.queryForObject("SELECT count(*) FROM "+schema+".study_sessions",Long.class)).isEqualTo(4);assertThat(jdbc.queryForObject("SELECT count(*) FROM "+schema+".study_plan_applications",Long.class)).isZero();assertThat(jdbc.queryForObject("SELECT max(version::int) FROM "+schema+".flyway_schema_history WHERE success AND version IS NOT NULL",Integer.class)).isEqualTo(13);
         }finally{if(!schema.matches("backend_it_[a-f0-9]{32}"))throw new IllegalStateException("Unsafe schema");jdbc.execute("DROP SCHEMA IF EXISTS "+schema+" CASCADE");}
     }
 }

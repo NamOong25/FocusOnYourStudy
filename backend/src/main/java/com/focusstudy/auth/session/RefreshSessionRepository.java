@@ -12,4 +12,8 @@ public interface RefreshSessionRepository extends JpaRepository<RefreshSessionEn
     Optional<RefreshSessionEntity> lockById(@Param("id") UUID id);
 
     boolean existsByIdAndUserIdAndRevokedAtIsNullAndExpiresAtAfter(UUID id, UUID userId, Instant now);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from RefreshSessionEntity s where s.userId = :userId and s.revokedAt is null order by s.id")
+    List<RefreshSessionEntity> lockUnrevokedByUserId(@Param("userId") UUID userId);
 }

@@ -23,6 +23,7 @@ public class UserEntity extends BaseEntity {
     public String getSchool() { return school; }
     public String getMajor() { return major; }
     public String getTimeZone() { return timeZone; }
+    public void changePasswordHash(String encodedPassword) { passwordHash = encodedPassword; }
     public void updateProfile(String fullName, String school, String major) {
         this.fullName = fullName; this.school = school; this.major = major;
     }

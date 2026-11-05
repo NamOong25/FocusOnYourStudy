@@ -34,8 +34,11 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public LoginResponse login(LoginRequest request, SessionTransport transport) {
-        var user = users.findByEmail(request.email());
+        // Check credentials and start the session under the same owner lock as
+        // password changes. A login that waited must check the committed hash.
+        var user = users.lockByEmail(request.email());
         boolean matches;
         try { matches = passwords.matches(request.password(), user.map(UserEntity::getPasswordHash).orElse(dummyHash)); }
         catch (IllegalArgumentException ex) { passwords.matches(request.password(), dummyHash); matches = false; }

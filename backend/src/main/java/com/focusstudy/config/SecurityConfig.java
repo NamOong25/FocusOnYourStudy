@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/me/password").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters", "/api/v1/semesters/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/semesters").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/semesters/*").authenticated()

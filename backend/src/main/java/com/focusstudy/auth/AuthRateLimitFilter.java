@@ -13,6 +13,7 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
     private final ObjectMapper json;
     public AuthRateLimitFilter(AuthRateLimiter limiter, ObjectMapper json) { this.limiter = limiter; this.json = json; }
     @Override protected boolean shouldNotFilter(HttpServletRequest request) {
+        if ("PUT".equals(request.getMethod()) && "/api/v1/users/me/password".equals(request.getServletPath())) return false;
         return !"POST".equals(request.getMethod()) || !("/api/v1/auth/login".equals(request.getServletPath())
                 || "/api/v1/auth/register".equals(request.getServletPath())
                 || "/api/v1/auth/refresh".equals(request.getServletPath())
@@ -20,7 +21,8 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
     }
     @Override protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String route = request.getServletPath().substring(request.getServletPath().lastIndexOf('/') + 1);
+        String route = "/api/v1/users/me/password".equals(request.getServletPath()) ? "change-password"
+                : request.getServletPath().substring(request.getServletPath().lastIndexOf('/') + 1);
         var permit = limiter.acquire(route, request.getRemoteAddr());
         if (permit.allowed()) { chain.doFilter(request, response); return; }
         response.setStatus(429); response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);

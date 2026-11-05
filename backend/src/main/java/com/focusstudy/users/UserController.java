@@ -14,7 +14,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final AuthService auth;
     private final UserProfileService profiles;
-    public UserController(AuthService auth, UserProfileService profiles) { this.auth = auth; this.profiles = profiles; }
+    private final PasswordChangeService passwords;
+    public UserController(AuthService auth, UserProfileService profiles, PasswordChangeService passwords) {
+        this.auth = auth; this.profiles = profiles; this.passwords = passwords;
+    }
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(@AuthenticationPrincipal Jwt token, @Valid @RequestBody ChangePasswordRequest input) {
+        passwords.change(UUID.fromString(token.getSubject()), UUID.fromString(token.getClaimAsString("sid")), input);
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+    }
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserProfile>> me(@AuthenticationPrincipal Jwt token, HttpServletRequest request) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())

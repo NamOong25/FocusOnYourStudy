@@ -25,6 +25,7 @@ public class AuthRateLimiter {
         int limit = switch (route) {
             case "register" -> registerLimit;
             case "login" -> loginLimit;
+            case "change-password" -> loginLimit;
             case "refresh" -> refreshLimit;
             case "logout" -> logoutLimit;
             default -> throw new IllegalArgumentException("Unknown auth route");
