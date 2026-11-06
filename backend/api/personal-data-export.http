@@ -1,0 +1,8 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+
+### Đăng nhập bằng auth.http, lấy data.accessToken và điền vào biến riêng trên máy.
+### Lưu phản hồi JSON thành một tệp .json trên máy bạn.
+GET {{baseUrl}}/api/v1/users/me/export
+Authorization: Bearer {{accessToken}}
+Accept: application/json

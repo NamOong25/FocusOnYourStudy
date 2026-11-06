@@ -2,7 +2,11 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9D.2B: Áp dụng tùy chọn nhắc học
+## Mới nhất — 9E.1: API xuất dữ liệu cá nhân
+
+Backend có `GET /api/v1/users/me/export` để tải bản sao dữ liệu học tập dưới dạng JSON UTF-8. File chứa hồ sơ, học kỳ/môn, bài tập, lịch, điểm và Pomodoro của tài khoản đang đăng nhập. [Hướng dẫn kiểm tra bằng Postman](docs/BACKEND-PHASE-9E1.md)
+
+## 9D.2B: Áp dụng tùy chọn nhắc học
 
 Chuông áp dụng các loại nhắc đã bật và tạm ẩn số trong giờ yên lặng theo múi giờ tài khoản. Mốc mặc định được gợi ý khi tạo lịch học/lịch thi mới. Lịch hiện có dùng mốc riêng. [Hướng dẫn kiểm tra](docs/FRONTEND-PHASE-9D2B.md)
 

@@ -1,5 +1,13 @@
 # Tên commit cho từng đợt
 
+## 9E.1 — API xuất dữ liệu cá nhân
+
+```powershell
+git add .
+git commit -m "Thêm API xuất dữ liệu học tập theo tài khoản"
+git push origin main
+```
+
 ## 9D.2B — Áp dụng tùy chọn nhắc học
 
 ```powershell

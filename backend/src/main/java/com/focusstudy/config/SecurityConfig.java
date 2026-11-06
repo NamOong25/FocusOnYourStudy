@@ -73,6 +73,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/password-reset/request", "/api/v1/auth/password-reset/confirm").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me/export").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me/password").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/semesters", "/api/v1/semesters/*").authenticated()
@@ -161,7 +162,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "Accept", "Authorization", "X-Request-ID", "X-Auth-Transport", "X-XSRF-TOKEN"));
-        config.setExposedHeaders(List.of("X-Request-ID", "Retry-After", "WWW-Authenticate"));
+        config.setExposedHeaders(List.of("X-Request-ID", "Retry-After", "WWW-Authenticate", "Content-Disposition"));
         config.setAllowCredentials(true);
         var source = new UrlBasedCorsConfigurationSource(); source.registerCorsConfiguration("/**", config);
         return source;

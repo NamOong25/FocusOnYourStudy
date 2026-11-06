@@ -1,5 +1,7 @@
 # Backend — FocusYourStudy
 
+**9E.1 — Xuất dữ liệu cá nhân.** `GET /api/v1/users/me/export` yêu cầu Bearer và trả tệp JSON UTF-8 có phiên bản định dạng. Các phần được đọc chung snapshot. [Hướng dẫn Postman](../docs/BACKEND-PHASE-9E1.md) · [Mẫu HTTP](api/personal-data-export.http)
+
 **9D.1 — Tùy chọn nhắc học.** `GET` và `PUT /api/v1/notification-preferences` dùng Bearer, lưu theo tài khoản. Flyway V16 tạo bảng tùy chọn. [Hướng dẫn thử bằng Postman](../docs/BACKEND-PHASE-9D1.md) · [Mẫu HTTP](api/notification-preferences.http)
 
 **9C.1 — Quên mật khẩu qua email.** `POST /api/v1/auth/password-reset/request` nhận email và trả thông báo chung. `POST /api/v1/auth/password-reset/confirm` đổi mật khẩu qua mã dùng một lần và thu hồi phiên cũ. V15 tạo bảng lưu bản băm của mã. Cấu hình Spring Mail trước khi bật tính năng. [Hướng dẫn Mailpit và hợp đồng API](../docs/BACKEND-PHASE-9C1.md)
