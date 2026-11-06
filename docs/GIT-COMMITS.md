@@ -1,5 +1,15 @@
 # Tên commit cho từng đợt
 
+## 9C.1 — Backend quên mật khẩu
+
+API gửi liên kết qua SMTP và xác nhận mã một lần. V15 lưu bản băm. Đặt lại mật khẩu và thu hồi phiên cũ cùng transaction. [Hướng dẫn](BACKEND-PHASE-9C1.md)
+
+```powershell
+git add .
+git commit -m "Thêm API đặt lại mật khẩu qua email"
+git push origin main
+```
+
 ## 9B.2 — Giao diện đổi mật khẩu
 
 Form ba ô, validation/hiện-ẩn/bản nháp, nối API, đóng phiên và mở đăng nhập sau kết quả; phân biệt chưa xác nhận và không tự gửi lại. TypeScript, 771 frontend tests, export và SessionManager/API/PostgreSQL đạt; UI form/layout đã kiểm tra, bước đổi thật trên form còn nghiệm thu thủ công. [Hướng dẫn](FRONTEND-PHASE-9B2.md). Không đổi backend/schema/dependency.

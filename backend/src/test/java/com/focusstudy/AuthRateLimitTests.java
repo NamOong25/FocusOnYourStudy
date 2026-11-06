@@ -10,6 +10,25 @@ import org.springframework.mock.web.*;
 import tools.jackson.databind.json.JsonMapper;
 
 class AuthRateLimitTests {
+    @Test void resetRequestAndConfirmAreLimitedSeparatelyAndIgnoreForwardedAddresses() throws Exception {
+        var limiter = new AuthRateLimiter(new TestClock(), 10, 10, 10, 10, 1, 2, 100);
+        var filter = new AuthRateLimitFilter(limiter, JsonMapper.builder().build());
+        for (String action : java.util.List.of("request", "confirm")) {
+            String path = "/api/v1/auth/password-reset/" + action;
+            int limit = action.equals("request") ? 1 : 2;
+            for (int attempt = 0; attempt <= limit; attempt++) {
+                var request = new MockHttpServletRequest("POST", path);
+                request.setServletPath(path);
+                request.setRemoteAddr("127.0.0.1");
+                request.addHeader("X-Forwarded-For", "198.51.100." + attempt);
+                var response = new MockHttpServletResponse();
+                filter.doFilter(request, response, (req, res) -> {});
+                assertThat(response.getStatus()).isEqualTo(attempt < limit ? 200 : 429);
+                if (attempt == limit) assertThat(response.getHeader("Retry-After")).isEqualTo("60");
+            }
+        }
+    }
+
     @Test void passwordChangeHasSeparateBucketAndThePutRouteIsLimited() throws Exception {
         var clock = new TestClock(); var limiter = new AuthRateLimiter(clock, 1, 1, 10);
         assertThat(limiter.acquire("change-password", "a").allowed()).isTrue();

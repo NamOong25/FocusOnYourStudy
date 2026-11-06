@@ -11,14 +11,21 @@ public class AuthRateLimiter {
     private final Map<String, Window> windows = new HashMap<>();
     private final Clock clock;
     private final int loginLimit, registerLimit, refreshLimit, logoutLimit, maxKeys;
+    private final int resetRequestLimit, resetConfirmLimit;
     public AuthRateLimiter(Clock clock, int loginLimit, int registerLimit, int maxKeys) {
         this(clock, loginLimit, registerLimit, 60, 60, maxKeys);
     }
     public AuthRateLimiter(Clock clock, int loginLimit, int registerLimit, int refreshLimit, int logoutLimit, int maxKeys) {
-        if (loginLimit < 1 || registerLimit < 1 || refreshLimit < 1 || logoutLimit < 1 || maxKeys < 1)
+        this(clock, loginLimit, registerLimit, refreshLimit, logoutLimit, 5, 10, maxKeys);
+    }
+    public AuthRateLimiter(Clock clock, int loginLimit, int registerLimit, int refreshLimit, int logoutLimit,
+            int resetRequestLimit, int resetConfirmLimit, int maxKeys) {
+        if (loginLimit < 1 || registerLimit < 1 || refreshLimit < 1 || logoutLimit < 1
+                || resetRequestLimit < 1 || resetConfirmLimit < 1 || maxKeys < 1)
             throw new IllegalArgumentException("Auth limits must be positive");
         this.clock = clock; this.loginLimit = loginLimit; this.registerLimit = registerLimit;
         this.refreshLimit = refreshLimit; this.logoutLimit = logoutLimit; this.maxKeys = maxKeys;
+        this.resetRequestLimit = resetRequestLimit; this.resetConfirmLimit = resetConfirmLimit;
     }
     public Permit acquire(boolean register, String client) { return acquire(register ? "register" : "login", client); }
     public synchronized Permit acquire(String route, String client) {
@@ -28,6 +35,8 @@ public class AuthRateLimiter {
             case "change-password" -> loginLimit;
             case "refresh" -> refreshLimit;
             case "logout" -> logoutLimit;
+            case "password-reset-request" -> resetRequestLimit;
+            case "password-reset-confirm" -> resetConfirmLimit;
             default -> throw new IllegalArgumentException("Unknown auth route");
         };
         long now = clock.millis();

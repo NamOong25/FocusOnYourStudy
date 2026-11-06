@@ -15,8 +15,11 @@ public class PasswordChangeService {
     private final RefreshSessionRepository sessions;
     private final PasswordEncoder passwords;
     private final Clock clock;
-    public PasswordChangeService(UserRepository users, RefreshSessionRepository sessions, PasswordEncoder passwords, Clock clock) {
+    private final PasswordCredentials credentials;
+    public PasswordChangeService(UserRepository users, RefreshSessionRepository sessions, PasswordEncoder passwords, Clock clock,
+            PasswordCredentials credentials) {
         this.users = users; this.sessions = sessions; this.passwords = passwords; this.clock = clock;
+        this.credentials = credentials;
     }
 
     @Transactional
@@ -33,11 +36,6 @@ public class PasswordChangeService {
         if (input.currentPassword().equals(input.newPassword()))
             throw new AuthApiException(HttpStatus.BAD_REQUEST, "PASSWORD_UNCHANGED", "Mật khẩu mới cần khác mật khẩu hiện tại.");
 
-        // Lock session rows after the owner; refresh/logout only lock session rows.
-        // Hash and revocation commit atomically; failure rolls both back.
-        var active = sessions.lockUnrevokedByUserId(ownerId);
-        user.changePasswordHash(passwords.encode(input.newPassword()));
-        active.forEach(session -> session.revoke(now, "PASSWORD_CHANGED"));
-        users.flush();
+        credentials.replace(user, input.newPassword());
     }
 }

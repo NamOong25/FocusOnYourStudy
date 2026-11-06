@@ -3,6 +3,7 @@ package com.focusstudy.auth;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.focusstudy.auth.session.SessionProperties;
+import com.focusstudy.auth.reset.PasswordResetProperties;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -18,7 +19,7 @@ import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 
-@Configuration @EnableConfigurationProperties({JwtProperties.class, SessionProperties.class})
+@Configuration @EnableConfigurationProperties({JwtProperties.class, SessionProperties.class, PasswordResetProperties.class})
 public class AuthConfig {
     @Bean Clock authClock() { return Clock.systemUTC(); }
 

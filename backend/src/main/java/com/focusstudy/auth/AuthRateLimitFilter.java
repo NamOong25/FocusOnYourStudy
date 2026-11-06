@@ -17,12 +17,19 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
         return !"POST".equals(request.getMethod()) || !("/api/v1/auth/login".equals(request.getServletPath())
                 || "/api/v1/auth/register".equals(request.getServletPath())
                 || "/api/v1/auth/refresh".equals(request.getServletPath())
-                || "/api/v1/auth/logout".equals(request.getServletPath()));
+                || "/api/v1/auth/logout".equals(request.getServletPath())
+                || "/api/v1/auth/password-reset/request".equals(request.getServletPath())
+                || "/api/v1/auth/password-reset/confirm".equals(request.getServletPath()));
     }
     @Override protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String route = "/api/v1/users/me/password".equals(request.getServletPath()) ? "change-password"
-                : request.getServletPath().substring(request.getServletPath().lastIndexOf('/') + 1);
+        String path = request.getServletPath();
+        String route = switch (path) {
+            case "/api/v1/users/me/password" -> "change-password";
+            case "/api/v1/auth/password-reset/request" -> "password-reset-request";
+            case "/api/v1/auth/password-reset/confirm" -> "password-reset-confirm";
+            default -> path.substring(path.lastIndexOf('/') + 1);
+        };
         var permit = limiter.acquire(route, request.getRemoteAddr());
         if (permit.allowed()) { chain.doFilter(request, response); return; }
         response.setStatus(429); response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);

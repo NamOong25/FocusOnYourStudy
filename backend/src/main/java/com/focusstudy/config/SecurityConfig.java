@@ -69,7 +69,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/health", "/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
-                                "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
+                                "/api/v1/auth/refresh", "/api/v1/auth/logout",
+                                "/api/v1/auth/password-reset/request", "/api/v1/auth/password-reset/confirm").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
@@ -135,8 +136,11 @@ public class SecurityConfig {
             @Value("${app.auth.rate-limit.login-per-minute}") int loginLimit,
             @Value("${app.auth.rate-limit.register-per-minute}") int registerLimit,
             @Value("${app.auth.rate-limit.refresh-per-minute}") int refreshLimit,
-            @Value("${app.auth.rate-limit.logout-per-minute}") int logoutLimit) {
-        return new AuthRateLimitFilter(new AuthRateLimiter(clock, loginLimit, registerLimit, refreshLimit, logoutLimit, 10_000), json);
+            @Value("${app.auth.rate-limit.logout-per-minute}") int logoutLimit,
+            @Value("${app.auth.rate-limit.password-reset-request-per-minute}") int resetRequestLimit,
+            @Value("${app.auth.rate-limit.password-reset-confirm-per-minute}") int resetConfirmLimit) {
+        return new AuthRateLimitFilter(new AuthRateLimiter(clock, loginLimit, registerLimit, refreshLimit, logoutLimit,
+                resetRequestLimit, resetConfirmLimit, 10_000), json);
     }
 
     @Bean FilterRegistrationBean<AuthRateLimitFilter> preventDuplicateRateFilter(AuthRateLimitFilter filter) {
