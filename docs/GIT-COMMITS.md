@@ -1,5 +1,13 @@
 # Tên commit cho từng đợt
 
+## 9C.2 — Giao diện quên mật khẩu
+
+```powershell
+git add .
+git commit -m "Kết nối giao diện quên mật khẩu qua email"
+git push origin main
+```
+
 ## 9C.1 — Backend quên mật khẩu
 
 API gửi liên kết qua SMTP và xác nhận mã một lần. V15 lưu bản băm. Đặt lại mật khẩu và thu hồi phiên cũ cùng transaction. [Hướng dẫn](BACKEND-PHASE-9C1.md)

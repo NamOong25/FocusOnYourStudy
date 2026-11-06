@@ -1,6 +1,6 @@
 # 9C.1 — Backend quên mật khẩu qua email
 
-Backend nhận email và gửi liên kết đặt lại mật khẩu qua SMTP. Dùng Mailpit trên máy để thử với địa chỉ `@example.test`. Form mở liên kết và nhập mật khẩu mới thuộc 9C.2. Trong 9C.1, dùng HTTP client hoặc Postman để xác nhận.
+Backend nhận email và gửi liên kết đặt lại mật khẩu qua SMTP. Dùng Mailpit trên máy để thử với địa chỉ `@example.test`. Bạn có thể kiểm tra bằng giao diện web, HTTP client hoặc Postman.
 
 ## Chạy thử trên Windows
 
@@ -38,6 +38,16 @@ Flyway áp dụng V15 khi backend khởi động. Dùng một tài khoản thử
 4. Gửi `/request` cho một email chưa đăng ký. API trả cùng `202` và thông báo như bước 1. Hộp thư không nhận thư cho địa chỉ này.
 
 [Mẫu yêu cầu HTTP](../backend/api/password-reset.http)
+
+## Kiểm tra trên giao diện web
+
+1. Chạy Mailpit và backend với cấu hình phía trên. Mở PowerShell ở gốc project và chạy `npx expo start --web --port 8092`. Mở [FocusYourStudy](http://localhost:8092/) bằng hostname `localhost` để khớp với địa chỉ trong email.
+2. Dùng tài khoản thử đã đăng ký. Vào **Hồ sơ → Đăng nhập → Quên mật khẩu?**, nhập email và bấm **Gửi liên kết đặt lại mật khẩu**. App hiện cùng một lời nhắn cho email hợp lệ có hoặc chưa có tài khoản.
+3. Mở [Mailpit](http://127.0.0.1:8025/) rồi mở liên kết trong thư. Màn hình **Đặt lại mật khẩu** xuất hiện và mã tự biến mất khỏi thanh địa chỉ. Nếu lỡ tải lại trang lúc đang nhập, mở lại link trong thư.
+4. Nhập mật khẩu mới vào cả hai ô rồi bấm **Lưu mật khẩu mới**. Khi thấy **Đã đặt lại mật khẩu**, chọn **Đến trang đăng nhập**. Thử mật khẩu cũ rồi thử mật khẩu mới.
+5. Mở lại liên kết cũ từ Mailpit. Sau khi nhập hai ô khớp và bấm lưu, app báo liên kết không còn dùng được. Bấm **Yêu cầu liên kết mới** để về form gửi email.
+
+Nếu mất phản hồi sau khi gửi mật khẩu mới, app hiện **Cần kiểm tra kết quả** và đưa bạn đến trang đăng nhập để thử mật khẩu mới. Nếu vẫn chưa vào được, yêu cầu một liên kết mới.
 
 ## Hợp đồng API
 

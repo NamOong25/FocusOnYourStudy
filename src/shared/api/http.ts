@@ -12,6 +12,9 @@ export function assertNotCancelled(signal?: AbortSignal) { if (signal?.aborted) 
 const messages: Record<string, string> = {
   CURRENT_PASSWORD_INCORRECT: 'Mật khẩu hiện tại chưa đúng.',
   PASSWORD_UNCHANGED: 'Mật khẩu mới cần khác mật khẩu hiện tại.',
+  PASSWORD_RESET_LINK_INVALID: 'Liên kết đặt lại mật khẩu đã hết hạn, đã dùng hoặc không hợp lệ.',
+  PASSWORD_RESET_UNAVAILABLE: 'Tính năng đặt lại mật khẩu đang tạm gián đoạn. Hãy thử lại sau.',
+  PASSWORD_CONFIRMATION_MISMATCH: 'Mật khẩu xác nhận chưa trùng khớp.',
   PROFILE_VERSION_CONFLICT: 'Hồ sơ đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
   NOTIFICATION_REVISION_CONFLICT: 'Nội dung hoặc mốc nhắc đã thay đổi. Tải lại nhắc việc rồi xem bản mới trước khi đánh dấu đã đọc.',
   NOTIFICATION_SOURCE_UNAVAILABLE: 'Lời nhắc không còn khả dụng. Tải lại để đối chiếu danh sách hiện tại.',
@@ -94,6 +97,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   const fields: FieldErrors = {};
   if (code === 'CURRENT_PASSWORD_INCORRECT') fields.currentPassword = messages[code]!;
   if (code === 'PASSWORD_UNCHANGED') fields.newPassword = messages[code]!;
+  if (code === 'PASSWORD_CONFIRMATION_MISMATCH') fields.confirmPassword = messages[code]!;
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
       && (['email', 'password', 'currentPassword', 'newPassword', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
@@ -107,7 +111,7 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   return new ApiError(message, code, status, fields);
 }
 
-type RequestOptions = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean };
+type RequestOptions = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean; expectedStatus?: number };
 export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher = fetch }: { timeoutMs?: number; fetcher?: typeof fetch } = {}) {
   return async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     assertNotCancelled(options.signal);
@@ -136,6 +140,9 @@ export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher 
       let payload: unknown;
       try { payload = text ? JSON.parse(text) : null; } catch { payload = null; }
       if (!response.ok) throw errorFromResponse(response.status, payload, response.headers.get('Retry-After'));
+      if (options.expectedStatus !== undefined && response.status !== options.expectedStatus) {
+        throw new ApiError('Phản hồi xác nhận chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
+      }
       if (options.empty) {
         if (response.status === 204 && !text) return undefined as T;
         throw new ApiError('Phản hồi xác nhận chưa hợp lệ. Kiểm tra dữ liệu trước khi thử lại.', 'INVALID_RESPONSE');

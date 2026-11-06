@@ -17,6 +17,7 @@ import AccountProfileEditor from './components/AccountProfileEditor';
 import PasswordChangeForm from './components/PasswordChangeForm';
 import { Appearance, ProfileEditor, ReminderEditor } from './components/PreferenceEditors';
 import { AuthHero } from './components/AuthHero';
+import PasswordResetRequestForm from './components/PasswordResetRequestForm';
 import LogoutForm from './components/LogoutForm';
 import { useApiAction } from './auth/useApiAction';
 
@@ -90,10 +91,10 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               <T accessibilityLiveRegion="polite" style={S.small}>{auth.notice}</T>
             </Card>}
             {(page === 'login' || page === 'register') && <AuthForm key={page} mode={page} initialEmail={email} message={message}
-              onMode={open} onForgot={() => open('forgot')}
+              onMode={open} onForgot={value => { setEmail(value); open('forgot'); }}
               onRegistered={value => { setEmail(value); open('login'); setMessage('Tạo tài khoản thành công. Đăng nhập để tiếp tục.'); }}
               onSignedIn={loaded => { open('hub'); showNotice(loaded ? 'Đăng nhập thành công. Hồ sơ đã được tải.' : 'Đã đăng nhập. Thử tải lại hồ sơ để tiếp tục.'); }} />}
-            {page === 'forgot' && <><AuthHero icon="key-outline" title="Khôi phục mật khẩu" detail="Chức năng gửi email khôi phục chưa sẵn sàng." /><Card><T style={S.small}>Mật khẩu của bạn chưa được thay đổi và chưa có email nào được gửi. Bạn có thể quay lại đăng nhập hoặc tiếp tục khám phá các màn học tập.</T></Card><Button label="Quay lại đăng nhập" onPress={() => open('login')} /></>}
+            {page === 'forgot' && <PasswordResetRequestForm initialEmail={email} onLogin={() => open('login')} />}
           </InteractionBlock>
         </RememberedScrollView>
         <ActionStatus /><NoticeToast modal bottom={Math.max(20, inset.bottom)} />

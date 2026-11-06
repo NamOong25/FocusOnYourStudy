@@ -44,6 +44,8 @@ import ClassDialog from './src/features/schedule/ClassDialog';
 import Account from './src/features/account/AccountScreen';
 import { AuthProvider, useAuth } from './src/features/account/auth/AuthProvider';
 import SessionGate from './src/features/account/components/SessionGate';
+import PasswordRecoveryScreen from './src/features/account/components/PasswordRecoveryScreen';
+import { readPasswordResetLink, type ResetLink } from './src/features/account/password/passwordResetData';
 import NotificationsCenter from './src/features/notifications/NotificationsCenter';
 import NotificationBell from './src/features/notifications/components/NotificationBell';
 import useInAppNotifications from './src/features/notifications/useInAppNotifications';
@@ -132,9 +134,26 @@ function Workspace() {
     : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><NavigationProvider><PomodoroProvider><PomodoroProgressProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></PomodoroProgressProvider></PomodoroProvider></NavigationProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
 }
 export default function App() {
+  const [recovery, setRecovery] = useState<{ id: number; link: ResetLink | null } | null>(null);
+  const recoveryId = useRef(0);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const readLink = () => {
+      const entry = readPasswordResetLink(window.location.hash);
+      if (!entry) return;
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + entry.remainingHash);
+      setRecovery({ id: ++recoveryId.current, link: entry.link });
+    };
+    readLink();
+    window.addEventListener('hashchange', readLink);
+    return () => window.removeEventListener('hashchange', readLink);
+  }, []);
   const [loaded, error] = useFonts({ Jakarta: PlusJakartaSans_400Regular, JakartaMedium: PlusJakartaSans_500Medium, JakartaSemi: PlusJakartaSans_600SemiBold, JakartaBold: PlusJakartaSans_700Bold, JakartaExtra: PlusJakartaSans_800ExtraBold });
   if (!loaded && !error) return <View style={{ flex: 1, backgroundColor: C.canvas, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color={C.primary} /></View>;
-  return <SafeAreaProvider><AuthProvider><Workspace /></AuthProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><AuthProvider>{recovery
+    ? <PasswordRecoveryScreen key={recovery.id} link={recovery.link} onClose={() => setRecovery(null)}
+      clearLink={() => setRecovery(current => current?.id === recovery.id ? { ...current, link: null } : current)} />
+    : <Workspace />}</AuthProvider></SafeAreaProvider>;
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#EDEDF8', alignItems: 'center' },

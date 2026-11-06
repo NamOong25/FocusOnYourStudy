@@ -2,9 +2,9 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9C.1: Backend quên mật khẩu qua email
+## Mới nhất — 9C.2: Giao diện quên mật khẩu qua email
 
-Hai API công khai nhận yêu cầu và xác nhận đặt lại mật khẩu. Backend gửi liên kết qua SMTP, lưu bản băm của mã dùng một lần trong PostgreSQL và thu hồi các phiên cũ khi xác nhận thành công. Flyway áp dụng V15 khi khởi động. Mặc định tính năng tắt đến khi cấu hình SMTP. Form đặt lại thuộc 9C.2. [Hướng dẫn chạy thử với Mailpit](docs/BACKEND-PHASE-9C1.md)
+Từ màn hình đăng nhập, chọn **Quên mật khẩu?** rồi mở liên kết trong email trên web để đặt mật khẩu mới. Backend dùng mã một lần và thu hồi phiên cũ sau khi xác nhận. Bật tính năng và cấu hình SMTP để thử. [Hướng dẫn chạy thử với Mailpit](docs/BACKEND-PHASE-9C1.md#kiểm-tra-trên-giao-diện-web)
 
 ## 9B.2: Form đổi mật khẩu
 

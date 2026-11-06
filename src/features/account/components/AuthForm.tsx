@@ -9,7 +9,7 @@ import { useApiAction } from '../auth/useApiAction';
 import { AuthHero } from './AuthHero';
 
 type Props = { mode: 'login' | 'register'; initialEmail: string; message: string; onRegistered: (email: string) => void;
-  onSignedIn: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register') => void; onForgot: () => void };
+  onSignedIn: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register') => void; onForgot: (email: string) => void };
 export default function AuthForm({ mode, initialEmail, message, onRegistered, onSignedIn, onMode, onForgot }: Props) {
   const register = mode === 'register', auth = useAuth(), action = useApiAction();
   const [name, setName] = useState(''), [email, setEmail] = useState(initialEmail), [password, setPassword] = useState('');
@@ -53,7 +53,7 @@ export default function AuthForm({ mode, initialEmail, message, onRegistered, on
     {action.busy && <T accessibilityLiveRegion="polite" style={S.small}>{register ? 'Đang tạo tài khoản…' : 'Đang đăng nhập và tải hồ sơ…'}</T>}
     <Button label={register ? 'Tạo tài khoản' : 'Đăng nhập'} onPress={submit} loading={action.busy} icon={register ? 'person-add-outline' : 'log-in-outline'} />
     <Button label={register ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'} secondary disabled={action.busy} onPress={() => onMode(register ? 'login' : 'register')} />
-    {!register && <Button label="Quên mật khẩu?" secondary disabled={action.busy} onPress={onForgot} />}
+    {!register && <Button label="Quên mật khẩu?" secondary disabled={action.busy} onPress={() => onForgot(email)} />}
     <T style={[S.small, { textAlign: 'center' }]}>Tài khoản được lưu trực tuyến. Ứng dụng giữ đăng nhập khi phiên còn hiệu lực.</T>
   </>;
 }

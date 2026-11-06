@@ -1,7 +1,9 @@
-import { ApiError, createHttpClient } from '../../../shared/api/http';
+import { ApiError, assertNotCancelled, createHttpClient } from '../../../shared/api/http';
 import type { AccountProfile, LoginInput, LoginResult, RegisterInput } from './types';
 import { editableProfile, profileUpdate, sameProfileFields, profileVersion, type ProfileUpdate } from '../profile/profileData';
 import { passwordUpdate, type PasswordUpdate } from '../password/passwordData';
+import { normalizeEmail } from '../account';
+import type { ResetConfirmation } from '../password/passwordResetData';
 
 const isProfile = (p: unknown): p is AccountProfile => {
   if (typeof p !== 'object' || p === null) return false;
@@ -29,6 +31,25 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
     return value;
   }
   return {
+    async requestPasswordReset(email: string, signal: AbortSignal): Promise<void> {
+      const headers = await authHeaders(signal);
+      await request('/api/v1/auth/password-reset/request', { method: 'POST', body: { email: normalizeEmail(email) },
+        signal, credentials, headers, expectedStatus: 202 });
+    },
+    async confirmPasswordReset(body: ResetConfirmation, signal: AbortSignal): Promise<'changed' | 'invalid' | 'unconfirmed'> {
+      const headers = await authHeaders(signal);
+      assertNotCancelled(signal);
+      try {
+        await request<void>('/api/v1/auth/password-reset/confirm', { method: 'POST', body, signal, credentials, headers, empty: true });
+        return 'changed';
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 400 && error.code === 'PASSWORD_RESET_LINK_INVALID') return 'invalid';
+        if (error instanceof ApiError && ([400, 401, 403, 404, 405, 415, 422, 429].includes(error.status)
+          || (error.status === 503 && error.code === 'PASSWORD_RESET_UNAVAILABLE'))) throw error;
+        // The server may have used the one-time token even if the browser lost the reply.
+        return 'unconfirmed';
+      }
+    },
     async changePassword(accessToken: string, input: PasswordUpdate): Promise<void> {
       const body = passwordUpdate(input);
       await request<void>('/api/v1/users/me/password', { method: 'PUT', body, credentials: 'omit',
