@@ -15,6 +15,7 @@ import AuthForm from './components/AuthForm';
 import AccountProfile from './components/AccountProfile';
 import AccountProfileEditor from './components/AccountProfileEditor';
 import PasswordChangeForm from './components/PasswordChangeForm';
+import AccountReminderPreferences from './components/AccountReminderPreferences';
 import { Appearance, ProfileEditor, ReminderEditor } from './components/PreferenceEditors';
 import { AuthHero } from './components/AuthHero';
 import PasswordResetRequestForm from './components/PasswordResetRequestForm';
@@ -36,6 +37,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
   const [page, setPage] = useState<Page>(auth.passwordChange ? 'login' : 'hub'), [email, setEmail] = useState(auth.passwordChange?.email ?? auth.email), [message, setMessage] = useState('');
   const [editing, setEditing] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [editingReminders, setEditingReminders] = useState(false);
   const open = (next: Page) => { action?.cancel(); setMessage(''); setPage(next); };
   const back = () => { if (page === 'hub') onClose(); else open(page === 'register' || page === 'forgot' ? 'login' : 'hub'); };
   useBackAction(true, picker.active ? picker.cancel : back, picker.active ? 1000 + scope.depth : undefined);
@@ -69,7 +71,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               <Card style={{ paddingVertical: 4 }}>
                 {!auth.hasSession && <AccountRow title="Chỉnh sửa hồ sơ mẫu" detail="Thử bố cục; không thay đổi tài khoản đã lưu" icon="person-outline" onPress={() => open('preview-profile')} />}
                 <AccountRow title="Giao diện & ngôn ngữ" detail="Xem trước sáng/tối và tiếng Việt/English" icon="color-palette-outline" onPress={() => open('appearance')} />
-                <AccountRow title="Tùy chọn nhắc học" detail="Mốc nhắc, loại lịch và giờ yên lặng của bản mẫu" icon="notifications-outline" onPress={() => open('reminders')} />
+                <AccountRow title="Tùy chọn nhắc học" detail={auth.hasSession ? 'Mốc nhắc, loại lịch và giờ yên lặng đã lưu' : 'Mốc nhắc, loại lịch và giờ yên lặng của bản mẫu'} icon="notifications-outline" onPress={() => auth.hasSession ? setEditingReminders(true) : open('reminders')} />
               </Card>
               {auth.hasSession && <>
                 <Section title="Tài khoản" /><Card style={{ paddingVertical: 4 }}>
@@ -100,6 +102,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
         <ActionStatus /><NoticeToast modal bottom={Math.max(20, inset.bottom)} />
         {editing && auth.hasSession && <FlowScope onClose={() => setEditing(false)}><AccountProfileEditor onClose={() => setEditing(false)} /></FlowScope>}
         {changingPassword && auth.hasSession && <FlowScope onClose={() => setChangingPassword(false)}><PasswordChangeForm onClose={() => setChangingPassword(false)} /></FlowScope>}
+        {editingReminders && auth.hasSession && <FlowScope onClose={() => setEditingReminders(false)}><AccountReminderPreferences onClose={() => setEditingReminders(false)} /></FlowScope>}
         {picker.active && <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 30 + inset.bottom }}><DateTimePanel /></ScrollView>}
       </KeyboardAvoidingView>
     </View>

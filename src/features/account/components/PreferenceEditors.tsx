@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Field, Icon, IconTile, Row, Section, Segments, T } from '../../../shared/components';
-import { TimeField } from '../../../shared/components/DateTimePicker';
 import { C, F, S } from '../../../shared/theme';
 import { useApp } from '../../../store/model';
 import { AccountPreferences, StudentProfile, normalizeEmail, validateProfile, validatePreferences } from '../account';
-import { AccountField, FormMessage, PreferenceToggle, StudentAvatar } from '../components';
+import { AccountField, FormMessage, StudentAvatar } from '../components';
+import ReminderPreferenceFields from './ReminderPreferenceFields';
 export function ProfileEditor({ onSave }: { onSave: (p: StudentProfile) => void }) {
   const { profile } = useApp(); const [draft, setDraft] = useState(profile); const [error, setError] = useState('');
   const update = (key: keyof StudentProfile, value: string) => { setDraft(v => ({ ...v, [key]: value })); setError(''); };
@@ -23,7 +23,22 @@ export function Appearance({ preferences, onSave }: { preferences: AccountPrefer
 }
 
 export function ReminderEditor({ preferences, onSave }: { preferences: AccountPreferences; onSave: (p: AccountPreferences) => void }) {
-  const [draft, setDraft] = useState(preferences); const [error, setError] = useState('');
-  return <><Badge label="TÙY CHỌN MẪU" icon="notifications-outline" /><T style={S.small}>Chuẩn bị cách bạn muốn được nhắc. Các lựa chọn chưa gửi thông báo trên thiết bị và chưa thay từng lời nhắc của lịch học/lịch thi.</T><Card style={{ gap: 7 }}><PreferenceToggle title="Nhắc bài tập" detail="Bài sắp đến hạn nộp" value={draft.assignments} onChange={v => setDraft(p => ({ ...p, assignments: v }))} /><PreferenceToggle title="Nhắc lịch học" detail="Trước khi bắt đầu ca học" value={draft.classes} onChange={v => setDraft(p => ({ ...p, classes: v }))} /><PreferenceToggle title="Nhắc lịch thi" detail="Chuẩn bị trước kỳ thi" value={draft.exams} onChange={v => setDraft(p => ({ ...p, exams: v }))} /></Card><Section title="Mốc nhắc mặc định" /><Row style={{ flexWrap: 'wrap', gap: 8 }}>{([5, 15, 30, 60] as const).map(n => <Pressable key={n} accessibilityRole="radio" accessibilityLabel={`Nhắc trước ${n} phút`} accessibilityState={{ checked: draft.reminderMinutes === n }} aria-checked={draft.reminderMinutes === n} onPress={() => setDraft(p => ({ ...p, reminderMinutes: n }))} style={{ minHeight: 45, minWidth: 64, flexGrow: 1, padding: 10, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: draft.reminderMinutes === n ? C.primary : C.soft }}><T style={{ fontFamily: F.bold, fontSize: 12, color: draft.reminderMinutes === n ? '#fff' : C.primary }}>{n} phút</T></Pressable>)}</Row><Card style={{ gap: 14 }}><PreferenceToggle title="Giờ yên lặng" detail="Khoảng thời gian bạn muốn nghỉ ngơi" value={draft.quiet} onChange={v => { setDraft(p => ({ ...p, quiet: v })); setError(''); }} />{draft.quiet && <><Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><TimeField label="Yên lặng từ" value={draft.quietStart} onChange={v => { setDraft(p => ({ ...p, quietStart: v })); setError(''); }} /></View><View style={S.grow}><TimeField label="Đến" value={draft.quietEnd} onChange={v => { setDraft(p => ({ ...p, quietEnd: v })); setError(''); }} /></View></Row><T style={S.small}>Có thể qua đêm, ví dụ 22:00 → 07:00.</T></>}</Card><FormMessage message={error} /><Button label="Lưu tùy chọn nhắc học" onPress={() => { const invalid = validatePreferences(draft); if (invalid) { setError(invalid); return; } setError(''); onSave(draft); }} actionLabel="Đang lưu" /><Card style={{ backgroundColor: C.soft, gap: 8 }}><T style={{ fontFamily: F.bold }}>Quyền thông báo</T><T style={S.small}>Chưa yêu cầu quyền trong bản dùng thử. Khi có thông báo thật, bạn sẽ chọn cho phép hoặc tiếp tục học mà không bật nhắc.</T></Card></>;
+  const [draft, setDraft] = useState(preferences);
+  const [error, setError] = useState('');
+  return <>
+    <Badge label="TÙY CHỌN MẪU" icon="notifications-outline" />
+    <T style={S.small}>Chuẩn bị cách bạn muốn được nhắc. Các lựa chọn được giữ trong phiên dùng thử.</T>
+    <ReminderPreferenceFields draft={draft} onChange={(field, value) => { setDraft(current => ({ ...current, [field]: value })); setError(''); }} />
+    <FormMessage message={error} />
+    <Button label="Lưu tùy chọn nhắc học" actionLabel="Đang lưu" onPress={() => {
+      const invalid = validatePreferences(draft);
+      if (invalid) { setError(invalid); return; }
+      setError('');
+      onSave(draft);
+    }} />
+    <Card style={{ backgroundColor: C.soft, gap: 8 }}>
+      <T style={{ fontFamily: F.bold }}>Quyền thông báo</T>
+      <T style={S.small}>Chưa yêu cầu quyền trong bản dùng thử. Khi có thông báo thật, bạn sẽ chọn cho phép hoặc tiếp tục học mà không bật nhắc.</T>
+    </Card>
+  </>;
 }
-

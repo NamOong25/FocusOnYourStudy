@@ -16,6 +16,9 @@ const messages: Record<string, string> = {
   PASSWORD_RESET_UNAVAILABLE: 'Tính năng đặt lại mật khẩu đang tạm gián đoạn. Hãy thử lại sau.',
   PASSWORD_CONFIRMATION_MISMATCH: 'Mật khẩu xác nhận chưa trùng khớp.',
   PROFILE_VERSION_CONFLICT: 'Hồ sơ đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
+  NOTIFICATION_PREFERENCES_VERSION_CONFLICT: 'Tùy chọn nhắc học đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
+  INVALID_REMINDER_MINUTES: 'Chọn nhắc trước 5, 15, 30 hoặc 60 phút.',
+  INVALID_QUIET_HOURS: 'Giờ bắt đầu và kết thúc cần khác nhau.',
   NOTIFICATION_REVISION_CONFLICT: 'Nội dung hoặc mốc nhắc đã thay đổi. Tải lại nhắc việc rồi xem bản mới trước khi đánh dấu đã đọc.',
   NOTIFICATION_SOURCE_UNAVAILABLE: 'Lời nhắc không còn khả dụng. Tải lại để đối chiếu danh sách hiện tại.',
   INVALID_NOTIFICATION_TARGET: 'Thông tin lời nhắc chưa hợp lệ. Tải lại nhắc việc để đối chiếu.',
@@ -98,9 +101,11 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   if (code === 'CURRENT_PASSWORD_INCORRECT') fields.currentPassword = messages[code]!;
   if (code === 'PASSWORD_UNCHANGED') fields.newPassword = messages[code]!;
   if (code === 'PASSWORD_CONFIRMATION_MISMATCH') fields.confirmPassword = messages[code]!;
+  if (code === 'INVALID_REMINDER_MINUTES') fields.reminderMinutes = messages[code]!;
+  if (code === 'INVALID_QUIET_HOURS') fields.quietEnd = messages[code]!;
   if (code === 'VALIDATION_FAILED' && object(value) && Array.isArray(value.errors)) {
     for (const item of value.errors) if (object(item) && typeof item.field === 'string' && typeof item.message === 'string'
-      && (['email', 'password', 'currentPassword', 'newPassword', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
+      && (['assignments', 'classes', 'exams', 'quiet', 'quietStart', 'quietEnd', 'email', 'password', 'currentPassword', 'newPassword', 'confirmPassword', 'fullName', 'school', 'major', 'term', 'startYear', 'status', 'note', 'version', 'semesterId', 'code', 'name', 'credits', 'teacher', 'room', 'color', 'description', 'courseId', 'title', 'dueAt', 'goal', 'fromDate', 'toDate', 'availableStart', 'availableEnd', 'totalMinutes', 'sessionMinutes', 'breakMinutes', 'examId', 'priority', 'notes', 'startsAt', 'timeZone', 'durationMinutes', 'assignmentId', 'weekdays', 'startsOn', 'endsOn', 'startTime', 'endTime', 'reminderMinutes', 'reason', 'kind', 'scheduleVersion', 'endsAt', 'format', 'reminder'].includes(item.field) || /^weekdays\[[0-6]\]$/.test(item.field) || ['assessment','parts'].includes(item.field) || /^parts\[[0-9]\]\.(id|name|kind|score|remainderScore|project|project\.(target|share))$/.test(item.field))) fields[item.field] = item.message.slice(0, 180);
   }
   let message = messages[code] ?? (status >= 500 ? 'Dịch vụ đang gặp sự cố. Hãy thử lại sau.'
     : 'Chưa thể hoàn tất yêu cầu. Kiểm tra thông tin và thử lại.');

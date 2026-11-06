@@ -1,5 +1,13 @@
 # Tên commit cho từng đợt
 
+## 9D.2A — Giao diện lưu tùy chọn nhắc học
+
+```powershell
+git add .
+git commit -m "Kết nối giao diện tùy chọn nhắc học với tài khoản"
+git push origin main
+```
+
 ## 9D.1 — API tùy chọn nhắc học
 
 ```powershell
