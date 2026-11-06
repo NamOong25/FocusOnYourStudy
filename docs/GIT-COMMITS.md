@@ -1,5 +1,13 @@
 # Tên commit cho từng đợt
 
+## 9E.2 — Giao diện tải dữ liệu cá nhân
+
+```powershell
+git add .
+git commit -m "Thêm giao diện tải bản sao dữ liệu học tập"
+git push origin main
+```
+
 ## 9E.1 — API xuất dữ liệu cá nhân
 
 ```powershell

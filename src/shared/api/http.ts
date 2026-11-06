@@ -19,6 +19,7 @@ const messages: Record<string, string> = {
   NOTIFICATION_PREFERENCES_VERSION_CONFLICT: 'Tùy chọn nhắc học đã thay đổi ở nơi khác. Đọc lại để đối chiếu trước khi lưu tiếp.',
   INVALID_REMINDER_MINUTES: 'Chọn nhắc trước 5, 15, 30 hoặc 60 phút.',
   INVALID_QUIET_HOURS: 'Giờ bắt đầu và kết thúc cần khác nhau.',
+  EXPORT_TOO_LARGE: 'Dữ liệu vượt giới hạn xuất một lần. Tệp hỗ trợ tối đa 10.000 bản ghi và 20 MiB.',
   NOTIFICATION_REVISION_CONFLICT: 'Nội dung hoặc mốc nhắc đã thay đổi. Tải lại nhắc việc rồi xem bản mới trước khi đánh dấu đã đọc.',
   NOTIFICATION_SOURCE_UNAVAILABLE: 'Lời nhắc không còn khả dụng. Tải lại để đối chiếu danh sách hiện tại.',
   INVALID_NOTIFICATION_TARGET: 'Thông tin lời nhắc chưa hợp lệ. Tải lại nhắc việc để đối chiếu.',
@@ -116,7 +117,8 @@ function errorFromResponse(status: number, value: unknown, retryAfter: string | 
   return new ApiError(message, code, status, fields);
 }
 
-type RequestOptions = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean; expectedStatus?: number };
+export type JsonFileResponse = { text: string; value: unknown; contentType: string | null; disposition: string | null };
+type RequestOptions = { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: unknown; headers?: Record<string, string>; signal?: AbortSignal; credentials?: RequestCredentials; empty?: boolean; expectedStatus?: number; jsonFile?: boolean };
 export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher = fetch }: { timeoutMs?: number; fetcher?: typeof fetch } = {}) {
   return async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     assertNotCancelled(options.signal);
@@ -151,6 +153,11 @@ export function createHttpClient(baseUrl: string, { timeoutMs = 10_000, fetcher 
       if (options.empty) {
         if (response.status === 204 && !text) return undefined as T;
         throw new ApiError('Phản hồi xác nhận chưa hợp lệ. Kiểm tra dữ liệu trước khi thử lại.', 'INVALID_RESPONSE');
+      }
+      if (options.jsonFile) {
+        if (!object(payload)) throw new ApiError('Tệp dữ liệu nhận được chưa hợp lệ. Hãy thử lại.', 'INVALID_EXPORT_RESPONSE');
+        return { text, value: payload, contentType: response.headers.get('Content-Type'),
+          disposition: response.headers.get('Content-Disposition') } as T;
       }
       if (!object(payload) || !('data' in payload)) throw new ApiError('Phản hồi chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
       return payload.data as T;

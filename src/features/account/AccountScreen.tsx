@@ -16,6 +16,7 @@ import AccountProfile from './components/AccountProfile';
 import AccountProfileEditor from './components/AccountProfileEditor';
 import PasswordChangeForm from './components/PasswordChangeForm';
 import AccountReminderPreferences from './components/AccountReminderPreferences';
+import AccountDataExport from './components/AccountDataExport';
 import { Appearance, ProfileEditor, ReminderEditor } from './components/PreferenceEditors';
 import { AuthHero } from './components/AuthHero';
 import PasswordResetRequestForm from './components/PasswordResetRequestForm';
@@ -38,6 +39,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
   const [editing, setEditing] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [editingReminders, setEditingReminders] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
   const open = (next: Page) => { action?.cancel(); setMessage(''); setPage(next); };
   const back = () => { if (page === 'hub') onClose(); else open(page === 'register' || page === 'forgot' ? 'login' : 'hub'); };
   useBackAction(true, picker.active ? picker.cancel : back, picker.active ? 1000 + scope.depth : undefined);
@@ -76,6 +78,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
               {auth.hasSession && <>
                 <Section title="Tài khoản" /><Card style={{ paddingVertical: 4 }}>
                   {auth.profile && <AccountRow title="Đổi mật khẩu" detail="Bảo vệ tài khoản và đăng nhập lại trên các thiết bị" icon="key-outline" onPress={() => setChangingPassword(true)} />}
+                  <AccountRow title="Xuất dữ liệu" detail="Tải bản sao dữ liệu học tập dạng JSON" icon="download-outline" onPress={() => setExportingData(true)} />
                   <AccountRow title="Đăng nhập tài khoản khác" detail="Hồ sơ chỉ đổi sau khi đăng nhập thành công" icon="log-in-outline" onPress={() => { setEmail(''); open('login'); }} />
                   <AccountRow title="Tạo tài khoản khác" detail="Đăng ký tài khoản mới" icon="person-add-outline" onPress={() => { setEmail(''); open('register'); }} />
                   <AccountRow title="Đăng xuất" detail="Đóng phiên đăng nhập này" icon="log-out-outline" onPress={() => open('logout')} danger />
@@ -103,6 +106,7 @@ function AccountContent({ onClose }: { onClose: () => void }) {
         {editing && auth.hasSession && <FlowScope onClose={() => setEditing(false)}><AccountProfileEditor onClose={() => setEditing(false)} /></FlowScope>}
         {changingPassword && auth.hasSession && <FlowScope onClose={() => setChangingPassword(false)}><PasswordChangeForm onClose={() => setChangingPassword(false)} /></FlowScope>}
         {editingReminders && auth.hasSession && <FlowScope onClose={() => setEditingReminders(false)}><AccountReminderPreferences onClose={() => setEditingReminders(false)} /></FlowScope>}
+        {exportingData && auth.hasSession && <FlowScope onClose={() => setExportingData(false)}><AccountDataExport onClose={() => setExportingData(false)} /></FlowScope>}
         {picker.active && <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 8, paddingBottom: 30 + inset.bottom }}><DateTimePanel /></ScrollView>}
       </KeyboardAvoidingView>
     </View>

@@ -231,7 +231,8 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 9D.2A — Nối màn Tùy chọn nhắc học với API. Đọc/lưu theo tài khoản, giữ bản đang chỉnh, đối chiếu khi xung đột hoặc mất xác nhận, cảnh báo thay đổi chưa lưu. [Cách kiểm tra](FRONTEND-PHASE-9D2A.md)
 - [x] 9D.2B — Áp dụng lựa chọn vào chuông trong app, lọc loại nhắc, giờ yên lặng theo múi giờ tài khoản và mốc gợi ý khi tạo lịch mới. Giữ mốc riêng và trạng thái đọc, cập nhật sau lưu/quay lại tab. TypeScript, tests frontend, build web và QA với PostgreSQL đã qua. Cần kiểm tra thao tác trực tiếp theo [hướng dẫn 9D.2B](FRONTEND-PHASE-9D2B.md) do trình duyệt tự động bị tắt.
 - [x] 9E.1 — API xuất dữ liệu học tập của tài khoản thành tệp JSON UTF-8 có phiên bản định dạng, giữ liên kết và điểm 0/null. Đọc chung snapshot, xác thực Bearer. [Hướng dẫn kiểm tra](BACKEND-PHASE-9E1.md)
-- [ ] 9E.2 — Nút tải tệp dữ liệu trong Hồ sơ, có trạng thái tải và lỗi.
+- [x] 9E.2 — Hồ sơ → Xuất dữ liệu, chuẩn bị JSON qua API và bấm tải trên web hoặc mở chia sẻ native. Có số bản ghi/dung lượng, hủy, lỗi/thử lại và hủy khi đóng màn/đổi tài khoản. TypeScript, toàn bộ tests frontend, bundle web/Android/iOS và luồng frontend/API/PostgreSQL với Blob đạt. Thêm FileSystem/Sharing SDK 56. [Hướng dẫn và giới hạn](FRONTEND-PHASE-9E2.md)
+- [ ] Nghiệm thu 9E.2 trực tiếp — Tải/mở JSON từ trình duyệt và lưu/chia sẻ trên điện thoại thật theo hướng dẫn. DOM/native trong test dùng giả lập, trình duyệt tự động đang bị tắt trong Work settings.
 - [ ] Các đợt còn lại — Triển khai backend và bản cài. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
 
 ## Các đợt giao diện đã hoàn thành
