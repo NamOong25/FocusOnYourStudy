@@ -1,5 +1,13 @@
 # Tên commit cho từng đợt
 
+## 9D.2B — Áp dụng tùy chọn nhắc học
+
+```powershell
+git add .
+git commit -m "Áp dụng tùy chọn nhắc học vào chuông và lịch mới"
+git push origin main
+```
+
 ## 9D.2A — Giao diện lưu tùy chọn nhắc học
 
 ```powershell

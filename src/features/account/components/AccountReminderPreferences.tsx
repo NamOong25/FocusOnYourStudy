@@ -45,7 +45,7 @@ export default function AccountReminderPreferences({ onClose }: { onClose: () =>
       <Button label="Lưu tùy chọn nhắc học" icon="checkmark-outline" loading={state.busy}
         disabled={state.busy || state.reviewRequired || !manager?.dirty} onPress={act(manager!.save)} />
       <Button label="Xong" secondary disabled={state.busy} onPress={onClose} />
-      <T style={S.small}>Áp dụng các lựa chọn vào chuông thông báo sẽ được bổ sung ở bước tiếp theo.</T>
+      <T style={S.small}>Loại nhắc và giờ yên lặng áp dụng cho chuông trong app. Mốc mặc định được gợi ý khi tạo lịch mới.</T>
     </>}
   </Sheet>;
 }

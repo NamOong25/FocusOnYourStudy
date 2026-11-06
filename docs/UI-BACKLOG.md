@@ -229,7 +229,7 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 9C.2 — Nối nút Quên mật khẩu và form đặt lại trên web từ liên kết email. Xử lý mã hết hạn, phản hồi mất kết nối và đưa người dùng về đăng nhập. [Cách kiểm tra](BACKEND-PHASE-9C1.md#kiểm-tra-trên-giao-diện-web)
 - [x] 9D.1 — API tùy chọn nhắc học theo tài khoản. V16 lưu loại nhắc, mốc nhắc và giờ yên lặng. Kiểm tra Bearer và version khi lưu. [Cách kiểm tra bằng Postman](BACKEND-PHASE-9D1.md)
 - [x] 9D.2A — Nối màn Tùy chọn nhắc học với API. Đọc/lưu theo tài khoản, giữ bản đang chỉnh, đối chiếu khi xung đột hoặc mất xác nhận, cảnh báo thay đổi chưa lưu. [Cách kiểm tra](FRONTEND-PHASE-9D2A.md)
-- [ ] 9D.2B — Áp dụng lựa chọn vào thông báo trong app. Mốc mặc định cho mục chưa có mốc riêng, lọc loại nhắc và xử lý giờ yên lặng.
+- [x] 9D.2B — Áp dụng lựa chọn vào chuông trong app, lọc loại nhắc, giờ yên lặng theo múi giờ tài khoản và mốc gợi ý khi tạo lịch mới. Giữ mốc riêng và trạng thái đọc, cập nhật sau lưu/quay lại tab. TypeScript, tests frontend, build web và QA với PostgreSQL đã qua. Cần kiểm tra thao tác trực tiếp theo [hướng dẫn 9D.2B](FRONTEND-PHASE-9D2B.md) do trình duyệt tự động bị tắt.
 - [ ] Các đợt còn lại — Xuất dữ liệu, triển khai backend và bản cài. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
 
 ## Các đợt giao diện đã hoàn thành

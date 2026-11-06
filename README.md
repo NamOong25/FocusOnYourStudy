@@ -2,9 +2,13 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9D.2A: Giao diện tùy chọn nhắc học
+## Mới nhất — 9D.2B: Áp dụng tùy chọn nhắc học
 
-**Hồ sơ → Tùy chọn nhắc học** đọc và lưu lựa chọn theo tài khoản. Có cảnh báo thay đổi chưa lưu và đối chiếu khi hai tab cùng sửa hoặc phản hồi bị mất. Áp dụng vào chuông thông báo ở 9D.2B. [Hướng dẫn kiểm tra](docs/FRONTEND-PHASE-9D2A.md)
+Chuông áp dụng các loại nhắc đã bật và tạm ẩn số trong giờ yên lặng theo múi giờ tài khoản. Mốc mặc định được gợi ý khi tạo lịch học/lịch thi mới. Lịch hiện có dùng mốc riêng. [Hướng dẫn kiểm tra](docs/FRONTEND-PHASE-9D2B.md)
+
+## 9D.2A: Giao diện tùy chọn nhắc học
+
+**Hồ sơ → Tùy chọn nhắc học** đọc và lưu lựa chọn theo tài khoản. Có cảnh báo thay đổi chưa lưu và đối chiếu khi hai tab cùng sửa hoặc phản hồi bị mất. Chuông đã áp dụng các lựa chọn ở 9D.2B. [Hướng dẫn kiểm tra form](docs/FRONTEND-PHASE-9D2A.md)
 
 ## 9D.1: API tùy chọn nhắc học
 

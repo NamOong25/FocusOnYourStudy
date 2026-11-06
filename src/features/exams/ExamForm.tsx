@@ -21,11 +21,11 @@ export function ExamForm(props: ExamFormProps) {
 }
 
 function PreviewExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }: ExamFormProps) {
-  const { courseCatalog, classes, classExceptions, exams, studySessions, saveExam, deleteExam, setToast } = useApp();
+  const { courseCatalog, classes, classExceptions, exams, studySessions, saveExam, deleteExam, setToast, accountPreferences } = useApp();
   const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const [date, setDate] = useState(item?.date ?? dateKey(addDays(today, 7))); const [time, setTime] = useState(item?.time ?? '08:00'); const [end, setEnd] = useState(item?.end ?? '10:00');
   const [room, setRoom] = useState(item?.room ?? ''); const [kind, setKind] = useState<Exam['kind']>(item?.kind ?? 'Giữa kỳ'); const [format, setFormat] = useState<Exam['format']>(item?.format ?? 'Tự luận');
-  const [reminder, setReminder] = useState(item?.reminder ?? true); const [minutes, setMinutes] = useState(item?.reminderMinutes ?? [1440, 180]); const [notes, setNotes] = useState(item?.notes ?? '');
+  const [reminder, setReminder] = useState(item?.reminder ?? true); const [minutes, setMinutes] = useState(item?.reminderMinutes ?? [accountPreferences.reminderMinutes]); const [notes, setNotes] = useState(item?.notes ?? '');
   const [error, setError] = useState(''); const [conflicts, setConflicts] = useState<CalendarEvent[]>([]); const [confirmDelete, setConfirmDelete] = useState(false);
   const dirty = useFormChanges({ courseId, date, time, end, room, kind, format, reminder, minutes: [...minutes].sort((a, b) => a - b), notes });
   const save = () => {
@@ -47,7 +47,7 @@ function PreviewExamForm({ item, initialCourseId, onClose, onDeleted, onSaved }:
     <Row><View style={S.grow}><TimeField label="Giờ thi" value={time} onChange={setTime} /></View><View style={S.grow}><TimeField label="Kết thúc thi" value={end} onChange={setEnd} /></View></Row>
     <Field label={format === 'Trực tuyến' ? 'Phòng / đường dẫn thi' : 'Phòng thi'} value={room} onChange={setRoom} placeholder="Ví dụ: B202 hoặc Phòng máy 3" />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Tùy chọn nhắc</T><Segments values={['Không nhắc', 'Có nhắc']} value={reminder ? 'Có nhắc' : 'Không nhắc'} onChange={v => setReminder(v === 'Có nhắc')} />
-    {reminder && <View style={{ gap: 7 }}>{[1440,180,60,15].map(value => <Pressable key={value} accessibilityRole="checkbox" accessibilityLabel={`Nhắc trước ${reminderLabel(value)}`} accessibilityState={{ checked: minutes.includes(value) }} aria-checked={minutes.includes(value)} onPress={() => setMinutes(v => v.includes(value) ? v.filter(n => n !== value) : [...v,value])} style={{ backgroundColor: minutes.includes(value) ? C.soft : C.canvas, padding: 12, minHeight: 46, borderRadius: 14 }}><Row><Icon name={minutes.includes(value) ? 'checkbox' : 'square-outline'} size={19} /><T style={{ fontSize: 12 }}>Trước {reminderLabel(value)}</T></Row></Pressable>)}</View>}
+    {reminder && <View style={{ gap: 7 }}>{[...new Set([1440,180,60,30,15,5,...minutes])].sort((a,b) => b-a).map(value => <Pressable key={value} accessibilityRole="checkbox" accessibilityLabel={`Nhắc trước ${reminderLabel(value)}`} accessibilityState={{ checked: minutes.includes(value) }} aria-checked={minutes.includes(value)} onPress={() => setMinutes(v => v.includes(value) ? v.filter(n => n !== value) : [...v,value])} style={{ backgroundColor: minutes.includes(value) ? C.soft : C.canvas, padding: 12, minHeight: 46, borderRadius: 14 }}><Row><Icon name={minutes.includes(value) ? 'checkbox' : 'square-outline'} size={19} /><T style={{ fontSize: 12 }}>Trước {reminderLabel(value)}</T></Row></Pressable>)}</View>}
     <Field label="Ghi chú kỳ thi" value={notes} onChange={setNotes} multiline placeholder="Giấy tờ cần mang, nội dung cần chuẩn bị…" />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${kind} · ${time} – ${end}`} />
     <Button label={item ? 'Lưu lịch thi' : 'Thêm lịch thi'} icon="checkmark" onPress={save} actionLabel="Đang lưu" /><T style={S.small}>Các mốc nhắc là tùy chọn mẫu; chưa đặt chuông hoặc gửi thông báo hệ thống.</T>

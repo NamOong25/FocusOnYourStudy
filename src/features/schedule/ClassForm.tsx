@@ -17,14 +17,14 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     : <PreviewClassForm item={item} initialCourseId={initialCourseId} onClose={onClose} onDeleted={onDeleted} />;
 }
 function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
-  const { saveClass, deleteClass, classes, classExceptions, exams, studySessions, courseCatalog, setToast } = useApp();
+  const { saveClass, deleteClass, classes, classExceptions, exams, studySessions, courseCatalog, setToast, accountPreferences } = useApp();
   const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const course = courseCatalog.find(c => c.id === courseId);
   const [weekdays, setWeekdays] = useState(item?.weekdays ?? [today.getDay()]);
   const [startsOn, setStartsOn] = useState(item?.startsOn ?? dateKey(addDays(today, -30))); const [endsOn, setEndsOn] = useState(item?.endsOn ?? dateKey(addDays(today, 90)));
   const [start, setStart] = useState(item?.start ?? '08:00'); const [end, setEnd] = useState(item?.end ?? '10:00');
   const [room, setRoom] = useState(item?.room ?? course?.room ?? ''); const [teacher, setTeacher] = useState(item?.teacher ?? course?.teacher ?? '');
-  const [reminder, setReminder] = useState(item?.reminderMinutes ?? 15); const [error, setError] = useState('');
+  const [reminder, setReminder] = useState(item?.reminderMinutes ?? accountPreferences.reminderMinutes); const [error, setError] = useState('');
   const [conflicts, setConflicts] = useState<CalendarEvent[]>([]); const [confirmDelete, setConfirmDelete] = useState(false);
   const dirty = useFormChanges({ courseId, weekdays: [...weekdays].sort(), startsOn, endsOn, start, end, room, teacher, reminder });
   const save = () => {
@@ -49,7 +49,7 @@ function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     <DateField label="Áp dụng từ" value={startsOn} onChange={setStartsOn} /><DateField label="Áp dụng đến" value={endsOn} onChange={setEndsOn} />
     <Row><View style={S.grow}><TimeField label="Bắt đầu" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Kết thúc" value={end} onChange={setEnd} /></View></Row>
     <Field label="Phòng học" value={room} onChange={setRoom} /><Field label="Giảng viên" value={teacher} onChange={setTeacher} />
-    <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
+    <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút', '60 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${course?.name ?? 'Ca học'} · ${start} – ${end}`} />
     <Button label="Lưu lịch học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
     <T style={S.small}>Phạm vi áp dụng thuộc môn/học kỳ đã chọn. Khi sửa cả chuỗi, ngoại lệ còn thuộc khoảng ngày và các thứ mới sẽ được giữ; ngoại lệ ngoài phạm vi mới được bỏ. Tùy chọn nhắc hiện là mẫu, chưa phát thông báo trên thiết bị.</T>

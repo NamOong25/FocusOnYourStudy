@@ -12,11 +12,12 @@ import ReminderCard from './components/ReminderCard';
 import type { NotificationScheduleState } from './serverClassReminders';
 import type { ApiError } from '../../shared/api/http';
 
-export default function NotificationsCenter({ items, unread, sources, now, onRead, onReadAll, onClose, schedule, readState, onSavedClass }: {
+export default function NotificationsCenter({ items, unread, sources, now, onRead, onReadAll, onClose, schedule, readState, onSavedClass, quiet = false }: {
   items: ReminderWithRead[]; unread: number; sources: ReminderSources; now: Date;
   onRead: (item: InAppReminder) => void; onReadAll: (seen: InAppReminder[]) => void; onClose: () => void;
   readState: {ready:boolean;loading:boolean;busy:boolean;error:ApiError|null;needsReload:boolean;message:string} | null;
   schedule: NotificationScheduleState | null; onSavedClass: (target: Extract<NotificationTarget, { kind: 'saved-class' }>) => void;
+  quiet?: boolean;
 }) {
   const [filter, setFilter] = useState('Tất cả'), [opened, setOpened] = useState<NotificationTarget | null>(null);
   // A saved exam is resolved by its own authenticated GET (including 404), never by preview RAM.
@@ -31,6 +32,8 @@ export default function NotificationsCenter({ items, unread, sources, now, onRea
           <Row style={{ gap: 12 }}><IconTile name="notifications-outline" bg="#FFFFFFAA" /><View style={S.grow}><T style={{ fontFamily: F.bold, color: C.primary, fontSize: 17 }}>Giữ những việc cần nhớ</T><T style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T></View></Row>
           <Badge label={pending ? `${items.length} mục đã tải · đang xác nhận nhắc việc` : `${items.length} mục · ${unread} chưa đọc`} bg="#FFFFFFCC" />
           <T style={S.small}>Mở một mục để xem chi tiết và đánh dấu đã đọc. Mở chuông không tự đánh dấu tất cả.</T>
+          {quiet && <T accessibilityLiveRegion="polite" style={S.small}>Đang trong giờ yên lặng. Số trên chuông được tạm ẩn, bạn vẫn có thể xem và đánh dấu nhắc việc ở đây.</T>}
+          <T style={S.small}>Danh sách áp dụng các loại nhắc đã bật trong Tùy chọn nhắc học.</T>
         </Card>
         {!!schedule && <>
           <T style={S.small}>Lịch học: {schedule.classesReady ? 'đã xác nhận' : 'chưa xác nhận'} · Lịch thi: {schedule.examsReady ? 'đã xác nhận' : 'chưa xác nhận'}</T>

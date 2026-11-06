@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, View, useWindowDimensions } from 'react-native';
-import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from '../../../shared/components';
+import { Badge, Button, Field, Icon, Row, Segments, Sheet, StateView, T } from '../../../shared/components';
 import { DateField, TimeField } from '../../../shared/components/DateTimePicker';
 import { FlowScope } from '../../../navigation/Navigation';
 import { asApiError } from '../../../shared/api/http';
@@ -12,12 +12,26 @@ import { examKinds, examFormats, type ServerExam } from '../api/examsApi';
 import { useExamWrites } from '../api/ExamWritesProvider';
 import { examDate, examTiming } from '../examView';
 import ExamWriteReview from './ExamWriteReview';
+import { useSavedReminderPreferences } from '../../account/preferences/ReminderPreferencesProvider';
 
-export default function ExamApiForm({ original, initialCourseId, onClose, onSaved, onDeleted }: {
+type Props = {
   original?: ServerExam; initialCourseId?: string; onClose: () => void; onSaved?: (exam: ServerExam) => void; onDeleted?: () => void;
-}) {
+};
+
+export default function ExamApiForm(props: Props) {
+  const preferences = useSavedReminderPreferences();
+  if (!props.original && !preferences.value) return <Sheet title="Lịch thi mới" onClose={props.onClose}>
+    <StateView kind={preferences.error ? 'error' : 'loading'} title="Đang chuẩn bị mốc nhắc"
+      message={preferences.error?.message ?? 'Đang đọc tùy chọn nhắc học đã lưu.'} />
+    {preferences.error && <Button label="Tải lại tùy chọn nhắc học" secondary loading={preferences.loading}
+      onPress={() => { void preferences.reload().catch(() => { }); }} />}
+  </Sheet>;
+  return <ExamApiFormContent {...props} defaultReminderMinutes={preferences.value?.reminderMinutes} />;
+}
+
+function ExamApiFormContent({ original, initialCourseId, onClose, onSaved, onDeleted, defaultReminderMinutes }: Props & { defaultReminderMinutes?: number }) {
   const { courseCatalog, courseConnection, academicSemesterId, setToast } = useApp(), { width } = useWindowDimensions(), { manager, state } = useExamWrites();
-  const [basis, setBasis] = useState(original), [draft, setDraft] = useState(() => examDraft(original, initialCourseId ?? courseCatalog.find(c => c.semesterId === academicSemesterId)?.id ?? ''));
+  const [basis, setBasis] = useState(original), [draft, setDraft] = useState(() => examDraft(original, initialCourseId ?? courseCatalog.find(c => c.semesterId === academicSemesterId)?.id ?? '', defaultReminderMinutes));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [confirmDelete, setConfirmDelete] = useState(false), [custom, setCustom] = useState('');
   const [parentsLoading, setParentsLoading] = useState(false), [completed, setCompleted] = useState<ServerExam | 'deleted' | null>(null);
   const locked = state.busy || state.checking || parentsLoading || !!courseConnection?.busy || !!courseConnection?.loading;
@@ -61,7 +75,7 @@ export default function ExamApiForm({ original, initialCourseId, onClose, onSave
       <T style={S.small}>Ngày/giờ theo múi giờ ghi ở đây. Kết thúc trước 24:00 cùng ngày. Đổi múi giờ sẽ đổi thời điểm thực tế của lịch thi.</T>{fold('start')}{fold('end')}
       <Field label={draft.format === 'ONLINE' ? 'Phòng / đường dẫn thi' : 'Phòng thi'} value={draft.room} maxLength={100} disabled={blocked} onChange={room => change({ room })} placeholder="Ví dụ: B202 hoặc Phòng máy 3" />
       <T style={{ fontFamily: F.semi, fontSize: 12 }}>Tùy chọn nhắc</T><Segments values={['Không nhắc', 'Có nhắc']} value={draft.reminder ? 'Có nhắc' : 'Không nhắc'} disabled={blocked} onChange={value => change({ reminder: value === 'Có nhắc' })} />
-      {draft.reminder && <View style={{ gap: 8 }}>{[...new Set([1440, 180, 60, 15, 0, ...draft.minutes])].sort((a, b) => b - a).map(minutes => <Pressable key={minutes} disabled={blocked} accessibilityRole="checkbox" accessibilityLabel={minutes ? `Nhắc trước ${minutes} phút` : 'Nhắc đúng giờ bắt đầu'} accessibilityState={{ checked: draft.minutes.includes(minutes), disabled: blocked }} aria-checked={draft.minutes.includes(minutes)} onPress={() => {
+      {draft.reminder && <View style={{ gap: 8 }}>{[...new Set([1440, 180, 60, 30, 15, 5, 0, ...draft.minutes])].sort((a, b) => b - a).map(minutes => <Pressable key={minutes} disabled={blocked} accessibilityRole="checkbox" accessibilityLabel={minutes ? `Nhắc trước ${minutes} phút` : 'Nhắc đúng giờ bắt đầu'} accessibilityState={{ checked: draft.minutes.includes(minutes), disabled: blocked }} aria-checked={draft.minutes.includes(minutes)} onPress={() => {
         if (!draft.minutes.includes(minutes) && draft.minutes.length >= 10) { setError('Chọn tối đa 10 mốc nhắc.'); return; }
         change({ minutes: draft.minutes.includes(minutes) ? draft.minutes.filter(n => n !== minutes) : [...draft.minutes, minutes].sort((a, b) => b - a) });
       }} style={{ padding: 12, minHeight: 46, borderRadius: 14, backgroundColor: draft.minutes.includes(minutes) ? C.soft : C.canvas }}><Row><Icon name={draft.minutes.includes(minutes) ? 'checkbox' : 'square-outline'} size={19} /><T style={{ fontSize: 12 }}>{minutes ? `Trước ${minutes} phút${minutes === 1440 ? ' (1 ngày)' : ''}` : 'Đúng giờ bắt đầu'}</T></Row></Pressable>)}

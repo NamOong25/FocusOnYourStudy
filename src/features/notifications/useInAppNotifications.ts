@@ -10,10 +10,20 @@ import { useServerAllExams } from '../exams/api/useServerExams';
 import { describeReminders } from './api/notificationDescriptors';
 import { useNotificationReads } from './api/useNotificationReads';
 import { asApiError } from '../../shared/api/http';
+import { useSavedReminderPreferences } from '../account/preferences/ReminderPreferencesProvider';
+import { filterReminderTypes, inQuietHours } from './reminderPolicy';
+import { deviceTimeZone } from '../study/studyTime';
 
 export default function useInAppNotifications(now: Date) {
   const { tasks, classes, classExceptions, exams, courseCatalog, semesters, assignmentConnection, courseConnection, semesterConnection } = useApp();
   const auth = useAuth(), schedule = useScheduleOverview(auth.hasSession ? { reminders: true, today: dateKey(now) } : null);
+  const preferences = useSavedReminderPreferences();
+  const quietState = useMemo(() => {
+    try { return { quiet: inQuietHours(preferences.value, now, auth.profile?.timeZone ?? deviceTimeZone()), error: null }; }
+    catch (error) { return { quiet: false, error: asApiError(error) }; }
+  }, [preferences.value, now, auth.profile?.timeZone]);
+  const preferencesError = preferences.error ?? quietState.error;
+  const preferencesReady = !!preferences.value && !preferencesError;
   const savedExams = useServerAllExams(auth.hasSession);
   const [receipts, setReceipts] = useState<ReadReceipts>({}),[refreshNonce,setRefreshNonce]=useState(0);
   const sources = useMemo(() => ({ tasks, classes, exceptions: classExceptions, exams, courses: courseCatalog }), [tasks, classes, classExceptions, exams, courseCatalog]);
@@ -23,9 +33,10 @@ export default function useInAppNotifications(now: Date) {
   const saved = useMemo(() => projectServerReminders({ classes: schedule, exams: savedExams, courses: courseCatalog, semesters, metadataReady, metadataError: metadataError ?? null, now }),
     [schedule.rows, schedule.rules, schedule.loaded, schedule.loading, schedule.error, savedExams.value, savedExams.loaded, savedExams.loading, savedExams.error, courseCatalog, semesters, metadataReady, metadataError, now]);
   const tasksReady=!!assignmentConnection?.loaded && !assignmentConnection.loading && !assignmentConnection.error;
-  const ready = saved.ready && tasksReady;
-  const reminders = useMemo(() => mergeReminders(base, saved.classItems, saved.examItems), [base, saved.classItems, saved.examItems]);
-  useEffect(() => { if(!auth.hasSession)setReceipts(current => pruneKnownReceipts(current, reminders,true,true)); }, [reminders,auth.hasSession]);
+  const ready = saved.ready && tasksReady && preferencesReady;
+  const allReminders = useMemo(() => mergeReminders(base, saved.classItems, saved.examItems), [base, saved.classItems, saved.examItems]);
+  const reminders = useMemo(() => filterReminderTypes(allReminders, preferences.value), [allReminders, preferences.value]);
+  useEffect(() => { if(!auth.hasSession)setReceipts(current => pruneKnownReceipts(current, allReminders,true,true)); }, [allReminders,auth.hasSession]);
   const described=useMemo(()=>{
     if(!auth.hasSession || !ready)return {frame:null,error:null};
     try{return {frame:describeReminders(reminders,{tasks,courses:courseCatalog,semesters,exams:savedExams.value ?? [],rows:schedule.rows},now),error:null};}
@@ -38,19 +49,21 @@ export default function useInAppNotifications(now: Date) {
     return {...item,read:!!known && row.state.read,readKnown:!!known};
   }) : applyReadReceipts(reminders,receipts);
   const reload = useCallback(async()=>{
-    try {await Promise.all([assignmentConnection?.reload(),schedule.reload(),savedExams.reload(),courseConnection?.reload(),semesterConnection?.reload()]);}
+    try {await Promise.all([preferences.reload(),assignmentConnection?.reload(),schedule.reload(),savedExams.reload(),courseConnection?.reload(),semesterConnection?.reload()]);}
     finally{setRefreshNonce(n=>n+1);}
-  },[assignmentConnection?.reload,schedule.reload,savedExams.reload,courseConnection?.reload,semesterConnection?.reload]);
+  },[preferences.reload,assignmentConnection?.reload,schedule.reload,savedExams.reload,courseConnection?.reload,semesterConnection?.reload]);
   const markSeen=(seen:InAppReminder[])=>{
-    if(auth.hasSession){if(confirmed && !state.busy)void persisted.mark(seen.map(item=>({id:item.id,localRevision:item.revision}))).catch(()=>{});}
-    else setReceipts(current=>markRemindersRead(current,seen.filter(item=>items.some(x=>x.id===item.id && x.revision===item.revision))));
+    const visible=seen.filter(item=>items.some(x=>x.id===item.id && x.revision===item.revision));
+    if(!visible.length)return;
+    if(auth.hasSession){if(confirmed && !state.busy)void persisted.mark(visible.map(item=>({id:item.id,localRevision:item.revision}))).catch(()=>{});}
+    else setReceipts(current=>markRemindersRead(current,visible));
   };
   return {
-    items,sources,unread:items.filter(item=>item.readKnown!==false && !item.read).length,
+    items,sources,quiet:quietState.quiet,unread:items.filter(item=>item.readKnown!==false && !item.read).length,
     readState:auth.hasSession ? {ready:confirmed,loading:state.loading,busy:state.busy,error:described.error ?? state.error,needsReload:state.needsReload,message:state.message} : null,
     schedule:auth.hasSession ? {ready,classesReady:saved.classesReady,examsReady:saved.examsReady,tasksReady,
-      loading:schedule.loading || savedExams.loading || !!assignmentConnection?.loading || !!courseConnection?.loading || !!semesterConnection?.loading,
-      error:assignmentConnection?.error ?? saved.error,reload} : null,
+      loading:preferences.loading || schedule.loading || savedExams.loading || !!assignmentConnection?.loading || !!courseConnection?.loading || !!semesterConnection?.loading,
+      error:preferencesError ?? assignmentConnection?.error ?? saved.error,reload} : null,
     markRead:(item:InAppReminder)=>markSeen([item]),
     markAllRead:(seen:InAppReminder[])=>markSeen(seen),
   };

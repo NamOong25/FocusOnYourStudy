@@ -4,12 +4,13 @@ import { deviceTimeZone, validTimeZone, zonedDay } from '../study/studyTime';
 import { examClock } from './examView';
 import { examInput, type ExamInput, type ServerExam } from './api/examsApi';
 
-export function examDraft(original?: ServerExam, courseId = '') {
+export function examDraft(original?: ServerExam, courseId = '', defaultReminderMinutes?: number) {
   return { courseId: original?.courseId ?? courseId, kind: original?.kind ?? 'MIDTERM' as ServerExam['kind'],
     format: original?.format ?? 'WRITTEN' as ServerExam['format'], date: original ? zonedDay(Date.parse(original.startsAt), original.timeZone) : dateKey(new Date()),
     start: original ? examClock(original.startsAt, original.timeZone) : '08:00', end: original ? examClock(original.endsAt, original.timeZone) : '10:00',
     timeZone: original?.timeZone ?? deviceTimeZone(), startChoice: original?.startsAt ?? '', endChoice: original?.endsAt ?? '',
-    room: original?.room ?? '', notes: original?.notes ?? '', reminder: original?.reminder ?? true, minutes: [...(original?.reminderMinutes ?? [1440, 180])] };
+    room: original?.room ?? '', notes: original?.notes ?? '', reminder: original?.reminder ?? true,
+    minutes: [...(original?.reminderMinutes ?? (defaultReminderMinutes === undefined ? [1440, 180] : [defaultReminderMinutes]))] };
 }
 export type ExamDraft = ReturnType<typeof examDraft>;
 // Resolve a wall-clock selection in its source zone, including repeated/missing DST clocks.

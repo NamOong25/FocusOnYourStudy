@@ -11,14 +11,28 @@ import type { ScheduleSource } from '../api/useServerSchedule';
 import type { ServerRule } from '../api/scheduleApi';
 import { ruleDraft, draftInput, type RuleDraft } from '../ruleDraft';
 import { weekdaysLabel } from '../calendar';
+import { useSavedReminderPreferences } from '../../account/preferences/ReminderPreferencesProvider';
 
-export default function ServerClassForm({ source, original, initialDate, semesterId, onClose, onSaved, onDeleted }: {
+type Props = {
   source: ScheduleSource; original?: ServerRule; initialDate: string; semesterId: string;
   onClose: () => void; onSaved: (saved: ServerRule) => void; onDeleted: () => void;
-}) {
+};
+
+export default function ServerClassForm(props: Props) {
+  const preferences = useSavedReminderPreferences();
+  if (!props.original && !preferences.value) return <Sheet title="Chuỗi lịch học mới" onClose={props.onClose}>
+    <StateView kind={preferences.error ? 'error' : 'loading'} title="Đang chuẩn bị mốc nhắc"
+      message={preferences.error?.message ?? 'Đang đọc tùy chọn nhắc học đã lưu.'} />
+    {preferences.error && <Button label="Tải lại tùy chọn nhắc học" secondary loading={preferences.loading}
+      onPress={() => { void preferences.reload().catch(() => { }); }} />}
+  </Sheet>;
+  return <ServerClassFormContent {...props} defaultReminderMinutes={preferences.value?.reminderMinutes} />;
+}
+
+function ServerClassFormContent({ source, original, initialDate, semesterId, onClose, onSaved, onDeleted, defaultReminderMinutes }: Props & { defaultReminderMinutes?: number }) {
   const { courseCatalog, courseConnection, semesters } = useApp(), action = useApiAction(), { width } = useWindowDimensions();
   const firstCourse = courseCatalog.find(c => c.semesterId === semesterId);
-  const [basis, setBasis] = useState(original), [draft, setDraft] = useState(() => ruleDraft(original, { date: initialDate, courseId: firstCourse?.id, room: firstCourse?.room, teacher: firstCourse?.teacher }));
+  const [basis, setBasis] = useState(original), [draft, setDraft] = useState(() => ruleDraft(original, { date: initialDate, courseId: firstCourse?.id, room: firstCourse?.room, teacher: firstCourse?.teacher, reminderMinutes: defaultReminderMinutes }));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [mustRebase, setMustRebase] = useState(false), [gone, setGone] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false), [checked, setChecked] = useState<ServerRule[] | null>(null);
   const [completed, setCompleted] = useState<{ kind: 'saved'; rule: ServerRule } | { kind: 'deleted' } | null>(null), live = useRef(true);
