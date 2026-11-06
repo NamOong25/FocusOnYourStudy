@@ -87,6 +87,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/assignment-statistics").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/notification-read-states/query").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/notification-read-states").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/notification-preferences").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/notification-preferences").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/assignments").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/assignments/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/assignments/*").authenticated()

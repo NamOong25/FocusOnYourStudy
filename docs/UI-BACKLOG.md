@@ -227,7 +227,9 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [ ] Nghiệm thu UI 9B.2 — Người dùng tự kiểm tra nhập mật khẩu mới → bấm đổi thật → chuyển về login → mật khẩu cũ bị từ chối/mới đăng nhập được/dữ liệu còn. Không đánh dấu đã có UI toàn luồng từ kết quả Manager/API. Native tiếp tục để riêng.
 - [x] 9C.1 — API quên mật khẩu qua email. Phản hồi chung, gửi nền qua SMTP, mã băm dùng một lần và hết hạn sau 30 phút, xác nhận hai ô mật khẩu và thu hồi phiên cũ trong cùng transaction. V15 tạo bảng mã. [Hướng dẫn](BACKEND-PHASE-9C1.md)
 - [x] 9C.2 — Nối nút Quên mật khẩu và form đặt lại trên web từ liên kết email. Xử lý mã hết hạn, phản hồi mất kết nối và đưa người dùng về đăng nhập. [Cách kiểm tra](BACKEND-PHASE-9C1.md#kiểm-tra-trên-giao-diện-web)
-- [ ] Các đợt còn lại — Tùy chọn thật, xuất dữ liệu, triển khai backend và bản cài; chốt phạm vi từng đợt trước khi làm. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
+- [x] 9D.1 — API tùy chọn nhắc học theo tài khoản. V16 lưu loại nhắc, mốc nhắc và giờ yên lặng. Kiểm tra Bearer và version khi lưu. [Cách kiểm tra bằng Postman](BACKEND-PHASE-9D1.md)
+- [ ] 9D.2 — Nối màn Tùy chọn nhắc học với API, áp dụng lựa chọn vào thông báo trong app.
+- [ ] Các đợt còn lại — Xuất dữ liệu, triển khai backend và bản cài. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
 
 ## Các đợt giao diện đã hoàn thành
 

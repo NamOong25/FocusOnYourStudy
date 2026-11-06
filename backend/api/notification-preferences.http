@@ -1,0 +1,29 @@
+@baseUrl = http://localhost:8080
+@accessToken = THAY_ACCESS_TOKEN
+@preferencesVersion = 0
+
+### Đọc cấu hình hiện tại và lấy data.version.
+GET {{baseUrl}}/api/v1/notification-preferences
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Gửi toàn bộ tùy chọn với version vừa đọc.
+PUT {{baseUrl}}/api/v1/notification-preferences
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "assignments": true,
+  "classes": false,
+  "exams": true,
+  "reminderMinutes": 30,
+  "quiet": true,
+  "quietStart": "23:00",
+  "quietEnd": "06:30",
+  "version": {{preferencesVersion}}
+}
+
+### Đọc lại cấu hình đã lưu.
+GET {{baseUrl}}/api/v1/notification-preferences
+Authorization: Bearer {{accessToken}}
+Accept: application/json
