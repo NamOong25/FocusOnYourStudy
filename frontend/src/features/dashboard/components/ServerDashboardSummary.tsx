@@ -22,8 +22,7 @@ export default function ServerDashboardSummary({semester,data,active,onGrades,on
       value: read.loaded && summary ? gradeNumber(summary.gpa, 2) : '…',
       caption: summary ? `${summary.calculatedCredits} tín chỉ tính GPA · Điểm đã lưu` : 'Đang đọc điểm trong tài khoản',
     }}/>
-    <Button label="Cập nhật điểm Trang chủ" secondary disabled={read.loading} onPress={reload}/>
-    {error?<T accessibilityRole="alert" style={{color:C.red}}>{error.message}</T>:summary&&<T style={S.small}>{semesterGpaCaption(summary)}{summary.excludedCourses>0?` · ${summary.excludedCourses} môn chưa tính. Điểm thiếu không được xem là 0.`:''}</T>}
+    {error?<><T accessibilityRole="alert" style={{color:C.red}}>{error.message}</T><Button label="Thử lại điểm học kỳ" secondary disabled={read.loading} onPress={reload}/></>:summary&&<T style={S.small}>{semesterGpaCaption(summary)}{summary.excludedCourses>0?` · ${summary.excludedCourses} môn chưa tính. Điểm thiếu không được xem là 0.`:''}</T>}
     {!!warnings.length&&!error&&<Card style={{backgroundColor:C.canvas,gap:12}}><T style={{fontFamily:F.bold}}>Môn học cần chú ý</T>{warnings.map(c=>{const result=serverGradeView(c.result),p=gradePresentation(result);return <Pressable key={c.id} accessibilityRole="button" accessibilityLabel={`Dashboard: cảnh báo điểm ${c.name}`} onPress={()=>onCourse(c.id)}><Row><View style={S.grow}><T style={{fontFamily:F.bold,color:p.color}}>{c.name}</T><GradeStatus result={result}/></View><T style={{fontFamily:F.extra,fontSize:22,color:p.color}}>{gradeNumber(result.total,1)}</T><Icon name="chevron-forward" color={p.color}/></Row></Pressable>;})}</Card>}
   </>;
 }

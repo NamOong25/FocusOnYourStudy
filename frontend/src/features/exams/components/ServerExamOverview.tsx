@@ -33,9 +33,9 @@ export default function ServerExamOverview({ query, now, nearest = false, active
   const visible = filterExams(data.rows, period, now.getTime());
   return <>
     <T style={S.small}>{nearest ? 'Theo học kỳ đang chọn. Ưu tiên kỳ thi đang diễn ra, sau đó đến lịch sắp tới.' : 'Lịch thi của đúng môn và học kỳ này.'} Ngày/giờ theo múi giờ ghi trên kỳ thi.</T>
-    <Button label={nearest ? 'Cập nhật kỳ thi gần nhất' : 'Cập nhật lịch thi của môn'} secondary icon="refresh-outline" loading={source.loading} onPress={reload} />
+    {!nearest && <Button label="Cập nhật lịch thi của môn" secondary icon="refresh-outline" loading={source.loading} onPress={reload} />}
     {!source.loaded ? <StateView kind={source.error ? 'error' : 'loading'} title={source.error ? 'Chưa tải được lịch thi' : 'Đang tải lịch thi'} message={source.error?.message ?? 'Đang đọc lịch thi đã lưu trong tài khoản.'} actionLabel={source.error ? 'Thử lại lịch thi' : undefined} onAction={reload} /> : <>
-      {source.error && <Card style={{ backgroundColor: C.redSoft, gap: 7 }}><T accessibilityRole="alert" style={{ color: C.red }}>{source.error.message}</T><T style={S.small}>Chưa cập nhật được lịch thi. Dữ liệu bên dưới là bản đã tải của đúng học kỳ/môn đang xem; có thể đã thay đổi ở nơi khác.</T></Card>}
+      {source.error && <Card style={{ backgroundColor: C.redSoft, gap: 7 }}><T accessibilityRole="alert" style={{ color: C.red }}>{source.error.message}</T><T style={S.small}>Chưa cập nhật được lịch thi. Dữ liệu bên dưới là bản đã tải của đúng học kỳ/môn đang xem; có thể đã thay đổi ở nơi khác.</T>{nearest && <Button label="Thử lại lịch thi" secondary loading={source.loading} onPress={reload} />}</Card>}
       {source.loading && <T accessibilityLiveRegion="polite" style={S.small}>Đang cập nhật lịch thi…</T>}
       {data.catalogueMismatch ? <StateView kind="error" title="Cần cập nhật môn và lịch thi" message="Thông tin liên kết đã thay đổi hoặc chưa tải đủ. Hãy cập nhật trước khi xem tiếp." actionLabel="Cập nhật môn và lịch thi" onAction={reload} /> : nearest ? <>
         {data.next && <ServerNearestExamCard exam={data.next} course={courseCatalog.find(c => c.id === data.next!.courseId)!} now={now.getTime()} stale={data.stale} onOpen={() => onOpen(data.next!.id)} />}

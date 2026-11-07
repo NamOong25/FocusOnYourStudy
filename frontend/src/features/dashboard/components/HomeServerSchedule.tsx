@@ -18,7 +18,7 @@ export default function HomeServerSchedule({ semesterId, now }: { semesterId: st
   return <>
     <Section title="Buổi học gần nhất" icon="calendar-outline" />
     <T style={S.small}>Theo học kỳ đang chọn · Giờ hiển thị theo thiết bị ({Intl.DateTimeFormat().resolvedOptions().timeZone}). Buổi nghỉ không tính vào buổi sắp học.</T>
-    <OverviewSyncStatus source={source} label="Tải lại lịch học" reload={reload} />
+    <OverviewSyncStatus source={source} label="Tải lại lịch học" reload={reload} statusOnly />
     {source.loaded && data.next && <OverviewOccurrenceCard row={data.next} title={title(data.next.courseId)} now={now} context="Trang chủ gần nhất" onOpen={open} />}
     {ready && !data.next && <Empty title={data.hasRules ? 'Chưa có buổi học đang diễn ra hoặc sắp tới' : 'Học kỳ này chưa có lịch học'} message={data.hasRules ? 'Các buổi đã kết thúc hoặc được nghỉ không được đề xuất ở đây. Xem Thời khóa biểu để kiểm tra lịch đã lưu.' : 'Thêm chuỗi lịch học để xem buổi gần nhất của học kỳ này.'} actionLabel="Mở thời khóa biểu" onAdd={() => openSavedSchedule(semesterId)} />}
     <Section title="Lịch học hôm nay" icon="time-outline" />

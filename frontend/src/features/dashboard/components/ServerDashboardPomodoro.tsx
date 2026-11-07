@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Button, Card, IconButton, IconTile, Row, StateView, T } from '../../../shared/components';
+import { Button, Card, IconTile, Row, StateView, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
 import { useApp } from '../../../store/model';
 import { usePomodoroProgress } from '../../focus/api/PomodoroProgressProvider';
@@ -9,7 +9,7 @@ import ServerFocusStreakCard from '../../focus/components/ServerFocusStreakCard'
 export default function ServerDashboardPomodoro() {
   const { state, data, reload, timeZone } = usePomodoroProgress(), { setTab } = useApp(), daily = data?.daily;
   return <Card style={{ gap: 15 }}>
-    <Row between style={{ gap: 8 }}><Row style={[S.grow, { gap: 10 }]}><IconTile name="timer-outline" size={38} /><T accessibilityRole="header" style={[S.grow, { fontFamily: F.bold, fontSize: 17 }]}>Nhịp học hôm nay</T></Row><IconButton label="Cập nhật nhịp học hôm nay" name="refresh-outline" disabled={state.loading} onPress={() => { void reload().catch(() => {}); }} /></Row>
+    <Row style={{ gap: 10 }}><IconTile name="timer-outline" size={38} /><T accessibilityRole="header" style={[S.grow, { fontFamily: F.bold, fontSize: 17 }]}>Nhịp học hôm nay</T></Row>
     {state.error ? <StateView kind="error" title="Chưa tải được nhịp học" message={state.error.message} actionLabel="Thử lại nhịp học" onAction={() => { void reload().catch(() => {}); }} />
       : !daily ? <StateView kind="loading" title="Đang tải nhịp học hôm nay" message="Đọc thời gian học, số phiên và mục tiêu ngày." />
         : <>
