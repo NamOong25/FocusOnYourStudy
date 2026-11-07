@@ -1,0 +1,21 @@
+# Allow only files required by the build. Local databases, keys, env files,
+# test reports, Git metadata and scripts never enter the Docker context.
+**
+!Dockerfile
+!.dockerignore
+!pom.xml
+!mvnw
+!.mvn/
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.properties
+!src/
+!src/main/
+!src/main/**
+**/application-local.*
+**/.env*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore

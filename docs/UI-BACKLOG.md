@@ -233,7 +233,11 @@ Frontend React Native + backend Spring Boot/PostgreSQL. Ngày 23/10/2026 đã xo
 - [x] 9E.1 — API xuất dữ liệu học tập của tài khoản thành tệp JSON UTF-8 có phiên bản định dạng, giữ liên kết và điểm 0/null. Đọc chung snapshot, xác thực Bearer. [Hướng dẫn kiểm tra](BACKEND-PHASE-9E1.md)
 - [x] 9E.2 — Hồ sơ → Xuất dữ liệu, chuẩn bị JSON qua API và bấm tải trên web hoặc mở chia sẻ native. Có số bản ghi/dung lượng, hủy, lỗi/thử lại và hủy khi đóng màn/đổi tài khoản. TypeScript, toàn bộ tests frontend, bundle web/Android/iOS và luồng frontend/API/PostgreSQL với Blob đạt. Thêm FileSystem/Sharing SDK 56. [Hướng dẫn và giới hạn](FRONTEND-PHASE-9E2.md)
 - [ ] Nghiệm thu 9E.2 trực tiếp — Tải/mở JSON từ trình duyệt và lưu/chia sẻ trên điện thoại thật theo hướng dẫn. DOM/native trong test dùng giả lập, trình duyệt tự động đang bị tắt trong Work settings.
-- [ ] Các đợt còn lại — Triển khai backend và bản cài. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
+- [x] 9F.1 — Thêm profile production, kiểm tra cấu hình bắt buộc, cookie Secure/CORS HTTPS, Dockerfile Java 21 chạy user riêng và mẫu biến môi trường. Có test production/PostgreSQL và script JAR kiểm tra giữ dữ liệu/phiên qua khởi động lại với khóa cố định. [Hướng dẫn 9F.1 và giới hạn](DEPLOYMENT-PHASE-9F1.md)
+- [x] 9F.2A — Chuẩn bị Render Free và Neon Free. Build và chạy Docker giới hạn 512 MB, thử health, đăng nhập, lưu dữ liệu, restart và quyền đọc khóa theo nhóm Render. Có mẫu biến môi trường và [hướng dẫn triển khai](DEPLOYMENT-PHASE-9F2A.md).
+- [ ] 9F.2B — Triển khai trên Render Free và Neon Free. Kiểm tra TLS Neon, health HTTPS, proxy/IP/rate limit, giữ dữ liệu sau redeploy, thời gian thức lại và phiên cookie khi có web cùng site.
+- [ ] 9G.1 — Nối frontend với API online và kiểm tra luồng dữ liệu trên thiết bị thật.
+- [ ] 9G.2 — Cấu hình và tạo APK Android, cài thử và hướng dẫn chia sẻ. Native 2C.3B và các phần đã hoãn vẫn giữ riêng.
 
 ## Các đợt giao diện đã hoàn thành
 

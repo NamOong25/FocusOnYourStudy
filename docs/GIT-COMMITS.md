@@ -1,5 +1,23 @@
 # Tên commit cho từng đợt
 
+## 9F.2A — Chuẩn bị backend cho Render và Neon
+
+```powershell
+git add .
+git commit -m "Chuẩn bị triển khai backend miễn phí trên Render và Neon"
+git push origin main
+```
+
+Nếu 9F.1 vẫn đang nằm chung trong các thay đổi chưa commit, dùng tên `Chuẩn bị Docker production và triển khai Render Neon` cho commit gộp.
+
+## 9F.1 — Chuẩn bị backend chạy trên server
+
+```powershell
+git add .
+git commit -m "Chuẩn bị cấu hình production và Docker cho backend"
+git push origin main
+```
+
 ## 9E.2 — Giao diện tải dữ liệu cá nhân
 
 ```powershell

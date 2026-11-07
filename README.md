@@ -2,7 +2,15 @@
 
 Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
-## Mới nhất — 9E.2: Tải dữ liệu từ Hồ sơ
+## Mới nhất — 9F.2A: Chuẩn bị Render Free và Neon Free
+
+Backend đã chạy thử trong Docker với giới hạn 512 MB, dùng PostgreSQL QA và cấu hình JVM dành cho Render. Bài thử kiểm tra quyền đọc khóa JWT, health, đăng nhập và giữ dữ liệu sau restart. [Cấu hình và hướng dẫn 9F.2A](docs/DEPLOYMENT-PHASE-9F2A.md)
+
+## 9F.1: Chuẩn bị backend chạy trên server
+
+Backend có profile `prod`, Dockerfile Java 21 chạy user riêng và mẫu cấu hình ở `backend/deploy/production.env.example`. Đã kiểm tra JAR với database QA riêng và build/chạy image Docker Desktop, gồm health, đăng nhập và giữ tài khoản sau restart. [Hướng dẫn và cách test 9F.1](docs/DEPLOYMENT-PHASE-9F1.md)
+
+## 9E.2: Tải dữ liệu từ Hồ sơ
 
 **Hồ sơ → Xuất dữ liệu → Chuẩn bị tệp JSON → Tải tệp JSON** lấy bản sao thật của tài khoản. Trên điện thoại, nút lưu/chia sẻ mở bảng chia sẻ hệ điều hành. Có trạng thái tải, hủy, lỗi và tách tài khoản. TypeScript, tests frontend, bundle web/Android/iOS và luồng mã frontend/API/PostgreSQL đã qua. Thao tác tải trực tiếp trên trình duyệt và chia sẻ trên điện thoại còn cần kiểm tra thủ công. [Hướng dẫn kiểm tra 9E.2](docs/FRONTEND-PHASE-9E2.md)
 
