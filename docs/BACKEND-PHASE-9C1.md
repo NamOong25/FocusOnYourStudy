@@ -41,7 +41,7 @@ Flyway áp dụng V15 khi backend khởi động. Dùng một tài khoản thử
 
 ## Kiểm tra trên giao diện web
 
-1. Chạy Mailpit và backend với cấu hình phía trên. Mở PowerShell ở gốc project và chạy `npx expo start --web --port 8092`. Mở [FocusYourStudy](http://localhost:8092/) bằng hostname `localhost` để khớp với địa chỉ trong email.
+1. Chạy Mailpit và backend với cấu hình phía trên. Mở PowerShell ở thư mục `frontend` và chạy `npx expo start --web --port 8092`. Mở [FocusYourStudy](http://localhost:8092/) bằng hostname `localhost` để khớp với địa chỉ trong email.
 2. Dùng tài khoản thử đã đăng ký. Vào **Hồ sơ → Đăng nhập → Quên mật khẩu?**, nhập email và bấm **Gửi liên kết đặt lại mật khẩu**. App hiện cùng một lời nhắn cho email hợp lệ có hoặc chưa có tài khoản.
 3. Mở [Mailpit](http://127.0.0.1:8025/) rồi mở liên kết trong thư. Màn hình **Đặt lại mật khẩu** xuất hiện và mã tự biến mất khỏi thanh địa chỉ. Nếu lỡ tải lại trang lúc đang nhập, mở lại link trong thư.
 4. Nhập mật khẩu mới vào cả hai ô rồi bấm **Lưu mật khẩu mới**. Khi thấy **Đã đặt lại mật khẩu**, chọn **Đến trang đăng nhập**. Thử mật khẩu cũ rồi thử mật khẩu mới.

@@ -32,7 +32,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 ```powershell
 # Terminal frontend khác
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

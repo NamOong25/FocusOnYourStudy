@@ -23,15 +23,17 @@ Chưa phát hiện lỗi chặn luồng trong các lượt đã chạy. Có mộ
 Mở hai terminal trong thư mục project. Terminal đầu chạy:
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
 Nếu máy chủ 8092 đang chạy thì dùng lại. Terminal thứ hai chạy:
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 $env:PLAYWRIGHT_MODULE='C:/Users/PC/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'
 $env:CHROME_PATH='C:/Program Files/Google/Chrome/Application/chrome.exe'
-node docs/qa-frontend-review.cjs --live
+node qa/qa-frontend-review.cjs --live
 ```
 
 Đường dẫn runtime trên là công cụ sẵn có của máy hiện tại, không phải dependency của app. Máy khác cần trỏ hai biến tới Playwright/Chrome đã cài.

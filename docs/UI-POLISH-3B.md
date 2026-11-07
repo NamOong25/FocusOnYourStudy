@@ -41,9 +41,10 @@ Các màn chính, ba phần Lịch học và hai phần Thống kê được gi�
 ## Kiểm tra
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-navigation-unit.cjs
-node docs/qa-navigation.cjs
+node qa/qa-navigation-unit.cjs
+node qa/qa-navigation.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```

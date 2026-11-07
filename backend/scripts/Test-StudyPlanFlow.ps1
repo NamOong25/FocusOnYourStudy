@@ -47,7 +47,7 @@ try {
         Start-Sleep -Milliseconds 1000
     }
     if (!$ready) { throw 'QA backend did not become ready.' }
-    & node --test (Join-Path $projectRoot 'tests/integration/study-plan-flow.test.cjs')
+    & node --test (Join-Path $projectRoot 'frontend/tests/integration/study-plan-flow.test.cjs')
     if ($LASTEXITCODE -ne 0) { throw 'Plan flow integration tests failed.' }
     & java -cp $driver.FullName (Join-Path $PSScriptRoot 'StudyPlanQaDatabase.java') verify
     if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL verification failed.' }

@@ -56,6 +56,7 @@ Ca mất kết nối có thể thử bằng cách dừng terminal backend đang 
 - Dùng schema `backend_it_<UUID>`, hai tài khoản giả và các tiến trình loopback riêng. Schema/tiến trình QA được dọn sau kiểm tra; PostgreSQL cục bộ và dữ liệu thật được giữ nguyên.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 node --test tests/*.test.cjs
 npm run build:web

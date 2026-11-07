@@ -25,7 +25,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Terminal 2:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -54,6 +54,7 @@ Mở http://localhost:8092, đăng nhập, có sẵn một học kỳ và môn c
 `npm run test:exams` kiểm tra hợp đồng đọc/ghi, phản hồi xác nhận, version/204, nhắc, UTC/DST, bấm đôi, bản cũ, mất phản hồi, đối chiếu và đổi chủ sở hữu. `npm run test:schedule` hồi quy lịch học. Có TypeScript và export web. Luồng browser được chạy với Spring Boot/PostgreSQL và schema QA riêng; dữ liệu thử được dọn sau kiểm tra, không seed vào dữ liệu của người dùng.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run test:exams
 npm run test:schedule
 npm run typecheck

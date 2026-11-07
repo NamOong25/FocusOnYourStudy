@@ -61,10 +61,10 @@ Tỷ lệ/điểm dùng đúng theo môn của bạn. Chức năng tính điểm
 
 ## Kiểm tra
 
-- `node docs/qa-grades-unit.cjs`: **149 kiểm tra** về công thức IUH, thiếu/0, BTL thay cuối kỳ hoặc một cột thực hành, tỷ lệ sai/thiếu, cuối kỳ trùng, bảo vệ điểm BTL, lịch sử học lại và bộ cột có thể chỉnh sửa.
-- `node docs/qa-project-grades.cjs`: giao diện 2 loại, lọc loại điểm, BTL toàn bộ/một phần cuối kỳ, React 5 cột, lưu/mở lại, tránh tính trùng, đổi loại chưa lưu giữ dữ liệu, xóa điểm.
-- `node docs/qa-iuh-grades.cjs`: điều kiện thi, biên qua môn, thang IUH và tách/gộp thường kỳ.
-- `node docs/qa-dashboard.cjs`: luồng từ dữ liệu trống và số liệu chung trên Dashboard.
+- `node frontend/qa/qa-grades-unit.cjs`: **149 kiểm tra** về công thức IUH, thiếu/0, BTL thay cuối kỳ hoặc một cột thực hành, tỷ lệ sai/thiếu, cuối kỳ trùng, bảo vệ điểm BTL, lịch sử học lại và bộ cột có thể chỉnh sửa.
+- `node frontend/qa/qa-project-grades.cjs`: giao diện 2 loại, lọc loại điểm, BTL toàn bộ/một phần cuối kỳ, React 5 cột, lưu/mở lại, tránh tính trùng, đổi loại chưa lưu giữ dữ liệu, xóa điểm.
+- `node frontend/qa/qa-iuh-grades.cjs`: điều kiện thi, biên qua môn, thang IUH và tách/gộp thường kỳ.
+- `node frontend/qa/qa-dashboard.cjs`: luồng từ dữ liệu trống và số liệu chung trên Dashboard.
 - `qa-grades.cjs` giữ làm điểm vào cho bài kiểm tra giao diện mới, thay bộ thử trọng số/thang mô phỏng cũ đã gỡ khỏi UI.
 
 Ảnh/kết quả trình duyệt nằm trong `.expo/qa-project-grades/`, không đưa vào Git. Các ví dụ số trong test là dữ liệu kiểm tra phép tính, không khẳng định là điểm/đề cương chính thức của hai môn đã nêu.

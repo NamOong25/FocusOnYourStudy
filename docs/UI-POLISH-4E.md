@@ -29,10 +29,10 @@ Các số ở bước 1–5 giả định chưa sửa bộ điểm mẫu ở cá
 ## Kiểm tra kỹ thuật
 
 - `npm run typecheck`: qua.
-- `node docs/qa-gpa-comparison-unit.cjs`: 67 kiểm tra qua, gồm sắp thứ tự/chọn cặp khác nhau, dữ liệu mẫu, cùng hàm với bảng điểm, tạm tính/thiếu/GPA 0, đạt/không đạt, chặn thi, trọng số tín chỉ, học lại theo kỳ và làm tròn chênh lệch.
-- `node docs/qa-grades-unit.cjs`: 149 kiểm tra công thức điểm hiện có qua. `qa-statistics-unit.cjs`: 71; `qa-navigation-unit.cjs`: 30 kiểm tra qua.
-- `node docs/qa-gpa-comparison.cjs`: qua luồng chọn/đổi chiều, kỳ trống, đúng môn/kỳ, lưu/hủy điểm, khớp màn Điểm & GPA, chuyển tab giữ lựa chọn, GPA 0 thật, Back/X, trạng thái 0/1 học kỳ và console.
-- `node docs/qa-statistics.cjs`: hồi quy Tổng quan Thống kê qua, gồm bộ lọc ngày/học kỳ, phiên Pomodoro, deadline, trạng thái bài tập, lối vào Điểm & GPA và dữ liệu trống phát triển thành thống kê.
+- `node frontend/qa/qa-gpa-comparison-unit.cjs`: 67 kiểm tra qua, gồm sắp thứ tự/chọn cặp khác nhau, dữ liệu mẫu, cùng hàm với bảng điểm, tạm tính/thiếu/GPA 0, đạt/không đạt, chặn thi, trọng số tín chỉ, học lại theo kỳ và làm tròn chênh lệch.
+- `node frontend/qa/qa-grades-unit.cjs`: 149 kiểm tra công thức điểm hiện có qua. `qa-statistics-unit.cjs`: 71; `qa-navigation-unit.cjs`: 30 kiểm tra qua.
+- `node frontend/qa/qa-gpa-comparison.cjs`: qua luồng chọn/đổi chiều, kỳ trống, đúng môn/kỳ, lưu/hủy điểm, khớp màn Điểm & GPA, chuyển tab giữ lựa chọn, GPA 0 thật, Back/X, trạng thái 0/1 học kỳ và console.
+- `node frontend/qa/qa-statistics.cjs`: hồi quy Tổng quan Thống kê qua, gồm bộ lọc ngày/học kỳ, phiên Pomodoro, deadline, trạng thái bài tập, lối vào Điểm & GPA và dữ liệu trống phát triển thành thống kê.
 - Ảnh/layout được xem ở 320/390/430/1280px: trang so sánh, hai thẻ, biểu đồ, hộp chọn kỳ và bảng điểm. Không tràn cuộn ngang; không có lỗi runtime/console trong lượt test. Kết quả và ảnh tại `.expo/qa-gpa-comparison/`, Git bỏ qua.
 - Build web và export bundle Android qua. Chưa chạy trên điện thoại thật.
 

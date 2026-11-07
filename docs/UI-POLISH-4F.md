@@ -35,12 +35,12 @@ Nên thử trên dữ liệu mẫu để không sửa nhầm nội dung đang ki
 ## Kiểm tra kỹ thuật
 
 - `npm run typecheck`: qua.
-- `node docs/qa-notifications-unit.cjs`: 62 kiểm tra qua, gồm deadline/khung 7 ngày, đang diễn ra/kết thúc, lịch lặp/ngoại lệ, đọc từng mục/tất cả, phiên bản dữ liệu thay đổi, dọn trạng thái cũ, liên kết đúng và dữ liệu trống/không hợp lệ.
+- `node frontend/qa/qa-notifications-unit.cjs`: 62 kiểm tra qua, gồm deadline/khung 7 ngày, đang diễn ra/kết thúc, lịch lặp/ngoại lệ, đọc từng mục/tất cả, phiên bản dữ liệu thay đổi, dọn trạng thái cũ, liên kết đúng và dữ liệu trống/không hợp lệ.
 - Hồi quy logic: assignment 62, calendar 18, navigation 30 kiểm tra qua.
-- `node docs/qa-notifications.cjs`: qua luồng chuông không tự đọc, huy hiệu số, bộ lọc, nhớ trạng thái qua tab, sửa deadline/phòng, hoàn thành/hủy/xóa, dữ liệu mới, đúng ngày của buổi học và Back/Escape/Back trình duyệt/X.
+- `node frontend/qa/qa-notifications.cjs`: qua luồng chuông không tự đọc, huy hiệu số, bộ lọc, nhớ trạng thái qua tab, sửa deadline/phòng, hoàn thành/hủy/xóa, dữ liệu mới, đúng ngày của buổi học và Back/Escape/Back trình duyệt/X.
 - Test giao diện dùng đồng hồ 07:00 ngày 21/10/2026 trước khi tải app: dữ liệu mẫu lúc đó có 8 mục (3 bài, 4 buổi học, 1 lịch thi). Đây là giá trị kiểm tra, không cố định trong sản phẩm.
 - Ảnh/layout được xem tại 320/390/430/1280px, gồm danh sách, thẻ, chi tiết lịch học và trạng thái trống. Không tràn cuộn ngang, không có lỗi runtime/console trong lượt test. Kết quả/ảnh tại `.expo/qa-notifications/`, Git bỏ qua.
-- `node docs/qa-navigation.cjs`: hồi quy điều hướng toàn app qua, gồm lưu màn/bộ lọc/cuộn, các luồng bài → tự học → Pomodoro, nhắc việc → chi tiết → nhắc việc, lịch chọn ngày, Back/Escape, AI và tài khoản. Selector lịch thi được cập nhật theo nhãn mục mới.
+- `node frontend/qa/qa-navigation.cjs`: hồi quy điều hướng toàn app qua, gồm lưu màn/bộ lọc/cuộn, các luồng bài → tự học → Pomodoro, nhắc việc → chi tiết → nhắc việc, lịch chọn ngày, Back/Escape, AI và tài khoản. Selector lịch thi được cập nhật theo nhãn mục mới.
 - Build web và export bundle Android qua. Chưa chạy trên điện thoại thật hoặc nghiệm thu thông báo khi khóa màn hình.
 
 Script giao diện dùng profile headless riêng, không dùng session trình duyệt cá nhân. Cần Metro tại localhost:8092 (hoặc truyền URL) và Playwright/Chromium. Đặt `PLAYWRIGHT_MODULE`/`CHROME_PATH` nếu bộ công cụ ở ngoài project.

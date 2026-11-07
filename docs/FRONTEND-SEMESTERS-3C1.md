@@ -15,10 +15,10 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 .\scripts\Run-Local.ps1
 ```
 
-Terminal 2, tại gốc project:
+Dùng terminal thứ hai để chạy frontend.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -53,10 +53,11 @@ Mở `http://localhost:8092`, đăng nhập ở **Hồ sơ**, đóng bảng tài
 - `SessionManager.authorized`: dùng access token trong RAM, làm mới một lần khi hết hạn/401; không tự lặp POST/PUT/DELETE khi lỗi mạng/5xx. Kết quả phiên cũ bị bỏ khi đăng xuất/đổi tài khoản.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-semester-api-unit.cjs
-node docs/qa-session-unit.cjs
-node docs/qa-account-api-unit.cjs
+node qa/qa-semester-api-unit.cjs
+node qa/qa-session-unit.cjs
+node qa/qa-account-api-unit.cjs
 npm run build:web
 ```
 

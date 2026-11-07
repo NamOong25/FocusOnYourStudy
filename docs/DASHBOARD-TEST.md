@@ -100,8 +100,8 @@ Từ bộ chọn Dashboard → **Quản lý học kỳ và môn** → **+ Thêm*
 
 ## Phạm vi đã kiểm tra tự động
 
-- `node docs/qa-dashboard-unit.cjs`: 28 kiểm tra lọc học kỳ, quá hạn/7 ngày, chuyển ngày, thi đã kết thúc/đang diễn ra, ca nghỉ/đổi và GPA dùng chung.
-- `node docs/qa-dashboard.cjs`: tạo dữ liệu từ UI, sửa bài/điểm/lịch thi, mở chi tiết và quay lại, chuyển kỳ và bố cục 320/390/430/1280px.
+- `node frontend/qa/qa-dashboard-unit.cjs`: 28 kiểm tra lọc học kỳ, quá hạn/7 ngày, chuyển ngày, thi đã kết thúc/đang diễn ra, ca nghỉ/đổi và GPA dùng chung.
+- `node frontend/qa/qa-dashboard.cjs`: tạo dữ liệu từ UI, sửa bài/điểm/lịch thi, mở chi tiết và quay lại, chuyển kỳ và bố cục 320/390/430/1280px.
 - Các bài trình duyệt dùng Playwright + Chrome qua biến `PLAYWRIGHT_MODULE`, `CHROME_PATH` giống các đợt trước. Kết quả/ảnh nằm trong `.expo/qa-dashboard/`, không đưa vào Git.
 
 Các thẻ lấy từ dữ liệu đã tạo trong phiên, chưa phải dữ liệu API. GPA tính từ điểm đã nhập theo cấu hình IUH đang dùng trong app. Thống kê đã tổng hợp từ các bản ghi phiên học (UI 4D), nhắc việc có trạng thái đã đọc (UI 4F) và form có cảnh báo chưa lưu (UI 4G). Chưa nghiệm thu thiết bị thật, thông báo đẩy, đăng nhập hoặc lưu/đồng bộ backend.

@@ -22,7 +22,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 ```powershell
 # Terminal 2
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -45,6 +45,7 @@ Mở http://localhost:8092, đăng nhập tài khoản có học kỳ và môn.
 - Browser với Spring Boot/PostgreSQL và schema QA riêng: thẻ đang diễn ra, mở/sửa từ Dashboard và môn, dữ liệu khớp hai nơi, giữ bộ lọc khi quay lại, đổi kỳ/cùng tên môn, nút xem tất cả, trạng thái trống/nút thêm chọn sẵn môn, xóa ở nơi khác/404, lỗi mạng cùng/khác phạm vi và thử lại sau restart, F5, đổi tài khoản. Đã xem ảnh Dashboard 320/390px và chi tiết môn 390px; không thấy lỗi console. Schema QA và token thử được dọn, dữ liệu người dùng không bị seed/reset.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run test:exams
 npm run test:schedule
 npm run typecheck

@@ -33,7 +33,7 @@ Trong app, bấm **Bản xem trước · Thử trạng thái** dưới header:
 
 ## Kiểm tra
 
-`docs/qa-ui-states.cjs` kiểm tra luồng bắt đầu trống → học kỳ → môn → bài, lỗi giữ form, retry dùng giá trị mới, chặn lưu lặp, hủy/đóng/back không ghi muộn, tải/lỗi/retry giữ bộ lọc, đổi màn hủy lượt tải cũ và thông báo trong Modal. Có ảnh ở 320/390/430/1280px trong `.expo/qa-ui-states/`.
+`frontend/qa/qa-ui-states.cjs` kiểm tra luồng bắt đầu trống → học kỳ → môn → bài, lỗi giữ form, retry dùng giá trị mới, chặn lưu lặp, hủy/đóng/back không ghi muộn, tải/lỗi/retry giữ bộ lọc, đổi màn hủy lượt tải cũ và thông báo trong Modal. Có ảnh ở 320/390/430/1280px trong `.expo/qa-ui-states/`.
 
 Các script QA trước dùng `qa-onboarding-helpers.cjs` để vào chế độ mẫu và chờ thao tác hoàn tất; kiểm tra UI 3C riêng vẫn quan sát trạng thái đang xử lý và nút bị khóa.
 

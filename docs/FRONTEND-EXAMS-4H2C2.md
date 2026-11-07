@@ -23,7 +23,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 ```powershell
 # Terminal 2
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -48,6 +48,7 @@ Mở http://localhost:8092 và đăng nhập. Nhắc việc tự xét lại theo
 Browser với API/PostgreSQL thật dùng schema và tài khoản QA riêng: mốc 0 phút ở kỳ khác, mở chi tiết, giữ đã đọc qua reload, sửa phòng, đổi giờ/mốc, version/ghi chú không hiển thị, tắt nhắc, xóa lịch, giữ nhắc lịch học, đánh dấu tất cả, bộ lọc Chưa đọc khi Back, tự bỏ thẻ đúng giờ kết thúc, lỗi mạng/restart và hai tài khoản tách biệt. Đã xem chuông 320/390px, ảnh 390px được lưu; dữ liệu QA được dọn sau kiểm tra. Native/OS notifications không thuộc nghiệm thu đợt này.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run test:exams
 npm run test:schedule
 npm run typecheck

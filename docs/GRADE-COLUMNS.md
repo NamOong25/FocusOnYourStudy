@@ -28,8 +28,8 @@ BTL tiếp tục thay một cột hoặc quy vào một cột cuối kỳ; khôn
 
 ## Kiểm tra
 
-- `node docs/qa-grades-unit.cjs`: 149 kiểm tra công thức, BTL, cột tùy chỉnh, bản nháp thiếu nhóm và loại khỏi GPA.
-- `node docs/qa-grade-columns.cjs`: thêm/xóa/sửa tên, xác nhận/hủy, lưu/mở lại, khôi phục cột cuối kỳ, xóa hết/khôi phục gợi ý, số cột thực hành tùy chỉnh, bảo toàn BTL, giới hạn 10 cột và Back bỏ thay đổi chưa lưu. Kiểm tra không tràn ngang tại 320/390/430/1280 px.
-- `node docs/qa-project-grades.cjs`: giữ hành vi BTL thay toàn bộ/một phần cuối kỳ hoặc một cột thực hành và tránh tính trùng.
+- `node frontend/qa/qa-grades-unit.cjs`: 149 kiểm tra công thức, BTL, cột tùy chỉnh, bản nháp thiếu nhóm và loại khỏi GPA.
+- `node frontend/qa/qa-grade-columns.cjs`: thêm/xóa/sửa tên, xác nhận/hủy, lưu/mở lại, khôi phục cột cuối kỳ, xóa hết/khôi phục gợi ý, số cột thực hành tùy chỉnh, bảo toàn BTL, giới hạn 10 cột và Back bỏ thay đổi chưa lưu. Kiểm tra không tràn ngang tại 320/390/430/1280 px.
+- `node frontend/qa/qa-project-grades.cjs`: giữ hành vi BTL thay toàn bộ/một phần cuối kỳ hoặc một cột thực hành và tránh tính trùng.
 
 Dữ liệu vẫn lưu trong bộ nhớ phiên frontend, chưa có lưu lâu dài/backend. Nguồn quy tắc và phạm vi đối chiếu ở `GRADES-PROJECTS.md` và `IUH-GRADING.md`.

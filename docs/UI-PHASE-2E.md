@@ -30,8 +30,9 @@ Bấm **Hồ sơ** ở góc phải trên cùng, hoặc avatar/tên ở trang ch�
 ## Kiểm tra
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-account.cjs
+node qa/qa-account.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```

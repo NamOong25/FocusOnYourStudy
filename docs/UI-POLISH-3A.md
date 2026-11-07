@@ -35,9 +35,10 @@ Thời lượng học, số tín chỉ, điểm và năm học/niên khóa vẫn
 ## Kiểm tra
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-picker-unit.cjs
-node docs/qa-picker.cjs
+node qa/qa-picker-unit.cjs
+node qa/qa-picker.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```

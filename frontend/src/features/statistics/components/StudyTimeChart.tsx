@@ -13,7 +13,7 @@ export function StudyTimeChart({ data, onStart, startLabel, preferredDay }: { da
   const [width, setWidth] = useState(240);
   const count = 'completedSessions' in data ? data.completedSessions : data.entries.length;
   const wide = data.buckets.length > 7;
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const firstDay = data.buckets[0]?.from, lastDay = data.buckets[data.buckets.length - 1]?.to;
   useEffect(() => {
     setSelectedDay(null);

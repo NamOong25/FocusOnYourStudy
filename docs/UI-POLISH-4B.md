@@ -44,9 +44,9 @@ Các ngày và giờ chưa hợp lệ không được lưu từ form. Chưa chu�
 
 - TypeScript, xuất bundle web và Android đều thành công; chưa thử trên điện thoại thật.
 
-- `node docs/qa-assignments-unit.cjs`: 62 kiểm tra biên ngày/giờ, 23:59 mặc định, 00:00, giới hạn 7 ngày, tìm không dấu, lọc kết hợp, loại bài hoàn thành, sắp theo giờ, hạn của buổi học, Dashboard và AI.
-- `node docs/qa-dashboard-unit.cjs`: 28 kiểm tra tổng hợp; cửa sổ Sắp hạn đã đổi sang 7 ngày tính theo giờ hiện tại.
-- `node docs/qa-ai-unit.cjs`: 31 kiểm tra sinh/duyệt đề xuất, lịch trùng và mốc deadline.
+- `node frontend/qa/qa-assignments-unit.cjs`: 62 kiểm tra biên ngày/giờ, 23:59 mặc định, 00:00, giới hạn 7 ngày, tìm không dấu, lọc kết hợp, loại bài hoàn thành, sắp theo giờ, hạn của buổi học, Dashboard và AI.
+- `node frontend/qa/qa-dashboard-unit.cjs`: 28 kiểm tra tổng hợp; cửa sổ Sắp hạn đã đổi sang 7 ngày tính theo giờ hiện tại.
+- `node frontend/qa/qa-ai-unit.cjs`: 31 kiểm tra sinh/duyệt đề xuất, lịch trùng và mốc deadline.
 - Kiểm tra trực tiếp trên web: tìm không dấu, trạng thái không có kết quả/xóa lọc; giữ từ khóa sau khi sang lịch thi rồi quay lại; lưu/mở lại 18:45, đổi 00:00 vào Quá hạn, cập nhật Dashboard/nhắc bài; chặn buổi học sau giờ nộp và sửa hạn trước buổi liên kết; giao diện không tràn ngang ở 320/390/430/1280 px. Không có lỗi console trong phiên thử.
 
 Các script UI cũ không thay thế kiểm tra giờ deadline mới; phần kiểm tra tự động chính cho quy tắc mới là `qa-assignments-unit.cjs`. Chưa nghiệm thu backend, thông báo thiết bị, lưu lâu dài hoặc chạy trên điện thoại thật.

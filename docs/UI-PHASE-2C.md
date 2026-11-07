@@ -27,8 +27,8 @@
 ## Kiểm tra
 
 - TypeScript: qua. Build web và bundle Android/Hermes được kiểm tra trong đợt này.
-- `docs/qa-calendar-unit.cjs`: 18 kiểm tra logic về biên ngày, nhiều thứ, hủy/đổi đúng một ngày, tuần sau giữ nguyên, giờ nối tiếp, loại trừ đúng lịch đang sửa và trùng giữa các loại lịch.
-- `docs/qa-calendar.cjs`: tạo chuỗi nhiều thứ/có giới hạn; đổi một buổi và đối chiếu tuần sau; nghỉ buổi; đặt thi vào giờ được giải phóng; chặn khôi phục khi bị thi chiếm giờ; chuyển thi sang giờ liền kề rồi khôi phục; sửa/xóa chuỗi; không hiển thị sau ngày kết thúc; tạo/sửa/xóa kỳ thi và lưu tùy chọn nhắc.
+- `frontend/qa/qa-calendar-unit.cjs`: 18 kiểm tra logic về biên ngày, nhiều thứ, hủy/đổi đúng một ngày, tuần sau giữ nguyên, giờ nối tiếp, loại trừ đúng lịch đang sửa và trùng giữa các loại lịch.
+- `frontend/qa/qa-calendar.cjs`: tạo chuỗi nhiều thứ/có giới hạn; đổi một buổi và đối chiếu tuần sau; nghỉ buổi; đặt thi vào giờ được giải phóng; chặn khôi phục khi bị thi chiếm giờ; chuyển thi sang giờ liền kề rồi khôi phục; sửa/xóa chuỗi; không hiển thị sau ngày kết thúc; tạo/sửa/xóa kỳ thi và lưu tùy chọn nhắc.
 - Kiểm tra lại `qa-academics.cjs`, `qa-learning.cjs` và `qa-smoke.cjs`: các luồng cũ vẫn qua. Ca học thử trong test môn học chuyển sang 22:00 để tránh buổi tự học mẫu 18:00 nay được kiểm tra chung.
 - Xem ảnh chi tiết buổi, cảnh báo khôi phục và chi tiết thi ở 390px; danh sách thi ở 320/390/430/1280px. Kết quả/ảnh tại `.expo/qa-calendar/`. Không có lỗi runtime/console.error ở các lượt smoke cuối.
 - Chưa chạy trên điện thoại thật; bundle Android không thay cho kiểm tra native layout hoặc thông báo nền.

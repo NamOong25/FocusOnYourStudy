@@ -22,7 +22,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 ```
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -69,10 +69,11 @@ Giữ phiên hợp lệ rồi F5: vẫn khôi phục. Nếu server thu hồi phi
 `qa-account-isolation.cjs` dùng Playwright/Chrome riêng, tạo hai email `ui-a-*`/`ui-b-*@example.test`. Chỉ chạy với schema PostgreSQL QA riêng vì script tạo tài khoản thật. Không chạy trên production hoặc schema chứa dữ liệu bạn đang sử dụng. Thiết lập `QA_APP_URL`, `QA_API_URL`, `PLAYWRIGHT_MODULE`/`CHROME_PATH` theo môi trường. Kết quả/ảnh ở `.expo/qa-account-isolation`, không commit.
 
 ```powershell
-node docs/qa-session-unit.cjs
-node docs/qa-account-api-unit.cjs
-node docs/qa-account-isolation.cjs
-node docs/qa-session.cjs
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
+node qa/qa-session-unit.cjs
+node qa/qa-account-api-unit.cjs
+node qa/qa-account-isolation.cjs
+node qa/qa-session.cjs
 npm run typecheck
 npm run build:web
 ```

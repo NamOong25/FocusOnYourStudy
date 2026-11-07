@@ -21,7 +21,7 @@ Các luồng đã qua:
 - AI xem trước, chấp nhận và hiển thị kế hoạch tự học ở Trang chủ.
 - Không có lỗi runtime hoặc console.error trong lượt smoke cuối. Không tràn cuộn ngang ở các kích thước đã kiểm tra.
 
-Script: `docs/qa-smoke.cjs`. Cần Playwright và Chromium để chạy trên máy khác; có thể dùng biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` để trỏ tới bộ cài sẵn. Trước khi chạy, mở Metro tại localhost:8092 (hoặc truyền URL vào script). Kết quả và screenshot được ghi vào `.expo/qa/`, không đưa vào Git.
+Script: `frontend/qa/qa-smoke.cjs`. Cần Playwright và Chromium để chạy trên máy khác; có thể dùng biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` để trỏ tới bộ cài sẵn. Trước khi chạy, mở Metro tại localhost:8092 (hoặc truyền URL vào script). Kết quả và screenshot được ghi vào `.expo/qa/`, không đưa vào Git.
 
 ## Giới hạn
 

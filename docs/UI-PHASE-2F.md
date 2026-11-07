@@ -35,11 +35,12 @@ Các câu hỏi nhanh/ô nhập chuyển thành mục tiêu trong form kế ho�
 ## Kiểm tra
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-ai-unit.cjs
-node docs/qa-ai.cjs
-node docs/qa-smoke.cjs
-node docs/qa-learning.cjs
+node qa/qa-ai-unit.cjs
+node qa/qa-ai.cjs
+node qa/qa-smoke.cjs
+node qa/qa-learning.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```

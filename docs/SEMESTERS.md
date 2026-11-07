@@ -24,7 +24,7 @@ Các component riêng ở `src/features/academics/components/SemesterPicker.tsx`
 
 ## Kiểm tra
 
-`docs/qa-semesters.cjs` kiểm tra chọn kỳ/năm, bỏ ô nhập tự do, tạo hai kỳ chính mà không cần kỳ hè, thêm hè chủ động, chặn trùng khi thêm/sửa, cùng kỳ khác năm, giữ liên kết môn và bố cục 320/390/430/1280px. Ảnh/kết quả ở `.expo/qa-semesters/`, không đưa lên Git.
+`frontend/qa/qa-semesters.cjs` kiểm tra chọn kỳ/năm, bỏ ô nhập tự do, tạo hai kỳ chính mà không cần kỳ hè, thêm hè chủ động, chặn trùng khi thêm/sửa, cùng kỳ khác năm, giữ liên kết môn và bố cục 320/390/430/1280px. Ảnh/kết quả ở `.expo/qa-semesters/`, không đưa lên Git.
 
 Các kiểm tra UI 3C, môn/học kỳ, bảng điểm và quay lại đã đổi sang nhận diện kỳ cùng năm học. Lệnh commit/push hiện tại ở `GIT-COMMITS.md`.
 

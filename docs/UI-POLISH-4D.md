@@ -30,9 +30,9 @@ Project: `D:\Video OBS\QuanLyHocTap`. Đợt frontend theo ảnh Thống kê đ�
 ## Kiểm tra đã thực hiện
 
 - `npm run typecheck`: qua.
-- `node docs/qa-statistics-unit.cjs`: 71 kiểm tra qua; chạy ở Asia/Saigon và America/New_York để kiểm tra ngày chuyển DST. Bao gồm tách học kỳ, snapshot môn đã đổi/xóa, 7/30/tùy chọn, nhóm liên tục, ngày/năm mới, không tính trùng/tương lai, tổng các biểu đồ và deadline theo phút.
+- `node frontend/qa/qa-statistics-unit.cjs`: 71 kiểm tra qua; chạy ở Asia/Saigon và America/New_York để kiểm tra ngày chuyển DST. Bao gồm tách học kỳ, snapshot môn đã đổi/xóa, 7/30/tùy chọn, nhóm liên tục, ngày/năm mới, không tính trùng/tương lai, tổng các biểu đồ và deadline theo phút.
 - Hồi quy: focus 88, assignment 62, Dashboard 28, AI 31, navigation 30 kiểm tra logic qua.
-- `node docs/qa-statistics.cjs`: kiểm tra trình duyệt headless riêng với đồng hồ test. Chọn học kỳ/ngày, áp dụng/hủy/lỗi khoảng ngày, cập nhật sau phiên Pomodoro/nghỉ, deadline cập nhật theo phút, bài hoàn thành, lối vào bảng điểm và workspace trống phát triển thành thống kê.
+- `node frontend/qa/qa-statistics.cjs`: kiểm tra trình duyệt headless riêng với đồng hồ test. Chọn học kỳ/ngày, áp dụng/hủy/lỗi khoảng ngày, cập nhật sau phiên Pomodoro/nghỉ, deadline cập nhật theo phút, bài hoàn thành, lối vào bảng điểm và workspace trống phát triển thành thống kê.
 - Kiểm tra bố cục/ảnh tại 320/390/430/1280px: Tổng quan, biểu đồ, phân bổ môn và hộp chọn ngày; không tràn cuộn ngang, không có lỗi runtime/console trong luồng test. Ảnh/kết quả nằm trong `.expo/qa-statistics/`, được Git bỏ qua.
 - Build web và export bundle Android qua. Android mới kiểm tra bundle, chưa chạy UI trên điện thoại thật.
 

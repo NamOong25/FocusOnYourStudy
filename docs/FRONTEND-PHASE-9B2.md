@@ -14,7 +14,7 @@ powershell.exe -NoProfile -File ".\scripts\Run-Local.ps1"
 Giữ terminal này mở. Terminal thứ hai:
 
 ```text
-cd "D:\Video OBS\QuanLyHocTap"
+cd "D:\Video OBS\QuanLyHocTap\frontend"
 npx expo start --web --port 8092
 ```
 

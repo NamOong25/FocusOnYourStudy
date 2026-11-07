@@ -21,7 +21,7 @@ Ngày 29/10/2026. Màn **Thống kê → Tổng quan** của tài khoản đọc
 2. Chạy frontend như đang dùng:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

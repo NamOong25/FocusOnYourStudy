@@ -1,6 +1,6 @@
 # Cấu hình điểm — 5A.1
 
-V8 thêm `grade_configurations` và `grade_columns`; không seed và không sửa V1–V7. Endpoint cấu hình chỉ lưu cấu trúc bảng điểm. **Từ 5A.2A/V9, giá trị điểm được lưu qua API riêng `/grade-configurations/{id}/scores`, dùng chung version và bảo vệ các cột đã có điểm.** Xem [hợp đồng điểm](GRADE-SCORES.md). Chưa tính tổng kết/đạt/học lại/GPA; màn Điểm React Native nối ở 5C. Các quy tắc dưới đây tái hiện cấu hình hiện có trong `src/features/grades/grades.ts`; đề cương từng lớp quyết định số cột và cách quy BTL, không suy từ tên môn.
+V8 thêm `grade_configurations` và `grade_columns`; không seed và không sửa V1–V7. Endpoint cấu hình chỉ lưu cấu trúc bảng điểm. **Từ 5A.2A/V9, giá trị điểm được lưu qua API riêng `/grade-configurations/{id}/scores`, dùng chung version và bảo vệ các cột đã có điểm.** Xem [hợp đồng điểm](GRADE-SCORES.md). Chưa tính tổng kết/đạt/học lại/GPA; màn Điểm React Native nối ở 5C. Các quy tắc dưới đây tái hiện cấu hình hiện có trong `frontend/src/features/grades/grades.ts`; đề cương từng lớp quyết định số cột và cách quy BTL, không suy từ tên môn.
 
 ## API
 

@@ -58,6 +58,7 @@ Mọi dữ liệu cần test phải là dữ liệu bạn chấp nhận chỉnh 
 - Không chạy lại 537 tests backend vì không đổi backend; đó là baseline đã đạt ở 5B.2B.2.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 npm run test:grades
 node --test tests/*.test.cjs

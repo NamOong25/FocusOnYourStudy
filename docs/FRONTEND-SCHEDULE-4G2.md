@@ -14,7 +14,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Frontend:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -96,7 +96,7 @@ Lịch học và bài tập dùng dữ liệu tài khoản. Nhắc lịch thi v�
 ## Nghiệm thu
 
 - **140 test lịch/nhắc việc qua, gồm 29 mới**: mốc chính xác, 0 phút/7 ngày, kết thúc, ngoại lệ, nhiều kỳ/ngày, múi giờ/ngày nguồn, dấu đọc khi đổi nội dung/đổi ngày khác/tải lỗi, account-wide bounded reads, snapshot thiếu/đổi và invalidation cùng ngày không xóa khóa ghi.
-- **62 kiểm tra nhắc việc cũ** qua với `node docs/qa-notifications-unit.cjs`.
+- **62 kiểm tra nhắc việc cũ** qua với `node frontend/qa/qa-notifications-unit.cjs`.
 - TypeScript và export web qua. Không đổi backend/migration; không chạy lại 238 backend tests của các đợt trước.
 - **15 nhóm browser với API/PostgreSQL thật** qua trong schema QA riêng, dùng đồng hồ kiểm thử: trước/đúng mốc, tự cập nhật phút, đã đọc/lọc/tải lại, mở ngày/sửa phòng, version do ngày khác, chuyển giờ và mốc, nghỉ/khôi phục, xóa/kết thúc/đọc tất cả, lỗi tải và nhắc bài vẫn mở, khôi phục dấu đọc, lỗi lần đầu/F5, request đang chờ, hai tài khoản/mốc 0, nhãn 0/F5, điều hướng sang học kỳ khác dù Trang chủ đang không có lịch.
 - Ảnh Góc nhắc nhở 320/390/430/1280px đã được xem. Dữ liệu và dịch vụ QA riêng được dọn sau kiểm tra; không seed vào tài khoản hoặc schema chính của bạn.

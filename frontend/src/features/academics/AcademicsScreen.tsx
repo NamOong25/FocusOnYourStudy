@@ -3,7 +3,7 @@ import { FlowScope } from '../../navigation/Navigation';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Badge, Button, Card, Icon, IconButton, IconTile, Progress, Row, Section, Segments, Sheet, T } from '../../shared/components';
+import { Badge, Button, Card, Icon, IconButton, IconTile, Progress, Row, Section, Segments, Sheet, SheetFlow, T } from '../../shared/components';
 import { Course, courseColors } from './academic';
 import { CourseForm, SemesterForm } from './forms';
 import { ClassForm } from '../schedule/ClassForm';
@@ -83,12 +83,15 @@ export default function Academics() {
     {list.length > 0 && <Button label="Thêm môn học mới" icon="add-circle-outline" onPress={() => setSheet('new-course')} />}
     {(sheet === 'new-semester' || sheet === 'edit-semester') && <SemesterForm key="semester-editor" item={sheet === 'edit-semester' ? semester : undefined} onClose={() => setSheet(null)} onSaved={id => { if (id !== semester.id) selectSemester(id); setSheet(null); }} onDeleted={() => { setSheet(null); setSemesterId(''); }} />}
     {(sheet === 'new-course' || sheet === 'edit-course') && <CourseForm item={sheet === 'edit-course' ? openedCourse : undefined} semesterId={semester.id} onClose={() => setSheet(sheet === 'edit-course' && openedCourse ? 'detail' : null)} onSaved={(id, targetSemesterId) => { if (targetSemesterId !== semester.id) selectSemester(targetSemesterId); if (sheet === 'new-course') setDetailSection('Tổng quan'); setCourseId(id); setSheet('detail'); }} onDeleted={() => { setCourseId(null); setSheet(null); }} />}
-    {sheet === 'detail' && openedCourse && <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}><CourseDetail examPeriod={examPeriod} onExamPeriod={setExamPeriod} section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onNewExam={() => setSheet('new-exam')} onGrades={(mode='scores') => { setGradeEditMode(mode); setSheet('grades'); }} /></Sheet>}
+    {(sheet === 'detail' || sheet === 'grades') && openedCourse && <SheetFlow>
+      {sheet === 'detail' ? <Sheet title="Chi tiết môn học" scrollKey={`course-${courseId}-${detailSection}`} onClose={() => setSheet(null)}>
+        <CourseDetail examPeriod={examPeriod} onExamPeriod={setExamPeriod} section={detailSection} setSection={setDetailSection} course={openedCourse} onEdit={() => setSheet('edit-course')} onClose={() => setSheet(null)} onTask={item => { setTaskItem(item); setSheet('task'); }} onClass={item => { setClassItem(item); setSheet('class'); }} onExam={id => { setExamId(id); setSheet('exam'); }} onNewExam={() => setSheet('new-exam')} onGrades={(mode='scores') => { setGradeEditMode(mode); setSheet('grades'); }} />
+      </Sheet> : <GradeEditor courseId={openedCourse.id} mode={gradeEditMode} onClose={() => setSheet('detail')} />}
+    </SheetFlow>}
     {sheet === 'task' && openedCourse && (taskItem ? <TaskDialog key={taskItem.id} taskId={taskItem.id} onClose={() => setSheet('detail')} /> : <TaskForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'class' && openedCourse && (classItem ? <ClassDialog id={classItem.id} onClose={() => setSheet('detail')} /> : <ClassForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} />)}
     {sheet === 'exam' && examId && <ExamDialog id={examId} onClose={() => setSheet('detail')} />}
     {sheet === 'new-exam' && openedCourse && <ExamForm initialCourseId={openedCourse.id} onClose={() => setSheet('detail')} onSaved={id => { setExamId(id); setSheet('exam'); }} />}
-    {sheet === 'grades' && openedCourse && <GradeEditor courseId={openedCourse.id} mode={gradeEditMode} onClose={() => setSheet('detail')} />}
   </FlowScope>;
 }
 

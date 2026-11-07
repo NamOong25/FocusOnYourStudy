@@ -50,6 +50,7 @@ Giữ backend/frontend chạy như trước, tải lại trang và đăng nhập
 - Không đổi backend, dependency hay schema (vẫn V9); không chạy lại 537 tests backend đã đạt ở 5B.2B.2.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 npm run test:grades
 node --test tests/*.test.cjs

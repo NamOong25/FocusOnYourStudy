@@ -25,8 +25,8 @@ Dữ liệu vẫn chỉ ở bộ nhớ; tải lại ứng dụng trở về mẫ
 ## Kết quả kiểm tra đợt 2A
 
 - TypeScript, build web (khoảng 631KB) và bundle Android/Hermes: qua.
-- `docs/qa-academics.cjs`: qua trên Chrome headless; xem bố cục catalog ở 320/390/430/1280px và chi tiết môn/điểm mẫu ở 390px.
+- `frontend/qa/qa-academics.cjs`: qua trên Chrome headless; xem bố cục catalog ở 320/390/430/1280px và chi tiết môn/điểm mẫu ở 390px.
 - Đã thử: đổi/tạo học kỳ, validate form; tìm/lọc môn; tạo/sửa/xóa môn; chặn mã trùng trong cùng học kỳ; cho phép cùng mã/tên ở học kỳ khác; chọn sẵn môn và giảng viên trong form; đổi tên giữ liên kết; chặn xóa môn có dữ liệu liên quan; mở Pomodoro cho môn vừa chọn.
-- `docs/qa-smoke.cjs`: các luồng 5 tab cũ, bài tập, lịch, timer, AI preview vẫn qua sau thay đổi.
+- `frontend/qa/qa-smoke.cjs`: các luồng 5 tab cũ, bài tập, lịch, timer, AI preview vẫn qua sau thay đổi.
 - Không có runtime error/console.error ở hai lượt smoke cuối. Kết quả và ảnh ở `.expo/qa-academics/` và `.expo/qa/` (không theo dõi bằng Git).
 - Chưa chạy trên điện thoại thật; bundle Android không thay cho kiểm tra native layout, chuông hoặc chạy nền.

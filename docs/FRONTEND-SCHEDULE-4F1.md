@@ -16,7 +16,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Terminal frontend:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -56,6 +56,7 @@ Nút tải lại cũng lấy lại danh mục môn để cập nhật tên môn.
 Đã qua **28 test đọc lịch**, `npm run typecheck`, export web; kiểm tra browser với API thật trên schema PostgreSQL riêng: đăng nhập, hai tài khoản, F5, đổi/không có học kỳ, ngày/tuần/tháng, nghỉ/đổi, chi tiết, mất mạng/thử lại và kích thước 320/390/430/1280px. Không dùng dữ liệu tài khoản của bạn, không nghiệm thu native trong đợt này. Backend không đổi nên không chạy lại 238 test backend.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run test:schedule
 npm run typecheck
 npm run build:web

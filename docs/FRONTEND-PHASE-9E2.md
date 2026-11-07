@@ -5,7 +5,7 @@ Trong **Hồ sơ → Xuất dữ liệu**, tài khoản đang đăng nhập có 
 ## Chạy thử trên web
 
 1. Giữ backend chạy bằng cách đang dùng. Mở [health](http://localhost:8080/api/v1/health) để kiểm tra backend và database đều `UP`.
-2. Tại thư mục gốc project, chạy `npx expo start --web --port 8092`. Sau khi cập nhật project trên máy khác, chạy `npm install` trước để cài hai thư viện mới.
+2. Tại thư mục `frontend`, chạy `npx expo start --web --port 8092`. Sau khi cập nhật project trên máy khác, chạy `npm install` trước để cài hai thư viện mới.
 3. Đăng nhập, mở biểu tượng hồ sơ ở góc trên, chọn **Xuất dữ liệu** trong phần Tài khoản.
 4. Bấm **Chuẩn bị tệp JSON**. Đợi thẻ **Tệp đã sẵn sàng**, kiểm tra email, tên tệp và số môn/bài tập.
 5. Bấm **Tải tệp JSON**. Tìm tệp `focusyourstudy-YYYYMMDD-HHmmss.json` trong mục tải xuống của trình duyệt hoặc nơi bạn vừa chọn lưu. Thời gian trong tên tệp dùng UTC, thời gian hiển thị trên màn dùng giờ thiết bị.
@@ -38,9 +38,10 @@ Tệp tạm được ghi vào cache riêng của app và lên lịch dọn sau 1
 - Đã chạy SessionManager và mã xuất frontend với API/PostgreSQL thật trong schema QA riêng. Kiểm tra tệp Blob ghi ra đĩa có tiếng Việt, đúng byte, đúng owner, tài khoản mới rỗng và chặn tệp của owner cũ. Đã dừng backend QA và xóa schema riêng.
 - Web saver dùng DOM giả lập trong test. Native dùng FileSystem/Sharing giả lập. Chưa nghiệm thu thao tác tải trực tiếp trên trình duyệt vì Local browser use bị tắt trong Work settings. Chưa nghiệm thu trên điện thoại thật. Dùng các bước trên để kiểm tra hai phần này.
 
-Lệnh kiểm tra lại từ thư mục gốc project
+Lệnh kiểm tra trong thư mục `frontend`
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 node --test tests/data-export.test.cjs
 ```

@@ -28,8 +28,8 @@ Giữ các phần đã hoãn trong `UI-BACKLOG.md`: chọn ngày/giờ bằng l�
 ## Kiểm tra
 
 - TypeScript, build web (~666KB) và bundle Android/Hermes: qua.
-- `docs/qa-learning.cjs`: qua. Thử checklist giữ dữ liệu qua luồng, gắn/đọc/gỡ tài liệu mẫu, tạo buổi có liên kết và độc lập, validate deadline/trùng giờ, lịch ngày/tuần, sửa/xóa và bảo toàn kế hoạch khi xóa bài.
+- `frontend/qa/qa-learning.cjs`: qua. Thử checklist giữ dữ liệu qua luồng, gắn/đọc/gỡ tài liệu mẫu, tạo buổi có liên kết và độc lập, validate deadline/trùng giờ, lịch ngày/tuần, sửa/xóa và bảo toàn kế hoạch khi xóa bài.
 - Dùng đồng hồ giả trong trình duyệt để thử hoàn tất 25 phút: ghi đúng một phiên, cập nhật buổi được chọn, giữ nguyên trạng thái bài tập. Không dùng kết quả này để kết luận hoạt động nền trên điện thoại thật.
-- `docs/qa-academics.cjs` và `docs/qa-smoke.cjs`: các luồng môn học và 5 tab cũ vẫn qua. Cập nhật thao tác test để mở chỉnh sửa từ màn chi tiết bài mới.
+- `frontend/qa/qa-academics.cjs` và `frontend/qa/qa-smoke.cjs`: các luồng môn học và 5 tab cũ vẫn qua. Cập nhật thao tác test để mở chỉnh sửa từ màn chi tiết bài mới.
 - Không có runtime error/console.error trong các lượt smoke cuối. Kiểm tra bố cục Tự học ở 320/390/430/1280px, chi tiết bài và Pomodoro liên kết ở 390px. Ảnh/kết quả tại `.expo/qa-learning/`.
 - Chưa chạy ứng dụng trên điện thoại thật.

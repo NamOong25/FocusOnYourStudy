@@ -33,10 +33,10 @@ Các mốc số liệu trên giả định thử cùng ngày và không hoàn th
 ## Kiểm tra kỹ thuật
 
 - `npm run typecheck`: qua.
-- `node docs/qa-focus-unit.cjs`: 88 kiểm tra logic qua, gồm pause/resume chính xác, gọi lặp/Strict Mode, callback muộn, reset đúng hạn, nghỉ/bỏ dở, mục tiêu, qua nửa đêm/năm, chuỗi, nhóm lịch sử và cộng phút đúng buổi.
+- `node frontend/qa/qa-focus-unit.cjs`: 88 kiểm tra logic qua, gồm pause/resume chính xác, gọi lặp/Strict Mode, callback muộn, reset đúng hạn, nghỉ/bỏ dở, mục tiêu, qua nửa đêm/năm, chuỗi, nhóm lịch sử và cộng phút đúng buổi.
 - Các kiểm tra hồi quy assignment (62), Dashboard (28), AI (31) và navigation (30): qua.
-- `node docs/qa-focus.cjs`: chạy trình duyệt headless riêng, đồng hồ test tăng thời gian để thử đủ phiên mà không cần đợi 25 phút thật. Qua hai phiên, pause, đổi tab, mục tiêu lưu/hủy, nghỉ/reset, trạng thái bài tập độc lập, bản trống/mẫu, console và các kích thước 320/390/430/1280px. Kết quả/ảnh nằm trong `.expo/qa-focus/`, không đưa vào Git.
-- `node docs/qa-learning.cjs`: qua luồng hồi quy chi tiết bài tập/checklist/tài liệu → tạo và liên kết nhiều buổi tự học → Pomodoro hoàn tất đúng một lần → giữ trạng thái bài tập → sửa/xóa và bỏ liên kết. Script đã cập nhật cách đọc lịch sử mới và chọn nút trong đúng hộp thoại.
+- `node frontend/qa/qa-focus.cjs`: chạy trình duyệt headless riêng, đồng hồ test tăng thời gian để thử đủ phiên mà không cần đợi 25 phút thật. Qua hai phiên, pause, đổi tab, mục tiêu lưu/hủy, nghỉ/reset, trạng thái bài tập độc lập, bản trống/mẫu, console và các kích thước 320/390/430/1280px. Kết quả/ảnh nằm trong `.expo/qa-focus/`, không đưa vào Git.
+- `node frontend/qa/qa-learning.cjs`: qua luồng hồi quy chi tiết bài tập/checklist/tài liệu → tạo và liên kết nhiều buổi tự học → Pomodoro hoàn tất đúng một lần → giữ trạng thái bài tập → sửa/xóa và bỏ liên kết. Script đã cập nhật cách đọc lịch sử mới và chọn nút trong đúng hộp thoại.
 - `npm run build:web` và `npx expo export --platform android --output-dir .expo/native-check`: qua. Android mới kiểm tra bundle, chưa chạy trên điện thoại.
 
 Script giao diện cần Playwright và Chromium hiện có; nếu máy chưa có trong project, đặt `PLAYWRIGHT_MODULE`/`CHROME_PATH` trỏ đến bộ cài của máy, tương tự các script QA trước. Cần mở `npx expo start --web --port 8092`, hoặc truyền URL làm đối số cho script. Công cụ xem trực tiếp trình duyệt gặp lỗi khởi tạo trong đợt này; ảnh được chụp từ kiểm thử headless và xem lại từ file.

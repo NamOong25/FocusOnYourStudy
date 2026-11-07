@@ -18,7 +18,7 @@ Giữ terminal này chạy. Nếu backend đang chạy từ bản trước 4A, d
 Terminal PowerShell 2:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -79,17 +79,18 @@ Các kiểm tra buổi tự học hiện chỉ áp dụng dữ liệu đang có 
 Kiểm tra tự động:
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-assignment-api-unit.cjs
-node docs/qa-course-api-unit.cjs
-node docs/qa-semester-api-unit.cjs
-node docs/qa-account-api-unit.cjs
-node docs/qa-session-unit.cjs
-node docs/qa-grades-unit.cjs
+node qa/qa-assignment-api-unit.cjs
+node qa/qa-course-api-unit.cjs
+node qa/qa-semester-api-unit.cjs
+node qa/qa-account-api-unit.cjs
+node qa/qa-session-unit.cjs
+node qa/qa-grades-unit.cjs
 npm run build:web
 ```
 
-Browser runner `docs/qa-assignments-api.cjs` dùng `QA_APP_URL`, `QA_API_URL`, `PLAYWRIGHT_MODULE`, `CHROME_PATH`. Chỉ chạy với backend trỏ tới **schema QA riêng** vì runner tạo tài khoản `assign-a/assign-b-...@example.test` và các dữ liệu kiểm thử. Runner hồi quy môn/tách tài khoản đã cập nhật kỳ vọng bài thật; ảnh và kết quả nằm trong `.expo/`, ngoài Git.
+Browser runner `frontend/qa/qa-assignments-api.cjs` dùng `QA_APP_URL`, `QA_API_URL`, `PLAYWRIGHT_MODULE`, `CHROME_PATH`. Chỉ chạy với backend trỏ tới **schema QA riêng** vì runner tạo tài khoản `assign-a/assign-b-...@example.test` và các dữ liệu kiểm thử. Runner hồi quy môn/tách tài khoản đã cập nhật kỳ vọng bài thật; ảnh và kết quả nằm trong `.expo/`, ngoài Git.
 
 Tài liệu Expo đã đối chiếu: [SDK 56](https://docs.expo.dev/versions/v56.0.0/). Hợp đồng backend giữ nguyên ở [ASSIGNMENTS.md](../backend/docs/ASSIGNMENTS.md).
 

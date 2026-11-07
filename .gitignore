@@ -5,5 +5,5 @@ dist/
 *.tsbuildinfo
 .env*.local
 npm-debug.*
-/android
-/ios
+/frontend/android/
+/frontend/ios/

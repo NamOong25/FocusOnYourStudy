@@ -14,7 +14,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 ```
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -56,12 +56,13 @@ Mở `http://localhost:8092`, đăng nhập ở **Hồ sơ** rồi đóng bảng
 - `SemesterSyncStatus.tsx` và AppShell: tải/lỗi/thử lại trước khi mở các màn cần danh sách học kỳ/môn.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-course-api-unit.cjs
-node docs/qa-semester-api-unit.cjs
-node docs/qa-session-unit.cjs
-node docs/qa-account-api-unit.cjs
-node docs/qa-grades-unit.cjs
+node qa/qa-course-api-unit.cjs
+node qa/qa-semester-api-unit.cjs
+node qa/qa-session-unit.cjs
+node qa/qa-account-api-unit.cjs
+node qa/qa-grades-unit.cjs
 npm run build:web
 ```
 

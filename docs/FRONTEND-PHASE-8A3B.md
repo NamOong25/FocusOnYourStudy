@@ -34,6 +34,7 @@ powershell.exe -NoProfile -File "D:\Video OBS\QuanLyHocTap\backend\scripts\Run-L
 Giữ terminal đó chạy. Ở terminal khác, tại thư mục `D:\Video OBS\QuanLyHocTap`:
 
 ```text
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

@@ -17,7 +17,7 @@ Bổ sung nhỏ API: `basis.milestoneMinutes` cho lịch thi khi đã tới mố
 ## Cách bạn kiểm tra
 
 1. **Khởi động lại backend** để nhận bổ sung mốc nhắc: Ctrl+C terminal backend cũ, trong thư mục `backend` chạy `.\scripts\Run-Local.ps1`.
-2. Giữ frontend chạy hoặc từ gốc project chạy `npx expo start --web --port 8092`; dùng URL/cổng đang chạy của bạn. Đăng nhập tài khoản app khi muốn kiểm tra database.
+2. Giữ frontend chạy hoặc từ thư mục `frontend` chạy `npx expo start --web --port 8092`; dùng URL/cổng đang chạy của bạn. Đăng nhập tài khoản app khi muốn kiểm tra database.
 3. Tạo bài chưa hoàn thành, hạn ngày mai, tên `TEST 7B2`. Mở chuông và chờ xác nhận xong. Bấm dấu đọc: số chưa đọc giảm sau xác nhận server. Hoặc mở thẻ xem chi tiết rồi quay lại.
 4. F5, mở chuông lại: thẻ vẫn Đã đọc. Mở chuông không tự đánh dấu tất cả.
 5. Có nhiều mục thì bấm Đánh dấu tất cả đã đọc; tab Chưa đọc hiện Bạn đã đọc hết nhắc việc. Xem tất cả vẫn giữ các thẻ đã đọc.
@@ -36,7 +36,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 
 ```powershell
 # Terminal frontend khác
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

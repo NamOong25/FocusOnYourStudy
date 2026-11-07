@@ -48,10 +48,11 @@ Trên web, form đang hoạt động và có thay đổi đăng ký `beforeunloa
 Chạy từ thư mục project, dùng Playwright và Chrome đã cài trên máy. Biến `PLAYWRIGHT_MODULE`/`CHROME_PATH` cho phép chọn runtime, không cần thêm thư viện vào app.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-unsaved-forms.cjs
-node docs/qa-navigation.cjs
-node docs/qa-ui-states.cjs
+node qa/qa-unsaved-forms.cjs
+node qa/qa-navigation.cjs
+node qa/qa-ui-states.cjs
 npm run build:web
 ```
 

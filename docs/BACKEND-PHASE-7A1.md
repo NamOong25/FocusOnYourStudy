@@ -65,7 +65,7 @@ Nếu cần tạo bài để thử, dùng app như bình thường hoặc script
 Nếu frontend đang chạy thì dùng tab hiện có. Nếu chưa chạy và muốn sửa dữ liệu qua giao diện, mở frontend ở terminal riêng:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

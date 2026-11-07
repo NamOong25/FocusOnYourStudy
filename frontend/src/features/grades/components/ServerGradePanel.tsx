@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 import { View } from 'react-native';
-import { Badge, Button, Card, Progress, Row, Sheet, StateView, T } from '../../../shared/components';
+import { Badge, Button, Card, Progress, Row, Sheet, SheetFlow, StateView, T } from '../../../shared/components';
 import { useNavigationScope } from '../../../navigation/Navigation';
 import { useApp } from '../../../store/model';
 import { C, F, S } from '../../../shared/theme';
@@ -15,11 +15,13 @@ export function ServerCourseGradeDialog({courseId,onClose}:{courseId:string;onCl
   const {state:writes}=useGradeConfigurationWrites();
   const [edit,setEdit]=useState<ServerGradeEditMode|null>(()=>writes.pending?.course.id===courseId?(writes.pending.operation==='scores'?'scores':'configuration'):null);
   const {courseCatalog}=useApp(),course=courseCatalog.find(c=>c.id===courseId);
-  if(edit)return <ServerGradeEditorRouter key={courseId} courseId={courseId} mode={edit} onClose={()=>{setEdit(null);if(!course)onClose();}}/>;
-  return <Sheet title="Bảng điểm môn học" onClose={onClose}>
-    {course&&<><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/></>}
-    <ServerGradePanel courseId={courseId} onConfigure={()=>setEdit('configuration')} onScores={()=>setEdit('scores')}/>
-  </Sheet>;
+  return <SheetFlow>
+    {edit ? <ServerGradeEditorRouter key={courseId} courseId={courseId} mode={edit} onClose={()=>{setEdit(null);if(!course)onClose();}}/>
+      : <Sheet title="Bảng điểm môn học" onClose={onClose}>
+        {course&&<><T style={{fontFamily:F.extra,fontSize:22,lineHeight:32}}>{course.name}</T><Badge label={`${course.code} · ${course.credits} tín chỉ`}/></>}
+        <ServerGradePanel courseId={courseId} onConfigure={()=>setEdit('configuration')} onScores={()=>setEdit('scores')}/>
+      </Sheet>}
+  </SheetFlow>;
 }
 export default function ServerGradePanel({courseId,onConfigure,onScores}:{courseId:string;onConfigure?:()=>void;onScores?:()=>void}){
   const {courseCatalog,courseConnection,semesterConnection}=useApp(),course=courseCatalog.find(c=>c.id===courseId);

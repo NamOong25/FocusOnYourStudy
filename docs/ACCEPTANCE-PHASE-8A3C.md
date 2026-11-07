@@ -54,9 +54,10 @@ Giữ hai terminal chạy như trước. Backend:
 powershell.exe -NoProfile -File "D:\Video OBS\QuanLyHocTap\backend\scripts\Run-Local.ps1"
 ```
 
-Frontend, tại `D:\Video OBS\QuanLyHocTap`:
+Frontend, tại `D:\Video OBS\QuanLyHocTap\frontend`:
 
 ```text
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

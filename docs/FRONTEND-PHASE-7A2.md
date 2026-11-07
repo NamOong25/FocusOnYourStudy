@@ -26,7 +26,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Dùng frontend đang chạy; nếu chưa chạy thì mở terminal khác:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

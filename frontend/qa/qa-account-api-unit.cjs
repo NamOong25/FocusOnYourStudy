@@ -1,6 +1,12 @@
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict'), ts = require('typescript');
 const out = path.resolve(__dirname, '../.expo/qa-account-api/unit'); fs.mkdirSync(out, { recursive: true });
-for (const name of ['shared/api/http', 'features/account/api/accountApi']) {
+for (const name of [
+  'shared/api/http',
+  'features/account/account',
+  'features/account/profile/profileData',
+  'features/account/password/passwordData',
+  'features/account/api/accountApi',
+]) {
   const file = path.join(out, name + '.js'); fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, ts.transpileModule(fs.readFileSync(path.resolve(__dirname, '../src', name + '.ts'), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },

@@ -32,9 +32,10 @@ Giữ nền xanh nhạt, tím, gradient, font Jakarta, thẻ bo tròn và dock c
 ## Kiểm tra
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-grades-unit.cjs
-node docs/qa-grades.cjs
+node qa/qa-grades-unit.cjs
+node qa/qa-grades.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```

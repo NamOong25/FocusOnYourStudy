@@ -13,7 +13,7 @@ export { Section } from './Section';
 export { Progress } from './Progress';
 export { Segments } from './Segments';
 export { Field } from './Field';
-export { Sheet } from './Sheet';
+export { Sheet, SheetFlow } from './Sheet';
 export { Empty } from './Empty';
 
 export { StateView } from './StateView';

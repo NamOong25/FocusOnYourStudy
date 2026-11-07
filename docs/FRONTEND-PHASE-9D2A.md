@@ -11,10 +11,10 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 powershell.exe -NoProfile -File .\scripts\Run-Local.ps1
 ```
 
-Mở terminal thứ hai ở gốc project.
+Mở terminal thứ hai để chạy frontend.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 

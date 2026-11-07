@@ -22,7 +22,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Terminal frontend:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -54,8 +54,8 @@ Mở `http://localhost:8092`. Không cần tạo lại database. Nếu backend �
 
 Kết quả ngày 23/10/2026: **TypeScript và export web qua; 37 nhóm unit mới, 16 nhóm browser tự học, 16 nhóm hồi quy bài tập và 11 nhóm tài khoản/liên tab qua** trên PostgreSQL/schema riêng. Các unit bài tập/môn, lịch và Pomodoro cùng smoke khách 320/390/430/1280px qua. Đã xem ảnh form 320px/390px. Runner tài khoản được cập nhật phạm vi ghi tự học và chờ thông báo đổi danh tính khi test đăng xuất liên tab, tránh kiểm tra trước storage event. Không chạy lại Maven vì không sửa backend; 155 tests là kết quả đợt 4C, không phải số test mới của 4D.
 
-- `node docs/qa-study-api-unit.cjs`: API mapping, timezone/DST, expected version, confirmed cache/lỗi mạng, chặn gửi lặp, phản hồi tài khoản cũ và tách phút Pomodoro khỏi trạng thái.
-- `node docs/qa-study-api.cjs`: chạy trên frontend và backend **schema QA riêng**, tạo tài khoản `study-*@example.test`; không chạy vào database cá nhân. Dùng `QA_APP_URL`, `QA_API_URL`, `PLAYWRIGHT_MODULE`, `CHROME_PATH` như các runner trước. Có lỗi ban đầu/thử lại, CRUD/F5, liên kết, conflict, mất phản hồi, offline, hai tài khoản/hai tab và 320/390/430/1280px.
+- `node frontend/qa/qa-study-api-unit.cjs`: API mapping, timezone/DST, expected version, confirmed cache/lỗi mạng, chặn gửi lặp, phản hồi tài khoản cũ và tách phút Pomodoro khỏi trạng thái.
+- `node frontend/qa/qa-study-api.cjs`: chạy trên frontend và backend **schema QA riêng**, tạo tài khoản `study-*@example.test`; không chạy vào database cá nhân. Dùng `QA_APP_URL`, `QA_API_URL`, `PLAYWRIGHT_MODULE`, `CHROME_PATH` như các runner trước. Có lỗi ban đầu/thử lại, CRUD/F5, liên kết, conflict, mất phản hồi, offline, hai tài khoản/hai tab và 320/390/430/1280px.
 - Hồi quy bài tập/tài khoản được cập nhật: tự học giờ là dữ liệu đã lưu; backend chặn rút deadline sai liên kết. Không thay backend hoặc migration trong 4D.
 
 Tên commit: **Kết nối giao diện tự học với dữ liệu backend**. Lệnh ở `GIT-COMMITS.md`; không tự commit/push.

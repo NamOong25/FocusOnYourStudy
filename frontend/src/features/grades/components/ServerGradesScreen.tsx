@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Pressable,ScrollView,TextInput,View} from 'react-native';
-import {Badge,Button,Card,Icon,Row,Segments,Sheet,StateView,T} from '../../../shared/components';
+import {Badge,Button,Card,Icon,Row,Segments,Sheet,SheetFlow,StateView,T} from '../../../shared/components';
 import {useNavigationScope} from '../../../navigation/Navigation';
 import {useApp} from '../../../store/model';
 import {C,F,S} from '../../../shared/theme';
@@ -14,8 +14,10 @@ import {GradeConfigurationPendingNotice} from './GradeConfigurationReview';
 
 export function ServerSemesterGradesSheet({semesterId,onClose}:{semesterId:string;onClose:()=>void}){
   const [opened,setOpened]=useState<string|null>(null);
-  if(opened)return <ServerCourseGradeDialog courseId={opened} onClose={()=>setOpened(null)}/>;
-  return <Sheet title="Điểm học kỳ đã lưu" onClose={onClose}><ServerGradesScreen fixedSemesterId={semesterId} onOpenCourse={setOpened}/></Sheet>;
+  return <SheetFlow>
+    {opened ? <ServerCourseGradeDialog courseId={opened} onClose={()=>setOpened(null)}/>
+      : <Sheet title="Điểm học kỳ đã lưu" onClose={onClose}><ServerGradesScreen fixedSemesterId={semesterId} onOpenCourse={setOpened}/></Sheet>}
+  </SheetFlow>;
 }
 export default function ServerGradesScreen({fixedSemesterId,onOpenCourse,onCompare}:{fixedSemesterId?:string;onOpenCourse?:(id:string)=>void;onCompare?:()=>void}={}){
   const {semesters,courseCatalog,academicSemesterId,setAcademicSemesterId,setScheduleMode,courseConnection,semesterConnection}=useApp();

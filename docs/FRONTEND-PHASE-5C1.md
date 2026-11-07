@@ -38,6 +38,7 @@ Không thay backend/schema/migration hay quy tắc IUH ở đợt này; vẫn V9
 - Schema và tiến trình QA được dọn sau kiểm tra; không thêm dữ liệu thử vào tài khoản thật.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 npm run test:grades
 node --test tests/*.test.cjs

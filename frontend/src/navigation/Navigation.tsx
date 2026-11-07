@@ -41,7 +41,7 @@ export function useBackAction(enabled: boolean, onBack: () => void, priority?: n
   useEffect(() => { if (enabled && scope.active) return registry?.register(id.current, rank, () => action.current()); }, [registry, enabled, scope.active, rank]);
 }
 export function RememberedScrollView({ memoryKey, active = true, onScroll, onContentSizeChange, ...props }: ScrollViewProps & { memoryKey: string; active?: boolean }) {
-  const scope = useNavigationScope(); const ref = useRef<ScrollView>(null); const restoring = useRef(true); const wanted = useRef(0); const visible = active && scope.active;
+  const scope = useNavigationScope(); const ref = useRef<React.ComponentRef<typeof ScrollView>>(null); const restoring = useRef(true); const wanted = useRef(0); const visible = active && scope.active;
   useLayoutEffect(() => {
     if (!visible) return;
     restoring.current = true; wanted.current = scope.scroll.get(memoryKey) ?? 0;

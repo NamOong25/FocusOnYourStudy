@@ -1,6 +1,6 @@
 # QuanLyHocTap — FocusYourStudy
 
-Frontend React Native + Expo SDK 56, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
+Frontend React Native + Expo SDK 58 ở `frontend/`, dựng từ template bạn cung cấp; project độc lập với StudyPlanner cũ. Backend Spring Boot + PostgreSQL ở `backend/`. Tài khoản/phiên, học kỳ, môn học, bài tập, tự học và thời khóa biểu đã dùng dữ liệu thật. **Lịch thi đã đọc và thêm/sửa/xóa qua API ở 4H.2A/4H.2B**; Trang chủ/chi tiết môn đã dùng lịch thi thật ở 4H.2C.1; nhắc việc lịch thi đã nối API ở 4H.2C.2. Điểm môn và GPA học kỳ đã đọc dữ liệu thật ở 5C.1; cấu hình bộ cột lưu thật từ 5C.2A, nhập/lưu điểm số ở 5C.2B. GPA tích lũy, so sánh học kỳ và Dashboard đã nối API ở 5C.3. Đồng hồ Pomodoro tài khoản đã nối API ở 6B.1; lịch sử, mục tiêu và tiến độ ngày đã nối ở 6B.2; API thống kê tuần/tháng có ở 6C.1, giao diện biểu đồ đã nối ở 6C.2; chuỗi ngày và nhịp học trên Dashboard đã nối ở 6C.3B.
 
 ## Mới nhất — 9F.2A: Chuẩn bị Render Free và Neon Free
 
@@ -428,7 +428,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 ```
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -438,7 +438,7 @@ Mở `http://localhost:8092` → chọn dữ liệu trống hoặc mẫu → **H
 
 **2C.3A** kiểm tra A/B với dữ liệu thử, bản nháp và đồng hồ đang chạy; không giữ thông báo hoặc chế độ thử lỗi từ tài khoản cũ. Có kiểm tra liên tab, phản hồi về muộn, offline/kết nối lại. Xem [hướng dẫn tự test](docs/FRONTEND-AUTH-2C3A.md). Từ 4B, runner giữ học kỳ/môn/bài thật của A khi trở lại A, nhưng dọn lịch/điểm/timer thử. Thiết bị thật còn ở 2C.3B.
 
-URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `.env.local` ở gốc theo `.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
+URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổng khác thì tạo `frontend/.env.local` theo `frontend/.env.example`, đặt `EXPO_PUBLIC_API_URL`, rồi tải lại app; không đặt thông tin DB/khóa ký ở frontend. Dùng `localhost` ở cả frontend/backend khi thử cookie. Hướng dẫn test và giới hạn native tại [FRONTEND-AUTH-2C2.md](docs/FRONTEND-AUTH-2C2.md); phần nối API ban đầu tại [FRONTEND-AUTH-2C1.md](docs/FRONTEND-AUTH-2C1.md).
 
 ## Backend hiện tại — đợt 4C
 
@@ -459,19 +459,20 @@ API môn đã mở ở 3B: CRUD/lọc học kỳ, kiểm tra chủ sở hữu, m
 
 ## Chạy ứng dụng
 
-Yêu cầu Node.js 20.19 trở lên (khuyên dùng Node 22 LTS).
+Khuyên dùng Node.js 24 LTS (24.3 trở lên) cho Expo SDK 58.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
-npm install
-npx expo start
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
+npm install # Lần đầu sau khi clone
+npm start
 ```
 
 Khi mở app chưa đăng nhập, chọn **Bắt đầu với dữ liệu trống** để thử thiết lập học kỳ/môn/bài đầu tiên, hoặc **Khám phá dữ liệu mẫu** để xem các màn có sẵn. Khi có phiên hợp lệ, app khôi phục hồ sơ và tải học kỳ/môn/bài tập từ backend; lịch/điểm/buổi tự học thử bắt đầu trống.
 
-Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 56 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
+Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 58 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
 npm run check:dependencies
 npm run build:web
@@ -492,19 +493,24 @@ npm run build:web
 
 ## Cấu trúc
 
-`App.tsx` chứa khung ứng dụng, header và dock. Mã nguồn được chia theo chức năng:
+`frontend/App.tsx` chứa khung ứng dụng, header và dock. Mã nguồn Expo nằm trong `frontend/`:
 
 ```text
-src/
-├── features/     # Màn hình, form và xử lý của từng chức năng
-├── navigation/   # Điều hướng, quay lại và giữ vị trí cuộn
-├── shared/       # Thành phần giao diện, theme, tiện ích dùng chung
-└── store/        # Provider và trạng thái mẫu dùng chung toàn app
+QuanLyHocTap/
+├── frontend/
+│   ├── App.tsx
+│   ├── package.json
+│   ├── src/
+│   ├── assets/
+│   ├── tests/
+│   └── qa/
+├── backend/
+└── docs/
 ```
 
-Ví dụ: `src/features/assignments/TaskForm.tsx` là form bài tập; `src/features/grades/GradesScreen.tsx` là màn điểm; `src/shared/components/` chứa các file riêng như `Button.tsx`, `Card.tsx`, `Sheet.tsx` và `Typography.tsx`; `index.ts` chỉ xuất các component để import gọn. Xem **[sơ đồ đầy đủ và quy tắc đặt file](docs/FRONTEND-STRUCTURE.md)**.
+Ví dụ: `frontend/src/features/assignments/TaskForm.tsx` là form bài tập; `frontend/src/features/grades/GradesScreen.tsx` là màn điểm; `frontend/src/shared/components/` chứa các file riêng như `Button.tsx`, `Card.tsx`, `Sheet.tsx` và `Typography.tsx`; `index.ts` chỉ xuất các component để import gọn. Xem **[sơ đồ đầy đủ và quy tắc đặt file](docs/FRONTEND-STRUCTURE.md)**.
 
-Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. Điều hướng nằm trong `src/navigation/`; URL deep link, Forward replay và gesture iOS chưa được triển khai. State mẫu/timer vẫn ở `src/store/model.tsx`; HTTP dùng chung ở `src/shared/api/`, API tài khoản/học kỳ nằm trong thư mục chức năng tương ứng.
+Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. Điều hướng nằm trong `frontend/src/navigation/`; URL deep link, Forward replay và gesture iOS chưa được triển khai. State mẫu/timer vẫn ở `frontend/src/store/model.tsx`; HTTP dùng chung ở `frontend/src/shared/api/`, API tài khoản/học kỳ nằm trong thư mục chức năng tương ứng.
 
 ## Tài liệu tiếp theo
 
@@ -512,7 +518,7 @@ Không dùng HTML trong WebView, Tailwind CDN hoặc SQLite cho bản UI này. �
 - `docs/references/`: 5 screenshot gốc và DESIGN.md gốc để đối chiếu.
 - `docs/DECISIONS.md`: quy ước thiết kế và phạm vi kỹ thuật.
 
-Ảnh avatar, sách và trợ lý trong `assets/` lấy từ URL có sẵn trong HTML template bạn gửi. Cần xác nhận quyền sử dụng tài nguyên trước khi phát hành thương mại. Font Plus Jakarta Sans qua gói `@expo-google-fonts/plus-jakarta-sans`; icon từ Ionicons. Các tài nguyên giao diện đã có sẵn cục bộ sau khi cài dependency, không cần tải từ CDN mỗi lần mở màn.
+Ảnh avatar, sách và trợ lý trong `frontend/assets/` lấy từ URL có sẵn trong HTML template bạn gửi. Cần xác nhận quyền sử dụng tài nguyên trước khi phát hành thương mại. Font Plus Jakarta Sans qua gói `@expo-google-fonts/plus-jakarta-sans`; icon từ Ionicons. Các tài nguyên giao diện đã có sẵn cục bộ sau khi cài dependency, không cần tải từ CDN mỗi lần mở màn.
 
 ## Cập nhật đợt 2A: Môn học & học kỳ
 
@@ -526,7 +532,7 @@ Bấm một bài tập để mở màn chi tiết với checklist việc nhỏ, 
 
 Tài liệu chỉ dùng thư viện minh họa có nội dung đọc được, chưa tải tệp thật. Thời gian buổi học được cộng từ các phiên Pomodoro 25 phút đã hoàn tất; đánh dấu buổi xong thủ công không tự cộng thời gian và không hoàn tất bài tập. Dữ liệu vẫn đặt lại khi tải lại ứng dụng.
 
-Xem `docs/UI-PHASE-2B.md` để biết phạm vi và kiểm tra. `docs/qa-learning.cjs` là smoke test tùy chọn với Playwright/Chromium; hỗ trợ biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` như các script QA trước.
+Xem `docs/UI-PHASE-2B.md` để biết phạm vi và kiểm tra. `frontend/qa/qa-learning.cjs` là smoke test tùy chọn với Playwright/Chromium; hỗ trợ biến `PLAYWRIGHT_MODULE` và `CHROME_PATH` như các script QA trước.
 
 ## Cập nhật đợt 2C: Lịch thi & ngoại lệ lịch học
 
@@ -550,7 +556,7 @@ Bấm **Hồ sơ** góc phải trên cùng hoặc avatar trang chủ để mở 
 
 Đây là phạm vi tại thời điểm UI 2E. **Từ 2C.1, đăng ký/đăng nhập/hồ sơ đã dùng API thật**, form mật khẩu được gửi đến backend để xác thực. Chưa gửi email/khôi phục/đổi mật khẩu; hồ sơ mẫu và dữ liệu học tập vẫn là bản thử trong bộ nhớ. Theme/ngôn ngữ/nhắc thiết bị vẫn theo giới hạn của bản xem trước.
 
-Xem `docs/UI-PHASE-2E.md` và `docs/qa-account.cjs` để biết phạm vi/kiểm tra. Tên commit: **Thêm giao diện tài khoản, hồ sơ và cài đặt**; lệnh push được cập nhật trong `docs/GIT-COMMITS.md`. Tiếp theo là UI 2F — các luồng con AI.
+Xem `docs/UI-PHASE-2E.md` và `frontend/qa/qa-account.cjs` để biết phạm vi/kiểm tra. Tên commit: **Thêm giao diện tài khoản, hồ sơ và cài đặt**; lệnh push được cập nhật trong `docs/GIT-COMMITS.md`. Tiếp theo là UI 2F — các luồng con AI.
 
 ## Cập nhật đợt 2F: Trợ lý AI & duyệt kế hoạch
 
@@ -558,7 +564,7 @@ Mở **Trợ lý AI**. **Tạo lộ trình/Tìm lịch trống** cho chọn mụ
 
 **Xem bản mẫu** có hai tài liệu minh họa, tóm tắt ngắn/chi tiết và đọc từng trang nguồn. **Luyện thử** có 3/5 câu, quay lại sửa đáp án, nộp bài, kết quả/giải thích, đọc nguồn và làm lại. Đây là nội dung có sẵn, chưa upload/đọc PDF hoặc gọi AI thật. Kế hoạch được sinh local để thử luồng; ô hỏi chỉ làm mục tiêu, chưa được AI phân tích. Dữ liệu vẫn đặt lại khi tải lại.
 
-Xem `docs/UI-PHASE-2F.md`, `docs/qa-ai-unit.cjs`, `docs/qa-ai.cjs`. Tên commit và lệnh push mới nhất ở `docs/GIT-COMMITS.md`. Sau đợt này nên rà soát tổng thể và quay lại bốn nhóm hoàn thiện đang hoãn trong `docs/UI-BACKLOG.md`.
+Xem `docs/UI-PHASE-2F.md`, `frontend/qa/qa-ai-unit.cjs`, `frontend/qa/qa-ai.cjs`. Tên commit và lệnh push mới nhất ở `docs/GIT-COMMITS.md`. Sau đợt này nên rà soát tổng thể và quay lại bốn nhóm hoàn thiện đang hoãn trong `docs/UI-BACKLOG.md`.
 
 ## Cập nhật đợt 3A: Bộ chọn ngày & giờ
 
@@ -566,7 +572,7 @@ Bấm các ô lịch/đồng hồ trong form để chọn, thay cho gõ chuỗi.
 
 Đã áp dụng cho bài tập, chuỗi lịch học/ngoại lệ một buổi, lịch thi, tự học, form/preview AI và giờ yên lặng. Nội dung đang sửa được giữ khi mở bộ chọn. Kiểm tra trùng lịch, giờ kết thúc và deadline vẫn thực hiện khi lưu. Không thêm dependency; dữ liệu vẫn là mẫu trong bộ nhớ.
 
-Xem `docs/UI-POLISH-3A.md`, `docs/qa-picker-unit.cjs` và `docs/qa-picker.cjs`. Tên commit: **Thêm bộ chọn ngày giờ cho các biểu mẫu**; lệnh push ở `docs/GIT-COMMITS.md`. Ba mục tiếp theo còn trong checklist: điều hướng, trạng thái giao diện và Dashboard.
+Xem `docs/UI-POLISH-3A.md`, `frontend/qa/qa-picker-unit.cjs` và `frontend/qa/qa-picker.cjs`. Tên commit: **Thêm bộ chọn ngày giờ cho các biểu mẫu**; lệnh push ở `docs/GIT-COMMITS.md`. Ba mục tiếp theo còn trong checklist: điều hướng, trạng thái giao diện và Dashboard.
 
 ## Cập nhật đợt 3B: Điều hướng & quay lại
 
@@ -574,14 +580,14 @@ Mũi tên trong chi tiết quay lại một bước; X đóng cả luồng. Màn
 
 Browser Back/Escape và Back Android dùng cùng nguyên tắc (picker → chi tiết → màn chính). Web ở gốc vẫn Back ra trang trước bình thường. Chưa có deep link/Forward replay hoặc gesture iOS; chưa thử Back/cảm ứng trên thiết bị thật. Dữ liệu/navigation vẫn chỉ giữ trong phiên.
 
-Xem `docs/UI-POLISH-3B.md`, `docs/qa-navigation-unit.cjs`, `docs/qa-navigation.cjs`. Tên commit: **Hoàn thiện điều hướng và luồng quay lại**; lệnh push ở `docs/GIT-COMMITS.md`. Tiếp theo là 3C — trạng thái giao diện, rồi 3D — Dashboard.
+Xem `docs/UI-POLISH-3B.md`, `frontend/qa/qa-navigation-unit.cjs`, `frontend/qa/qa-navigation.cjs`. Tên commit: **Hoàn thiện điều hướng và luồng quay lại**; lệnh push ở `docs/GIT-COMMITS.md`. Tiếp theo là 3C — trạng thái giao diện, rồi 3D — Dashboard.
 
 
 ## Cập nhật đợt 3C: Trạng thái giao diện
 
 Đã có màn bắt đầu, chế độ học tập trống và hướng dẫn thiết lập. Các form chính có chờ/khóa nút, lỗi giữ nội dung, thử lại và hủy; thông báo kết quả hiển thị trong hộp thoại đang mở. Bấm **Bản xem trước · Thử trạng thái** dưới header để xem tải/lỗi và bật lỗi cho lần xử lý kế tiếp. Đây là mô phỏng UI, chưa gọi backend.
 
-Xem `docs/UI-POLISH-3C.md`, `docs/qa-ui-states.cjs` và `docs/GIT-COMMITS.md`. Tiếp theo là UI 3D — Dashboard theo học kỳ và kỳ thi gần nhất.
+Xem `docs/UI-POLISH-3C.md`, `frontend/qa/qa-ui-states.cjs` và `docs/GIT-COMMITS.md`. Tiếp theo là UI 3D — Dashboard theo học kỳ và kỳ thi gần nhất.
 
 
 ## Chọn học kỳ theo năm học

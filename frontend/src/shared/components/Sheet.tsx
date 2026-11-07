@@ -1,7 +1,7 @@
 import { ActionScope, InteractionBlock, useActionState } from '../feedback/ActionScope';
 import { ActionStatus } from './ActionStatus';
 import { NoticeToast } from './NoticeToast';
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, S } from '../theme';
@@ -21,6 +21,21 @@ type SheetProps = {
     dirty?: boolean;
 };
 
+const SheetFlowContext = createContext<RefObject<(() => void) | null> | null>(null);
+
+// Keep the native modal mounted while the current sheet in this flow changes.
+export function SheetFlow({ children }: { children: ReactNode }) {
+    const parent = useContext(SheetFlowContext);
+    const scope = useNavigationScope();
+    const back = useRef<(() => void) | null>(null);
+    if (parent) return <>{children}</>;
+    return (
+        <Modal visible={scope.active} transparent animationType="slide" onRequestClose={() => back.current?.()}>
+            <SheetFlowContext.Provider value={back}>{children}</SheetFlowContext.Provider>
+        </Modal>
+    );
+}
+
 export function Sheet(props: SheetProps) {
     return (
         <ActionScope><DateTimeProvider>
@@ -32,6 +47,7 @@ export function Sheet(props: SheetProps) {
 function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
+    const flow = useContext(SheetFlowContext);
     const action = useActionState();
     const [confirming, setConfirming] = useState(false);
     const pendingExit = useRef<(() => void) | null>(null);
@@ -54,8 +70,12 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
         return () => window.removeEventListener('beforeunload', leave);
     }, [scope.active, dirty]);
     useBackAction(true, back, picker.active ? 1000 + scope.depth : undefined);
-    return (
-        <Modal visible={scope.active} transparent animationType="slide" onRequestClose={back}>
+    useLayoutEffect(() => {
+        if (!flow || !scope.active) return;
+        flow.current = back;
+        return () => { if (flow.current === back) flow.current = null; };
+    });
+    const content = (
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={{
@@ -113,6 +133,8 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                 </View>
                 <NoticeToast modal bottom={Math.max(22, inset.bottom)} />
             </KeyboardAvoidingView>
-        </Modal>
     );
+    return flow
+        ? <SheetFlowContext.Provider value={null}>{content}</SheetFlowContext.Provider>
+        : <Modal visible={scope.active} transparent animationType="slide" onRequestClose={back}>{content}</Modal>;
 }

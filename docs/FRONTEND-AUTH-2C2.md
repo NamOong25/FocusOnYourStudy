@@ -22,7 +22,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 ```
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -47,9 +47,9 @@ Cổng thường ngày là backend 8080/frontend 8092; cổng QA 8085/8093 chỉ
 ## Kiểm tra ngày 22/10/2026
 
 - TypeScript, export web và Android Hermes bundle qua; bundle không thay thế kiểm tra máy thật.
-- `node docs/qa-session-unit.cjs`: 19 nhóm qua: khôi phục/expiry, đồng thời, 401 một lần, CSRF trước POST, mất phản hồi, crash journal, logout offline/sau refresh, hai manager, hủy một caller, lỗi lưu trữ, hồ sơ về muộn và adapter SecureStore mock.
-- `node docs/qa-account-api-unit.cjs`: 15 nhóm qua, có cookie/body cho refresh/logout và logout 204.
-- `node docs/qa-session.cjs`: 9 nhóm qua với browser/backend/PostgreSQL schema riêng. F5, cookie đổi, storage không token, F5 hai tab đồng thời, 401, logout liên tab, lỗi mạng khi logout, mất phản hồi refresh đã thành công và phiên bị thu hồi. Bốn chiều rộng 320/390/430/1280px không tràn ngang/lỗi runtime.
+- `node frontend/qa/qa-session-unit.cjs`: 19 nhóm qua: khôi phục/expiry, đồng thời, 401 một lần, CSRF trước POST, mất phản hồi, crash journal, logout offline/sau refresh, hai manager, hủy một caller, lỗi lưu trữ, hồ sơ về muộn và adapter SecureStore mock.
+- `node frontend/qa/qa-account-api-unit.cjs`: 15 nhóm qua, có cookie/body cho refresh/logout và logout 204.
+- `node frontend/qa/qa-session.cjs`: 9 nhóm qua với browser/backend/PostgreSQL schema riêng. F5, cookie đổi, storage không token, F5 hai tab đồng thời, 401, logout liên tab, lỗi mạng khi logout, mất phản hồi refresh đã thành công và phiên bị thu hồi. Bốn chiều rộng 320/390/430/1280px không tràn ngang/lỗi runtime.
 - Hồi quy `qa-account-api.cjs`: 13 nhóm qua (hai tài khoản, lỗi mạng/timeout và F5 theo 2C.2); `qa-smoke.cjs` và `qa-account.cjs` qua, giữ các luồng prototype và hồ sơ/cài đặt mẫu.
 - Expiry thử bằng đồng hồ giả trong unit; không coi là đã chờ 15 phút thật trên browser. Test 401 chèn một phản hồi 401 rồi để backend thật xử lý refresh/hồ sơ.
 - `expo install --check` nhận SecureStore 56.0.4 nhưng báo Expo 56.0.23 có bản vá 56.0.24 mới. Chưa nâng Expo trong đợt này.

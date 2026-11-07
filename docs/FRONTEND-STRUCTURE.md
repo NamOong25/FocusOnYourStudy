@@ -4,6 +4,8 @@
 
 ## Sơ đồ
 
+App Expo nằm trong `frontend/`, cùng cấp với `backend/`. Cây dưới đây tính từ `frontend/`. Chạy `npm start` trong thư mục này.
+
 ```text
 App.tsx                          Khung ứng dụng, ghép các màn và provider
 src/
@@ -64,7 +66,8 @@ src/
 └── store/
     └── model.tsx                PrototypeProvider, dữ liệu mẫu và timer
 assets/                          Ảnh và tài nguyên tĩnh
-docs/                            Thiết kế, checklist, lệnh Git và script QA
+tests/                           Bộ test Node và kiểm tra liên thông
+qa/                              Script kiểm tra giao diện và logic
 ```
 
 ## Tìm file để chỉnh sửa
@@ -106,17 +109,18 @@ docs/                            Thiết kế, checklist, lệnh Git và script 
 Lệnh kiểm tra:
 
 ```powershell
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run typecheck
-node docs/qa-ai-unit.cjs
-node docs/qa-calendar-unit.cjs
-node docs/qa-grades-unit.cjs
-node docs/qa-picker-unit.cjs
-node docs/qa-navigation-unit.cjs
+node qa/qa-ai-unit.cjs
+node qa/qa-calendar-unit.cjs
+node qa/qa-grades-unit.cjs
+node qa/qa-picker-unit.cjs
+node qa/qa-navigation-unit.cjs
 npm run build:web
 npx expo export --platform android --output-dir .expo/native-check
 ```
 
-Với Metro đang chạy ở cổng 8092 và Playwright/Chrome đã cài, chạy thêm `node docs/qa-smoke.cjs` và `node docs/qa-navigation.cjs`. Có thể thiết lập `PLAYWRIGHT_MODULE`/`CHROME_PATH` như các đợt trước. Kết quả ở `.expo/`, không commit.
+Với Metro đang chạy ở cổng 8092 và Playwright/Chrome đã cài, chạy thêm `node frontend/qa/qa-smoke.cjs` và `node frontend/qa/qa-navigation.cjs`. Có thể thiết lập `PLAYWRIGHT_MODULE`/`CHROME_PATH` như các đợt trước. Kết quả ở `frontend/.expo/`, không commit.
 
 Tên commit của đợt sắp xếp: **Tổ chức thư mục frontend và tách component dùng chung**. Đợt mới nhất xem `GIT-COMMITS.md`. Lệnh push ở `GIT-COMMITS.md`. Checklist UI 3C/3D và backend vẫn chưa đánh dấu hoàn thành.
 

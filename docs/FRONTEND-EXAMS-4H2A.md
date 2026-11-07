@@ -16,7 +16,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Terminal 2:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npm run web -- --port 8092
 ```
 

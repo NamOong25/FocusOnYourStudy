@@ -48,4 +48,4 @@ Thống kê → Điểm & GPA → chọn môn → Nhập/chỉnh sửa điểm. 
 5. Đạt/không đạt: 4,9 không đạt; 5 đạt P, không tham gia GPA.
 6. Tạo cùng mã môn và tín chỉ ở kỳ sau → tự nhận diện lần học trước, không cần chọn công tắc Học lại.
 
-Kiểm tra tự động: `node docs/qa-grades-unit.cjs` (106 kiểm tra), `node docs/qa-iuh-grades.cjs`, `node docs/qa-grades.cjs`; các bài trình duyệt dùng Playwright/Chrome như tài liệu QA hiện có. Chạy `npm run typecheck`, `npm run build:web` và xuất Android để kiểm tra bundle; chưa thay thế chạy thật trên điện thoại.
+Kiểm tra tự động: `node frontend/qa/qa-grades-unit.cjs` (106 kiểm tra), `node frontend/qa/qa-iuh-grades.cjs`, `node frontend/qa/qa-grades.cjs`; các bài trình duyệt dùng Playwright/Chrome như tài liệu QA hiện có. Chạy `npm run typecheck`, `npm run build:web` và xuất Android để kiểm tra bundle; chưa thay thế chạy thật trên điện thoại.

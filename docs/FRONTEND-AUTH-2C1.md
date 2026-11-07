@@ -29,7 +29,7 @@ cd 'D:\Video OBS\QuanLyHocTap\backend'
 Terminal 2:
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap'
+cd 'D:\Video OBS\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -49,7 +49,7 @@ Quên mật khẩu hiện chỉ báo chưa sẵn sàng, không gửi email hoặ
 
 ## Cấu hình URL
 
-Mặc định web dùng `http://<hostname đang mở>:8080`; vì vậy localhost và 127.0.0.1 không bị trộn khi dùng cookie. Có thể tạo `.env.local` ở gốc:
+Mặc định web dùng `http://<hostname đang mở>:8080`; vì vậy localhost và 127.0.0.1 không bị trộn khi dùng cookie. Có thể tạo `frontend/.env.local`:
 
 ```dotenv
 EXPO_PUBLIC_API_URL=http://localhost:8080
@@ -82,7 +82,7 @@ Không dùng ActionScope mô phỏng chờ/lỗi cho request auth thật. Button
 ## Đã kiểm tra
 
 - `npm run typecheck` và `npm run build:web` thành công.
-- `node docs/qa-account-api-unit.cjs`: 13 nhóm kiểm tra transport/CSRF/Bearer, 409/validation/429/503, lỗi mạng, deadline cả fetch và body, hủy, response sai và không retry mutation.
+- `node frontend/qa/qa-account-api-unit.cjs`: 13 nhóm kiểm tra transport/CSRF/Bearer, 409/validation/429/503, lỗi mạng, deadline cả fetch và body, hủy, response sai và không retry mutation.
 - `qa-account-api.cjs` qua trên Chrome với backend Spring Boot/PostgreSQL thật ở schema `frontend_it_<uuid>` riêng: tạo hai tài khoản, duplicate email, sai mật khẩu, GET hồ sơ, cookie HttpOnly, không lưu token/password vào browser storage, lỗi hồ sơ lúc login và lúc tải lại, offline/thử lại, timeout 10 giây, đóng form ngăn kết quả muộn, tải lại cần login; 320/390/430/1280 px không tràn ngang, không lỗi runtime.
 - `qa-account.cjs` chỉ kiểm tra hồ sơ/appearance/reminders mẫu; không gửi API ghi. `qa-smoke.cjs` kiểm tra hồi quy các màn học tập. Các kiểm thử giao diện cũ được sửa tên nút hồ sơ mẫu; không coi là đã chạy lại mọi bài QA lịch sử.
 - Kết quả/screenshot kiểm tra trong `.expo/qa-account-api/`, ngoài Git. Tài khoản QA chỉ được tạo trong schema test, schema đó được dọn sau khi dừng backend test; không seed dữ liệu học tập vào schema ứng dụng.

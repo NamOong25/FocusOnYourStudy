@@ -1,5 +1,9 @@
 # Tên commit cho từng đợt
 
+## Tách thư mục frontend
+
+Tên commit gợi ý `Tách frontend Expo khỏi thư mục gốc`
+
 ## 9F.2A — Chuẩn bị backend cho Render và Neon
 
 ```powershell
