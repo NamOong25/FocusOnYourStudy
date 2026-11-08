@@ -2,11 +2,12 @@ import { ActionScope, InteractionBlock, useActionState } from '../feedback/Actio
 import { ActionStatus } from './ActionStatus';
 import { NoticeToast } from './NoticeToast';
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, S } from '../theme';
 import { RememberedScrollView, useBackAction, useNavigationScope } from '../../navigation/Navigation';
 import { DateTimePanel, DateTimeProvider, useDateTimePicker } from './DateTimePicker';
+import { Button } from './Button';
 import { IconButton } from './IconButton';
 import { Row } from './Row';
 import { T } from './Typography';
@@ -19,6 +20,7 @@ type SheetProps = {
     onBack?: () => void;
     scrollKey?: string;
     dirty?: boolean;
+    alert?: { title: string; message: string; onDismiss: () => void };
 };
 
 const SheetFlowContext = createContext<RefObject<(() => void) | null> | null>(null);
@@ -44,15 +46,18 @@ export function Sheet(props: SheetProps) {
     );
 }
 
-function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false }: SheetProps) {
+function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false, alert }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
     const flow = useContext(SheetFlowContext);
     const action = useActionState();
     const [confirming, setConfirming] = useState(false);
     const pendingExit = useRef<(() => void) | null>(null);
+    const panel = useRef<React.ComponentRef<typeof View>>(null), popup = useRef<React.ComponentRef<typeof View>>(null);
+    const alertVisible = scope.active && !!alert;
     const keepEditing = () => { pendingExit.current = null; setConfirming(false); };
     const requestExit = (exit: () => void) => {
+        if (alert) { alert.onDismiss(); return; }
         // Stop a delayed prototype save before showing a discard decision.
         action?.cancel();
         if (confirming) { keepEditing(); return; }
@@ -63,6 +68,20 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
     const back = () => requestExit(onBack ?? onClose);
     const dismiss = () => requestExit(scope.closeFlow ?? onClose);
     const discard = () => { const exit = pendingExit.current; keepEditing(); action?.cancel(); exit?.(); };
+    useLayoutEffect(() => {
+        if (!alertVisible) return;
+        Keyboard.dismiss();
+        if (Platform.OS !== 'web') return;
+        const sheet = panel.current as unknown as HTMLElement | null;
+        const dialog = popup.current as unknown as HTMLElement | null;
+        const previouslyFocused = document.activeElement;
+        dialog?.focus();
+        if (sheet) sheet.inert = true;
+        return () => {
+            if (sheet) sheet.inert = false;
+            if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) previouslyFocused.focus();
+        };
+    }, [alertVisible]);
     useEffect(() => {
         if (Platform.OS !== 'web' || typeof window === 'undefined' || !scope.active || !dirty) return;
         const leave = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
@@ -89,10 +108,11 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Đóng hộp thoại"
+                    disabled={alertVisible}
                     onPress={dismiss}
                     style={{ position: 'absolute', width: '100%', height: '100%' }}
                 />
-                <View style={{
+                <View ref={panel} accessibilityElementsHidden={alertVisible} importantForAccessibility={alertVisible ? 'no-hide-descendants' : 'auto'} style={{
                     backgroundColor: '#fff',
                     width: '100%',
                     maxWidth: 520,
@@ -132,6 +152,18 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                     {confirming ? <UnsavedChanges onContinue={keepEditing} onDiscard={discard} /> : <ActionStatus />}
                 </View>
                 <NoticeToast modal bottom={Math.max(22, inset.bottom)} />
+                {alertVisible && alert && (
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: '#16113266', alignItems: 'center', justifyContent: 'center', padding: 20 }]}>
+                        <View ref={popup} role="alertdialog" aria-modal accessibilityViewIsModal accessibilityLabel={alert.title} tabIndex={-1}
+                            style={{ width: '100%', maxWidth: 360, maxHeight: '100%' }}>
+                            <ScrollView style={{ flexGrow: 0, backgroundColor: '#fff', borderRadius: 22 }} contentContainerStyle={{ padding: 22, gap: 14 }}>
+                                <T accessibilityRole="alert" style={S.title}>{alert.title}</T>
+                                <T>{alert.message}</T>
+                                <Button label="Đã hiểu" onPress={alert.onDismiss} />
+                            </ScrollView>
+                        </View>
+                    </View>
+                )}
             </KeyboardAvoidingView>
     );
     return flow

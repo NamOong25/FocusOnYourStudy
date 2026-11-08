@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, T } from '../../../shared/components';
+import { API_BASE_URL } from '../../../shared/api/config';
 import { ApiError, asApiError, assertNotCancelled } from '../../../shared/api/http';
 import { C, F, S } from '../../../shared/theme';
 import { useApp } from '../../../store/model';
+import { useAuth } from '../../account/auth/AuthProvider';
 import { useApiAction } from '../../account/auth/useApiAction';
+import { createGradesReadApi } from '../../grades/api/gradesReadApi';
 import { courseGradeLinks } from '../courseLinks';
 import { Course, CourseColor, CourseStatus, courseColors } from '../academic';
 import type { CourseInput } from '../api/coursesApi';
@@ -19,6 +22,8 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
   const { semesters, courseCatalog, courseConnection: c, semesterConnection, tasks, classes, exams, studySessions, gradeBook, studyConnection } = useApp();
   const [basis, setBasis] = useState(item), [draft, setDraft] = useState(() => draftOf(item, semesterId));
   const [baseline, setBaseline] = useState(draft), [error, setError] = useState(''), [mustRebase, setMustRebase] = useState(false), [confirmDelete, setConfirmDelete] = useState(false);
+  const [showGradeWarning, setShowGradeWarning] = useState(false);
+  const { authorized } = useAuth();
   const action = useApiAction();
   if (!c) return null;
   const locked = action.busy || c.busy || c.loading || !!semesterConnection?.busy || !!semesterConnection?.loading || !!studyConnection?.busy || !!studyConnection?.loading;
@@ -59,11 +64,34 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
   const remove = () => {
     if (!basis || locked || needsReload || mustRebase) return;
     if (linkCount || gradeLinked) { setError('Xử lý các bài tập, lịch, điểm và liên kết học lại trước khi xóa môn.'); return; }
-    if (!confirmDelete) { setConfirmDelete(true); return; }
-    execute(() => c.remove(basis), onDeleted);
+    if (confirmDelete) {
+      execute(async () => {
+        try { await c.remove(basis); }
+        catch (failure) {
+          if (asApiError(failure).code === 'COURSE_HAS_GRADE_CONFIGURATION') {
+            setShowGradeWarning(true);
+            setConfirmDelete(false);
+          }
+          throw failure;
+        }
+      }, onDeleted);
+      return;
+    }
+    setError('');
+    const grades = createGradesReadApi(API_BASE_URL, authorized);
+    void action.run(signal => grades.configuration(basis, signal), configuration => {
+      setShowGradeWarning(configuration !== null);
+      setConfirmDelete(configuration === null);
+    });
   };
-  const problem = error || action.error?.message || (needsReload ? 'Tải lại học kỳ và môn học trước khi lưu tiếp.' : '');
-  return <Sheet title={basis ? 'Chỉnh sửa môn học' : 'Môn học mới'} onClose={onClose} dirty={JSON.stringify(draft) !== JSON.stringify(baseline)}>
+  const gradeDeleteError = showGradeWarning && action.error?.code === 'COURSE_HAS_GRADE_CONFIGURATION';
+  const problem = error || (!gradeDeleteError && action.error?.message) || (needsReload ? 'Tải lại học kỳ và môn học trước khi lưu tiếp.' : '');
+  return <Sheet title={basis ? 'Chỉnh sửa môn học' : 'Môn học mới'} onClose={onClose} dirty={JSON.stringify(draft) !== JSON.stringify(baseline)}
+    alert={showGradeWarning ? {
+      title: 'Cần xóa cấu hình cột điểm trước khi xóa môn',
+      message: 'Vào Điểm số → Chỉnh sửa cấu hình cột điểm → Xóa cấu hình bảng điểm. Nếu đã nhập điểm, hãy để trống các ô điểm và lưu trước.',
+      onDismiss: () => { setShowGradeWarning(false); action.clearError(); },
+    } : undefined}>
     <Badge label="MÔN HỌC TRONG TÀI KHOẢN" icon="cloud-done-outline" />
     <Field label="Tên môn học" value={draft.name} onChange={name => update({ name })} placeholder="Ví dụ: Công nghệ phần mềm" disabled={locked} maxLength={200} />
     <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><Field label="Mã môn học" value={draft.code} onChange={code => update({ code })} placeholder="SE301" disabled={locked} maxLength={64} /></View><View style={{ width: 105 }}><Field label="Số tín chỉ" value={draft.credits} onChange={credits => update({ credits })} numeric disabled={locked} maxLength={3} /></View></Row>

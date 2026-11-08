@@ -122,13 +122,17 @@ export function parseGradeDetail(input: unknown, course: CourseRef, config: { id
 export function createGradesReadApi(baseUrl: string, authorized: Authorized, options?: Parameters<typeof createHttpClient>[1]) {
   const http=createHttpClient(baseUrl,options);
   const get=(path:string,signal?:AbortSignal)=>authorized(token=>http<unknown>(path,{headers:{Authorization:`Bearer ${token}`},signal}),signal);
+  async function readConfiguration(course:CourseRef,signal?:AbortSignal) {
+    courseGradeKey(course);
+    try { return configuration(await get('/api/v1/courses/'+encodeURIComponent(course.id)+'/grade-configuration',signal),course.id); }
+    catch(e) { if (e instanceof ApiError && e.status===404 && e.code==='GRADE_CONFIGURATION_NOT_FOUND') return null; throw e; }
+  }
   return {
     async semester(query:SemesterGradeQuery,signal?:AbortSignal) { semesterGradesKey(query); return parseSemesterGrades(await get('/api/v1/semesters/'+encodeURIComponent(query.semesterId)+'/gpa',signal),query); },
+    configuration: readConfiguration,
     async detail(course:CourseRef,signal?:AbortSignal):Promise<ServerGradeDetail> {
-      courseGradeKey(course);
-      let config: {id:string;version:number};
-      try { config=configuration(await get('/api/v1/courses/'+encodeURIComponent(course.id)+'/grade-configuration',signal),course.id); }
-      catch(e) { if (e instanceof ApiError && e.status===404 && e.code==='GRADE_CONFIGURATION_NOT_FOUND') return {kind:'unconfigured',courseId:course.id.toLowerCase()}; throw e; }
+      const config=await readConfiguration(course,signal);
+      if (!config) return {kind:'unconfigured',courseId:course.id.toLowerCase()};
       return parseGradeDetail(await get('/api/v1/grade-configurations/'+encodeURIComponent(config.id)+'/result',signal),course,config);
     },
   };
