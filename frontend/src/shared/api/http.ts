@@ -56,6 +56,7 @@ const messages: Record<string, string> = {
   COURSE_NOT_FOUND: 'Môn học không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
   COURSE_VERSION_CONFLICT: 'Môn học đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   COURSE_HAS_ASSIGNMENTS: 'Môn còn bài tập đã lưu. Hãy xử lý các bài tập trước khi xóa hoặc chuyển học kỳ.',
+  COURSE_HAS_GRADE_CONFIGURATION: 'Môn đã có bảng điểm. Bạn vẫn có thể sửa thông tin môn trong học kỳ hiện tại. Để xóa môn hoặc chuyển học kỳ, cần xử lý bảng điểm trước.',
   ASSIGNMENT_NOT_FOUND: 'Bài tập không còn tồn tại hoặc bạn không được truy cập. Hãy tải lại danh sách.',
   ASSIGNMENT_VERSION_CONFLICT: 'Bài tập đã được sửa ở nơi khác. Nạp bản mới nhất trước khi lưu hoặc xóa.',
   ASSIGNMENT_HAS_STUDY_SESSIONS: 'Bài tập còn buổi tự học đã lưu. Gỡ liên kết các buổi trước khi đổi môn.',
