@@ -20,7 +20,7 @@ export default function Stats() {
   const auth = useAuth();
   const [view, setView] = useState('Tổng quan');
   return <>
-    {auth.hasSession && view === 'Tổng quan' &&
+    {auth.hasSession && view !== 'Điểm & GPA' &&
       <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 28, lineHeight: 39, letterSpacing: -0.7 }}>Thống kê</T>}
     <Segments values={['Tổng quan', 'So sánh GPA', 'Điểm & GPA']} value={view} onChange={setView} />
     <NavigationScope active={view === 'Tổng quan'}><View style={{ display: view === 'Tổng quan' ? 'flex' : 'none', gap: 16 }}>
