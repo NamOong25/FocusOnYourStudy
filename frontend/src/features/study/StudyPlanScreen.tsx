@@ -4,38 +4,69 @@ import { studyViewData } from './studyView';
 import StudySessionDialog from './StudyDialog';
 import { FlowScope, NavigationScope } from '../../navigation/Navigation';
 import React, { useState } from 'react';
-import { View } from 'react-native';
-import { Button, Card, Icon, IconButton, IconTile, Row, Segments, Sheet, T } from '../../shared/components';
-import { addDays, dateKey, dateLabel, parseDay, today, useApp } from '../../store/model';
+import { Pressable, View } from 'react-native';
+import { Button, IconButton, Row, Segments, Sheet, StateView, T } from '../../shared/components';
+import useCurrentTime from '../../shared/hooks/useCurrentTime';
+import { addDays, dateKey, dateLabel, parseDay } from '../../shared/utils/dates';
+import { useApp } from '../../store/model';
 import { StudySessionForm } from './StudyForm';
 import { StudySessionCard } from './components';
+import StudyWeekOverview from './components/StudyWeekOverview';
 import TaskDialog from '../assignments/TaskDialog';
 import { C, F, S } from '../../shared/theme';
 
 export default function StudyPlan() {
-  const { studySessions, prepareFocus, studyView, dispatchStudyView } = useApp();
+  const { studySessions, studyConnection, prepareFocus, studyView, dispatchStudyView } = useApp();
+  const today = dateKey(useCurrentTime());
   const { period, date: selected, filter } = studyView;
   const setSelected = (date: string) => dispatchStudyView({ type: 'date', date });
   const setPeriod = (value: string) => dispatchStudyView({ type: 'period', value });
   const setFilter = (value: string) => dispatchStudyView({ type: 'filter', value });
   const [create, setCreate] = useState(false); const [choosingDate, setChoosingDate] = useState(false);
   const [opened, setOpened] = useState<string | null>(null); const [taskId, setTaskId] = useState<string | null>(null);
-  const { week, days, inRange, list, pending } = studyViewData(studySessions, studyView);
+  const { week, inRange, list, pending } = studyViewData(studySessions, studyView);
+  const byWeek = period === 'Theo tuần';
+  const loaded = !studyConnection || studyConnection.loaded;
+  const firstDay = week[0]!, lastDay = week[6]!;
+  const dateHeading = byWeek ? `${dateLabel(firstDay)} – ${dateLabel(lastDay)}`
+    : parseDay(selected).toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  const year = byWeek && firstDay.slice(0, 4) !== lastDay.slice(0, 4)
+    ? `${firstDay.slice(0, 4)} – ${lastDay.slice(0, 4)}` : selected.slice(0, 4);
+  const openDay = (date: string) => { setSelected(date); setPeriod('Theo ngày'); };
   const focus = (id: string) => { const session = studySessions.find(s => s.id === id); if (session) prepareFocus({ courseId: session.courseId, taskId: session.taskId, sessionId: id }); };
-  const go = (n: number) => setSelected(dateKey(addDays(parseDay(selected), n * (period === 'Theo ngày' ? 1 : 7))));
+  const go = (n: number) => setSelected(dateKey(addDays(parseDay(selected), n * (byWeek ? 7 : 1))));
   return <>
-    <StudySyncStatus/>
-    <View style={{ gap: 5, marginTop: 5 }}><T style={{ fontFamily: F.bold, fontSize: 10, color: C.primary, letterSpacing: 1.2 }}>KHÔNG GIAN TỰ HỌC</T><T style={{ fontFamily: F.extra, fontSize: 26, lineHeight: 37, letterSpacing: -0.6 }}>Học từng chút,{"\n"}tiến xa hơn.</T><T style={{ color: C.muted, fontSize: 12 }}>Dành thời gian cụ thể cho điều bạn muốn hoàn thành.</T></View>
-    <T style={S.small}>{period === 'Theo ngày' ? `Thống kê ngày ${parseDay(selected).toLocaleDateString('vi-VN')}` : `Thống kê tuần ${dateLabel(week[0]!)} – ${dateLabel(week[6]!)} · ${parseDay(selected).getFullYear()}`}</T>
-    <Row style={{ alignItems: 'stretch', gap: 9 }}>{[{ value: `${pending.length}`, label: 'Buổi cần học', icon: 'book-outline' as const }, { value: `${pending.reduce((sum,s) => sum + s.duration, 0)}′`, label: 'Dự kiến còn lại', icon: 'time-outline' as const }, { value: `${inRange.length - pending.length}`, label: 'Buổi đã xong', icon: 'checkmark-circle-outline' as const }].map(m => <Card key={m.label} style={[S.grow, { padding: 13, gap: 7 }]}><IconTile name={m.icon} size={31} /><T style={{ fontFamily: F.extra, color: C.primary, fontSize: 26, lineHeight: 36 }}>{m.value}</T><T style={{ fontSize: 10, lineHeight: 17, color: C.muted }}>{m.label}</T></Card>)}</Row>
-    <Button label="Lên kế hoạch mới" icon="add-circle-outline" onPress={() => setCreate(true)} />
-    <Button label="Đổi ngày xem tự học" icon="calendar-outline" secondary onPress={() => setChoosingDate(true)}/>
-    <Segments values={['Theo ngày', 'Theo tuần']} value={period} onChange={setPeriod} />
-    <Card style={{ padding: 12 }}><Row between><IconButton name="chevron-back" label="Khoảng tự học trước" bg="#fff" onPress={() => go(-1)} /><View style={{ flex: 1, alignItems: 'center' }}><T style={{ fontFamily: F.bold, fontSize: 14 }}>{period === 'Theo ngày' ? parseDay(selected).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' }) : `${dateLabel(week[0]!)} – ${dateLabel(week[6]!)}`}</T><T style={{ color: C.muted, fontSize: 10 }}>{period === 'Theo ngày' && selected === dateKey(today) ? 'Hôm nay · ' : ''}{parseDay(selected).getFullYear()}</T></View><IconButton name="chevron-forward" label="Khoảng tự học sau" bg="#fff" onPress={() => go(1)} /></Row>{selected !== dateKey(today) && <Button label="Về lịch hôm nay" secondary onPress={() => setSelected(dateKey(today))} />}</Card>
-    <Segments values={['Tất cả', 'Chưa xong', 'Hoàn thành']} value={filter} onChange={setFilter} />
-    {days.filter(day => list.some(s => s.date === day)).map(day => <View key={day} style={{ gap: 13 }}>{period === 'Theo tuần' && <Row><Icon name="calendar-outline" size={17} /><T style={{ fontFamily: F.bold }}>{parseDay(day).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}</T></Row>}{list.filter(s => s.date === day).map(s => <StudySessionCard key={s.id} session={s} onOpen={() => setOpened(s.id)} onFocus={() => focus(s.id)} />)}</View>)}
-    {list.length === 0 && <Card style={{ alignItems: 'center', paddingVertical: 28, gap: 11 }}><IconTile name="leaf-outline" size={57} /><T style={{ fontFamily: F.bold, fontSize: 17 }}>Một khoảng trống cho bạn</T><T style={[S.small, { textAlign: 'center' }]}>{inRange.length ? 'Chưa có buổi học phù hợp với bộ lọc này.' : 'Lên một buổi học ngắn, hoặc dành thời gian nghỉ ngơi để sẵn sàng cho ngày tiếp theo.'}</T><Button label={inRange.length ? 'Xem tất cả buổi' : 'Thêm buổi tự học'} secondary onPress={() => inRange.length ? setFilter('Tất cả') : setCreate(true)} /></Card>}
-    <T style={{ color: C.muted, fontSize: 11, lineHeight: 19, textAlign: 'center' }}>Buổi tự học và bài phải nộp có trạng thái riêng.{"\n"}Bạn có thể học một môn mà không gắn với bài tập.</T>
+    <View style={{ gap: 10 }}>
+      <Row between>
+        <T accessibilityRole="header" style={[S.grow, { fontFamily: F.extra, fontSize: 22, lineHeight: 29, letterSpacing: -0.5 }]}>Tự học</T>
+        <Button label="+ Buổi học" onPress={() => setCreate(true)} style={{ minHeight: 44, paddingHorizontal: 13, paddingVertical: 8 }} />
+      </Row>
+      <Segments values={['Theo ngày', 'Theo tuần']} value={period} onChange={setPeriod} />
+      <Row style={{ gap: 4 }}>
+        <IconButton name="chevron-back" label="Khoảng tự học trước" bg={C.card} onPress={() => go(-1)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={`Đổi ngày xem tự học, ${dateHeading}, ${year}`}
+          onPress={() => setChoosingDate(true)} style={({ pressed }) => [S.grow, { minHeight: 44, alignItems: 'center',
+            justifyContent: 'center', borderRadius: 12, backgroundColor: pressed ? C.soft : C.card, borderColor: C.line, borderWidth: 1 }]}>
+          <T style={{ fontFamily: F.bold, fontSize: 12, lineHeight: 17, textAlign: 'center' }}>{dateHeading}</T>
+          <T style={{ color: C.muted, fontSize: 10, lineHeight: 15 }}>{!byWeek && selected === today ? 'Hôm nay · ' : ''}{year}</T>
+        </Pressable>
+        <IconButton name="chevron-forward" label="Khoảng tự học sau" bg={C.card} onPress={() => go(1)} />
+        {(byWeek || selected !== today) && <Button label="Hôm nay" secondary onPress={() => openDay(today)}
+          style={{ minHeight: 44, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 12 }} />}
+      </Row>
+      {loaded && <T style={[S.small, { textAlign: 'center' }]}>
+        {pending.length} buổi cần học · {pending.reduce((sum, session) => sum + session.duration, 0)} phút dự kiến · {inRange.length - pending.length} đã xong
+      </T>}
+      {loaded && <Segments values={['Tất cả', 'Chưa xong', 'Hoàn thành']} value={filter} onChange={setFilter} />}
+    </View>
+    <StudySyncStatus statusOnly />
+    {loaded && (byWeek ? <StudyWeekOverview days={week} sessions={list} today={today} selected={selected} onOpenDay={openDay} />
+      : list.map(session => <StudySessionCard key={session.id} session={session}
+        onOpen={() => setOpened(session.id)} onFocus={() => focus(session.id)} />))}
+    {loaded && !list.length && (!byWeek || !!inRange.length) && <StateView
+      title={inRange.length ? 'Không có buổi phù hợp' : 'Ngày này chưa có buổi tự học'}
+      message={inRange.length ? 'Chọn Tất cả để xem các buổi trong khoảng này.' : 'Bạn có thể lên kế hoạch cho một buổi học mới.'}
+      actionLabel={inRange.length ? 'Xem tất cả buổi' : 'Thêm buổi tự học'} onAction={() => inRange.length ? setFilter('Tất cả') : setCreate(true)} />}
     <FlowScope onClose={() => { setCreate(false); setOpened(null); setTaskId(null); setChoosingDate(false); }}>
     {choosingDate && <Sheet title="Chọn ngày xem tự học" onClose={() => setChoosingDate(false)}><DateField label="Ngày xem tự học" value={selected} onChange={setSelected}/><Button label="Xem ngày đã chọn" onPress={() => setChoosingDate(false)}/></Sheet>}
     {create && <StudySessionForm initialDate={selected} onClose={() => setCreate(false)} onSaved={(_id,date) => { setCreate(false); if(date)setSelected(date); }} />}
