@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Badge, Button, T } from '../../../shared/components';
+import { View } from 'react-native';
+import { Badge, Button, Row, T } from '../../../shared/components';
 import { S } from '../../../shared/theme';
 import type { FieldErrors } from '../../../shared/api/http';
 import { isEmail, normalizeEmail, validatePassword } from '../account';
@@ -7,10 +8,11 @@ import { AccountField, FormMessage } from '../components';
 import { accountApi, useAuth } from '../auth/AuthProvider';
 import { useApiAction } from '../auth/useApiAction';
 import { AuthHero } from './AuthHero';
+import { AuthEntryHeading, AuthEntryLink, AuthEntrySubmit } from './AuthEntryControls';
 
 type Props = { mode: 'login' | 'register'; initialEmail: string; message: string; onRegistered: (email: string) => void;
-  onSignedIn?: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register') => void; onForgot: (email: string) => void };
-export default function AuthForm({ mode, initialEmail, message, onRegistered, onSignedIn, onMode, onForgot }: Props) {
+  onSignedIn?: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register', email?: string) => void; onForgot: (email: string) => void; entry?: boolean };
+export default function AuthForm({ mode, initialEmail, message, onRegistered, onSignedIn, onMode, onForgot, entry = false }: Props) {
   const register = mode === 'register', auth = useAuth(), action = useApiAction();
   const [name, setName] = useState(''), [email, setEmail] = useState(initialEmail), [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState(''), [school, setSchool] = useState(''), [major, setMajor] = useState('');
@@ -37,23 +39,39 @@ export default function AuthForm({ mode, initialEmail, message, onRegistered, on
     else void action.run(signal => auth.signIn({ email: normalizeEmail(email), password }, signal), loaded => { setPassword(''); onSignedIn?.(loaded); });
   };
   return <>
-    <AuthHero icon={register ? 'sparkles-outline' : 'school-outline'} title={register ? 'Một khởi đầu mới, cho việc học tốt hơn.' : 'Chào mừng bạn trở lại!'}
-      detail={register ? 'Tạo tài khoản để bắt đầu góc học tập của bạn.' : 'Đăng nhập để xem hồ sơ tài khoản của bạn.'} />
-    <Badge label="TÀI KHOẢN CỦA BẠN" icon="shield-checkmark-outline" />
-    <FormMessage message={message} success />
-    {register && <AccountField label="Họ tên đăng ký" value={name} onChange={edit('fullName', setName)} disabled={action.busy} error={errors.fullName} placeholder="Tên của bạn" />}
-    <AccountField label="Email tài khoản" email value={email} onChange={edit('email', setEmail)} disabled={action.busy} error={errors.email} placeholder="ban@example.com" />
-    <AccountField label="Mật khẩu" password value={password} shown={shown} onToggle={() => setShown(v => !v)} onChange={edit('password', setPassword)} disabled={action.busy} error={errors.password} placeholder="Từ 8 đến 128 ký tự" />
-    {register && <>
-      <AccountField label="Xác nhận mật khẩu" password value={confirm} shown={showConfirm} onToggle={() => setShowConfirm(v => !v)} onChange={edit('confirmPassword', setConfirm)} disabled={action.busy} error={errors.confirmPassword} />
-      <AccountField label="Trường học (không bắt buộc)" value={school} onChange={edit('school', setSchool)} disabled={action.busy} error={errors.school} />
-      <AccountField label="Ngành học (không bắt buộc)" value={major} onChange={edit('major', setMajor)} disabled={action.busy} error={errors.major} />
+    {entry ? <AuthEntryHeading title={register ? 'Tạo tài khoản' : 'Đăng nhập'}
+      detail={register ? 'Bắt đầu góc học tập của riêng bạn.' : 'Mở góc học tập của bạn.'} /> : <>
+      <AuthHero icon={register ? 'sparkles-outline' : 'school-outline'} title={register ? 'Một khởi đầu mới, cho việc học tốt hơn.' : 'Chào mừng bạn trở lại!'}
+        detail={register ? 'Tạo tài khoản để bắt đầu góc học tập của bạn.' : 'Đăng nhập để xem hồ sơ tài khoản của bạn.'} />
+      <Badge label="TÀI KHOẢN CỦA BẠN" icon="shield-checkmark-outline" />
     </>}
+    <FormMessage message={message} success />
+    {register && <AccountField entry={entry} label="Họ tên đăng ký" value={name} onChange={edit('fullName', setName)} disabled={action.busy} error={errors.fullName} placeholder="Tên của bạn" />}
+    <AccountField entry={entry} label="Email tài khoản" email value={email} onChange={edit('email', setEmail)} disabled={action.busy} error={errors.email} placeholder="ban@example.com" />
+    <AccountField entry={entry} label="Mật khẩu" password value={password} shown={shown} onToggle={() => setShown(v => !v)} onChange={edit('password', setPassword)} disabled={action.busy} error={errors.password} placeholder={entry && !register ? 'Nhập mật khẩu' : 'Từ 8 đến 128 ký tự'} />
+    {register && <>
+      <AccountField entry={entry} label="Xác nhận mật khẩu" password value={confirm} shown={showConfirm} onToggle={() => setShowConfirm(v => !v)} onChange={edit('confirmPassword', setConfirm)} disabled={action.busy} error={errors.confirmPassword} />
+      <AccountField entry={entry} label="Trường học (không bắt buộc)" value={school} onChange={edit('school', setSchool)} disabled={action.busy} error={errors.school} />
+      <AccountField entry={entry} label="Ngành học (không bắt buộc)" value={major} onChange={edit('major', setMajor)} disabled={action.busy} error={errors.major} />
+    </>}
+    {entry && !register && <View style={{ alignSelf: 'flex-end', marginTop: -7 }}>
+      <AuthEntryLink label="Quên mật khẩu?" disabled={action.busy} onPress={() => onForgot(email)} />
+    </View>}
     <FormMessage message={action.error?.message ?? ''} />
-    {action.busy && <T accessibilityLiveRegion="polite" style={S.small}>{register ? 'Đang tạo tài khoản…' : 'Đang đăng nhập và tải hồ sơ…'}</T>}
-    <Button label={register ? 'Tạo tài khoản' : 'Đăng nhập'} onPress={submit} loading={action.busy} icon={register ? 'person-add-outline' : 'log-in-outline'} />
-    <Button label={register ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'} secondary disabled={action.busy} onPress={() => onMode(register ? 'login' : 'register')} />
-    {!register && <Button label="Quên mật khẩu?" secondary disabled={action.busy} onPress={() => onForgot(email)} />}
-    <T style={[S.small, { textAlign: 'center' }]}>Tài khoản được lưu trực tuyến. Ứng dụng giữ đăng nhập khi phiên còn hiệu lực.</T>
+    {entry ? <>
+      <AuthEntrySubmit label={register ? 'Tạo tài khoản' : action.error ? 'Thử lại' : 'Đăng nhập'} pending={register ? 'Đang tạo tài khoản…' : 'Đang đăng nhập…'}
+        busy={action.busy} onPress={submit} />
+      <Row style={{ justifyContent: 'center', flexWrap: 'wrap', columnGap: 4, rowGap: 0 }}>
+        <T style={S.small}>{register ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}</T>
+        <AuthEntryLink label={register ? 'Quay lại đăng nhập' : 'Tạo tài khoản'} disabled={action.busy}
+          onPress={() => onMode(register ? 'login' : 'register', email)} />
+      </Row>
+    </> : <>
+      {action.busy && <T accessibilityLiveRegion="polite" style={S.small}>{register ? 'Đang tạo tài khoản…' : 'Đang đăng nhập và tải hồ sơ…'}</T>}
+      <Button label={register ? 'Tạo tài khoản' : 'Đăng nhập'} onPress={submit} loading={action.busy} icon={register ? 'person-add-outline' : 'log-in-outline'} />
+      <Button label={register ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'} secondary disabled={action.busy} onPress={() => onMode(register ? 'login' : 'register')} />
+      {!register && <Button label="Quên mật khẩu?" secondary disabled={action.busy} onPress={() => onForgot(email)} />}
+      <T style={[S.small, { textAlign: 'center' }]}>Tài khoản được lưu trực tuyến. Ứng dụng giữ đăng nhập khi phiên còn hiệu lực.</T>
+    </>}
   </>;
 }
