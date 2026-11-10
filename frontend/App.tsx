@@ -61,20 +61,20 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
 function AppShell() {
   const auth = useAuth();
   const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute, assignmentDestination, semesterConnection, courseConnection, assignmentConnection, studyConnection, openSavedSchedule, dispatchStudyView } = useApp(); const inset = useSafeAreaInsets();
-  const current = viewKey(route); const visited = useRef(new Set<string>()); visited.current.add(current);
+  const current = viewKey(route), isHome = current === 'home'; const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
   const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(auth.notice ? 'profile' : null);
   const [classDate, setClassDate] = useState<string | undefined>();
   const action = useActionState();
-  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading');
+  const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>(auth.hasSession ? 'ready' : 'loading');
   const loadTimer = useRef<ReturnType<typeof setTimeout> | null>(null), previousPage = useRef(current);
   const loadPreview = (fail: boolean) => {
     if (loadTimer.current) clearTimeout(loadTimer.current);
     setPanel(null); setLoadState('loading');
     loadTimer.current = setTimeout(() => { setLoadState(fail ? 'error' : 'ready'); loadTimer.current = null; }, 850);
   };
-  useEffect(() => { loadTimer.current = setTimeout(() => { setLoadState('ready'); loadTimer.current = null; }, 850); return () => { if (loadTimer.current) clearTimeout(loadTimer.current); }; }, []);
+  useEffect(() => { if (auth.hasSession) return; loadTimer.current = setTimeout(() => { setLoadState('ready'); loadTimer.current = null; }, 850); return () => { if (loadTimer.current) clearTimeout(loadTimer.current); }; }, [auth.hasSession]);
   useEffect(() => {
     if (previousPage.current === current) return;
     previousPage.current = current;
@@ -93,21 +93,21 @@ function AppShell() {
     if (auth.hasSession && (!semesterConnection?.loaded || !courseConnection?.loaded)) return <SemesterSyncStatus />;
     if (auth.hasSession && !assignmentConnection?.loaded) return <AssignmentSyncStatus />;
     if (auth.hasSession && !studyConnection?.loaded) return <StudySyncStatus/>;
-    if (key === 'home') return <Home onTask={openTask} onClass={openClass} onProfile={() => openPanel('profile')} onStudyPlan={study} />;
+    if (key === 'home') return <Home onTask={openTask} onClass={openClass} onStudyPlan={study} />;
     if (key === 'focus') return <Focus onStudyPlan={study} />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant onStudyPlan={study} />;
     return <><LearningNavigation value={key as ScheduleMode} onChange={setScheduleMode} />{key === 'Thời khóa biểu' ? <Schedule onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Bài tập' ? <AssignmentsScreen key={assignmentDestination?.key ?? 'regular'} initialStatisticsLink={assignmentDestination?.link} onTask={openTask} onNewTask={() => openTask('new')} /> : key === 'Kỳ thi' ? <ExamList /> : key === 'Môn & học kỳ' ? <Academics /> : <StudyPlan />}</>;
   };
-  return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, { paddingTop: inset.top }]}>
-    <Row between style={styles.header}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T><T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'home' ? 'Không ngừng tiến bộ mỗi ngày' : tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T></View></Pressable>
+  return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, isHome && styles.homeSurface, { paddingTop: inset.top }]}>
+    <Row between style={[styles.header, isHome && styles.homeSurface]}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T>{!isHome && <T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T>}</View></Pressable>
       <NotificationBell quiet={notifications.quiet} unread={notifications.unread} pending={!!notifications.schedule && !notifications.schedule.ready || !!notifications.readState && !notifications.readState.ready} onPress={() => { openPanel('notifications'); if (notifications.schedule) void notifications.schedule.reload().catch(() => {}); }} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
     </Row>
 
-    <Pressable accessibilityRole="button" accessibilityLabel="Thử trạng thái giao diện" onPress={() => openPanel('preview')} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 36, gap: 6 }]}><Icon name="flask-outline" size={15} /><T style={{ color: C.primary, fontSize: 11 }}>Bản xem trước · Thử trạng thái</T></Pressable>
+    {(!isHome || !auth.hasSession) && <Pressable accessibilityRole="button" accessibilityLabel="Thử trạng thái giao diện" onPress={() => openPanel('preview')} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 36, gap: 6 }]}><Icon name="flask-outline" size={15} /><T style={{ color: C.primary, fontSize: 11 }}>{isHome ? 'Chế độ dùng thử' : 'Bản xem trước · Thử trạng thái'}</T></Pressable>}
     {canBack && <Pressable accessibilityRole="button" accessibilityLabel="Quay lại màn trước" onPress={goBackRoute} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 40, gap: 7 }]}><Icon name="arrow-back" size={18} /><T style={{fontSize:12,color:C.primary,fontFamily:F.semi}}>Quay lại {routeLabel(routeTrail[routeTrail.length - 2]!)}</T></Pressable>}
-    {[...visited.current].map(key => <NavigationScope key={key} active={current === key && loadState === 'ready'}><RememberedScrollView memoryKey={'page-' + key + (key === 'Bài tập' ? ':' + (assignmentDestination?.key ?? 'regular') : '')} testID={'page-' + key} active={current === key} style={{ flex: 1, display: current === key && loadState === 'ready' ? 'flex' : 'none' }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">{renderPage(key)}<T style={{ textAlign: 'center', color: '#91909F', fontSize: 9, lineHeight: 16, letterSpacing: 0.5 }}>{auth.hasSession ? 'FOCUSYOURSTUDY · ĐIỂM VÀ POMODORO ĐÃ KẾT NỐI' : 'FOCUSYOURSTUDY · BẢN GIAO DIỆN · DỮ LIỆU MẪU'}</T></RememberedScrollView></NavigationScope>)}
+    {[...visited.current].map(key => <NavigationScope key={key} active={current === key && loadState === 'ready'}><RememberedScrollView memoryKey={'page-' + key + (key === 'Bài tập' ? ':' + (assignmentDestination?.key ?? 'regular') : '')} testID={'page-' + key} active={current === key} style={{ flex: 1, display: current === key && loadState === 'ready' ? 'flex' : 'none' }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: key === 'home' ? 14 : 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">{renderPage(key)}{key !== 'home' && <T style={{ textAlign: 'center', color: '#91909F', fontSize: 9, lineHeight: 16, letterSpacing: 0.5 }}>{auth.hasSession ? 'FOCUSYOURSTUDY · ĐIỂM VÀ POMODORO ĐÃ KẾT NỐI' : 'FOCUSYOURSTUDY · BẢN GIAO DIỆN · DỮ LIỆU MẪU'}</T>}</RememberedScrollView></NavigationScope>)}
     {loadState !== 'ready' && <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 130 }}><StateView kind={loadState === 'loading' ? 'loading' : 'error'} title={loadState === 'loading' ? 'Đang chuẩn bị góc học tập' : 'Chưa thể hiển thị nội dung'} message={loadState === 'loading' ? 'Đợi một chút nhé. Đây là trạng thái tải của bản xem trước.' : 'Bạn đang xem lỗi tải mẫu. Dữ liệu và các bộ lọc trong phiên vẫn được giữ.'} actionLabel={loadState === 'error' ? 'Thử tải lại' : undefined} onAction={() => loadPreview(false)} secondaryLabel={loadState === 'error' ? 'Quay về nội dung' : undefined} onSecondary={() => setLoadState('ready')} /></ScrollView>}
     <View style={{ position: 'absolute', bottom: 100 + inset.bottom, left: 10, right: 10 }}><ActionStatus /></View>
     <NoticeToast bottom={105 + inset.bottom} />
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#EDEDF8', alignItems: 'center' },
   app: { flex: 1, backgroundColor: C.canvas, width: '100%', maxWidth: 520, overflow: 'hidden', ...(Platform.OS === 'web' ? { boxShadow: '0px 0px 70px rgba(82,64,146,0.05)' } : {}) },
   header: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 14, backgroundColor: C.canvas, gap: 6 },
+  homeSurface: { backgroundColor: '#FBF8F5' },
   dockWrap: { position: 'absolute', left: 18, right: 18 },
   dock: { flexDirection: 'row', minHeight: 72, backgroundColor: '#fff', borderRadius: 32, paddingHorizontal: 5, paddingTop: 5, paddingBottom: 3, borderWidth: 1, borderColor: '#F4F0FF', boxShadow: '0px 7px 28px rgba(100,85,181,0.15)' },
 });
