@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Button, Icon, Row, Sheet, T } from '../../../shared/components';
+import { Button, Icon, Row, Sheet, SheetFlow, T } from '../../../shared/components';
 import { DateField } from '../../../shared/components/DateTimePicker';
+import { FlowScope } from '../../../navigation/Navigation';
 import { C, F, S } from '../../../shared/theme';
 import { statisticsWindow, type StatisticsPeriod } from '../api/pomodoroStatisticsApi';
 
@@ -11,13 +12,16 @@ export function StatisticsFilterButton({ label, value, onPress }: { label: strin
     <T style={S.small}>{label}</T><Row><T style={[S.grow, { fontFamily: F.semi, fontSize: 13, lineHeight: 21 }]}>{value}</T><Icon name="chevron-down" size={16} /></Row>
   </Pressable>;
 }
-export function StatisticsFilterSheet({ title, allLabel, options, selected, loading, error, onRetry, onSelect, onClose }: {
+type StatisticsFilter = {
   title: string; allLabel: string; options: StatisticsOption[]; selected: StatisticsOption | null; loading: boolean; error?: string;
-  onRetry: () => void; onSelect: (option: StatisticsOption | null) => void; onClose: () => void;
+  onSelect: (option: StatisticsOption | null) => void;
+};
+function StatisticsFilterSheet({ title, allLabel, options, selected, loading, error, onRetry, onSelect, onClose, onBack }: StatisticsFilter & {
+  onRetry: () => void; onClose: () => void; onBack: () => void;
 }) {
   const choices: StatisticsOption[] = [{ id: '', label: allLabel }, ...options];
   if (selected && !choices.some(option => option.id === selected.id)) choices.push(selected);
-  return <Sheet title={title} onClose={onClose}>
+  return <Sheet title={title} onClose={onClose} onBack={onBack}>
     {choices.map(option => <Pressable key={option.id} accessibilityRole="radio" accessibilityLabel={option.label + (option.hint ? `, ${option.hint}` : '')} accessibilityState={{ checked: (selected?.id ?? '') === option.id }} aria-checked={(selected?.id ?? '') === option.id} onPress={() => onSelect(option.id ? option : null)} style={{ padding: 15, minHeight: 58, borderRadius: 16, backgroundColor: (selected?.id ?? '') === option.id ? C.soft : C.canvas }}>
       <Row><Icon name={(selected?.id ?? '') === option.id ? 'radio-button-on' : 'radio-button-off'} /><View style={S.grow}><T style={{ fontFamily: F.semi, fontSize: 13, lineHeight: 21 }}>{option.label}</T>{option.hint && <T style={S.small}>{option.hint}</T>}</View></Row>
     </Pressable>)}
@@ -26,6 +30,24 @@ export function StatisticsFilterSheet({ title, allLabel, options, selected, load
     {!loading && !error && options.length === 0 && <T style={S.small}>Chưa có lựa chọn trong danh sách này. Bạn vẫn có thể xem tất cả.</T>}
   </Sheet>;
 }
+
+export function StatisticsScopeSheet({ semester, course, onRetry, onClose }: {
+  semester: StatisticsFilter; course: StatisticsFilter; onRetry: () => void; onClose: () => void;
+}) {
+  const [field, setField] = useState<'semester' | 'course' | null>(null);
+  const filter = field === 'semester' ? semester : course;
+  const back = () => setField(null);
+  return <FlowScope onClose={onClose}><SheetFlow>
+    {field ? <StatisticsFilterSheet key={field} {...filter} onRetry={onRetry} onClose={onClose} onBack={back} onSelect={value => { filter.onSelect(value); back(); }} />
+      : <Sheet key="scope" title="Bộ lọc thời gian học" onClose={onClose}>
+        <T style={S.small}>Chọn học kỳ hoặc môn để xem thời gian của các phiên tập trung đã hoàn tất.</T>
+        <StatisticsFilterButton label={semester.title} value={semester.selected?.label ?? semester.allLabel} onPress={() => setField('semester')} />
+        <StatisticsFilterButton label={course.title} value={course.selected?.label ?? course.allLabel} onPress={() => setField('course')} />
+        <Button label="Xem thống kê" onPress={onClose} />
+      </Sheet>}
+  </SheetFlow></FlowScope>;
+}
+
 export function StatisticsAnchorSheet({ date, period, onApply, onClose }: { date: string; period: StatisticsPeriod; onApply: (date: string) => void; onClose: () => void }) {
   const [draft, setDraft] = useState(date), [error, setError] = useState('');
   return <Sheet title={period === 'WEEK' ? 'Chọn ngày trong tuần muốn xem' : 'Chọn ngày trong tháng muốn xem'} onClose={onClose}>

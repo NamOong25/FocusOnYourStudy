@@ -8,13 +8,17 @@ import type { Semester } from '../../academics/academic';
 import { validateStatisticsRange, type StatisticsRange } from '../statistics';
 
 export function StatisticsSemesterSelector({ semester, onPress }: { semester: Semester; onPress: () => void }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel="Chọn học kỳ thống kê" onPress={onPress} style={[S.card, { paddingVertical: 17 }]}>
-    <Row style={{ gap: 12 }}><View style={{ width: 40, height: 44, borderRadius: 13, backgroundColor: C.soft, justifyContent: 'center', alignItems: 'center' }}><Icon name="calendar-outline" size={24} /></View><View style={[S.grow, { gap: 4 }]}><T style={{ fontFamily: F.bold, fontSize: 16 }}>{semester.name}</T><T style={S.small}>Năm học {semester.academicYear}</T></View><Icon name="chevron-down" size={18} /></Row>
+  return <Pressable accessibilityRole="button" accessibilityLabel="Chọn học kỳ thống kê" accessibilityHint={`${semester.name} · ${semester.academicYear}`} onPress={onPress} style={[S.card, { paddingVertical: 17 }]}>
+    <Row style={{ gap: 12 }}>
+      <View style={{ width: 40, height: 44, borderRadius: 13, backgroundColor: C.soft, justifyContent: 'center', alignItems: 'center' }}><Icon name="calendar-outline" size={24} /></View>
+      <View style={S.grow}><T style={[S.small, { fontSize: 10, letterSpacing: 0.5 }]}>HỌC KỲ ĐANG XEM</T><T style={{ fontFamily: F.bold, fontSize: 16 }}>{semester.name} · {semester.academicYear}</T></View>
+      <Icon name="chevron-down" size={18} />
+    </Row>
   </Pressable>;
 }
-export function StatisticsSemesterSheet({ semesters, selectedId, onSelect, onManage, onClose }: { semesters: Semester[]; selectedId: string; onSelect: (id: string) => void; onManage: () => void; onClose: () => void }) {
+export function StatisticsSemesterSheet({ semesters, selectedId, onSelect, onManage, onClose, description = 'Thời gian học, phân bổ môn và bài tập hiển thị theo học kỳ bạn chọn.' }: { semesters: Semester[]; selectedId: string; onSelect: (id: string) => void; onManage: () => void; onClose: () => void; description?: string }) {
   return <Sheet title="Học kỳ thống kê" onClose={onClose}>
-    <T style={S.small}>Thời gian học, phân bổ môn và bài tập hiển thị theo học kỳ bạn chọn.</T>
+    <T style={S.small}>{description}</T>
     {[...semesters].sort((a, b) => b.academicYear.localeCompare(a.academicYear) || a.term - b.term).map(semester => <Pressable key={semester.id} accessibilityRole="radio" accessibilityLabel={`Thống kê: ${semester.name}, ${semester.academicYear}`} accessibilityState={{ checked: selectedId === semester.id }} onPress={() => onSelect(semester.id)} style={{ padding: 15, minHeight: 80, borderRadius: 18, borderWidth: 1, borderColor: selectedId === semester.id ? C.primary : C.line, backgroundColor: selectedId === semester.id ? C.soft : C.canvas }}>
       <Row><Icon name={selectedId === semester.id ? 'radio-button-on' : 'radio-button-off'} /><View style={[S.grow, { gap: 5 }]}><T style={{ fontFamily: F.bold, fontSize: 15 }}>{semester.name}</T><T style={S.small}>{semester.academicYear}</T></View></Row><View style={{ marginTop: 10 }}><Badge label={semester.status} /></View>
     </Pressable>)}

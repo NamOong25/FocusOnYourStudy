@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { FlowScope } from '../../../navigation/Navigation';
-import { Button, Card, Icon, IconButton, Row, StateView, T } from '../../../shared/components';
+import { Button, Card, Icon, IconTile, Row, StateView, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
 import { useApp } from '../../../store/model';
 import { useAuth } from '../../account/auth/AuthProvider';
@@ -12,6 +12,7 @@ import { AssignmentProgressFilters } from './AssignmentProgressFilters';
 
 export default function ServerAssignmentProgressCard() {
   const app = useApp(), auth = useAuth(), zone = auth.profile?.timeZone ?? 'Asia/Ho_Chi_Minh';
+  const [expanded, setExpanded] = useState(false);
   const [semesterId, setSemesterId] = useState(() => app.semesters.find(s => s.id === app.academicSemesterId)?.id ?? app.semesters.find(s => s.status === 'Đang học')?.id ?? app.semesters[0]?.id ?? '');
   const [courseId, setCourseId] = useState(''), [sheet, setSheet] = useState<'semester' | 'course' | null>(null);
   const semester = app.semesters.find(s => s.id === semesterId), course = app.courseCatalog.find(c => c.id === courseId && c.semesterId === semesterId);
@@ -21,7 +22,7 @@ export default function ServerAssignmentProgressCard() {
   const revision = JSON.stringify([app.assignmentConnection?.loaded, app.assignmentConnection?.busy, app.assignmentConnection?.needsReload,
     app.tasks.map(t => [t.id, t.version, t.courseId, t.status, t.dueAt]).sort((a, b) => String(a[0]).localeCompare(String(b[0])))]);
   const enabled = !catalogLoading && !catalogError && !missing && !!semester && !app.assignmentConnection?.busy;
-  const { state, reload } = useAssignmentStatistics({ semesterId, ...(courseId ? { courseId } : {}), timeZone: zone }, revision, enabled);
+  const { state, reload } = useAssignmentStatistics({ semesterId, ...(courseId ? { courseId } : {}), timeZone: zone }, revision, enabled && expanded);
   const data = enabled && state.loaded && !state.loading && !state.error ? state.value : null;
   const retryCatalog = () => { void Promise.allSettled([app.semesterConnection?.reload(), app.courseConnection?.reload()]); };
   const retry = () => { void reload().catch(() => {}); };
@@ -32,8 +33,15 @@ export default function ServerAssignmentProgressCard() {
     // The destination hides stale rows until this canonical list read finishes.
     void Promise.allSettled([app.assignmentConnection?.reload(), app.courseConnection?.reload(), app.semesterConnection?.reload()]);
   };
-  return <FlowScope onClose={() => setSheet(null)}><Card style={{ gap: 16 }}>
-    <Row between style={{ gap: 8 }}><T accessibilityRole="header" style={[S.grow, { fontFamily: F.bold, fontSize: 18 }]}>Tiến độ bài tập</T><IconButton label="Cập nhật tiến độ bài tập" name="refresh-outline" disabled={!enabled || state.loading} onPress={retry} /></Row>
+  return <FlowScope onClose={() => setSheet(null)}><Card style={{ padding: 15, gap: 16 }}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Tiến độ bài tập" accessibilityState={{ expanded }} onPress={() => setExpanded(!expanded)} style={{ minHeight: 44, justifyContent: 'center' }}>
+      <Row style={{ gap: 10 }}>
+        <IconTile name="clipboard-outline" size={36} />
+        <T style={[S.grow, { fontFamily: F.bold, fontSize: 16 }]}>Tiến độ bài tập</T>
+        <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={17} />
+      </Row>
+    </Pressable>
+    {expanded && <>
     <T style={S.small}>Toàn bộ bài của học kỳ đang chọn. Không lọc theo tuần/tháng của biểu đồ thời gian học.</T>
     <StatisticsFilterButton label="Học kỳ tiến độ bài tập" value={semester ? `${semester.name} · ${semester.academicYear}` : semesterId ? 'Học kỳ không còn trong danh sách' : 'Chọn học kỳ'} onPress={() => setSheet('semester')} />
     {!!semester && <StatisticsFilterButton label="Môn học tiến độ bài tập" value={course?.name ?? (courseId ? 'Môn không còn trong học kỳ' : 'Tất cả môn trong học kỳ')} onPress={() => setSheet('course')} />}
@@ -58,6 +66,7 @@ export default function ServerAssignmentProgressCard() {
                   <Button label="Đến danh sách bài tập theo thống kê" secondary icon="clipboard-outline" onPress={() => open('ALL')} />
                 </>}
     {sheet && <AssignmentProgressFilters kind={sheet} semesterId={semesterId} courseId={courseId} onSelect={id => { if (sheet === 'semester') { setSemesterId(id); setCourseId(''); } else setCourseId(id); setSheet(null); }} onClose={() => setSheet(null)} />}
+    </>}
   </Card></FlowScope>;
 }
 function ProgressRow({ group, count, onPress }: { group: AssignmentStatisticsGroup; count: number; onPress: () => void }) {
