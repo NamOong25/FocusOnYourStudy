@@ -8,6 +8,7 @@ import { C, S } from '../theme';
 import { RememberedScrollView, useBackAction, useNavigationScope } from '../../navigation/Navigation';
 import { DateTimePanel, DateTimeProvider, useDateTimePicker } from './DateTimePicker';
 import { Button } from './Button';
+import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 import { Row } from './Row';
 import { T } from './Typography';
@@ -20,6 +21,8 @@ type SheetProps = {
     onBack?: () => void;
     scrollKey?: string;
     dirty?: boolean;
+    heading?: { icon: IconName; detail: string };
+    surfaceColor?: string;
     alert?: { title: string; message: string; onDismiss: () => void };
 };
 
@@ -46,7 +49,7 @@ export function Sheet(props: SheetProps) {
     );
 }
 
-function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false, alert }: SheetProps) {
+function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false, heading, surfaceColor = '#fff', alert }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
     const flow = useContext(SheetFlowContext);
@@ -113,7 +116,7 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                     style={{ position: 'absolute', width: '100%', height: '100%' }}
                 />
                 <View ref={panel} accessibilityElementsHidden={alertVisible} importantForAccessibility={alertVisible ? 'no-hide-descendants' : 'auto'} style={{
-                    backgroundColor: '#fff',
+                    backgroundColor: surfaceColor,
                     width: '100%',
                     maxWidth: 520,
                     maxHeight: '90%',
@@ -122,7 +125,16 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                     paddingBottom: Math.max(22, inset.bottom),
                 }}>
                     <View style={{ alignSelf: 'center', backgroundColor: C.line, width: 36, height: 4, borderRadius: 4, marginTop: 12 }} />
-                    <Row between style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 10, gap: 6 }}>
+                    {heading && !picker.active && !confirming ? <Row style={{ paddingHorizontal: 22, paddingTop: 14, paddingBottom: 10, gap: 11 }}>
+                        <View style={{ width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.soft }}>
+                            <Icon name={heading.icon} size={23} />
+                        </View>
+                        <View style={S.grow}>
+                            <T accessibilityRole="header" style={[S.title, { fontSize: 21, lineHeight: 28 }]}>{title}</T>
+                            <T accessibilityLiveRegion="polite" style={S.small}>{heading.detail}</T>
+                        </View>
+                        <IconButton name="close" label="Đóng" onPress={dismiss} />
+                    </Row> : <Row between style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 10, gap: 6 }}>
                         <IconButton name="arrow-back" label="Quay lại" onPress={back} bg="transparent" />
                         <T style={[S.title, S.grow]}>
                             {confirming ? 'Thay đổi chưa lưu' : picker.active ? `Chọn ${picker.active.label.toLocaleLowerCase()}` : title}
@@ -133,7 +145,7 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                             onPress={dismiss}
                             bg={C.canvas}
                         />
-                    </Row>
+                    </Row>}
                     <RememberedScrollView
                         key={scrollKey}
                         memoryKey={`${title}:${scrollKey ?? ''}`}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
-import { Badge, Button, Card, IconTile, Row, Segments, Sheet, StateView, T } from '../../shared/components';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Button, Row, Segments, Sheet, StateView, T } from '../../shared/components';
 import { FlowScope, NavigationScope } from '../../navigation/Navigation';
 import { C, F, S } from '../../shared/theme';
 import TaskDialog from '../assignments/TaskDialog';
@@ -24,29 +24,47 @@ export default function NotificationsCenter({ items, unread, sources, now, onRea
   // Keep the detail open if the reminder disappears while editing or reaches its end.
   const target = opened && (opened.kind === 'saved-exam' || notificationTargetExists(opened, sources)) ? opened : null;
   const visible = filter === 'Chưa đọc' ? items.filter(item => item.readKnown !== false && !item.read) : items;
-  const pending=!!schedule && !schedule.ready || !!readState && !readState.ready;
+  const pending = !!schedule && !schedule.ready || !!readState && !readState.ready;
+  const failure = schedule?.error ?? readState?.error;
+  const needsRetry = !!schedule && (!!failure || !!readState?.needsReload);
+  const marking = !!readState?.busy;
+  const canMarkAll = !!unread && !pending && !marking;
+  const headingDetail = pending ? needsRetry ? 'Cần kiểm tra lại' : 'Đang kiểm tra thông báo…' : `${unread} chưa đọc`;
   return <FlowScope onClose={onClose}>
     <NavigationScope active={!target}>
-      <Sheet title="Góc nhắc nhở" onClose={onClose}>
-        <Card style={{ gap: 11, backgroundColor: C.soft }}>
-          <Row style={{ gap: 12 }}><IconTile name="notifications-outline" bg="#FFFFFFAA" /><View style={S.grow}><T style={{ fontFamily: F.bold, color: C.primary, fontSize: 17 }}>Giữ những việc cần nhớ</T><T style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: 'long' })}</T></View></Row>
-          <Badge label={pending ? `${items.length} mục đã tải · đang xác nhận nhắc việc` : `${items.length} mục · ${unread} chưa đọc`} bg="#FFFFFFCC" />
-          <T style={S.small}>Mở một mục để xem chi tiết và đánh dấu đã đọc. Mở chuông không tự đánh dấu tất cả.</T>
-          {quiet && <T accessibilityLiveRegion="polite" style={S.small}>Đang trong giờ yên lặng. Số trên chuông được tạm ẩn, bạn vẫn có thể xem và đánh dấu nhắc việc ở đây.</T>}
-          <T style={S.small}>Danh sách áp dụng các loại nhắc đã bật trong Tùy chọn nhắc học.</T>
-        </Card>
-        {!!schedule && <>
-          <T style={S.small}>Lịch học: {schedule.classesReady ? 'đã xác nhận' : 'chưa xác nhận'} · Lịch thi: {schedule.examsReady ? 'đã xác nhận' : 'chưa xác nhận'}</T>
-          {!schedule.ready && <StateView kind={schedule.error ? 'error' : 'loading'} title={schedule.error ? 'Chưa xác nhận đủ nhắc việc' : 'Đang kiểm tra nhắc việc'} message={schedule.error?.message ?? 'Đang đọc lịch học và lịch thi của toàn tài khoản. Chưa kết luận là không có lịch cần nhắc.'} />}
-          {!!readState && !readState.ready && schedule.ready && <StateView kind={readState.error || readState.needsReload ? 'error' : 'loading'} title={readState.error || readState.needsReload ? 'Chưa xác nhận trạng thái đọc' : 'Đang đọc trạng thái từ tài khoản'} message={readState.error?.message ?? 'Đang đối chiếu trạng thái đã đọc với nội dung đang hiển thị.'} />}
-          {!!readState?.message && <T accessibilityLiveRegion="polite" style={S.small}>{readState.message}</T>}
-          <Button label="Tải lại nhắc việc" secondary disabled={readState?.busy} loading={schedule.loading || readState?.loading} onPress={() => { void schedule.reload().catch(() => {}); }} />
-        </>}
-        <Segments values={['Tất cả', 'Chưa đọc']} value={filter} onChange={setFilter} />
-        <Button label="Đánh dấu tất cả đã đọc" secondary icon="checkmark-done-outline" loading={readState?.busy} disabled={!unread || pending || !!readState?.busy} onPress={() => onReadAll(visible)} />
-        {visible.map(item => <ReminderCard key={item.id} item={item} disabledRead={!!readState?.busy} onRead={() => onRead(item)} onOpen={() => { if(item.readKnown !== false)onRead(item); if (item.target.kind === 'saved-class') onSavedClass(item.target); else setOpened(item.target); }} />)}
-        {!visible.length && !pending && <Card style={{ alignItems: 'center', padding: 22, gap: 13 }}><IconTile name={items.length ? 'checkmark-done-outline' : 'leaf-outline'} size={55} bg={C.soft} /><T accessibilityRole="header" style={{ fontFamily: F.bold, fontSize: 18, textAlign: 'center' }}>{items.length ? 'Bạn đã đọc hết nhắc việc' : 'Chưa có nhắc việc'}</T><T style={[S.small, { textAlign: 'center' }]}>{items.length ? 'Các mục đã đọc vẫn ở phần Tất cả.' : schedule ? 'Chưa có bài cần nhắc, hoặc lịch học/lịch thi chưa đến mốc nhắc. Các lịch đã kết thúc và lịch thi đã tắt nhắc không xuất hiện ở đây.' : 'Nhắc việc sẽ xuất hiện khi có bài chưa xong quá hạn/sắp hạn, lịch học hoặc lịch thi gần đến.'}</T>{!!items.length && <Button label="Xem tất cả nhắc việc" secondary onPress={() => setFilter('Tất cả')} />}</Card>}
-        <View style={{ gap: 8 }}><T style={S.small}>{schedule ? 'Lịch học và lịch thi lấy từ toàn tài khoản, không phụ thuộc học kỳ đang xem. Mục xuất hiện từ mốc nhắc đã lưu đến trước khi buổi kết thúc; 0 phút là nhắc đúng giờ bắt đầu. Buổi nghỉ/xóa và lịch thi tắt nhắc/xóa không được nhắc. Bài chưa xong quá hạn hoặc đến hạn trong 7 ngày vẫn được giữ.' : 'Bài chưa xong đã quá hạn hoặc đến hạn trong 7 ngày; buổi học/lịch thi đang diễn ra hoặc bắt đầu trong 7 ngày tới. Buổi đã hủy và lịch đã kết thúc được bỏ khỏi danh sách.'}</T><T style={S.small}>{schedule ? 'Lịch học, lịch thi và bài tập dùng dữ liệu tài khoản. Mỗi kỳ thi có một thẻ; đến mốc nhắc mới sẽ hiện chưa đọc lại. ' : ''}Đây là nhắc việc trong app, chưa gửi thông báo thiết bị. {schedule ? 'Trạng thái đã đọc được lưu vào tài khoản và đối chiếu sau khi tải lại. Nội dung hoặc mốc nhắc thay đổi sẽ cần đọc lại.' : 'Trạng thái đọc của bản xem thử chỉ giữ trong phiên.'}</T></View>
+      <Sheet title="Thông báo" onClose={onClose} heading={{ icon: 'notifications-outline', detail: headingDetail }} surfaceColor="#FFFCF7">
+        <Row style={{ gap: 12 }}>
+          <View style={S.grow}><Segments values={['Tất cả', 'Chưa đọc']} value={filter} onChange={setFilter} /></View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Đánh dấu tất cả đã đọc"
+            accessibilityState={{ disabled: !canMarkAll, busy: marking }} disabled={!canMarkAll}
+            onPress={() => onReadAll(visible)}
+            style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 4, justifyContent: 'center', opacity: pressed ? 0.7 : 1 })}>
+            <T style={{ color: canMarkAll ? C.primary : C.muted, fontFamily: F.bold, fontSize: 12, lineHeight: 19 }}>
+              {marking ? 'Đang lưu…' : 'Đọc tất cả'}
+            </T>
+          </Pressable>
+        </Row>
+        {quiet && <T accessibilityLiveRegion="polite" style={S.small}>Đang trong giờ yên lặng · Số trên chuông tạm ẩn.</T>}
+        {needsRetry && schedule && <View style={{ gap: 8, borderRadius: 13, padding: 11, backgroundColor: C.redSoft }}>
+          <T accessibilityRole="alert" style={[S.small, { color: C.red }]}>{failure?.message ?? 'Tải lại để xác nhận trạng thái đã đọc.'}</T>
+          {!!readState?.message && <T style={S.small}>{readState.message}</T>}
+          <Button label="Tải lại nhắc việc" secondary disabled={marking} loading={schedule.loading || readState?.loading}
+            onPress={() => { void schedule.reload().catch(() => {}); }} />
+        </View>}
+        {pending && !needsRetry && !visible.length && <Row style={{ paddingVertical: 8 }}>
+          <ActivityIndicator color={C.primary} /><T style={S.small}>Đang tải dữ liệu thông báo…</T>
+        </Row>}
+        {!!visible.length && <View style={{ gap: 9 }}>{visible.map(item => <ReminderCard key={item.id} item={item} disabledRead={pending || marking}
+          onRead={() => onRead(item)} onOpen={() => {
+            if (item.readKnown !== false) onRead(item);
+            if (item.target.kind === 'saved-class') onSavedClass(item.target);
+            else setOpened(item.target);
+          }} />)}</View>}
+        {!visible.length && !pending && <StateView
+          title={items.length ? 'Bạn đã đọc hết nhắc việc' : 'Chưa có thông báo'}
+          message={items.length ? 'Các mục đã đọc vẫn ở phần Tất cả.' : `Đến ${now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}, chưa có bài tập hoặc lịch nào cần nhắc.`}
+          actionLabel={items.length ? 'Xem tất cả nhắc việc' : undefined} onAction={() => setFilter('Tất cả')} />}
+        {!!readState?.message && !needsRetry && <T accessibilityLiveRegion="polite" style={S.small}>{readState.message}</T>}
       </Sheet>
     </NavigationScope>
     {target?.kind === 'task' && <TaskDialog key={target.id} taskId={target.id} onClose={() => setOpened(null)} />}
