@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Button, Card, Icon, Row, T } from '../../shared/components';
+import { Button, Card, Row, T } from '../../shared/components';
+import { BrandLogo } from '../../shared/components/BrandLogo';
 import { C, F, S } from '../../shared/theme';
 import { useBackAction } from '../../navigation/Navigation';
 import { useAuth } from '../account/auth/AuthProvider';
@@ -24,7 +25,7 @@ export default function WelcomeScreen() {
     <StatusBar style="dark" />
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.screen, { paddingTop: inset.top }]}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingBottom: 24 + inset.bottom }]}>
-        <Row style={{ gap: 9 }}><Icon name="school-outline" size={24} /><T style={styles.brand}>FocusYourStudy</T></Row>
+        <Row style={{ gap: 9 }}><BrandLogo /><T style={styles.brand}>FocusYourStudy</T></Row>
         {!!auth.notice && <Card style={{ backgroundColor: auth.logoutPending ? C.amberSoft : C.soft }}>
           <T accessibilityLiveRegion="polite" style={S.small}>{auth.notice}</T>
         </Card>}

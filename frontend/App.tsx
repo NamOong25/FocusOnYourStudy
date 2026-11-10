@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { FeedbackProvider } from './src/shared/feedback/FeedbackProvider';
 import { ActionScope, useActionState } from './src/shared/feedback/ActionScope';
 import { ActionStatus, NoticeToast, StateView } from './src/shared/components';
+import { BrandLogo } from './src/shared/components/BrandLogo';
 import WelcomeScreen from './src/features/onboarding/WelcomeScreen';
 import PreviewPanel from './src/features/preview/PreviewPanel';
 import { FlowScope, NavigationProvider, NavigationScope, RememberedScrollView, useBackAction } from './src/navigation/Navigation';
@@ -101,7 +102,7 @@ function AppShell() {
   };
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, isHome && styles.homeSurface, { paddingTop: inset.top }]}>
     <Row between style={[styles.header, isHome && styles.homeSurface]}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><View style={{ backgroundColor: C.soft, width: 39, height: 39, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }}><Icon name="school-outline" size={23} /></View><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T>{!isHome && <T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T>}</View></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 9 }]}><BrandLogo /><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T>{!isHome && <T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tab === 'focus' ? 'Không gian tập trung của bạn' : tabs.find(t => t.id === tab)?.label}</T>}</View></Pressable>
       <NotificationBell quiet={notifications.quiet} unread={notifications.unread} pending={!!notifications.schedule && !notifications.schedule.ready || !!notifications.readState && !notifications.readState.ready} onPress={() => { openPanel('notifications'); if (notifications.schedule) void notifications.schedule.reload().catch(() => {}); }} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
     </Row>
 

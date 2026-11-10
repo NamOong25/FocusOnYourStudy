@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Button, T } from '../../../shared/components';
+import { Button, Row, T } from '../../../shared/components';
+import { BrandLogo } from '../../../shared/components/BrandLogo';
 import { C, F } from '../../../shared/theme';
 import type { ResetLink } from '../password/passwordResetData';
 import AuthForm from './AuthForm';
@@ -21,7 +22,7 @@ export default function PasswordRecoveryScreen({ link, clearLink, onClose }: Pro
   return <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#EDEDF8' }}>
     <ScrollView style={{ width: '100%', maxWidth: 520, backgroundColor: C.canvas }}
       keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, paddingBottom: 36, gap: 18 }}>
-      <T style={{ fontFamily: F.extra, color: C.primary, fontSize: 17 }}>FocusYourStudy</T>
+      <Row style={{ gap: 9 }}><BrandLogo /><T style={{ fontFamily: F.extra, color: C.primary, fontSize: 17 }}>FocusYourStudy</T></Row>
       {page === 'reset' && <PasswordResetConfirmForm link={link} clearLink={clearLink} onClose={onClose}
         onLogin={() => open('login')} onRequest={() => open('forgot')} />}
       {page === 'forgot' && <PasswordResetRequestForm initialEmail={email} onLogin={() => open('login')} />}
