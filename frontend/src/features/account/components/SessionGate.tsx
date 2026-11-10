@@ -13,7 +13,7 @@ export default function SessionGate({ children }: { children: ReactNode }) {
       <StateView kind={failed ? 'error' : 'loading'} title={failed ? 'Chưa kiểm tra được phiên đăng nhập' : leaving ? 'Đang đăng xuất' : 'Đang khôi phục đăng nhập'}
         message={failed ? auth.profileError?.message ?? 'Kiểm tra kết nối rồi thử lại.' : leaving ? 'Đang xác nhận với máy chủ.' : 'Đợi một chút nhé.'}
         actionLabel={failed ? 'Thử khôi phục lại' : undefined} onAction={() => { void auth.restore(); }}
-        secondaryLabel={failed ? 'Tiếp tục xem giao diện' : undefined} onSecondary={auth.skipRestore} />
+        secondaryLabel={failed ? 'Về màn hình đăng nhập' : undefined} onSecondary={auth.skipRestore} />
     </ScrollView>
   </View>;
 }

@@ -293,7 +293,7 @@ export class SessionManager {
     this.publish({ phase: 'signing-out' });
     await this.finishLogout(record ?? { kind: 'logout-pending' });
   });
-  skipRestore = () => { this.clear('Chưa kiểm tra được phiên. Bạn đang xem giao diện chưa đăng nhập.'); this.publish({ canRestore: true }); };
+  skipRestore = () => { this.clear('Chưa kiểm tra được phiên cũ. Bạn có thể thử khôi phục phiên hoặc đăng nhập lại.'); this.publish({ canRestore: true }); };
   tick = async () => {
     const current = this.current;
     if (this.state.phase !== 'ready' || !current || current.expiresAt > this.now() + 30_000) return;

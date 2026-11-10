@@ -9,7 +9,7 @@ import { useApiAction } from '../auth/useApiAction';
 import { AuthHero } from './AuthHero';
 
 type Props = { mode: 'login' | 'register'; initialEmail: string; message: string; onRegistered: (email: string) => void;
-  onSignedIn: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register') => void; onForgot: (email: string) => void };
+  onSignedIn?: (profileLoaded: boolean) => void; onMode: (mode: 'login' | 'register') => void; onForgot: (email: string) => void };
 export default function AuthForm({ mode, initialEmail, message, onRegistered, onSignedIn, onMode, onForgot }: Props) {
   const register = mode === 'register', auth = useAuth(), action = useApiAction();
   const [name, setName] = useState(''), [email, setEmail] = useState(initialEmail), [password, setPassword] = useState('');
@@ -34,7 +34,7 @@ export default function AuthForm({ mode, initialEmail, message, onRegistered, on
       confirmPassword: confirm, school: school.trim(), major: major.trim() }, signal), profile => {
         setPassword(''); setConfirm(''); onRegistered(profile.email);
       });
-    else void action.run(signal => auth.signIn({ email: normalizeEmail(email), password }, signal), loaded => { setPassword(''); onSignedIn(loaded); });
+    else void action.run(signal => auth.signIn({ email: normalizeEmail(email), password }, signal), loaded => { setPassword(''); onSignedIn?.(loaded); });
   };
   return <>
     <AuthHero icon={register ? 'sparkles-outline' : 'school-outline'} title={register ? 'Một khởi đầu mới, cho việc học tốt hơn.' : 'Chào mừng bạn trở lại!'}

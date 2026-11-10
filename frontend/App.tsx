@@ -64,7 +64,7 @@ function AppShell() {
   const current = viewKey(route), isHome = current === 'home'; const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
-  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(auth.notice ? 'profile' : null);
+  const [panel, setPanel] = useState<'profile' | 'notifications' | 'preview' | 'guide' | null>(auth.notice || auth.profileError ? 'profile' : null);
   const [classDate, setClassDate] = useState<string | undefined>();
   const action = useActionState();
   const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>(auth.hasSession ? 'ready' : 'loading');
@@ -130,9 +130,11 @@ function AppShell() {
 }
 function Workspace() {
   const auth = useAuth();
-  const [workspace, setWorkspace] = useState<'welcome' | 'empty' | 'sample'>('welcome');
-  return <FeedbackProvider key={auth.revision}><SessionGate>{workspace === 'welcome' && !auth.hasSession && !auth.passwordChange ? <WelcomeScreen onStart={() => setWorkspace('empty')} onDemo={() => setWorkspace('sample')} />
-    : <PrototypeProvider empty={auth.hasSession || workspace === 'empty'}><ReminderPreferencesProvider><NavigationProvider><PomodoroProvider><PomodoroProgressProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></PomodoroProgressProvider></PomodoroProvider></NavigationProvider></ReminderPreferencesProvider></PrototypeProvider>}</SessionGate></FeedbackProvider>;
+  return <FeedbackProvider key={auth.revision}><SessionGate><NavigationProvider>
+    {auth.hasSession
+      ? <PrototypeProvider empty><ReminderPreferencesProvider><PomodoroProvider><PomodoroProgressProvider><GradeConfigurationWritesProvider><ExamWritesProvider><ActionScope><AppShell /></ActionScope></ExamWritesProvider></GradeConfigurationWritesProvider></PomodoroProgressProvider></PomodoroProvider></ReminderPreferencesProvider></PrototypeProvider>
+      : <WelcomeScreen />}
+  </NavigationProvider></SessionGate></FeedbackProvider>;
 }
 export default function App() {
   const [recovery, setRecovery] = useState<{ id: number; link: ResetLink | null } | null>(null);
