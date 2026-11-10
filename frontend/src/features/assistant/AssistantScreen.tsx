@@ -1,42 +1,107 @@
-import { FlowScope } from '../../navigation/Navigation';
-import {compareTaskDeadlines,deadlineTimestamp} from '../assignments/assignments';
 import React, { useState } from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Badge, Button, Card, Icon, IconButton, IconName, IconTile, Row, Section, T } from '../../shared/components';
+import { Image, Pressable, useWindowDimensions, View } from 'react-native';
+import { FlowScope } from '../../navigation/Navigation';
+import { Badge, Card, Icon, IconTile, Row, T, type IconName } from '../../shared/components';
 import { C, F, S } from '../../shared/theme';
-import { useApp } from '../../store/model';
-import AIPlanFlow from './AIPlanFlow';
-import AIDocumentFlow from './AIDocumentFlow';
 import { useAuth } from '../account/auth/AuthProvider';
+import AIDocumentFlow from './AIDocumentFlow';
+import AIPlanFlow from './AIPlanFlow';
 
-const features: { icon: IconName; title: string; description: string; action: string; color: string; bg: string }[] = [
-  { icon: 'alarm-outline', title: 'Kế hoạch ôn thi theo deadline', description: 'Chia mục tiêu lớn thành những phiên học vừa sức, bắt đầu từ bài cần ưu tiên.', action: 'Tạo lộ trình', color: C.primary, bg: C.soft },
-  { icon: 'calendar-outline', title: 'Lịch học theo thời gian rảnh', description: 'Tìm một khoảng trống giữa những ca học để tập trung mà vẫn có thời gian nghỉ.', action: 'Tìm lịch trống', color: C.primary, bg: C.soft },
-  { icon: 'document-text-outline', title: 'Tóm tắt PDF & giáo trình', description: 'Nắm ý chính, công thức và những nội dung cần đọc lại, kèm tham chiếu nguồn.', action: 'Xem bản mẫu', color: C.red, bg: C.redSoft },
-  { icon: 'help-circle-outline', title: 'Tạo câu hỏi trắc nghiệm', description: 'Tự kiểm tra kiến thức với câu hỏi ngắn và lời giải thích cho từng lựa chọn.', action: 'Luyện thử', color: C.green, bg: C.greenSoft },
-  { icon: 'analytics-outline', title: 'Điều chỉnh kế hoạch học', description: 'Chọn một buổi chưa bắt đầu, xem giờ mới phù hợp và duyệt thay đổi.', action: 'Xem đề xuất', color: C.primary, bg: C.soft },
-];
+const planActions = [
+  { id: 'deadline', icon: 'alarm-outline', title: 'Ôn theo hạn', description: 'Theo bài tập hoặc lịch thi', label: 'Tạo kế hoạch' },
+  { id: 'free', icon: 'calendar-outline', title: 'Tìm giờ trống', description: 'Xếp buổi tự học theo lịch', label: 'Tìm lịch' },
+] as const;
+
+type Feature = typeof planActions[number]['id'] | 'adjust' | 'summary' | 'quiz';
+
 export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string) => void }) {
-  const { tasks, setTab } = useApp(); const auth = useAuth();
-  const [feature, setFeature] = useState<number | null>(null); const [prompt, setPrompt] = useState(''); const [sent, setSent] = useState('');
-  const pending = tasks.filter(t => t.status !== 'Hoàn thành' && (!auth.hasSession || deadlineTimestamp(t)>Date.now())).sort(compareTaskDeadlines);
-  const firstTask = pending[0];
-  const send = () => { if (!prompt.trim()) return; setSent(prompt.trim()); setPrompt(''); setFeature(0); };
-  return <FlowScope onClose={() => setFeature(null)}>
-    <LinearGradient colors={['#7862EA', '#5341CD', '#7865DE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 23, borderRadius: 32, gap: 20, boxShadow: '0px 12px 24px rgba(108,92,231,0.18)' }}>
-      <Badge label={auth.hasSession ? 'Trợ lý học tập • Lịch tài khoản' : 'Trợ lý học tập • Bản xem trước'} bg="#FFFFFF26" color="#fff" icon="sparkles" />
-      <Row style={{ gap: 12 }}><View style={S.grow}><T style={{ color: '#fff', fontFamily: F.extra, fontSize: 24, lineHeight: 34, letterSpacing: -0.8 }}>Hôm nay, mình cùng học gì nhé?</T><T style={{ color: '#E9E2FF', fontSize: 12, lineHeight: 21, marginTop: 8 }}>Một kế hoạch vừa sức. Một chút tập trung. Thêm nhiều tiến bộ mỗi ngày.</T></View><Image source={require('../../../assets/mentor.png')} style={{ width: 84, height: 95, borderRadius: 23 }} /></Row>
-      <Row style={{ borderTopWidth: 1, borderTopColor: '#FFFFFF28', paddingTop: 16 }}>{[{ value: '5', label: 'Công cụ học tập' }, { value: 'Của bạn', label: 'Quyền quyết định' }, { value: 'Từng bước', label: 'Cách tiến bộ' }].map(s => <View key={s.label} style={{ flex: 1, alignItems: 'center', gap: 3 }}><T style={{ color: '#fff', fontFamily: F.bold, fontSize: 14 }}>{s.value}</T><T style={{ color: '#E9E2FF', fontSize: 9 }}>{s.label}</T></View>)}</Row>
-    </LinearGradient>
-    <Card style={{ gap: 12 }}><Row style={{ gap: 12 }}><IconTile name="bulb-outline" /><View style={S.grow}><T style={{ color: C.primary, fontSize: 10, fontFamily: F.bold, letterSpacing: 1 }}>GỢI Ý HÔM NAY</T><T style={{ fontFamily: F.bold, fontSize: 14, marginTop: 4 }}>{pending.length ? 'Bắt đầu từ một bài tập sắp đến hạn' : 'Dành một phiên để ôn lại bài'}</T><T style={{ color: C.muted, fontSize: 12, lineHeight: 20, marginTop: 4 }}>{firstTask?.title ?? 'Hôm nay bạn đã làm rất tốt. Một phiên ngắn sẽ giúp ghi nhớ lâu hơn.'}</T></View></Row><Row><Button label="Xem kế hoạch" icon="sparkles-outline" onPress={() => { setSent(''); setFeature(0); }} style={S.grow} /><Button label="Tự tập trung" secondary onPress={() => setTab('focus')} /></Row></Card>
-    <Section title="5 công cụ học tập" icon="sparkles-outline" />
-    {features.map((f, i) => <Pressable key={f.title} accessibilityRole="button" accessibilityLabel={f.action} onPress={() => { setSent(''); setFeature(i); }}><Card style={{ gap: 13 }}><Row style={{ alignItems: 'flex-start', gap: 13 }}><IconTile name={f.icon} color={f.color} bg={f.bg} /><View style={[S.grow, { gap: 5 }]}><T style={{ fontFamily: F.bold, fontSize: 15, lineHeight: 23 }}>{f.title}</T><T style={{ color: C.muted, fontSize: 12, lineHeight: 20 }}>{auth.hasSession && i===4 ? 'Mở danh sách tự học để sửa từng buổi đã lưu.' : f.description}</T></View></Row><Row between style={{ marginLeft: 57 }}><T style={{ color: C.muted, fontSize: 10 }}>{auth.hasSession && i < 2 ? 'Đề xuất từ lịch đã lưu' : auth.hasSession && i === 4 ? 'Điều chỉnh tại Tự học' : 'Khám phá bản mẫu'}</T><Row><T style={{ color: C.primary, fontFamily: F.semi, fontSize: 12 }}>{f.action}</T><Icon name="chevron-forward" size={14} /></Row></Row></Card></Pressable>)}
-    <Section title="Bắt đầu bằng một câu hỏi" />
-    <View style={{ gap: 8 }}>{['Lập kế hoạch ôn thi tuần này', 'Giúp mình ưu tiên bài tập'].map(q => <Pressable key={q} onPress={() => { setSent(q); setFeature(0); }} accessibilityRole="button" style={{ backgroundColor: '#fff', minHeight: 44, borderRadius: 22, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}><Icon name="chatbubble-outline" size={16} /><T style={{ fontSize: 12 }}>{q}</T></Pressable>)}</View>
-    <Card style={{ padding: 10 }}><Row><TextInput maxLength={120} value={prompt} onChangeText={setPrompt} onSubmitEditing={send} returnKeyType="send" accessibilityLabel="Câu hỏi cho trợ lý" placeholder="Bạn đang muốn học gì?" placeholderTextColor={C.muted} style={{ flex: 1, minWidth: 0, padding: 9, fontFamily: F.regular, fontSize: 13, color: C.ink }} /><IconButton name="send" label="Gửi câu hỏi" bg={C.primary} color="#fff" onPress={send} /></Row></Card>
-    <T style={{ textAlign: 'center', fontSize: 11, lineHeight: 18, color: C.muted }}>{auth.hasSession ? 'Kế hoạch đọc lịch tài khoản và xếp theo quy tắc, chưa gọi AI. Bạn xem, chọn và duyệt trước khi lưu các buổi vào lịch; các công cụ tài liệu vẫn là mẫu.' : 'Đang dùng đề xuất mẫu để bạn trải nghiệm giao diện. Bạn luôn xem và chọn trước khi thêm vào kế hoạch.'}</T>
-    {(feature === 0 || feature === 1 || feature === 4) && <AIPlanFlow variant={feature === 4 ? 'adjust' : feature === 1 ? 'free' : 'deadline'} request={sent} onClose={() => setFeature(null)} onStudyPlan={onStudyPlan} />}
-    {(feature === 2 || feature === 3) && <AIDocumentFlow initialMode={feature === 2 ? 'summary' : 'quiz'} onClose={() => setFeature(null)} />}
+  const { hasSession } = useAuth();
+  const { width, fontScale } = useWindowDimensions();
+  const [feature, setFeature] = useState<Feature | null>(null);
+  const [showSamples, setShowSamples] = useState(false);
+  const stack = width < 320 || fontScale >= 1.3;
+  const close = () => setFeature(null);
+  const adjust = () => {
+    if (hasSession) onStudyPlan();
+    else setFeature('adjust');
+  };
+
+  return <FlowScope onClose={close}>
+    <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 28, lineHeight: 39, letterSpacing: -0.7 }}>Trợ lý AI</T>
+    <Card style={{ backgroundColor: C.soft, padding: 16 }}>
+      <Row style={{ gap: 10 }}>
+        <View style={[S.grow, { gap: 6 }]}>
+          <Badge label={hasSession ? 'DỰA TRÊN LỊCH CỦA BẠN' : 'LỊCH MẪU'} bg={C.card} />
+          <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 21, lineHeight: 29 }}>Lên kế hoạch học</T>
+          <T style={S.small}>Tìm giờ trống và xem trước các buổi học trước khi lưu.</T>
+        </View>
+        {!stack && <Image source={require('../../../assets/mentor.png')} accessible={false}
+          resizeMode="cover" style={{ width: width < 360 ? 68 : 88, height: width < 360 ? 80 : 100, borderRadius: 20 }} />}
+      </Row>
+    </Card>
+
+    <T accessibilityRole="header" style={S.title}>Bạn muốn làm gì?</T>
+    <View style={{ flexDirection: stack ? 'column' : 'row', alignItems: 'stretch', gap: 10 }}>
+      {planActions.map(action => <Pressable key={action.id} accessibilityRole="button" accessibilityLabel={action.title}
+        accessibilityHint={action.description} onPress={() => setFeature(action.id)}
+        style={({ pressed }) => [S.card, S.grow, { padding: 12, gap: 8, backgroundColor: pressed ? C.soft : C.card }]}>
+        <IconTile name={action.icon} size={42} />
+        <View style={[S.grow, { gap: 4 }]}>
+          <T style={{ fontFamily: F.bold, fontSize: 15 }}>{action.title}</T>
+          <T style={S.small}>{action.description}</T>
+        </View>
+        <Row style={{ minHeight: 28, gap: 3 }}>
+          <T style={[S.grow, { color: C.primary, fontFamily: F.bold, fontSize: 12 }]}>{action.label}</T>
+          <Icon name="chevron-forward" size={14} />
+        </Row>
+      </Pressable>)}
+    </View>
+
+    <AssistantToolRow icon="options-outline" title="Điều chỉnh buổi học"
+      description={hasSession ? 'Mở các buổi tự học đã lưu' : 'Thử đổi giờ cho một buổi học mẫu'} onPress={adjust} />
+    <Row style={{ gap: 8, alignItems: 'flex-start', paddingHorizontal: 3 }}>
+      <Icon name="information-circle-outline" size={17} />
+      <T style={[S.grow, S.small]}>{hasSession
+        ? 'Ứng dụng xếp buổi theo lịch và giờ rảnh. Bạn xem và duyệt trước khi thêm vào lịch.'
+        : 'Bạn có thể xem và duyệt các đề xuất trên lịch mẫu.'}</T>
+    </Row>
+
+    <Card style={{ padding: 12, gap: 8 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Công cụ dùng thử" accessibilityState={{ expanded: showSamples }}
+        onPress={() => setShowSamples(value => !value)} style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? 0.65 : 1 })}>
+        <Row style={{ gap: 8 }}>
+          <IconTile name="flask-outline" size={36} />
+          <View style={[S.grow, { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }]}>
+            <T style={{ fontFamily: F.bold }}>Công cụ dùng thử</T>
+            <Badge label="Bản mẫu" />
+          </View>
+          <Icon name={showSamples ? 'chevron-up' : 'chevron-down'} size={16} />
+        </Row>
+      </Pressable>
+      {showSamples && <>
+        <AssistantToolRow sample icon="document-text-outline" title="Tóm tắt tài liệu mẫu" onPress={() => setFeature('summary')} />
+        <AssistantToolRow sample icon="help-circle-outline" title="Luyện trắc nghiệm mẫu" onPress={() => setFeature('quiz')} />
+      </>}
+    </Card>
+
+    {(feature === 'deadline' || feature === 'free' || feature === 'adjust') &&
+      <AIPlanFlow variant={feature} onClose={close} onStudyPlan={onStudyPlan} />}
+    {(feature === 'summary' || feature === 'quiz') && <AIDocumentFlow initialMode={feature} onClose={close} />}
   </FlowScope>;
+}
+
+function AssistantToolRow({ icon, title, description, sample = false, onPress }: {
+  icon: IconName; title: string; description?: string; sample?: boolean; onPress: () => void;
+}) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityHint={description} onPress={onPress}
+    style={({ pressed }) => [S.card, { minHeight: 52, padding: sample ? 8 : 12, justifyContent: 'center', backgroundColor: pressed ? C.soft : sample ? C.canvas : C.card }]}>
+    <Row style={{ gap: 10 }}>
+      <IconTile name={icon} size={sample ? 32 : 42} />
+      <View style={[S.grow, { gap: 2 }]}>
+        <T style={{ fontFamily: F.bold, fontSize: sample ? 13 : 15 }}>{title}</T>
+        {description && <T style={S.small}>{description}</T>}
+      </View>
+      <Icon name="chevron-forward" size={16} />
+    </Row>
+  </Pressable>;
 }
