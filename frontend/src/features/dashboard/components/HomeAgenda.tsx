@@ -18,11 +18,11 @@ export default function HomeAgenda({ semesterId, courses, now, day, weekStart, c
   semesterId: string; courses: Course[]; now: Date; day: string; weekStart: string; classes: ClassOccurrence[];
   sessions: StudySession[]; onClass: (item: ClassOccurrence, date: string) => void; onStudyPlan: (date?: string) => void;
 }) {
-  const { courseConnection, semesterConnection, studyConnection, openSavedSchedule, setScheduleMode, prepareFocus } = useApp();
+  const { courseConnection, semesterConnection, studyConnection, openSavedSchedule, prepareFocus } = useApp();
   const connected = !!semesterConnection, today = day === dateKey(now);
   const source = useScheduleOverview(connected ? { semesterId, today: weekStart } : null);
   const title = (id: string) => courses.find(course => course.id === id)?.name ?? 'Môn chưa được tải';
-  const showSchedule = (date: string) => connected ? openSavedSchedule(semesterId, date) : setScheduleMode('Thời khóa biểu');
+  const showSchedule = (date: string) => openSavedSchedule(semesterId, date);
   const classRows: AgendaRow[] = connected ? projectOverview(source, parseDay(day)).today.map(row => {
     const clock = occurrenceClock(row);
     return { id: `class-${row.scheduleId}:${row.date}`, time: clock.date < day ? '00:00' : clock.start,
