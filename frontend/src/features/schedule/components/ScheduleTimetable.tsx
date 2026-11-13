@@ -5,21 +5,49 @@ import { C, F, S } from '../../../shared/theme';
 import { dateKey, dateLabel } from '../../../shared/utils/dates';
 import { courseColors, type CourseColor } from '../../academics/academic';
 import { dayNames } from '../calendar';
+import { meetingPlatforms, type ClassFormat } from '../classFormat';
 
 export type TimetableEntry = {
   id: string; date: string; start: string; end: string; title: string; code?: string; room: string; color?: CourseColor;
   status?: 'Đã nghỉ' | 'Đã điều chỉnh'; exam?: boolean; onOpen: () => void;
-};
+} & Pick<ClassFormat, 'lessonType' | 'meetingPlatform'>;
 
 const timeWidth = 47;
 const minColumnWidth = 59;
+const onlineTone = { bg: '#D2E9FF', ink: '#124B84' };
+const practiceTone = { bg: '#D4F5C9', ink: '#245B21' };
 
-const entryTone = (entry: TimetableEntry) => entry.status === 'Đã nghỉ' ? { bg: C.redSoft, ink: C.red }
-  : entry.status === 'Đã điều chỉnh' || entry.exam ? { bg: C.amberSoft, ink: C.amber } : courseColors[entry.color ?? 'lavender'];
-const entryLabel = (entry: TimetableEntry) => `${entry.exam ? 'Xem kỳ thi' : 'Xem buổi học'} ${entry.title}, ${dateLabel(entry.date)}, ${entry.start} đến ${entry.end}${entry.status ? `, ${entry.status}` : ''}`;
+const onlinePlatform = (entry: TimetableEntry) => entry.meetingPlatform && entry.meetingPlatform !== 'NONE' ? meetingPlatforms[entry.meetingPlatform] : '';
+function entryTone(entry: TimetableEntry) {
+  if (entry.exam) return { bg: '#FFEC91', ink: '#654700' };
+  if (entry.status === 'Đã nghỉ') return { bg: C.redSoft, ink: C.red };
+  if (onlinePlatform(entry)) return onlineTone;
+  if (entry.lessonType === 'PRACTICE') return practiceTone;
+  if (entry.status === 'Đã điều chỉnh') return { bg: C.amberSoft, ink: C.amber };
+  return courseColors[entry.color ?? 'lavender'];
+}
+const lessonLabels = (entry: TimetableEntry) => [
+  onlinePlatform(entry) ? 'Online' : '',
+  entry.lessonType === 'PRACTICE' ? 'Thực hành' : '',
+].filter(Boolean);
+const entryLabel = (entry: TimetableEntry) => [
+  `${entry.exam ? 'Xem kỳ thi' : 'Xem buổi học'} ${entry.title}`, dateLabel(entry.date), `${entry.start} đến ${entry.end}`,
+  ...lessonLabels(entry), entry.status,
+].filter(Boolean).join(', ');
 
-export function ScheduleWeekGrid({ days, selected, entries, disabled, onDay }: {
-  days: Date[]; selected: string; entries: TimetableEntry[]; disabled?: boolean; onDay: (day: Date) => void;
+export function ClassTimetableLegend() {
+  return <Row style={{ flexWrap: 'wrap', gap: 14 }}>
+    {[{ label: 'Online', tone: onlineTone }, { label: 'Thực hành', tone: practiceTone }].map(({ label, tone }) => (
+      <Row key={label} style={{ gap: 5 }}>
+        <View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: tone.bg }} />
+        <T style={[S.small, { color: tone.ink }]}>{label}</T>
+      </Row>
+    ))}
+  </Row>;
+}
+
+export function ScheduleWeekGrid({ days, selected, entries, disabled, onDay, exams = false }: {
+  days: Date[]; selected: string; entries: TimetableEntry[]; disabled?: boolean; onDay: (day: Date) => void; exams?: boolean;
 }) {
   const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const [width, setWidth] = useState(0);
@@ -64,6 +92,7 @@ export function ScheduleWeekGrid({ days, selected, entries, disabled, onDay }: {
                 return <Pressable key={entry.id} disabled={disabled} accessibilityRole="button" accessibilityLabel={entryLabel(entry)} onPress={entry.onOpen}
                   style={({ pressed }) => [styles.event, { backgroundColor: tone.bg }, pressed && { opacity: 0.7 }]}>
                   <T numberOfLines={entry.code ? 1 : 2} style={[styles.eventTitle, { color: tone.ink }]}>{entry.code || entry.title}</T>
+                  {lessonLabels(entry).map(label => <T key={label} style={[styles.eventStatus, { color: tone.ink }]}>{label}</T>)}
                   {!!entry.status && <T style={[styles.eventStatus, { color: tone.ink }]}>{entry.status === 'Đã nghỉ' ? 'Nghỉ' : 'Đã đổi'}</T>}
                 </Pressable>;
               })}
@@ -73,16 +102,20 @@ export function ScheduleWeekGrid({ days, selected, entries, disabled, onDay }: {
       </ScrollView>
     </View>
     {width > 0 && timeWidth + minColumnWidth * days.length + 2 > width && <T style={S.small}>Vuốt ngang để xem hết tuần.</T>}
-    {!slots.length && <T style={S.small}>Tuần này chưa có buổi học.</T>}
+    {!slots.length && <T style={S.small}>{exams ? 'Tuần này chưa có kỳ thi.' : 'Tuần này chưa có buổi học.'}</T>}
   </View>;
 }
 
-export function ScheduleDayList({ date, entries, disabled }: { date: string; entries: TimetableEntry[]; disabled?: boolean }) {
+export function ScheduleDayList({ date, entries, disabled, exams = false }: {
+  date: string; entries: TimetableEntry[]; disabled?: boolean; exams?: boolean;
+}) {
   return <View testID="timetable-day" style={{ gap: 8 }}>
     <Section title={date === dateKey(new Date()) ? 'Lịch hôm nay' : `Lịch ngày ${dateLabel(date)}`} />
-    {!entries.length && <Card style={styles.empty}><T style={S.small}>Chưa có buổi học trong ngày này.</T></Card>}
+    {!entries.length && <Card style={styles.empty}><T style={S.small}>{exams ? 'Chưa có kỳ thi trong ngày này.' : 'Chưa có buổi học trong ngày này.'}</T></Card>}
     {entries.map(entry => {
       const tone = entryTone(entry);
+      const platform = onlinePlatform(entry);
+      const location = platform ? `Online · ${platform}` : entry.room ? `Phòng ${entry.room}` : 'Chưa có phòng';
       return <Pressable key={entry.id} accessibilityRole="button" accessibilityLabel={entryLabel(entry)} onPress={entry.onOpen} disabled={disabled}
         style={({ pressed }) => [styles.dayRow, pressed && { opacity: 0.7 }]}>
         <View style={[styles.timeBox, { backgroundColor: tone.bg }]}>
@@ -90,7 +123,7 @@ export function ScheduleDayList({ date, entries, disabled }: { date: string; ent
         </View>
         <View style={[S.grow, { gap: 2 }]}>
           <T style={[styles.dayTitle, entry.status === 'Đã nghỉ' && { textDecorationLine: 'line-through' }]}>{entry.exam ? `Thi: ${entry.title}` : entry.title}</T>
-          <T style={S.small}>{entry.room ? `Phòng ${entry.room}` : 'Chưa có phòng'}{entry.status ? ` · ${entry.status}` : ''}</T>
+          <T style={S.small}>{[location, entry.lessonType === 'PRACTICE' && 'Thực hành', entry.status].filter(Boolean).join(' · ')}</T>
         </View>
         <Icon name="chevron-forward" size={16} color={C.muted} />
       </Pressable>;

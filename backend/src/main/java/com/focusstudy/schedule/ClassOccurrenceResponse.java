@@ -1,11 +1,13 @@
 package com.focusstudy.schedule;
 
+import com.focusstudy.schedule.ClassScheduleRequests.LessonType;
+import com.focusstudy.schedule.ClassScheduleRequests.MeetingPlatform;
 import java.time.*;
 import java.util.UUID;
 
 public record ClassOccurrenceResponse(UUID scheduleId, UUID courseId, LocalDate date, String startTime, String endTime, String timeZone,
         Instant startsAt, Instant endsAt, String room, String teacher, int reminderMinutes, String notes, long scheduleVersion,
-        boolean cancelled, boolean changed, String reason, UUID exceptionId) {
+        boolean cancelled, boolean changed, String reason, UUID exceptionId, LessonType lessonType, MeetingPlatform meetingPlatform) {
     public static ClassOccurrenceResponse from(ClassScheduleEntity s, LocalDate day) {
         return from(s, day, null);
     }
@@ -16,6 +18,7 @@ public record ClassOccurrenceResponse(UUID scheduleId, UUID courseId, LocalDate 
         return new ClassOccurrenceResponse(s.getId(), s.getCourseId(), day, ClassScheduleResponse.time(start), ClassScheduleResponse.time(end), s.getTimeZone(),
                 day.atTime(start).atZone(zone).toInstant(), day.atTime(end).atZone(zone).toInstant(),
                 e == null || e.getRoom() == null ? s.getRoom() : e.getRoom(), e == null || e.getTeacher() == null ? s.getTeacher() : e.getTeacher(), s.getReminderMinutes(), s.getNotes(), s.getVersion(),
-                e != null && e.getKind() == ClassExceptionEntity.Kind.CANCELLED, e != null && e.getKind() == ClassExceptionEntity.Kind.CHANGED, e == null ? "" : e.getReason(), e == null ? null : e.getId());
+                e != null && e.getKind() == ClassExceptionEntity.Kind.CANCELLED, e != null && e.getKind() == ClassExceptionEntity.Kind.CHANGED,
+                e == null ? "" : e.getReason(), e == null ? null : e.getId(), s.getLessonType(), s.getMeetingPlatform());
     }
 }

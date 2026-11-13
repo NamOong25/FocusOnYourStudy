@@ -6,9 +6,12 @@ import java.util.*;
 public final class ClassScheduleRequests {
     private ClassScheduleRequests() { }
     private static String text(String value) { return value == null ? "" : value.strip(); }
+    public enum LessonType { THEORY, PRACTICE }
+    public enum MeetingPlatform { NONE, ZOOM, TEAMS }
     public interface Rule {
         UUID courseId(); List<Integer> weekdays(); String startsOn(); String endsOn(); String startTime(); String endTime();
         String timeZone(); String room(); String teacher(); Integer reminderMinutes(); String notes();
+        LessonType lessonType(); MeetingPlatform meetingPlatform(); String meetingId(); String meetingPasscode();
     }
     @ValidClassSchedule
     public record Create(
@@ -22,9 +25,13 @@ public final class ClassScheduleRequests {
             @Size(max = 100) String room,
             @Size(max = 200) String teacher,
             @Min(0) @Max(10080) Integer reminderMinutes,
-            @Size(max = 5000) String notes) implements Rule {
+            @Size(max = 5000) String notes,
+            LessonType lessonType, MeetingPlatform meetingPlatform,
+            @Size(max = 100) String meetingId, @Size(max = 100) String meetingPasscode) implements Rule {
         public Create { startsOn = text(startsOn); endsOn = text(endsOn); startTime = text(startTime); endTime = text(endTime);
-            timeZone = text(timeZone); room = text(room); teacher = text(teacher); notes = text(notes); reminderMinutes = reminderMinutes == null ? 15 : reminderMinutes; }
+            timeZone = text(timeZone); room = text(room); teacher = text(teacher); notes = text(notes); reminderMinutes = reminderMinutes == null ? 15 : reminderMinutes;
+            meetingId = text(meetingId); meetingPasscode = text(meetingPasscode); }
+        @Override public String toString() { return "ClassScheduleRequests.Create[courseId=" + courseId + "]"; }
     }
     @ValidClassSchedule
     public record Update(
@@ -39,8 +46,12 @@ public final class ClassScheduleRequests {
             @Size(max = 200) String teacher,
             @Min(0) @Max(10080) Integer reminderMinutes,
             @Size(max = 5000) String notes,
+            LessonType lessonType, MeetingPlatform meetingPlatform,
+            @Size(max = 100) String meetingId, @Size(max = 100) String meetingPasscode,
             @NotNull @PositiveOrZero Long version) implements Rule {
         public Update { startsOn = text(startsOn); endsOn = text(endsOn); startTime = text(startTime); endTime = text(endTime);
-            timeZone = text(timeZone); room = text(room); teacher = text(teacher); notes = text(notes); reminderMinutes = reminderMinutes == null ? 15 : reminderMinutes; }
+            timeZone = text(timeZone); room = text(room); teacher = text(teacher); notes = text(notes); reminderMinutes = reminderMinutes == null ? 15 : reminderMinutes;
+            meetingId = text(meetingId); meetingPasscode = text(meetingPasscode); }
+        @Override public String toString() { return "ClassScheduleRequests.Update[courseId=" + courseId + ", version=" + version + "]"; }
     }
 }

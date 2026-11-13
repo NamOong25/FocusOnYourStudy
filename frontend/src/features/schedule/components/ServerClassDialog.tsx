@@ -8,6 +8,7 @@ import { useAuth } from '../../account/auth/AuthProvider';
 import { weekdaysLabel, reminderLabel } from '../calendar';
 import { createScheduleApi, type ServerOccurrence, type ServerRule } from '../api/scheduleApi';
 import type { ExceptionMode } from '../exceptionDraft';
+import ClassFormatDetails from './ClassFormatDetails';
 
 export default function ServerClassDialog({ item, title, blocked, onClose, onReload, onEdit, onException }: {
   item: ServerOccurrence; title: string; blocked: boolean; onClose: () => void; onReload: () => void; onEdit: (rule: ServerRule) => void; onException: (mode: ExceptionMode, item: ServerOccurrence) => void;
@@ -22,8 +23,9 @@ export default function ServerClassDialog({ item, title, blocked, onClose, onRel
   return <Sheet title="Chi tiết buổi học" onClose={onClose}>
     {!rule ? <StateView kind={error ? 'error' : 'loading'} title={error ? 'Chưa xem được buổi học' : 'Đang tải chi tiết'} message={error?.message ?? 'Đang kiểm tra lịch đã lưu của bạn.'} actionLabel={error ? 'Tải lại lịch' : undefined} onAction={onReload} /> : <>
       <Card style={{ backgroundColor: item.cancelled ? C.redSoft : C.soft, gap: 10 }}><Badge label={item.cancelled ? 'Đã nghỉ buổi này' : item.changed ? 'Đã điều chỉnh buổi này' : 'Theo lịch gốc'} color={item.cancelled ? C.red : C.primary} bg="#FFFFFFAA" /><T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33 }}>{title}</T><T style={{ fontFamily: F.semi, color: C.primary }}>{dateLabel(item.date)}/{item.date.slice(0, 4)}</T></Card>
-      <Row><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.startTime} – {item.endTime}</T><T style={S.small}>{item.cancelled ? 'Giờ dự kiến trước khi nghỉ' : 'Giờ của buổi này'}</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.room || 'Chưa có phòng'}</T><T style={S.small}>Phòng học</T></Card></Row>
+      <Row><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.startTime} – {item.endTime}</T><T style={S.small}>{item.cancelled ? 'Giờ dự kiến trước khi nghỉ' : 'Giờ của buổi này'}</T></Card>{(!rule.meetingPlatform || rule.meetingPlatform === 'NONE') && <Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.room || 'Chưa có phòng'}</T><T style={S.small}>Phòng học</T></Card>}</Row>
       <T style={S.small}>Múi giờ: {item.timeZone}</T><T style={S.small}>Giảng viên: {item.teacher || 'Chưa có thông tin'}</T>
+      {!item.cancelled && <ClassFormatDetails format={rule} />}
       {(item.changed || item.cancelled) && <Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><T style={{ fontFamily: F.bold, color: C.amber }}>Chỉ áp dụng cho ngày này</T><T style={S.small}>{item.reason || 'Chưa ghi lý do'}</T><T style={S.small}>Lịch gốc: {rule.startTime} – {rule.endTime} · {rule.room || 'Chưa có phòng'}</T></Card>}
       {!!item.notes && <Card><T style={S.small}>{item.notes}</T></Card>}
       <Card style={{ backgroundColor: C.canvas, gap: 7 }}><T style={{ fontFamily: F.bold }}>Chuỗi lịch học</T><T style={S.small}>{weekdaysLabel(rule.weekdays.map(d => d % 7))} · {rule.startTime} – {rule.endTime}</T><T style={S.small}>{dateLabel(rule.startsOn)}/{rule.startsOn.slice(0, 4)} → {dateLabel(rule.endsOn)}/{rule.endsOn.slice(0, 4)}</T><T style={S.small}>{rule.reminderMinutes ? `Mốc nhắc đã chọn: trước ${reminderLabel(rule.reminderMinutes)}` : 'Nhắc đúng giờ bắt đầu (0 phút)'} · Chưa gửi nhắc trên thiết bị.</T></Card>

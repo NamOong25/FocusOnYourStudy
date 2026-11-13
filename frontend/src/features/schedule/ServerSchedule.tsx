@@ -8,7 +8,7 @@ import { queryKey, type ServerOccurrence, type ServerRule } from './api/schedule
 import { useServerSchedule } from './api/useServerSchedule';
 import ScheduleCalendar from './components/ScheduleCalendar';
 import ScheduleHeader from './components/ScheduleHeader';
-import { ScheduleDayList, ScheduleWeekGrid, type TimetableEntry } from './components/ScheduleTimetable';
+import { ClassTimetableLegend, ScheduleDayList, ScheduleWeekGrid, type TimetableEntry } from './components/ScheduleTimetable';
 import ServerClassDialog from './components/ServerClassDialog';
 import ServerClassForm from './components/ServerClassForm';
 import ServerRuleList from './components/ServerRuleList';
@@ -41,6 +41,7 @@ export default function ServerSchedule() {
     const course = courseCatalog.find(c => c.id === item.courseId);
     return { id: `${item.scheduleId}:${item.date}`, date: item.date, start: item.startTime, end: item.endTime,
       title: course?.name ?? 'Môn chưa được tải', code: course?.code, room: item.room, color: course?.color,
+      lessonType: item.lessonType, meetingPlatform: item.meetingPlatform,
       status: item.cancelled ? 'Đã nghỉ' : item.changed ? 'Đã điều chỉnh' : undefined, onOpen: () => setDetail({ key, item }) };
   });
   const name = (item: ServerOccurrence) => courseCatalog.find(c => c.id === item.courseId)?.name ?? 'Môn chưa được tải';
@@ -62,7 +63,7 @@ export default function ServerSchedule() {
         {view === 'Theo tuần'
           ? <ScheduleWeekGrid days={range.days} selected={day} entries={entries} disabled={stale} onDay={openDay} />
           : <ScheduleDayList date={day} entries={entries.filter(entry => entry.date === day)} disabled={stale} />}
-        {!!entries.length && <T style={S.small}>Giờ theo múi giờ của từng buổi. Bấm vào buổi học để xem chi tiết.</T>}
+        {!!entries.length && <ClassTimetableLegend />}
       </>}
       <Row>
         <Button label="Thêm chuỗi lịch học" icon="add" style={S.grow} disabled={stale || !source.loaded || source.needsReload || !!courseConnection?.needsReload} onPress={() => edit()} />

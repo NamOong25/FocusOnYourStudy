@@ -2,13 +2,15 @@ import { ApiError, createHttpClient } from '../../../shared/api/http';
 import { isValidDate, parseDay } from '../../../shared/utils/dates';
 import type { Authorized } from '../../academics/api/semestersApi';
 import { validTimeZone, zonedDay } from '../../study/studyTime';
+import { classFormatInput, type ClassFormat } from '../classFormat';
 
 export type ScheduleQuery = { semesterId: string; from: string; to: string };
 export type ServerOccurrence = { scheduleId: string; courseId: string; date: string; startTime: string; endTime: string;
   timeZone: string; startsAt: string; endsAt: string; room: string; teacher: string; reminderMinutes: number; notes: string;
-  scheduleVersion: number; cancelled: boolean; changed: boolean; reason: string; exceptionId: string | null };
+  scheduleVersion: number; cancelled: boolean; changed: boolean; reason: string; exceptionId: string | null }
+  & Pick<ClassFormat, 'lessonType' | 'meetingPlatform'>;
 export type ServerRule = { id: string; courseId: string; weekdays: number[]; startsOn: string; endsOn: string;
-  startTime: string; endTime: string; timeZone: string; room: string; teacher: string; reminderMinutes: number; notes: string; version: number };
+  startTime: string; endTime: string; timeZone: string; room: string; teacher: string; reminderMinutes: number; notes: string; version: number } & ClassFormat;
 export type RuleInput = Omit<ServerRule, 'id' | 'version'>;
 const uuid = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i;
 const validId = (v: unknown): v is string => typeof v === 'string' && uuid.test(v);
@@ -19,6 +21,12 @@ const time = (v: unknown): v is string => typeof v === 'string' && /^([01]\d|2[0
 const daysBetween = (a: string, b: string) => (Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000;
 const invalid = () => new ApiError('Dữ liệu lịch học chưa hợp lệ. Hãy tải lại lịch.', 'INVALID_RESPONSE');
 function record(v: unknown): v is Record<string, unknown> { return typeof v === 'object' && v !== null && !Array.isArray(v); }
+function format(v: Record<string, unknown>): Pick<ClassFormat, 'lessonType' | 'meetingPlatform'> {
+  const { lessonType, meetingPlatform } = v;
+  if (lessonType !== undefined && lessonType !== 'THEORY' && lessonType !== 'PRACTICE'
+    || meetingPlatform !== undefined && meetingPlatform !== 'NONE' && meetingPlatform !== 'ZOOM' && meetingPlatform !== 'TEAMS') throw invalid();
+  return { ...(lessonType === undefined ? {} : { lessonType }), ...(meetingPlatform === undefined ? {} : { meetingPlatform }) };
+}
 function base(v: Record<string, unknown>) {
   return validId(v.courseId) && time(v.startTime) && time(v.endTime) && v.startTime < v.endTime
     && typeof v.timeZone === 'string' && validTimeZone(v.timeZone) && text(v.room, 100) && text(v.teacher, 200)
@@ -44,21 +52,32 @@ function occurrence(value: unknown): ServerOccurrence {
     || zonedTime(start, v.timeZone) !== v.startTime || zonedTime(end, v.timeZone) !== v.endTime) throw invalid();
   return { scheduleId: v.scheduleId, courseId: v.courseId, date: v.date, startTime: v.startTime, endTime: v.endTime, timeZone: v.timeZone,
     startsAt: v.startsAt, endsAt: v.endsAt, room: v.room, teacher: v.teacher, reminderMinutes: v.reminderMinutes, notes: v.notes,
-    scheduleVersion: v.scheduleVersion, cancelled: v.cancelled, changed: v.changed, reason: v.reason, exceptionId: v.exceptionId };
+    scheduleVersion: v.scheduleVersion, cancelled: v.cancelled, changed: v.changed, reason: v.reason, exceptionId: v.exceptionId,
+    ...format(value) };
 }
 export { occurrence as parseServerOccurrence };
-function rule(value: unknown): ServerRule {
+function rule(value: unknown, requireMeetingPasscode = false): ServerRule {
   if (!record(value) || !base(value) || !validId(value.id) || !version(value.version) || !day(value.startsOn) || !day(value.endsOn)
     || daysBetween(value.startsOn, value.endsOn) < 0 || daysBetween(value.startsOn, value.endsOn) > 365
     || !Array.isArray(value.weekdays) || !value.weekdays.length || value.weekdays.some(d => !Number.isInteger(d) || d < 1 || d > 7)
     || new Set(value.weekdays).size !== value.weekdays.length) throw invalid();
   const v = value as unknown as ServerRule;
+  const info = format(value);
+  if (v.meetingId !== undefined && !text(v.meetingId, 100)
+    || info.meetingPlatform && info.meetingPlatform !== 'NONE' && !v.meetingId?.trim()
+    || info.meetingPlatform === 'NONE' && !!v.meetingId
+    || requireMeetingPasscode && info.meetingPlatform === 'ZOOM' && !v.meetingPasscode
+    || v.meetingPasscode !== undefined && (!text(v.meetingPasscode, 100)
+      || (info.meetingPlatform === 'ZOOM' ? !v.meetingPasscode.trim() : v.meetingPasscode !== ''))) throw invalid();
   return { id: v.id, courseId: v.courseId, weekdays: [...v.weekdays], startsOn: v.startsOn, endsOn: v.endsOn,
-    startTime: v.startTime, endTime: v.endTime, timeZone: v.timeZone, room: v.room, teacher: v.teacher, reminderMinutes: v.reminderMinutes, notes: v.notes, version: v.version };
+    startTime: v.startTime, endTime: v.endTime, timeZone: v.timeZone, room: v.room, teacher: v.teacher, reminderMinutes: v.reminderMinutes, notes: v.notes, version: v.version,
+    ...info, ...(v.meetingId === undefined ? {} : { meetingId: v.meetingId }),
+    ...(v.meetingPasscode === undefined ? {} : { meetingPasscode: v.meetingPasscode }) };
 }
 export function ruleInput(input: RuleInput): RuleInput {
   let value: ServerRule;
-  try { value = rule({ ...input, id: '00000000-0000-4000-8000-000000000000', version: 0,
+  const info = input.meetingPlatform === undefined ? {} : classFormatInput(input);
+  try { value = rule({ ...input, ...info, id: '00000000-0000-4000-8000-000000000000', version: 0,
     room: input.room.trim(), teacher: input.teacher.trim(), notes: input.notes.trim(), timeZone: input.timeZone.trim() }); }
   catch { throw new ApiError('Kiểm tra môn, thứ, khoảng ngày tối đa 366 ngày, giờ kết thúc, múi giờ và mốc nhắc.', 'INVALID_CLASS_INPUT', 400); }
   let matched = false;
@@ -80,13 +99,13 @@ export function createScheduleApi(baseUrl: string, authorized: Authorized, optio
       if (semesterId !== undefined && !validId(semesterId)) throw new ApiError('Chọn học kỳ hợp lệ.', 'INVALID_CLASS_INPUT');
       const rows = await authorized(token => http<unknown>('/api/v1/class-schedules' + (semesterId ? `?semesterId=${encodeURIComponent(semesterId)}` : ''), { headers: headers(token), signal }), signal);
       if (!Array.isArray(rows)) throw invalid();
-      const result = rows.map(rule);
+      const result = rows.map(row => rule(row));
       if (new Set(result.map(r => r.id)).size !== result.length) throw invalid();
       return result;
     },
     async readRule(id: string, signal?: AbortSignal) {
       if (!validId(id)) throw invalid();
-      const value = rule(await authorized(token => http<unknown>(`/api/v1/class-schedules/${encodeURIComponent(id)}`, { headers: headers(token), signal }), signal));
+      const value = rule(await authorized(token => http<unknown>(`/api/v1/class-schedules/${encodeURIComponent(id)}`, { headers: headers(token), signal }), signal), true);
       if (value.id !== id) throw invalid();
       return value;
     },
@@ -94,8 +113,11 @@ export function createScheduleApi(baseUrl: string, authorized: Authorized, optio
       const expected = original ? expectedVersion(original) : undefined, body = ruleInput(input);
       const value = rule(await authorized(token => http<unknown>('/api/v1/class-schedules' + (original ? '/' + encodeURIComponent(original.id) : ''), {
         method: original ? 'PUT' : 'POST', headers: headers(token), body: { ...body, ...(original ? { version: expected } : {}) },
-      })));
+      })), true);
       if (original && (value.id !== original.id || value.version < original.version) || value.courseId !== body.courseId) throw invalid();
+      if (body.lessonType !== undefined && value.lessonType !== body.lessonType
+        || body.meetingPlatform !== undefined && (value.meetingPlatform !== body.meetingPlatform
+          || (value.meetingId ?? '') !== body.meetingId || (value.meetingPasscode ?? '') !== body.meetingPasscode)) throw invalid();
       return value;
     },
     async remove(original: ServerRule) {
@@ -117,8 +139,9 @@ export function createScheduleApi(baseUrl: string, authorized: Authorized, optio
     },
     async get(selected: ServerOccurrence, signal?: AbortSignal) {
       if (!validId(selected.scheduleId)) throw invalid();
-      const value = rule(await authorized(token => http<unknown>(`/api/v1/class-schedules/${encodeURIComponent(selected.scheduleId)}`, { headers: headers(token), signal }), signal));
-      if (value.id !== selected.scheduleId || value.courseId !== selected.courseId || value.version !== selected.scheduleVersion)
+      const value = rule(await authorized(token => http<unknown>(`/api/v1/class-schedules/${encodeURIComponent(selected.scheduleId)}`, { headers: headers(token), signal }), signal), true);
+      if (value.id !== selected.scheduleId || value.courseId !== selected.courseId || value.version !== selected.scheduleVersion
+        || value.lessonType !== selected.lessonType || value.meetingPlatform !== selected.meetingPlatform)
         throw new ApiError('Lịch đã thay đổi từ lúc mở danh sách. Tải lại lịch để xem buổi mới nhất.', 'CLASS_SCHEDULE_VERSION_CONFLICT', 409);
       const isoDay = parseDay(selected.date).getDay() || 7;
       if (selected.date < value.startsOn || selected.date > value.endsOn || !value.weekdays.includes(isoDay)) throw invalid();

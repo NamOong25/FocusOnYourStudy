@@ -12,6 +12,7 @@ import type { ServerRule } from '../api/scheduleApi';
 import { ruleDraft, draftInput, type RuleDraft } from '../ruleDraft';
 import { weekdaysLabel } from '../calendar';
 import { useSavedReminderPreferences } from '../../account/preferences/ReminderPreferencesProvider';
+import ClassFormatFields from './ClassFormatFields';
 
 type Props = {
   source: ScheduleSource; original?: ServerRule; initialDate: string; semesterId: string;
@@ -82,6 +83,7 @@ function ServerClassFormContent({ source, original, initialDate, semesterId, onC
       const before = courseCatalog.find(c => c.id === draft.courseId), next = courseCatalog.find(c => c.id === courseId);
       change({ courseId, ...(!basis && (!draft.room || draft.room === before?.room) ? { room: next?.room ?? '' } : {}), ...(!basis && (!draft.teacher || draft.teacher === before?.teacher) ? { teacher: next?.teacher ?? '' } : {}) });
     }} />
+    <ClassFormatFields value={draft} onChange={change} disabled={locked} />
     <T style={{ fontFamily: F.semi }}>Các thứ trong tuần</T>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>{[1, 2, 3, 4, 5, 6, 7].map(day => <Pressable key={day} accessibilityRole="checkbox" accessibilityLabel={day === 7 ? 'Chủ nhật' : `Thứ ${day + 1}`} accessibilityState={{ checked: draft.weekdays.includes(day), disabled: locked }} disabled={locked} onPress={() => change({ weekdays: draft.weekdays.includes(day) ? draft.weekdays.filter(d => d !== day) : [...draft.weekdays, day].sort((a, b) => a - b) })} style={{ minHeight: 44, minWidth: 42, paddingHorizontal: 9, borderRadius: 13, justifyContent: 'center', alignItems: 'center', backgroundColor: draft.weekdays.includes(day) ? C.primary : C.canvas }}><T style={{ color: draft.weekdays.includes(day) ? '#fff' : C.ink, fontFamily: F.semi }}>{day === 7 ? 'CN' : `T${day + 1}`}</T></Pressable>)}</View>
     <View style={{ gap: 12, flexDirection: width < 360 ? 'column' : 'row' }}>
@@ -89,7 +91,7 @@ function ServerClassFormContent({ source, original, initialDate, semesterId, onC
       <View style={S.grow}><DateField label="Ngày kết thúc" value={draft.endsOn} onChange={endsOn => change({ endsOn })} disabled={locked} /></View>
     </View>
     <View style={{ gap: 12, flexDirection: width < 360 ? 'column' : 'row' }}><View style={S.grow}><TimeField label="Giờ bắt đầu" value={draft.startTime} onChange={startTime => change({ startTime })} disabled={locked} /></View><View style={S.grow}><TimeField label="Giờ kết thúc" value={draft.endTime} onChange={endTime => change({ endTime })} disabled={locked} /></View></View>
-    <Field label="Phòng học" value={draft.room} onChange={room => change({ room })} maxLength={100} disabled={locked} />
+    {draft.meetingPlatform === 'NONE' && <Field label="Phòng học" value={draft.room} onChange={room => change({ room })} maxLength={100} disabled={locked} />}
     <Field label="Giảng viên" value={draft.teacher} onChange={teacher => change({ teacher })} maxLength={200} disabled={locked} />
     <Field label="Nhắc trước (phút)" value={draft.reminderMinutes} onChange={reminderMinutes => change({ reminderMinutes })} numeric maxLength={5} disabled={locked} />
     <Field label="Ghi chú" value={draft.notes} onChange={notes => change({ notes })} multiline maxLength={5000} disabled={locked} />

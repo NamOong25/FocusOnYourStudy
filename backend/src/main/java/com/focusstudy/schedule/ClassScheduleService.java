@@ -65,11 +65,11 @@ public class ClassScheduleService {
         result.sort(Comparator.comparing(ClassOccurrenceResponse::startsAt).thenComparing(ClassOccurrenceResponse::scheduleId));
         return result;
     }
-    @Transactional(readOnly = true) public ClassScheduleResponse get(UUID owner, UUID id) { return ClassScheduleResponse.from(owned(owner, id)); }
+    @Transactional(readOnly = true) public ClassScheduleResponse get(UUID owner, UUID id) { return ClassScheduleResponse.detail(owned(owner, id)); }
     @Transactional public ClassScheduleResponse create(UUID owner, ClassScheduleRequests.Create v) {
         lockOwner(owner); ownedCourse(owner, v.courseId()); var candidate = ClassScheduleEntity.create(owner, v);
         conflicts.checkRule(owner, candidate, List.of(), null);
-        return ClassScheduleResponse.from(schedules.saveAndFlush(candidate));
+        return ClassScheduleResponse.detail(schedules.saveAndFlush(candidate));
     }
     @Transactional public ClassScheduleResponse update(UUID owner, UUID id, ClassScheduleRequests.Update v) {
         lockOwner(owner); var schedule = owned(owner, id); checkVersion(schedule, v.version()); ownedCourse(owner, v.courseId());
@@ -81,7 +81,7 @@ public class ClassScheduleService {
             try { ClassExceptionRules.validate(candidate, e); } catch (ClassScheduleApiException failure) { throw exceptionConflict("Thay đổi chuỗi làm buổi " + e.getDate() + " không hợp lệ: " + failure.getMessage()); }
         }
         conflicts.checkRule(owner, candidate, existing, id);
-        schedule.change(v); schedules.flush(); return ClassScheduleResponse.from(schedule);
+        schedule.change(v); schedules.flush(); return ClassScheduleResponse.detail(schedule);
     }
     @Transactional public void delete(UUID owner, UUID id, long version) {
         lockOwner(owner); var schedule = owned(owner, id); checkVersion(schedule, version); schedules.delete(schedule); schedules.flush();

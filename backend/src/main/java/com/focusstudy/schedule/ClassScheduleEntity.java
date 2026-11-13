@@ -1,6 +1,8 @@
 package com.focusstudy.schedule;
 
 import com.focusstudy.common.persistence.BaseEntity;
+import com.focusstudy.schedule.ClassScheduleRequests.LessonType;
+import com.focusstudy.schedule.ClassScheduleRequests.MeetingPlatform;
 import jakarta.persistence.*;
 import java.time.*;
 import java.util.UUID;
@@ -24,11 +26,23 @@ public class ClassScheduleEntity extends BaseEntity {
     @Column(name = "reminder_minutes", nullable = false) private int reminderMinutes;
     @Column(nullable = false, columnDefinition = "text") private String notes;
     @Column(name = "exception_revision", nullable = false) private long exceptionRevision;
+    @Enumerated(EnumType.STRING) @Column(name = "lesson_type", nullable = false, length = 16)
+    private LessonType lessonType = LessonType.THEORY;
+    @Enumerated(EnumType.STRING) @Column(name = "meeting_platform", nullable = false, length = 16)
+    private MeetingPlatform meetingPlatform = MeetingPlatform.NONE;
+    @Column(name = "meeting_id", nullable = false, length = 100) private String meetingId = "";
+    @Column(name = "meeting_passcode", nullable = false, length = 100) private String meetingPasscode = "";
     protected ClassScheduleEntity() { }
     public static ClassScheduleEntity create(UUID owner, ClassScheduleRequests.Rule input) { var rule = new ClassScheduleEntity(); rule.userId = owner; rule.change(input); return rule; }
     public void change(ClassScheduleRequests.Rule v) {
         courseId = v.courseId(); weekdayMask = ClassScheduleValidator.mask(v.weekdays()); startsOn = LocalDate.parse(v.startsOn()); endsOn = LocalDate.parse(v.endsOn());
         startTime = LocalTime.parse(v.startTime()); endTime = LocalTime.parse(v.endTime()); timeZone = v.timeZone(); room = v.room(); teacher = v.teacher(); reminderMinutes = v.reminderMinutes(); notes = v.notes();
+        if (v.lessonType() != null) lessonType = v.lessonType();
+        if (v.meetingPlatform() != null) {
+            meetingPlatform = v.meetingPlatform();
+            meetingId = v.meetingId();
+            meetingPasscode = v.meetingPasscode();
+        }
     }
     public UUID getCourseId() { return courseId; }
     public void markExceptionChange() { exceptionRevision = Math.incrementExact(exceptionRevision); }
@@ -42,4 +56,8 @@ public class ClassScheduleEntity extends BaseEntity {
     public String getTeacher() { return teacher; }
     public int getReminderMinutes() { return reminderMinutes; }
     public String getNotes() { return notes; }
+    public LessonType getLessonType() { return lessonType; }
+    public MeetingPlatform getMeetingPlatform() { return meetingPlatform; }
+    public String getMeetingId() { return meetingId; }
+    public String getMeetingPasscode() { return meetingPasscode; }
 }

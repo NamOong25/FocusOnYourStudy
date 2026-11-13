@@ -8,11 +8,15 @@ import useCurrentTime from '../../shared/hooks/useCurrentTime';
 import { examQueryKey } from './api/examsApi';
 import { useServerExamList } from './api/useServerExams';
 import { projectExamOverview } from './examOverview';
-import { filterExams, type ExamPeriod } from './examView';
+import { examClock, filterExams, type ExamPeriod } from './examView';
 import ExamListCard from './components/ExamListCard';
 import ServerExamDialog from './components/ServerExamDialog';
 import ExamApiForm from './components/ExamApiForm';
 import { useExamWrites } from './api/ExamWritesProvider';
+import { zonedDay } from '../study/studyTime';
+import { parseDay } from '../../shared/utils/dates';
+import type { TimetableEntry } from '../schedule/components/ScheduleTimetable';
+import ExamTimetable, { ExamViewPicker, type ExamView } from './components/ExamTimetable';
 
 export default function ServerExams() {
   const { semesters, academicSemesterId, setAcademicSemesterId, courseCatalog, courseConnection, semesterConnection, setScheduleMode } = useApp();
@@ -20,6 +24,8 @@ export default function ServerExams() {
   const { state: writes } = useExamWrites();
   const [creating, setCreating] = useState(false);
   const [period, setPeriod] = useState<ExamPeriod>('Sắp tới'), [courseId, setCourseId] = useState('');
+  const [view, setView] = useState<ExamView>('Theo tuần');
+  const [selected, setSelected] = useState(() => new Date());
   const [chooser, setChooser] = useState<'filters' | 'semester' | 'course' | null>(null), [opened, setOpened] = useState<{ id: string; key: string } | null>(null);
   const semester = semesters.find(s => s.id === academicSemesterId), courses = courseCatalog.filter(c => c.semesterId === semester?.id);
   const course = courses.find(c => c.id === courseId), query = semester ? { semesterId: semester.id, ...(course ? { courseId: course.id } : {}) } : null;
@@ -27,6 +33,12 @@ export default function ServerExams() {
   const overview = query ? projectExamOverview(source, courses, query, now.getTime()) : null;
   const visible = filterExams(overview?.rows ?? [], period, now.getTime());
   const nearest = period === 'Sắp tới' ? overview?.next?.id : undefined;
+  const entries = (overview?.rows ?? []).map((exam): TimetableEntry => ({
+    id: exam.id, date: zonedDay(Date.parse(exam.startsAt), exam.timeZone),
+    start: examClock(exam.startsAt, exam.timeZone), end: examClock(exam.endsAt, exam.timeZone),
+    title: courses.find(c => c.id === exam.courseId)?.name ?? 'Kỳ thi',
+    room: exam.room, exam: true, onOpen: () => setOpened({ id: exam.id, key }),
+  }));
   const create = () => setCreating(true);
   const reload = () => { void Promise.allSettled([source.reload(), courseConnection?.reload(), semesterConnection?.reload()]); };
   // Keep the shared catalogue current when returning from another screen or tab.
@@ -46,7 +58,8 @@ export default function ServerExams() {
         <Button label="Bộ lọc" secondary icon="options-outline" onPress={() => setChooser('filters')}
           style={{ minHeight: 44, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 14 }} />
       </Row>}
-      {semester && <Segments values={['Sắp tới', 'Đã qua', 'Tất cả']} value={period} onChange={value => setPeriod(value as ExamPeriod)} />}
+      {semester && <ExamViewPicker view={view} onView={setView} />}
+      {semester && view === 'Danh sách' && <Segments values={['Sắp tới', 'Đã qua', 'Tất cả']} value={period} onChange={value => setPeriod(value as ExamPeriod)} />}
     </View>
     {writes.pending && <Button label="Kiểm tra lần ghi lịch thi trước" secondary disabled={writes.busy || writes.checking} onPress={create} />}
     {!semester ? <StateView title="Chưa có học kỳ để xem lịch thi" message="Tạo học kỳ và thêm môn học để bắt đầu quản lý lịch thi." actionLabel="Đến Môn & học kỳ" onAction={() => setScheduleMode('Môn & học kỳ')} /> : <>
@@ -56,7 +69,9 @@ export default function ServerExams() {
           <T style={S.small}>Đang hiển thị lịch thi đã tải gần nhất.</T>
           <Button label="Thử tải lại lịch thi" secondary loading={source.loading} onPress={reload} />
         </Card>}
-        {overview?.catalogueMismatch ? <StateView kind="error" title="Chưa cập nhật đủ môn của lịch thi" message="Thông tin môn học có thể vừa thay đổi. Tải lại môn và lịch thi trước khi xem tiếp." actionLabel="Cập nhật môn và lịch thi" onAction={reload} /> : <>
+        {overview?.catalogueMismatch ? <StateView kind="error" title="Chưa cập nhật đủ môn của lịch thi" message="Thông tin môn học có thể vừa thay đổi. Tải lại môn và lịch thi trước khi xem tiếp." actionLabel="Cập nhật môn và lịch thi" onAction={reload} /> : view !== 'Danh sách'
+          ? <ExamTimetable entries={entries} selected={selected} view={view} onSelect={setSelected} onView={setView} />
+          : <>
           {!!visible.length && <T style={{ fontFamily: F.bold, fontSize: 13 }} accessibilityLiveRegion="polite">{visible.length} kỳ thi</T>}
           {visible.map(exam => <ExamListCard key={exam.id} exam={exam} course={courses.find(c => c.id === exam.courseId)!}
             now={now.getTime()} featured={exam.id === nearest} onOpen={() => setOpened({ id: exam.id, key })} />)}
@@ -95,6 +110,7 @@ export default function ServerExams() {
     {opened?.key === key && <ServerExamDialog key={`${key}:${opened.id}`} id={opened.id} onClose={() => { setOpened(null); reload(); }} onRefreshList={reload} />}
     {creating && <ExamApiForm initialCourseId={course?.id ?? courses[0]?.id} onClose={() => setCreating(false)} onSaved={exam => {
       setCreating(false); setCourseId(''); setPeriod('Tất cả');
+      setSelected(parseDay(zonedDay(Date.parse(exam.startsAt), exam.timeZone)));
       const savedCourse = courseCatalog.find(c => c.id === exam.courseId);
       if (savedCourse) { setAcademicSemesterId(savedCourse.semesterId); setOpened({ id: exam.id, key: examQueryKey({ semesterId: savedCourse.semesterId }) }); }
       reload();

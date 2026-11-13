@@ -6,7 +6,9 @@ export function ruleDraft(original?: ServerRule, defaults?: { date?: string; cou
   return { courseId: original?.courseId ?? defaults?.courseId ?? '', weekdays: [...(original?.weekdays ?? [parseDay(startsOn).getDay() || 7])].sort((a, b) => a - b),
     startsOn: original?.startsOn ?? startsOn, endsOn: original?.endsOn ?? (dateKey(addDays(parseDay(startsOn), 90)) > '2099-12-31' ? '2099-12-31' : dateKey(addDays(parseDay(startsOn), 90))),
     startTime: original?.startTime ?? '07:00', endTime: original?.endTime ?? '09:00', timeZone: original?.timeZone ?? deviceTimeZone(),
-    room: original?.room ?? defaults?.room ?? '', teacher: original?.teacher ?? defaults?.teacher ?? '', notes: original?.notes ?? '', reminderMinutes: String(original?.reminderMinutes ?? defaults?.reminderMinutes ?? 15) };
+    room: original?.room ?? defaults?.room ?? '', teacher: original?.teacher ?? defaults?.teacher ?? '', notes: original?.notes ?? '', reminderMinutes: String(original?.reminderMinutes ?? defaults?.reminderMinutes ?? 15),
+    lessonType: original?.lessonType ?? 'THEORY', meetingPlatform: original?.meetingPlatform ?? 'NONE',
+    meetingId: original?.meetingId ?? '', meetingPasscode: original?.meetingPasscode ?? '' };
 }
 export type RuleDraft = ReturnType<typeof ruleDraft>;
 export function draftInput(draft: RuleDraft): RuleInput {

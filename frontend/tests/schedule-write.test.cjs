@@ -60,7 +60,21 @@ test('validation exposes supported schedule fields without unknown paths', async
 });
 test('draft rebase preserves server timezone/ISO Sunday and blank override values', () => {
   const input = rule({ weekdays: [7], room: '', teacher: '', timeZone: 'America/New_York' }); const draft = ruleDraft(input);
-  assert.deepEqual(draftInput(draft), body({ weekdays: [7], room: '', teacher: '', timeZone: 'America/New_York' }));
+  assert.deepEqual(draftInput(draft), body({ weekdays: [7], room: '', teacher: '', timeZone: 'America/New_York',
+    lessonType: 'THEORY', meetingPlatform: 'NONE', meetingId: '', meetingPasscode: '' }));
+});
+test('Zoom practice uses its meeting details and Teams drops the old passcode', async () => {
+  const calls = [];
+  const zoom = { lessonType: 'PRACTICE', meetingPlatform: 'ZOOM', meetingId: '123 456', meetingPasscode: 'demo' };
+  const input = draftInput({ ...ruleDraft(rule()), ...zoom, meetingId: ' 123 456 ' });
+  assert.deepEqual(await api(rule(zoom), 201, calls).save(input), rule(zoom));
+  assert.equal(JSON.parse(calls[0].options.body).meetingId, zoom.meetingId);
+  assert.throws(() => draftInput({ ...ruleDraft(rule()), ...zoom, meetingPasscode: '' }), /mật khẩu Zoom/);
+  const teams = draftInput({ ...ruleDraft(rule(zoom)), meetingPlatform: 'TEAMS', meetingId: '987' });
+  assert.equal(teams.meetingPasscode, '');
+  const { meetingPasscode, ...summary } = rule(zoom);
+  assert.equal((await api([summary]).rules())[0].meetingPasscode, undefined);
+  await assert.rejects(api(summary).readRule(A), error => error.code === 'INVALID_RESPONSE');
 });
 for (const [label, patch] of Object.entries({ noDays: { weekdays: [] }, backwardsDates: { endsOn: '2026-10-18' }, overYear: { endsOn: '2027-11-08' }, badTime: { endTime: '06:00' }, badZone: { timeZone: 'Fake/Zone' }, fractionReminder: { reminderMinutes: '1.5' }, largeReminder: { reminderMinutes: '10081' } })) {
   test(`invalid draft ${label} is rejected before HTTP`, () => assert.throws(() => draftInput({ ...ruleDraft(rule()), ...patch })));

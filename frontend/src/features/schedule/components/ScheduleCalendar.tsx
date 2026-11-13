@@ -10,9 +10,9 @@ const modes = { Tuần: 'Theo tuần', Ngày: 'Theo ngày', Tháng: 'Theo tháng
 const labels = { 'Theo tuần': 'Tuần', 'Theo ngày': 'Ngày', 'Theo tháng': 'Tháng' } as const;
 const valid = (date: string) => date >= '1900-01-01' && date <= '2099-12-31';
 
-export default function ScheduleCalendar({ selected, view, onSelect, onView, hasEvent }: {
+export default function ScheduleCalendar({ selected, view, onSelect, onView, hasEvent, eventColor = C.primary, showViewPicker = true }: {
   selected: Date; view: CalendarView; onSelect: (date: Date) => void; onView: (view: CalendarView) => void;
-  hasEvent: (date: string) => boolean;
+  hasEvent: (date: string) => boolean; eventColor?: string; showViewPicker?: boolean;
 }) {
   const { grid, from, to } = scheduleWindow(selected, view), now = new Date();
   const day = dateKey(selected), today = dateKey(now);
@@ -33,7 +33,7 @@ export default function ScheduleCalendar({ selected, view, onSelect, onView, has
         </Pressable>}
       <IconButton name="chevron-forward" bg="#fff" label="Khoảng sau" disabled={!valid(dateKey(next))} onPress={() => onSelect(next)} />
     </Row>
-    <Segments values={Object.keys(modes)} value={labels[view]} onChange={value => onView(modes[value as keyof typeof modes])} />
+    {showViewPicker && <Segments values={Object.keys(modes)} value={labels[view]} onChange={value => onView(modes[value as keyof typeof modes])} />}
     {view !== 'Theo tuần' && <Card style={styles.calendar}>
       {view === 'Theo tháng' && <Row style={{ gap: 0 }}>{grid.slice(0, 7).map(date => <T key={dateKey(date)} style={styles.weekday}>{dayNames[date.getDay()]}</T>)}</Row>}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -43,7 +43,7 @@ export default function ScheduleCalendar({ selected, view, onSelect, onView, has
             accessibilityState={{ selected: active, disabled: !selectable }} onPress={() => onSelect(date)} style={[styles.day, !selectable && { opacity: 0.3 }]}>
             {view === 'Theo ngày' && <T style={[styles.dayName, key === today && { color: C.primary }]}>{dayNames[date.getDay()]}</T>}
             <T style={[styles.dayNumber, key === today && { color: C.primary }, view === 'Theo tháng' && date.getMonth() !== selected.getMonth() && { color: C.muted }, active && styles.active]}>{date.getDate()}</T>
-            <View style={[styles.dot, selectable && hasEvent(key) && { backgroundColor: C.primary }]} />
+            <View style={[styles.dot, selectable && hasEvent(key) && { backgroundColor: eventColor }]} />
           </Pressable>;
         })}
       </View>

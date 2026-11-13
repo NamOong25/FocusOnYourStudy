@@ -10,6 +10,8 @@ import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
 import { useAuth } from '../account/auth/AuthProvider';
 import { StateView } from '../../shared/components';
+import { classFormatInput, type ClassFormat } from './classFormat';
+import ClassFormatFields from './components/ClassFormatFields';
 
 export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
   const auth = useAuth(), { setScheduleMode } = useApp();
@@ -27,7 +29,9 @@ function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
   const [room, setRoom] = useState(item?.room ?? course?.room ?? ''); const [teacher, setTeacher] = useState(item?.teacher ?? course?.teacher ?? '');
   const [reminder, setReminder] = useState(item?.reminderMinutes ?? accountPreferences.reminderMinutes); const [error, setError] = useState('');
   const [conflicts, setConflicts] = useState<CalendarEvent[]>([]); const [confirmDelete, setConfirmDelete] = useState(false);
-  const dirty = useFormChanges({ courseId, weekdays: [...weekdays].sort(), startsOn, endsOn, start, end, room, teacher, reminder });
+  const [format, setFormat] = useState<ClassFormat>({ lessonType: item?.lessonType, meetingPlatform: item?.meetingPlatform,
+    meetingId: item?.meetingId, meetingPasscode: item?.meetingPasscode });
+  const dirty = useFormChanges({ courseId, weekdays: [...weekdays].sort(), startsOn, endsOn, start, end, room, teacher, reminder, format });
   const save = () => {
     setError(''); setConflicts([]);
     if (!course) { setError('Hãy chọn môn học.'); return; }
@@ -37,13 +41,17 @@ function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     let hasOccurrence = false;
     for (let d = parseDay(startsOn); dateKey(d) <= endsOn; d = addDays(d, 1)) { if (weekdays.includes(d.getDay())) { hasOccurrence = true; break; } }
     if (!hasOccurrence) { setError('Khoảng ngày này chưa có thứ nào bạn đã chọn.'); return; }
-    const candidate: ClassItem = { id: item?.id ?? uid(), courseId, title: course.name, weekday: weekdays[0]!, weekdays, startsOn, endsOn, start, end, room: room.trim() || 'Chưa có phòng', teacher: teacher.trim() || 'Chưa cập nhật', reminderMinutes: reminder };
+    let classFormat;
+    try { classFormat = classFormatInput(format); }
+    catch (failure) { setError(failure instanceof Error ? failure.message : 'Kiểm tra thông tin buổi học.'); return; }
+    const candidate: ClassItem = { ...classFormat, id: item?.id ?? uid(), courseId, title: course.name, weekday: weekdays[0]!, weekdays, startsOn, endsOn, start, end, room: room.trim() || 'Chưa có phòng', teacher: teacher.trim() || 'Chưa cập nhật', reminderMinutes: reminder };
     const clashes = seriesConflicts(candidate, classes, classExceptions, exams, studySessions);
     if (clashes.length) { setConflicts(clashes); return; }
     saveClass(candidate); setToast(item ? 'Đã cập nhật chuỗi lịch học' : 'Đã thêm lịch học lặp'); onClose();
   };
   return <Sheet title={item ? 'Sửa cả chuỗi lịch học' : 'Thêm lịch học'} onClose={onClose} dirty={dirty}>
     <CourseChoices dropdown value={courseId} onChange={id => { setCourseId(id); const next = courseCatalog.find(c => c.id === id); setRoom(next?.room ?? ''); setTeacher(next?.teacher ?? ''); }} />
+    <ClassFormatFields value={format} onChange={patch => setFormat(current => ({ ...current, ...patch }))} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Các thứ trong tuần</T>
     <Row style={{ gap: 0 }}>{[1,2,3,4,5,6,0].map(day => <Pressable key={day} accessibilityRole="checkbox" accessibilityLabel={`Học vào ${dayNames[day]}`} accessibilityState={{ checked: weekdays.includes(day) }} aria-checked={weekdays.includes(day)} onPress={() => setWeekdays(v => v.includes(day) ? v.filter(d => d !== day) : [...v, day])} style={{ flex: 1, minHeight: 46, alignItems: 'center', justifyContent: 'center' }}><View style={{ width: 34, height: 38, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: weekdays.includes(day) ? C.primary : C.track }}><T style={{ fontFamily: F.bold, fontSize: 11, color: weekdays.includes(day) ? '#fff' : C.muted }}>{dayNames[day]}</T></View></Pressable>)}</Row>
     <View style={{ gap: 12, flexDirection: width < 360 ? 'column' : 'row' }}>
@@ -54,7 +62,8 @@ function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
       <View style={S.grow}><TimeField label="Giờ bắt đầu" value={start} onChange={setStart} /></View>
       <View style={S.grow}><TimeField label="Giờ kết thúc" value={end} onChange={setEnd} /></View>
     </View>
-    <Field label="Phòng học" value={room} onChange={setRoom} /><Field label="Giảng viên" value={teacher} onChange={setTeacher} />
+    {(!format.meetingPlatform || format.meetingPlatform === 'NONE') && <Field label="Phòng học" value={room} onChange={setRoom} />}
+    <Field label="Giảng viên" value={teacher} onChange={setTeacher} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút', '60 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${course?.name ?? 'Ca học'} · ${start} – ${end}`} />
     <Button label="Lưu lịch học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />

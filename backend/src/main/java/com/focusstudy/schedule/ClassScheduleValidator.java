@@ -1,5 +1,6 @@
 package com.focusstudy.schedule;
 
+import com.focusstudy.schedule.ClassScheduleRequests.MeetingPlatform;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.*;
@@ -26,6 +27,11 @@ public class ClassScheduleValidator implements ConstraintValidator<ValidClassSch
     }
     @Override public boolean isValid(ClassScheduleRequests.Rule v, ConstraintValidatorContext context) {
         if (v == null) return true;
+        var platform = v.meetingPlatform() == null ? MeetingPlatform.NONE : v.meetingPlatform();
+        if (platform != MeetingPlatform.NONE && v.meetingId().isEmpty()) return error(context, "meetingId", "Nhập ID cuộc họp.");
+        if (platform == MeetingPlatform.NONE && !v.meetingId().isEmpty()) return error(context, "meetingId", "ID chỉ áp dụng cho buổi học online.");
+        if (platform == MeetingPlatform.ZOOM && v.meetingPasscode().isEmpty()) return error(context, "meetingPasscode", "Nhập mật khẩu Zoom.");
+        if (platform != MeetingPlatform.ZOOM && !v.meetingPasscode().isEmpty()) return error(context, "meetingPasscode", "Mật khẩu chỉ áp dụng cho Zoom.");
         // Basic annotations report missing values and invalid day numbers separately.
         if (v.weekdays() == null || v.weekdays().isEmpty() || v.weekdays().size() > 7 || v.weekdays().stream().anyMatch(d -> d == null || d < 1 || d > 7)) return true;
         if (new HashSet<>(v.weekdays()).size() != v.weekdays().size()) return error(context, "weekdays", "Các thứ trong tuần không được lặp lại.");

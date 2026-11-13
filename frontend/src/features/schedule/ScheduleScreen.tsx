@@ -9,7 +9,7 @@ import type { ClassItem } from './calendar';
 import ServerSchedule from './ServerSchedule';
 import ScheduleHeader from './components/ScheduleHeader';
 import ScheduleCalendar from './components/ScheduleCalendar';
-import { ScheduleDayList, ScheduleWeekGrid, type TimetableEntry } from './components/ScheduleTimetable';
+import { ClassTimetableLegend, ScheduleDayList, ScheduleWeekGrid, type TimetableEntry } from './components/ScheduleTimetable';
 import { scheduleWindow, type CalendarView } from './scheduleView';
 
 type Props = { onClass: (item: ClassItem, date?: string) => void; onNewClass: () => void };
@@ -39,6 +39,7 @@ function PreviewSchedule({ onClass, onNewClass }: Props) {
     const classes = getClassesOn(key).filter(item => courses.has(item.courseId)).map((item): TimetableEntry => ({
       id: `class-${item.id}:${key}`, date: key, start: item.start, end: item.end, title: item.title, code: courses.get(item.courseId)?.code,
       room: item.room, color: courses.get(item.courseId)?.color, status: item.cancelled ? 'Đã nghỉ' : item.changed ? 'Đã điều chỉnh' : undefined,
+      lessonType: item.lessonType, meetingPlatform: item.meetingPlatform,
       onOpen: () => onClass(item, key),
     }));
     const assessments = exams.filter(exam => exam.date === key && courses.has(exam.courseId)).map((exam): TimetableEntry => ({
@@ -55,6 +56,7 @@ function PreviewSchedule({ onClass, onNewClass }: Props) {
       {view === 'Theo tuần'
         ? <ScheduleWeekGrid days={days} selected={day} entries={entries} onDay={date => { setSelected(date); setView('Theo ngày'); }} />
         : <ScheduleDayList date={day} entries={entries.filter(entry => entry.date === day)} />}
+      {!!entries.length && <ClassTimetableLegend />}
       <Button label="Thêm lịch học" icon="add" onPress={onNewClass} />
     </>}
     {choose && <Sheet title="Học kỳ xem lịch" onClose={() => setChoose(false)}>

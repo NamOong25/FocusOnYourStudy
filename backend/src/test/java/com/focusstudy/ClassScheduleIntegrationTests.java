@@ -100,6 +100,38 @@ class ClassScheduleIntegrationTests {
         assertThat(occurrences(a, "?from=2026-10-28&to=2026-10-28")).hasSize(1); assertThat(occurrences(a, "?from=2026-11-09&to=2026-11-15")).isEmpty();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM class_schedules WHERE user_id=?", Integer.class, a.id)).isEqualTo(1);
     }
+    @Test void onlinePracticePersistsAndOnlyOwnerDetailReturnsTheZoomPasscode() throws Exception {
+        var owner = account();
+        var other = account();
+        var values = input(course(owner, semester(owner, 1), "ONLINE"));
+        values.put("lessonType", "PRACTICE");
+        values.put("meetingPlatform", "ZOOM");
+        values.put("meetingId", " 123 456 ");
+        error(send("POST", PATH, owner.token, values), 400, "VALIDATION_FAILED");
+        values.put("meetingPasscode", "sample-Zoom-code");
+        var saved = data(send("POST", PATH, owner.token, values));
+        var detail = data(send("GET", item(saved), owner.token, null));
+        assertThat(detail.get("meetingId")).isEqualTo("123 456");
+        assertThat(detail.get("meetingPasscode")).isEqualTo("sample-Zoom-code");
+        var row = (Map<?, ?>) occurrences(owner, "?from=2026-10-26&to=2026-10-26").getFirst();
+        assertThat(row.get("lessonType")).isEqualTo("PRACTICE");
+        assertThat(row.get("meetingPlatform")).isEqualTo("ZOOM");
+        assertThat(row.containsKey("meetingPasscode")).isFalse();
+        assertThat(((Map<?, ?>) list(owner, "").getFirst()).containsKey("meetingPasscode")).isFalse();
+        error(send("GET", item(saved), other.token, null), 404, "CLASS_SCHEDULE_NOT_FOUND");
+
+        var change = update(detail);
+        change.put("meetingPlatform", "TEAMS");
+        change.put("meetingId", "987 654");
+        var updated = data(send("PUT", item(saved), owner.token, change));
+        assertThat(updated.get("meetingPlatform")).isEqualTo("TEAMS");
+        assertThat(updated.containsKey("meetingPasscode")).isFalse();
+        var legacyUpdate = update(updated);
+        legacyUpdate.put("teacher", "Giảng viên mới");
+        var edited = data(send("PUT", item(saved), owner.token, legacyUpdate));
+        assertThat(edited.get("meetingId")).isEqualTo("987 654");
+        assertThat(edited.get("lessonType")).isEqualTo("PRACTICE");
+    }
     @Test void sundayIsSevenAndLeapDayCanBeASingleOccurrence() throws Exception {
         var a = account(); var c = course(a, semester(a, 1), "QA"); var v = input(c); v.put("weekdays", List.of(7)); v.put("startsOn", "2026-11-01"); v.put("endsOn", "2026-11-01"); data(send("POST", PATH, a.token, v));
         assertThat(occurrences(a, "?from=2026-10-31&to=2026-11-02")).hasSize(1);

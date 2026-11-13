@@ -8,6 +8,7 @@ import ConflictPanel from './ConflictPanel';
 import { addDays, dateKey, dateLabel, parseDay, today, uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
+import ClassFormatDetails from './components/ClassFormatDetails';
 
 export default function ClassDialog({ id, date, onClose }: { id: string; date?: string; onClose: () => void }) {
   const { classes, classExceptions, getClassesOn, restoreClassOccurrence, exams, studySessions, setToast } = useApp();
@@ -31,8 +32,9 @@ export default function ClassDialog({ id, date, onClose }: { id: string; date?: 
   return <Sheet title="Chi tiết buổi học" onClose={onClose}>
     <Card style={{ backgroundColor: occurrence?.cancelled ? C.redSoft : C.soft, gap: 13 }}><Row between><Badge label={occurrence?.cancelled ? 'Đã nghỉ buổi này' : occurrence?.changed ? 'Đã điều chỉnh buổi này' : 'Theo lịch gốc'} color={occurrence?.cancelled ? C.red : C.primary} bg="#FFFFFFAA" /><IconButton name="create-outline" label="Sửa cả chuỗi" onPress={() => setMode('series')} bg="#FFFFFFAA" /></Row><T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33 }}>{series.title}</T><T style={{ fontFamily: F.semi, color: C.primary }}>{dateLabel(selectedDate)}/{selectedDate.slice(0,4)}</T></Card>
     {occurrence ? <>
-      <Row><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><Icon name="time-outline" /><T style={{ fontFamily: F.bold }}>{occurrence.start} – {occurrence.end}</T><T style={S.small}>Giờ của buổi này</T></Card><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><Icon name="business-outline" /><T style={{ fontFamily: F.bold }}>{occurrence.room}</T><T style={S.small}>Phòng học</T></Card></Row>
+      <Row><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><Icon name="time-outline" /><T style={{ fontFamily: F.bold }}>{occurrence.start} – {occurrence.end}</T><T style={S.small}>Giờ của buổi này</T></Card>{(!series.meetingPlatform || series.meetingPlatform === 'NONE') && <Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><Icon name="business-outline" /><T style={{ fontFamily: F.bold }}>{occurrence.room}</T><T style={S.small}>Phòng học</T></Card>}</Row>
       <T style={S.small}>Giảng viên: {occurrence.teacher}</T>
+      {!occurrence.cancelled && <ClassFormatDetails format={series} />}
       {exception && <Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><T style={{ fontFamily: F.bold, color: C.amber }}>Chỉ áp dụng cho ngày này</T><T style={{ fontSize: 12 }}>{exception.reason || 'Chưa ghi lý do'}</T><T style={S.small}>Lịch gốc: {series.start} – {series.end} · {series.room}</T></Card>}
       <ConflictPanel conflicts={conflicts} candidate={`Khôi phục · ${series.start} – ${series.end}`} />
       {!occurrence.cancelled && <Button label="Đổi giờ hoặc phòng buổi này" icon="swap-horizontal-outline" onPress={() => setMode('change')} />}

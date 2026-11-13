@@ -1,7 +1,8 @@
 import { addDays, dateKey, parseDay } from '../../shared/utils/dates';
 import { StudySession, endTime } from '../study/learning';
 
-export type ClassItem = { id: string; courseId: string; title: string; weekday: number; weekdays: number[]; startsOn: string; endsOn: string; start: string; end: string; room: string; teacher: string; reminderMinutes: number };
+import type { ClassFormat } from './classFormat';
+export type ClassItem = { id: string; courseId: string; title: string; weekday: number; weekdays: number[]; startsOn: string; endsOn: string; start: string; end: string; room: string; teacher: string; reminderMinutes: number } & ClassFormat;
 export type ClassException = { id: string; seriesId: string; date: string; kind: 'cancelled' | 'changed'; start: string; end: string; room: string; teacher: string; reason: string };
 export type ClassOccurrence = ClassItem & { date: string; cancelled: boolean; changed: boolean; reason: string };
 export type Exam = { id: string; courseId: string; course: string; date: string; time: string; end: string; room: string; type: string; kind: 'Giữa kỳ' | 'Cuối kỳ' | 'Khác'; format: 'Tự luận' | 'Trắc nghiệm' | 'Thực hành' | 'Vấn đáp' | 'Trực tuyến'; reminder: boolean; reminderMinutes: number[]; notes: string };
