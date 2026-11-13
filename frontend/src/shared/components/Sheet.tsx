@@ -19,6 +19,7 @@ type SheetProps = {
     children: ReactNode;
     onClose: () => void;
     onBack?: () => void;
+    hideBackButton?: boolean;
     scrollKey?: string;
     dirty?: boolean;
     heading?: { icon: IconName; detail: string };
@@ -49,7 +50,7 @@ export function Sheet(props: SheetProps) {
     );
 }
 
-function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = false, heading, surfaceColor = '#fff', alert }: SheetProps) {
+function SheetContent({ title, children, onClose, onBack, hideBackButton = false, scrollKey, dirty = false, heading, surfaceColor = '#fff', alert }: SheetProps) {
     const inset = useSafeAreaInsets();
     const picker = useDateTimePicker(), scope = useNavigationScope();
     const flow = useContext(SheetFlowContext);
@@ -135,7 +136,7 @@ function SheetContent({ title, children, onClose, onBack, scrollKey, dirty = fal
                         </View>
                         <IconButton name="close" label="Đóng" onPress={dismiss} />
                     </Row> : <Row between style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 10, gap: 6 }}>
-                        <IconButton name="arrow-back" label="Quay lại" onPress={back} bg="transparent" />
+                        {(!hideBackButton || picker.active || confirming) && <IconButton name="arrow-back" label="Quay lại" onPress={back} bg="transparent" />}
                         <T style={[S.title, S.grow]}>
                             {confirming ? 'Thay đổi chưa lưu' : picker.active ? `Chọn ${picker.active.label.toLocaleLowerCase()}` : title}
                         </T>

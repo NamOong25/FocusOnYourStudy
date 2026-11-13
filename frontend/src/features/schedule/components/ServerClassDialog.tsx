@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Badge, Button, Card, Row, Sheet, StateView, T } from '../../../shared/components';
-import { C, F, S } from '../../../shared/theme';
-import { dateLabel } from '../../../shared/utils/dates';
+import { Sheet, StateView, T } from '../../../shared/components';
+import { S } from '../../../shared/theme';
 import { asApiError, isCancelled, type ApiError } from '../../../shared/api/http';
 import { API_BASE_URL } from '../../../shared/api/config';
 import { useAuth } from '../../account/auth/AuthProvider';
-import { weekdaysLabel, reminderLabel } from '../calendar';
+import { weekdaysLabel } from '../calendar';
 import { createScheduleApi, type ServerOccurrence, type ServerRule } from '../api/scheduleApi';
 import type { ExceptionMode } from '../exceptionDraft';
-import ClassFormatDetails from './ClassFormatDetails';
+import ClassOccurrenceDetails from './ClassOccurrenceDetails';
 
 export default function ServerClassDialog({ item, title, blocked, onClose, onReload, onEdit, onException }: {
   item: ServerOccurrence; title: string; blocked: boolean; onClose: () => void; onReload: () => void; onEdit: (rule: ServerRule) => void; onException: (mode: ExceptionMode, item: ServerOccurrence) => void;
@@ -20,21 +19,16 @@ export default function ServerClassDialog({ item, title, blocked, onClose, onRel
       .then(value => { if (live) setRule(value); }).catch(failure => { if (live && !isCancelled(failure)) setError(asApiError(failure)); });
     return () => { live = false; controller.abort(); };
   }, [item, auth.authorized]);
-  return <Sheet title="Chi tiết buổi học" onClose={onClose}>
-    {!rule ? <StateView kind={error ? 'error' : 'loading'} title={error ? 'Chưa xem được buổi học' : 'Đang tải chi tiết'} message={error?.message ?? 'Đang kiểm tra lịch đã lưu của bạn.'} actionLabel={error ? 'Tải lại lịch' : undefined} onAction={onReload} /> : <>
-      <Card style={{ backgroundColor: item.cancelled ? C.redSoft : C.soft, gap: 10 }}><Badge label={item.cancelled ? 'Đã nghỉ buổi này' : item.changed ? 'Đã điều chỉnh buổi này' : 'Theo lịch gốc'} color={item.cancelled ? C.red : C.primary} bg="#FFFFFFAA" /><T style={{ fontFamily: F.extra, fontSize: 23, lineHeight: 33 }}>{title}</T><T style={{ fontFamily: F.semi, color: C.primary }}>{dateLabel(item.date)}/{item.date.slice(0, 4)}</T></Card>
-      <Row><Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.startTime} – {item.endTime}</T><T style={S.small}>{item.cancelled ? 'Giờ dự kiến trước khi nghỉ' : 'Giờ của buổi này'}</T></Card>{(!rule.meetingPlatform || rule.meetingPlatform === 'NONE') && <Card style={[S.grow, { backgroundColor: C.canvas, gap: 6 }]}><T style={{ fontFamily: F.bold }}>{item.room || 'Chưa có phòng'}</T><T style={S.small}>Phòng học</T></Card>}</Row>
-      <T style={S.small}>Múi giờ: {item.timeZone}</T><T style={S.small}>Giảng viên: {item.teacher || 'Chưa có thông tin'}</T>
-      {!item.cancelled && <ClassFormatDetails format={rule} />}
-      {(item.changed || item.cancelled) && <Card style={{ backgroundColor: C.amberSoft, gap: 6 }}><T style={{ fontFamily: F.bold, color: C.amber }}>Chỉ áp dụng cho ngày này</T><T style={S.small}>{item.reason || 'Chưa ghi lý do'}</T><T style={S.small}>Lịch gốc: {rule.startTime} – {rule.endTime} · {rule.room || 'Chưa có phòng'}</T></Card>}
-      {!!item.notes && <Card><T style={S.small}>{item.notes}</T></Card>}
-      <Card style={{ backgroundColor: C.canvas, gap: 7 }}><T style={{ fontFamily: F.bold }}>Chuỗi lịch học</T><T style={S.small}>{weekdaysLabel(rule.weekdays.map(d => d % 7))} · {rule.startTime} – {rule.endTime}</T><T style={S.small}>{dateLabel(rule.startsOn)}/{rule.startsOn.slice(0, 4)} → {dateLabel(rule.endsOn)}/{rule.endsOn.slice(0, 4)}</T><T style={S.small}>{rule.reminderMinutes ? `Mốc nhắc đã chọn: trước ${reminderLabel(rule.reminderMinutes)}` : 'Nhắc đúng giờ bắt đầu (0 phút)'} · Chưa gửi nhắc trên thiết bị.</T></Card>
-      {blocked && <T accessibilityRole="alert" style={S.small}>Chưa thể chỉnh lịch. Đóng chi tiết để tải lại lịch hoặc kiểm tra lần ghi chưa rõ kết quả trước khi tiếp tục.</T>}
-      <Button label="Chỉnh sửa cả chuỗi lịch" icon="repeat-outline" disabled={blocked} onPress={() => onEdit(rule)} />
-      <Button label="Đổi buổi này" secondary icon="swap-horizontal-outline" disabled={blocked} onPress={() => onException('change', item)} />
-      {!item.cancelled && <Button label="Nghỉ buổi này" secondary icon="close-circle-outline" disabled={blocked} onPress={() => onException('cancel', item)} />}
-      {(item.changed || item.cancelled) && <Button label={item.cancelled ? 'Khôi phục buổi này' : 'Bỏ thay đổi buổi này'} secondary icon="refresh-outline" disabled={blocked} onPress={() => onException('restore', item)} />}
-      <T style={S.small}>Các nút buổi này chỉ áp dụng ngày {item.date}. Chỉnh sửa cả chuỗi áp dụng toàn khoảng lịch.</T><Button label="Đóng chi tiết" secondary onPress={onClose} />
-    </>}
+  return <Sheet title="Chi tiết buổi học" onClose={onClose} hideBackButton>
+    {!rule ? <StateView kind={error ? 'error' : 'loading'} title={error ? 'Chưa xem được buổi học' : 'Đang tải chi tiết'}
+      message={error?.message ?? 'Đang kiểm tra lịch đã lưu của bạn.'} actionLabel={error ? 'Tải lại lịch' : undefined} onAction={onReload} />
+      : <ClassOccurrenceDetails title={title} date={item.date} format={rule}
+        lesson={{ ...item, start: item.startTime, end: item.endTime }}
+        recurrence={{ ...rule, weekdays: weekdaysLabel(rule.weekdays.map(day => day % 7)), start: rule.startTime, end: rule.endTime }}
+        blocked={blocked} onEdit={() => onEdit(rule)}
+        onChange={() => onException('change', item)} onCancel={() => onException('cancel', item)}
+        onRestore={() => onException('restore', item)}>
+        {blocked && <T accessibilityRole="alert" style={S.small}>Tải lại lịch hoặc kiểm tra lần lưu trước khi tiếp tục chỉnh sửa.</T>}
+      </ClassOccurrenceDetails>}
   </Sheet>;
 }
