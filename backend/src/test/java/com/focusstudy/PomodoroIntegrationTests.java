@@ -69,6 +69,34 @@ class PomodoroIntegrationTests {
     @Test void emptyActiveIsNullWithEnvelopeAndNoStore()throws Exception {
         var a=account();var r=send("GET",PATH+"/active",a.token,null);assertThat(data(r)).isNull();assertThat(body(r).get("meta")).isNotNull();assertThat(r.headers().firstValue("Cache-Control").orElseThrow()).contains("no-store");
     }
+    @Test void accountBreakPersistsAcrossReadsAndKeepsStudyHistorySeparate() throws Exception {
+        String path = "/api/v1/pomodoro-break";
+        var owner = account();
+        var other = account();
+        var course = course(owner, "BREAK");
+        assertThat(n(data(send("GET", path, owner.token, null)), "version")).isZero();
+        var started = data(send("PUT", path, owner.token, Map.of("action", "START", "kind", "SHORT", "version", 0)));
+        assertThat(n(started, "remainingMs")).isEqualTo(300_000);
+        assertThat(data(send("GET", path, other.token, null)).get("state")).isEqualTo("IDLE");
+        error(send("PUT", path, owner.token, Map.of("action", "PAUSE", "version", 0)), 409, "POMODORO_BREAK_CHANGED");
+        var paused = data(send("PUT", path, owner.token, Map.of("action", "PAUSE", "version", started.get("version"))));
+        assertThat(paused.get("state")).isEqualTo("PAUSED");
+        assertThat(data(send("GET", path, owner.token, null))).isEqualTo(paused);
+        error(send("POST", PATH, owner.token, startInput(course)), 409, "POMODORO_BREAK_ACTIVE");
+        var resumed = data(send("PUT", path, owner.token, Map.of("action", "RESUME", "version", paused.get("version"))));
+        assertThat(n(resumed, "remainingMs")).isEqualTo(n(paused, "remainingMs"));
+        var idle = data(send("PUT", path, owner.token, Map.of("action", "RESET", "version", resumed.get("version"))));
+        var longBreak = data(send("PUT", path, owner.token, Map.of("action", "START", "kind", "LONG", "version", idle.get("version"))));
+        assertThat(n(longBreak, "remainingMs")).isEqualTo(900_000);
+        jdbc.update("UPDATE pomodoro_breaks SET ends_at = now() - interval '1 minute' WHERE user_id = ?", owner.id);
+        var expired = data(send("GET", path, owner.token, null));
+        assertThat(expired.get("state")).isEqualTo("ELAPSED");
+        assertThat(n(expired, "remainingMs")).isZero();
+        assertThat(count(owner)).isZero();
+        start(owner, course);
+        error(send("PUT", path, owner.token, Map.of("action", "START", "kind", "SHORT", "version", expired.get("version"))),
+                409, "POMODORO_BREAK_ACTIVE");
+    }
     @Test void startStoresServerTimeFixedDurationAndContextSnapshot()throws Exception {
         var a=account();var c=course(a,"FOCUS");var before=Instant.now();var r=send("POST",PATH,a.token,startInput(c));var row=data(r);
         assertThat(r.statusCode()).isEqualTo(201);assertThat(r.headers().firstValue("Location")).contains(item(row));assertThat(row.get("status")).isEqualTo("RUNNING");

@@ -2,10 +2,32 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 require.extensions['.ts']=(m,f)=>m._compile(ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,f);
 const {ApiError}=require('../src/shared/api/http.ts');
 const {createPomodoroApi,parsePomodoro,validateStart}=require('../src/features/focus/api/pomodoroApi.ts');
+const {createPomodoroBreakApi,parseBreak,breakRemaining}=require('../src/features/focus/api/pomodoroBreakApi.ts');
 const {parseCommand,newPomodoroRequestId,serializeCommandStore}=require('../src/features/focus/api/pomodoroCommand.ts');
 const {PomodoroManager,emptyPomodoro,pomodoroRemaining,visiblePomodoro}=require('../src/features/focus/api/PomodoroManager.ts');
 const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,iso=n=>new Date(Date.UTC(2026,9,28,12)+n).toISOString(),code=c=>e=>e.code===c;
 const input=(n=1)=>({clientRequestId:id(n),courseId:id(20),assignmentId:null,studySessionId:null,timeZone:'Asia/Ho_Chi_Minh'});
+test('rest countdown resumes from a server read and stays fixed when paused', () => {
+  const saved = parseBreak({ kind: 'SHORT', state: 'RUNNING', remainingMs: 250000, version: 2 });
+  assert.equal(breakRemaining(saved, 1000, 31000), 220000);
+  assert.equal(breakRemaining(saved, 1000, 300000), 0);
+  assert.equal(breakRemaining({ ...saved, state: 'PAUSED' }, 1000, 300000), 250000);
+  assert.throws(() => parseBreak({ ...saved, remainingMs: 900000 }), code('INVALID_RESPONSE'));
+});
+test('starting a long break sends its kind and exact version and checks the saved result', async () => {
+  const snapshot = { kind: 'LONG', state: 'RUNNING', remainingMs: 900000, version: 2 };
+  let sent;
+  const api = createPomodoroBreakApi('http://example.test', operation => operation('example'), {
+    fetcher: async (_url, options) => {
+      sent = JSON.parse(options.body);
+      return new Response(JSON.stringify({ data: snapshot }));
+    },
+  });
+  const { signal } = new AbortController();
+  assert.deepEqual(await api.change('START', 1, signal, 'LONG'), snapshot);
+  assert.deepEqual(sent, { action: 'START', version: 1, kind: 'LONG' });
+  await assert.rejects(api.change('START', 0, signal, 'LONG'), code('INVALID_RESPONSE'));
+});
 function row(status='RUNNING',version=0,request=1){
  const elapsed=status==='COMPLETED'?1500000:2000,paused=1000,server=elapsed+paused;
  return {id:id(100+request),clientRequestId:id(request),status,durationSeconds:1500,version,startedAt:iso(0),stateChangedAt:iso(status==='RUNNING'?paused:status==='PAUSED'?elapsed:server),serverTime:iso(server),timeZone:'Asia/Ho_Chi_Minh',elapsedMillis:elapsed,pausedMillis:paused,remainingMillis:1500000-elapsed,remainingSeconds:Math.ceil((1500000-elapsed)/1000),endsAt:status==='RUNNING'?iso(1500000+paused):null,endedAt:['COMPLETED','CANCELLED'].includes(status)?iso(server):null,finalizedAt:['COMPLETED','CANCELLED'].includes(status)?iso(server):null,timeUp:elapsed===1500000,creditedStudyMillis:status==='COMPLETED'?1500000:0,context:{courseId:id(20),courseCode:'QA',courseName:'Môn QA',semesterId:id(30),semesterTerm:1,semesterStartYear:2026,assignmentId:null,assignmentTitle:null,studySessionId:null,studyTitle:null}};

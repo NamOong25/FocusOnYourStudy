@@ -27,6 +27,8 @@ const messages: Record<string, string> = {
   INVALID_POMODORO_HISTORY_FILTER: 'Kiểm tra khoảng ngày và bộ lọc lịch sử tập trung.',
   POMODORO_NOT_FOUND: 'Phiên học không còn tồn tại hoặc bạn không được truy cập. Hãy đối chiếu phiên đã lưu.',
   POMODORO_ALREADY_ACTIVE: 'Đang có phiên học hoặc tạm dừng. Kiểm tra phiên hiện tại trước khi bắt đầu phiên mới.',
+  POMODORO_BREAK_ACTIVE: 'Hãy kết thúc phiên học hoặc giờ nghỉ hiện tại trước.',
+  POMODORO_BREAK_CHANGED: 'Giờ nghỉ đã thay đổi. Kiểm tra trạng thái mới nhất rồi thử lại.',
   POMODORO_VERSION_CONFLICT: 'Phiên đã thay đổi ở nơi khác. Đối chiếu trước khi thao tác tiếp.',
   POMODORO_INVALID_STATE: 'Trạng thái phiên đã thay đổi. Đối chiếu lại để chọn thao tác phù hợp.',
   POMODORO_ALREADY_FINISHED: 'Phiên đã hoàn tất hoặc hủy. Kết quả đã lưu được giữ nguyên.',

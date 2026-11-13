@@ -123,6 +123,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*", "/api/v1/pomodoro-goal", "/api/v1/pomodoro-statistics", "/api/v1/pomodoro-streak").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/pomodoro-sessions", "/api/v1/pomodoro-sessions/*/pause", "/api/v1/pomodoro-sessions/*/resume", "/api/v1/pomodoro-sessions/*/complete", "/api/v1/pomodoro-sessions/*/cancel").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pomodoro-goal").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pomodoro-break").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pomodoro-break").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> { }).authenticationEntryPoint(unauthorized).accessDeniedHandler(forbidden))

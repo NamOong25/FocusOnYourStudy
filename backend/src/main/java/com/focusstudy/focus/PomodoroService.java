@@ -21,10 +21,12 @@ public class PomodoroService {
     private final StudySessionRepository study;
     private final UserRepository users;
     private final Clock clock;
+    private final PomodoroBreakService breaks;
     public PomodoroService(PomodoroRepository sessions, CourseRepository courses, SemesterRepository semesters,
-            AssignmentRepository assignments, StudySessionRepository study, UserRepository users, Clock clock) {
+            AssignmentRepository assignments, StudySessionRepository study, UserRepository users, Clock clock, PomodoroBreakService breaks) {
         this.sessions = sessions; this.courses = courses; this.semesters = semesters; this.assignments = assignments;
         this.study = study; this.users = users; this.clock = clock;
+        this.breaks = breaks;
     }
     public record Started(PomodoroResponse session, boolean created) { }
     private Instant now() { return clock.instant().truncatedTo(ChronoUnit.MILLIS); }
@@ -41,6 +43,7 @@ public class PomodoroService {
             return new Started(PomodoroResponse.from(previous.get(), now()), false);
         }
         if (sessions.active(owner).isPresent()) throw problem(HttpStatus.CONFLICT, "POMODORO_ALREADY_ACTIVE", "Bạn đang có một phiên học hoặc tạm dừng. Đọc lại phiên hiện tại trước khi bắt đầu phiên khác.");
+        if (breaks.get(owner).active()) throw problem(HttpStatus.CONFLICT, "POMODORO_BREAK_ACTIVE", "Hãy kết thúc giờ nghỉ trước khi bắt đầu tập trung.");
         if (!ZoneId.getAvailableZoneIds().contains(input.timeZone())) throw problem(HttpStatus.BAD_REQUEST, "INVALID_POMODORO_TIME_ZONE", "Chọn múi giờ IANA hợp lệ, ví dụ Asia/Ho_Chi_Minh.");
         var course = courses.findByIdAndUserId(input.courseId(), owner).orElseThrow(() -> missing("COURSE_NOT_FOUND", "Không tìm thấy môn học."));
         var semester = semesters.findByIdAndUserId(course.getSemesterId(), owner).orElseThrow(() -> missing("SEMESTER_NOT_FOUND", "Không tìm thấy học kỳ."));
