@@ -1,7 +1,6 @@
 import type {Course} from '../academics/academic';
 import type {Task} from '../../store/model';
 import type {ClassOccurrence,Exam} from '../schedule/calendar';
-import type {StudySession} from '../study/learning';
 import {courseResult,summarizeGrades,type GradeBook,type GradeRules} from '../grades/grades';
 import {dateKey} from '../../shared/utils/dates';
 import {completionPercent} from '../../shared/utils/completionPercent';
@@ -18,7 +17,7 @@ export function examCountdown(exam:Exam,now:Date):string {
 }
 
 // Every dashboard section uses course IDs from one semester; titles are not identities.
-export function dashboardData(input:{semesterId:string;catalog:Course[];tasks:Task[];exams:Exam[];sessions:StudySession[];classes:ClassOccurrence[];book:GradeBook;rules:GradeRules;now:Date}){
+export function dashboardData(input:{semesterId:string;catalog:Course[];tasks:Task[];exams:Exam[];classes:ClassOccurrence[];book:GradeBook;rules:GradeRules;now:Date}){
   const {semesterId,catalog,book,rules,now}=input,today=dateKey(now);
   const courses=catalog.filter(c=>c.semesterId===semesterId),ids=new Set(courses.map(c=>c.id));
   const tasks=input.tasks.filter(t=>ids.has(t.courseId));
@@ -27,7 +26,6 @@ export function dashboardData(input:{semesterId:string;catalog:Course[];tasks:Ta
   const done=tasks.length-pending.length,percent=completionPercent(done,tasks.length);
   const exams=input.exams.filter(e=>ids.has(e.courseId)&&new Date(`${e.date}T${e.end}:00`).getTime()>now.getTime()).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const classes=input.classes.filter(c=>ids.has(c.courseId)&&c.date===today&&!c.cancelled).sort((a,b)=>a.start.localeCompare(b.start));
-  const sessions=input.sessions.filter(s=>ids.has(s.courseId)),todaySessions=sessions.filter(s=>s.date===today).sort((a,b)=>a.start.localeCompare(b.start));
   const failed=courses.filter(c=>courseResult(book[c.id],rules).failed),summary=summarizeGrades(courses,book,rules);
-  return {courses,tasks,pending,overdue,soon,done,percent,nextExam:exams[0],classes,sessions,todaySessions,failed,summary,today};
+  return {courses,tasks,pending,overdue,soon,done,percent,nextExam:exams[0],classes,failed,summary,today};
 }

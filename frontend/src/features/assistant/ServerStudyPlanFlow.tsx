@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Badge, Button, Card, Field, Icon, Row, Segments, Sheet, StateView, T } from '../../shared/components';
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
-import { dateKey } from '../../shared/utils/dates';
 import { C, F, S } from '../../shared/theme';
 import { ApiError, asApiError } from '../../shared/api/http';
 import { useApp } from '../../store/model';
@@ -11,31 +10,21 @@ import { CourseChoices } from '../academics/CourseChoices';
 import { deadlineTimestamp, taskDeadlineLabel } from '../assignments/assignments';
 import { useServerAllExams } from '../exams/api/useServerExams';
 import { examDate, examTiming } from '../exams/examView';
-import { draftReview, planDrafts, type PlanDraft } from './api/planDrafts';
 import { planClock, planDay } from './api/planTime';
 import { validatePlanInput, type PlanInput } from './api/studyPlansApi';
 import { usePlanPreview } from './api/usePlanPreview';
-import { buildPlanCommand } from './api/planApplicationsApi';
-import { usePlanApplication } from './api/usePlanApplication';
-import { PlanSaveStatus } from './components/PlanSaveStatus';
-import { PlanSessionCard } from './components/PlanSessionCard';
 
-type Props={variant:'deadline'|'free'|'adjust';request?:string;onClose:()=>void;onStudyPlan:(date?:string)=>void};
+type Props={variant:'deadline'|'free';onClose:()=>void};
 type Form={courseId:string;target:string;targetId:string;goal:string;fromDate:string;toDate:string;timeZone:string;availableStart:string;availableEnd:string;weekdays:number[];total:string;session:string;rest:string};
 const labels=['T2','T3','T4','T5','T6','T7','CN'];
 const dateAfter=(day:string,days:number)=>new Date(Date.parse(day+'T00:00:00Z')+days*86400000).toISOString().slice(0,10);
-export default function ServerStudyPlanFlow({variant,request='',onClose,onStudyPlan}:Props){
-  const app=useApp(),auth=useAuth(),exams=useServerAllExams(variant!=='adjust'),preview=usePlanPreview(),application=usePlanApplication();
-  const [listReady,setListReady]=useState(false),[listLoading,setListLoading]=useState(false),[listError,setListError]=useState(''),[serverStale,setServerStale]=useState(false);
-  const live=useRef(true);useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
-  const reloadList=async()=>{setListLoading(true);setListReady(false);setListError('');try{if(!app.studyConnection)throw new ApiError('Danh sách tự học chưa sẵn sàng.','STUDY_READ_UNAVAILABLE');await app.studyConnection.reloadFresh();if(live.current)setListReady(true);}catch(e){if(live.current){setListReady(false);setListError(asApiError(e).message);}}finally{if(live.current)setListLoading(false);}};
-  const savedId=application.state.receipt?.applicationId;
-  useEffect(()=>{if(savedId){setTouched(false);app.dispatchStudyView({type:'plan-saved',startsAt:application.state.receipt!.sessions.map(row=>row.session.startsAt)});app.invalidateSchedule();void reloadList();}},[savedId]);
+export default function ServerStudyPlanFlow({variant,onClose}:Props){
+  const app=useApp(),auth=useAuth(),exams=useServerAllExams(true),preview=usePlanPreview();
   const [form,setForm]=useState<Form>(()=>{const zone=auth.profile?.timeZone||'Asia/Ho_Chi_Minh',day=planDay(Date.now(),zone),pending=app.tasks.find(t=>t.status!=='Hoàn thành'&&deadlineTimestamp(t)>Date.now());
-    return{courseId:(variant==='deadline'?pending?.courseId:null)??app.courseCatalog[0]?.id??'',target:variant==='deadline'&&pending?'Bài tập':'Tự học',targetId:variant==='deadline'?pending?.id??'':'',goal:(request||'Ôn kiến thức và luyện bài tập').slice(0,120),fromDate:day,toDate:dateAfter(day,6),timeZone:zone,availableStart:'19:00',availableEnd:'21:00',weekdays:[1,2,3,4,5,6,7],total:'180',session:'45',rest:'10'};});
-  const [step,setStep]=useState<'input'|'review'>('input'),[localError,setError]=useState(''),[submitted,setSubmitted]=useState<PlanInput|null>(null),[drafts,setDrafts]=useState<PlanDraft[]>([]),[editing,setEditing]=useState<number|null>(null),[touched,setTouched]=useState(false),[baseline,setBaseline]=useState(''),[now,setNow]=useState(Date.now());
+    return{courseId:(variant==='deadline'?pending?.courseId:null)??app.courseCatalog[0]?.id??'',target:variant==='deadline'&&pending?'Bài tập':'Ôn theo môn',targetId:variant==='deadline'?pending?.id??'':'',goal:'Ôn kiến thức và luyện bài tập',fromDate:day,toDate:dateAfter(day,6),timeZone:zone,availableStart:'19:00',availableEnd:'21:00',weekdays:[1,2,3,4,5,6,7],total:'180',session:'45',rest:'10'};});
+  const [step,setStep]=useState<'input'|'review'>('input'),[localError,setError]=useState(''),[touched,setTouched]=useState(false),[baseline,setBaseline]=useState('');
   const generation=useRef(0);
-  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),30000);return()=>{clearInterval(timer);generation.current++;};},[]);
+  useEffect(()=>()=>{generation.current++;},[]);
   useEffect(()=>{if(!form.courseId&&app.courseCatalog.length)setForm(f=>({...f,courseId:app.courseCatalog[0]!.id}));},[form.courseId,app.courseCatalog]);
   const update=(patch:Partial<Form>)=>{generation.current++;preview.clear();setForm(f=>({...f,...patch}));setError('');setTouched(true);};
   const catalogError=app.courseConnection?.error??app.semesterConnection?.error;
@@ -43,8 +32,7 @@ export default function ServerStudyPlanFlow({variant,request='',onClose,onStudyP
   const sourceError=catalogError??(form.target==='Bài tập'?app.assignmentConnection?.error:form.target==='Kỳ thi'?exams.error:null);
   const stamp=JSON.stringify([app.courseCatalog.map(c=>[c.id,c.version]),app.tasks.map(t=>[t.id,t.version]),(exams.value??[]).map(e=>[e.id,e.version]),app.studySessions.map(s=>[s.id,s.version]),app.scheduleRevision]);
   const snapshot=preview.state.value,course=app.courseCatalog.find(c=>c.id===snapshot?.courseId),targetTask=app.tasks.find(t=>t.id===snapshot?.target.id),targetExam=exams.value?.find(e=>e.id===snapshot?.target.id);
-  const sourceChanged=!!snapshot&&(serverStale||baseline!==stamp||course?.version!==snapshot.courseVersion||snapshot.target.kind==='ASSIGNMENT'&&targetTask?.version!==snapshot.target.version||snapshot.target.kind==='EXAM'&&targetExam?.version!==snapshot.target.version);
-  const review=snapshot&&submitted?draftReview(drafts,submitted,snapshot,now):null;
+  const sourceChanged=!!snapshot&&(baseline!==stamp||course?.version!==snapshot.courseVersion||snapshot.target.kind==='ASSIGNMENT'&&targetTask?.version!==snapshot.target.version||snapshot.target.kind==='EXAM'&&targetExam?.version!==snapshot.target.version);
   const reload=async()=>{try{await Promise.all([app.courseConnection?.reload(),app.semesterConnection?.reload(),app.assignmentConnection?.reload(),exams.reload()]);setError('');}catch(error){setError(asApiError(error).message);}};
   const generate=async()=>{
     try{
@@ -55,27 +43,22 @@ export default function ServerStudyPlanFlow({variant,request='',onClose,onStudyP
       const task=app.tasks.find(t=>t.id===next.assignmentId),exam=exams.value?.find(e=>e.id===next.examId);
       if(next.assignmentId&&(!task||task.courseId!==next.courseId||task.status==='Hoàn thành'))throw new ApiError('Chọn bài chưa hoàn thành thuộc đúng môn.','INVALID_STUDY_PLAN');
       if(next.examId&&(!exam||exam.courseId!==next.courseId))throw new ApiError('Chọn kỳ thi thuộc đúng môn.','INVALID_STUDY_PLAN');
-      setError('');const seq=++generation.current;setSubmitted(next);setBaseline(stamp);const result=await preview.generate(next);
-      if(seq!==generation.current)return;setDrafts(planDrafts(result));setEditing(null);setStep('review');setTouched(false);setServerStale(false);
+      setError('');const seq=++generation.current;setBaseline(stamp);await preview.generate(next);
+      if(seq!==generation.current)return;setStep('review');setTouched(false);
     }catch(error){const failure=asApiError(error);if(failure.code!=='REQUEST_CANCELLED')setError(failure.message);}
   };
-  const save=async()=>{try{if(!submitted||!snapshot||!application.manager||sourceChanged)throw new ApiError('Dữ liệu đã đổi. Xem và tạo lại đề xuất trước khi lưu.','INVALID_PLAN_SELECTION');const command=buildPlanCommand(submitted,snapshot,drafts);setError('');await application.manager.start(command);}catch(e){const failure=asApiError(e);if(failure.code!=='REQUEST_CANCELLED'&&live.current){setError(failure.message);if(['STUDY_PLAN_SOURCE_CHANGED','STUDY_PLAN_TIME_CONFLICT','STUDY_PLAN_TARGET_COMPLETED','STUDY_PLAN_DEADLINE_PASSED','COURSE_NOT_FOUND','ASSIGNMENT_NOT_FOUND','EXAM_NOT_FOUND'].includes(failure.code))setServerStale(true);}}};
-  const leaveReceipt=async(view:boolean)=>{try{await application.manager!.acknowledge();setTouched(false);setError('');if(view){const first=application.state.receipt?.sessions.map(row=>row.session).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt))[0];onClose();onStudyPlan(first?dateKey(new Date(first.startsAt)):undefined);return;}if(application.state.receipt||!snapshot){preview.clear();setSubmitted(null);setDrafts([]);setStep('input');}setListReady(false);}catch{/* The receipt/key remain available when storage cannot be cleared. */}};
-  if(application.state.command&&application.manager)return <PlanSaveStatus state={application.state} manager={application.manager} onClose={onClose} onReturn={()=>{void leaveReceipt(false);}} onView={()=>{void leaveReceipt(true);}} listReady={listReady} listLoading={listLoading} listError={listError} onReload={()=>{void reloadList();}}/>;
-  if(!application.state.loaded)return <Sheet title="Mở kế hoạch học" onClose={onClose}><StateView kind={application.state.error?'error':'loading'} title={application.state.error?'Chưa đọc được thông tin đối chiếu':'Đang kiểm tra lần lưu trước'} message={application.state.error?.message??'Đợi một chút để bảo đảm lần lưu cũ được giữ đúng.'}/>{application.state.error&&<Button label="Đọc lại thông tin đối chiếu" secondary onPress={()=>{void application.manager?.restore().catch(()=>{});}}/>}</Sheet>;
-  if(variant==='adjust')return <Sheet title="Điều chỉnh buổi học đã lưu" onClose={onClose}><Badge label="Dữ liệu tài khoản"/><T style={S.small}>Đề xuất tự động dành cho các buổi mới. Bạn có thể chỉnh từng buổi đã lưu tại Tự học; điều chỉnh cả kế hoạch sẽ được bổ sung sau.</T><Button label="Đến Tự học" onPress={onStudyPlan}/></Sheet>;
   const title=step==='review'?'Xem trước kế hoạch':'Tạo đề xuất kế hoạch';
-  return <Sheet title={title} onClose={onClose} scrollKey={step} dirty={touched||!!review?.edited} onBack={()=>step==='review'?setStep('input'):onClose()}>
+  return <Sheet title={title} onClose={onClose} scrollKey={step} dirty={touched} onBack={()=>step==='review'?setStep('input'):onClose()}>
     <Badge label="LỊCH THẬT · ĐỀ XUẤT THEO QUY TẮC" icon="calendar-outline"/>
     {step==='input'&&<>
-      <Card style={{backgroundColor:C.soft,gap:8}}><T style={{fontFamily:F.extra,fontSize:21}}>Một kế hoạch vừa sức với bạn.</T><T style={S.small}>Chọn mục tiêu và giờ rảnh. Ứng dụng tìm khoảng trống từ lịch đã lưu; bạn xem trước kết quả trước khi quyết định.</T></Card>
+      <Card style={{backgroundColor:C.soft,gap:8}}><T style={{fontFamily:F.extra,fontSize:21}}>Tìm khung giờ học</T><T style={S.small}>Chọn mục tiêu và giờ rảnh để nhận gợi ý dựa trên lịch đã lưu.</T></Card>
       {!sourcesReady&&<StateView kind={sourceError?'error':'loading'} title={sourceError?'Chưa tải được danh mục':'Đang tải môn và mục tiêu'} message={sourceError?.message??'Chờ dữ liệu tài khoản để chọn đúng môn và mục tiêu.'} actionLabel={sourceError?'Tải lại danh mục':undefined} onAction={sourceError?()=>{void reload();}:undefined}/>}
       {!!app.courseConnection?.loaded&&!app.courseCatalog.length&&<StateView title="Cần một môn học để lập kế hoạch" message="Thêm học kỳ và môn học rồi quay lại." actionLabel="Đến Môn & học kỳ" onAction={()=>{onClose();app.setScheduleMode('Môn & học kỳ');}}/>}
       {!!app.courseCatalog.length&&<><T style={{fontFamily:F.bold}}>Môn học</T><CourseChoices value={form.courseId} onChange={courseId=>update({courseId,targetId:''})}/></>}
-      <T style={{fontFamily:F.bold}}>Mục tiêu gắn với</T><Segments values={['Bài tập','Kỳ thi','Tự học']} value={form.target} onChange={target=>update({target,targetId:''})}/>
-      {form.target==='Bài tập'&&<>{app.tasks.filter(t=>t.courseId===form.courseId&&t.status!=='Hoàn thành').map(t=><Target key={t.id} label={t.title} detail={`Hạn nộp ${taskDeadlineLabel(t)}`} selected={form.targetId===t.id} onPress={()=>update({targetId:t.id})}/>)}{!app.tasks.some(t=>t.courseId===form.courseId&&t.status!=='Hoàn thành')&&<T style={S.small}>Chưa có bài chưa hoàn thành cho môn này. Chọn môn khác hoặc Tự học.</T>}</>}
+      <T style={{fontFamily:F.bold}}>Mục tiêu gắn với</T><Segments values={['Bài tập','Kỳ thi','Ôn theo môn']} value={form.target} onChange={target=>update({target,targetId:''})}/>
+      {form.target==='Bài tập'&&<>{app.tasks.filter(t=>t.courseId===form.courseId&&t.status!=='Hoàn thành').map(t=><Target key={t.id} label={t.title} detail={`Hạn nộp ${taskDeadlineLabel(t)}`} selected={form.targetId===t.id} onPress={()=>update({targetId:t.id})}/>)}{!app.tasks.some(t=>t.courseId===form.courseId&&t.status!=='Hoàn thành')&&<T style={S.small}>Chưa có bài chưa hoàn thành cho môn này. Chọn môn khác hoặc Ôn theo môn.</T>}</>}
       {form.target==='Kỳ thi'&&<>{(exams.value??[]).filter(e=>e.courseId===form.courseId).map(e=><Target key={e.id} label={`Kỳ thi ${examDate(e)} · ${examTiming(e)}`} detail={`${e.room||'Chưa có phòng'} · ${e.timeZone}`} selected={form.targetId===e.id} onPress={()=>update({targetId:e.id})}/>)}{exams.loaded&&!exams.value?.some(e=>e.courseId===form.courseId)&&<T style={S.small}>Chưa có lịch thi cho môn này.</T>}</>}
-      <Field label="Mục tiêu học tập" value={form.goal} onChange={goal=>update({goal})} multiline maxLength={120}/>{!!request&&<T style={S.small}>Nội dung bạn nhập được dùng làm mục tiêu, chưa có AI phân tích câu hỏi.</T>}
+      <Field label="Mục tiêu học tập" value={form.goal} onChange={goal=>update({goal})} multiline maxLength={120}/>
       <DateField label="Từ ngày" value={form.fromDate} onChange={fromDate=>update({fromDate})}/><DateField label="Đến ngày" value={form.toDate} onChange={toDate=>update({toDate})}/>
       <Field label="Múi giờ kế hoạch" value={form.timeZone} onChange={timeZone=>update({timeZone})} maxLength={100}/><T style={S.small}>Ngày và giờ trong biểu mẫu theo múi giờ này. Ví dụ Asia/Ho_Chi_Minh là giờ Việt Nam.</T>
       <Row style={{alignItems:'flex-start'}}><View style={S.grow}><TimeField label="Rảnh từ" value={form.availableStart} onChange={availableStart=>update({availableStart})}/></View><View style={S.grow}><TimeField label="Rảnh đến" value={form.availableEnd} onChange={availableEnd=>update({availableEnd})}/></View></Row>
@@ -88,22 +71,19 @@ export default function ServerStudyPlanFlow({variant,request='',onClose,onStudyP
       {preview.state.loading&&<T accessibilityLiveRegion="polite" style={S.small}>Đang đọc lịch thật và tìm khoảng trống. Bạn có thể thay điều kiện để hủy lượt này.</T>}
       <T style={S.small}>Tối đa 14 ngày và 1440 phút mỗi lần. Tổng phút là phần muốn xếp thêm; buổi đã lưu được tính là lịch bận. Đây là bộ xếp lịch theo quy tắc, chưa gọi dịch vụ AI.</T>
     </>}
-    {step==='review'&&snapshot&&submitted&&review&&<>
-      <Card style={{backgroundColor:C.soft,gap:9}}><T style={{fontFamily:F.extra,fontSize:21}}>{snapshot.complete?'Đã tìm đủ thời gian học':'Kế hoạch còn thiếu thời gian'}</T><T style={{fontFamily:F.bold,color:C.primary}}>Đã xếp {snapshot.scheduledMinutes}/{snapshot.requestedMinutes} phút · còn thiếu {snapshot.unscheduledMinutes} phút</T><T style={S.small}>{snapshot.sessions.length} buổi · {snapshot.fromDate.split('-').reverse().join('/')} → {snapshot.toDate.split('-').reverse().join('/')} · {snapshot.timeZone}</T><T style={S.small}>Tính lúc {planClock(snapshot.asOf,snapshot.timeZone)} · {planDay(Date.parse(snapshot.asOf),snapshot.timeZone).split('-').reverse().join('/')}. Chưa lưu vào lịch.</T></Card>
+    {step==='review'&&snapshot&&<>
+      <Card style={{backgroundColor:C.soft,gap:9}}><T style={{fontFamily:F.extra,fontSize:21}}>{snapshot.complete?'Đã tìm đủ thời gian học':'Kế hoạch còn thiếu thời gian'}</T><T style={{fontFamily:F.bold,color:C.primary}}>Đã tìm {snapshot.scheduledMinutes}/{snapshot.requestedMinutes} phút · còn thiếu {snapshot.unscheduledMinutes} phút</T><T style={S.small}>{snapshot.sessions.length} khung giờ gợi ý · {snapshot.timeZone}. Đây là bản xem trước.</T></Card>
       {sourceChanged&&<Card style={{backgroundColor:C.amberSoft,gap:8}}><T accessibilityRole="alert" style={{color:C.amber}}>Dữ liệu môn hoặc lịch/mục tiêu đã được cập nhật. Bản đề xuất vẫn được giữ để xem; hãy tạo lại với dữ liệu mới.</T><Button label="Tải lại danh mục" secondary onPress={()=>{void reload();}}/></Card>}
       {snapshot.target.deadline&&<Badge label={`Kết thúc không sau ${planDay(Date.parse(snapshot.target.deadline),snapshot.timeZone).split('-').reverse().join('/')} · ${planClock(snapshot.target.deadline,snapshot.timeZone)}`} icon="flag-outline"/>}
       {snapshot.warnings.includes('DST_WINDOW_SKIPPED')&&<T style={{color:C.amber}}>Một số ngày có giờ rảnh không tồn tại hoặc lặp do đổi giờ đã được bỏ qua.</T>}
       {snapshot.warnings.includes('DEADLINE_LIMIT')&&<T style={S.small}>Thời gian có thể xếp đã được giới hạn theo deadline hoặc giờ bắt đầu thi.</T>}
-      {!drafts.length&&<StateView title="Chưa tìm được khoảng phù hợp" message="Thử mở rộng giờ rảnh, chọn thêm ngày hoặc giảm thời lượng mỗi buổi."/>}
-      <T accessibilityLiveRegion="polite" style={{fontFamily:F.bold}}>Đang chọn {review.selectedCount} buổi · {review.selectedMinutes} phút · còn thiếu {review.remainingMinutes} phút</T>
-      {review.overBudget&&<T accessibilityRole="alert" style={{color:C.red}}>Các buổi đang chọn vượt tổng thời gian yêu cầu. Giảm thời lượng hoặc bỏ chọn một số buổi.</T>}
-      {review.edited&&<T accessibilityRole="alert" style={{color:C.amber}}>Bạn đã chỉnh bản xem trước. Kiểm tra dưới đây chỉ xét ngày/giờ, deadline và các buổi đang chọn; các thay đổi chưa được kiểm tra lại với toàn bộ lịch bận.</T>}
-      {drafts.map(d=><PlanSessionCard key={d.index} draft={d} zone={snapshot.timeZone} expanded={editing===d.index} onExpand={()=>setEditing(editing===d.index?null:d.index)} issues={review.issues[d.index]??[]} onChange={patch=>{setDrafts(rows=>rows.map(row=>row.index===d.index?{...row,...patch,edited:row.edited||Object.keys(patch).some(key=>key!=='selected')}:row));setTouched(true);}}/>)}
-      <Card style={{backgroundColor:C.canvas,gap:8}}><T style={{fontFamily:F.bold}}>Sẵn sàng đưa vào lịch?</T><T style={S.small}>Chỉ các buổi đang chọn được lưu. Hệ thống sẽ kiểm tra lại toàn bộ lịch bận, deadline và dữ liệu mới nhất trước khi ghi.</T></Card>
+      {!snapshot.sessions.length&&<StateView title="Chưa tìm được khoảng phù hợp" message="Thử mở rộng giờ rảnh, chọn thêm ngày hoặc giảm thời lượng mỗi buổi."/>}
+      {snapshot.sessions.map(session=><Card key={session.index} style={{gap:4}}>
+        <T style={{fontFamily:F.bold}}>{session.title}</T>
+        <T style={S.small}>{planDay(Date.parse(session.startsAt),snapshot.timeZone).split('-').reverse().join('/')} · {planClock(session.startsAt,snapshot.timeZone)}–{planClock(session.endsAt,snapshot.timeZone)} · {session.durationMinutes} phút</T>
+      </Card>)}
       {!!localError&&<T accessibilityRole="alert" style={{color:C.red}}>{localError}</T>}
-      <Button label="Lưu các buổi đã chọn" icon="checkmark-outline" disabled={!sourcesReady||sourceChanged||!review.selectedCount||review.overBudget||!!Object.keys(review.issues).length} onPress={()=>{void save();}}/>
-      {(!review.selectedCount||review.overBudget||!!Object.keys(review.issues).length)&&<T style={{color:C.amber}}>Chọn ít nhất một buổi và sửa các mục được báo lỗi để lưu kế hoạch.</T>}
-      <Button label="Đổi điều kiện đề xuất" secondary onPress={()=>{setStep('input');setError('');}}/><Button label="Xem danh sách tự học" secondary onPress={onStudyPlan}/><Button label="Đóng bản xem trước" secondary onPress={onClose}/>
+      <Button label="Đổi điều kiện đề xuất" secondary onPress={()=>{setStep('input');setError('');}}/>
     </>}
   </Sheet>;
 }

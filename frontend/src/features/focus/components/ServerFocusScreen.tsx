@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {Button,Card,Link,Row,Sheet,StateView,T} from '../../../shared/components';
+import {Button,Card,Row,Sheet,StateView,T} from '../../../shared/components';
 import {C,F,S} from '../../../shared/theme';
 import {useApp} from '../../../store/model';
 import {useAuth} from '../../account/auth/AuthProvider';
@@ -18,11 +18,11 @@ import {useFeedback} from '../../../shared/feedback/FeedbackProvider';
 import {asApiError} from '../../../shared/api/http';
 import ServerFocusInsights from './ServerFocusInsights';
 
-export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
+export default function ServerFocusScreen(){
   const {manager,state}=usePomodoro(),clock=usePomodoroClock(),auth=useAuth(),{showNotice}=useFeedback();
-  const app=useApp(),{courseCatalog,focusCourseId,focusTaskId,focusSessionId,tasks,studySessions,prepareFocus,setScheduleMode,mode,setMode}=app;
+  const app=useApp(),{courseCatalog,focusCourseId,focusTaskId,tasks,prepareFocus,setScheduleMode,mode,setMode}=app;
   const [choose,setChoose]=useState(false),[cancel,setCancel]=useState<{id:string;version:number;name:string}|null>(null);
-  const row=state.active?.row,course=courseCatalog.find(c=>c.id===focusCourseId),plan=studySessions.find(s=>s.id===focusSessionId),task=tasks.find(t=>t.id===(plan?.taskId??focusTaskId));
+  const row=state.active?.row,course=courseCatalog.find(c=>c.id===focusCourseId),task=tasks.find(t=>t.id===focusTaskId);
   const hasActiveSession=!!row;
   const breakTimer=usePomodoroBreak();
   const savedBreak=breakTimer.saved;
@@ -33,14 +33,14 @@ export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
     else if (!hasActiveSession && resting && mode !== shownMode) setMode(shownMode);
   },[hasActiveSession,resting,mode,shownMode,setMode]);
   const millis=pomodoroRemaining(state.active,clock),due=!!row&&row.status==='RUNNING'&&millis===0;
-  const sources=[app.semesterConnection,app.courseConnection,app.assignmentConnection,app.studyConnection];
+  const sources=[app.semesterConnection,app.courseConnection,app.assignmentConnection];
   const catalogReady=sources.every(source=>!source||source.loaded&&!source.loading&&!source.error);
   const ready=!!manager&&state.loaded&&!state.loading&&!state.busy&&!state.needsReload&&!state.error;
   const canWrite=ready&&!state.pending;
   const perform=(operation:()=>Promise<unknown>)=>{void Promise.resolve().then(operation).catch(e=>showNotice(asApiError(e).message));};
   const reload=()=>{if(manager)perform(()=>Promise.allSettled([manager.reload(),...sources.map(source=>source?.reload())]));};
   const change=(kind:PomodoroAction)=>{if(manager&&row)perform(()=>manager.change(kind,row.id,row.version));};
-  const start=()=>{if(manager&&course)perform(()=>manager.start({clientRequestId:newPomodoroRequestId(),courseId:course.id,assignmentId:task?.id??null,studySessionId:plan?.id??null,timeZone:auth.profile?.timeZone??'Asia/Ho_Chi_Minh'}));};
+  const start=()=>{if(manager&&course)perform(()=>manager.start({clientRequestId:newPomodoroRequestId(),courseId:course.id,assignmentId:task?.id??null,studySessionId:null,timeZone:auth.profile?.timeZone??'Asia/Ho_Chi_Minh'}));};
   const label=state.busy?'Đang xác nhận':state.pending?'Chờ đối chiếu':state.needsReload?'Chưa đồng bộ':due?'Chờ xác nhận hoàn tất':row?.status==='PAUSED'?'Đang tạm dừng':row?'Đang tập trung':'Sẵn sàng tập trung';
   const pendingName=state.pending?.kind==='start'?'bắt đầu':state.pending?.kind==='pause'?'tạm dừng':state.pending?.kind==='resume'?'tiếp tục':state.pending?.kind==='cancel'?'hủy phiên':'hoàn tất';
   return <>
@@ -54,7 +54,7 @@ export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
         <FocusTimerFace milliseconds={millis} duration={focusDurations[0]} label={label} testID="server-pomodoro-clock"
           stale={state.needsReload||!!state.pending}>
           <FocusCourseSelector title={row?.context.courseName??course?.name??'Chưa chọn môn'}
-            detail={row?row.context.studyTitle??row.context.assignmentTitle??undefined:plan?.title??task?.title}
+            detail={row?row.context.studyTitle??row.context.assignmentTitle??undefined:task?.title}
             onChoose={row||!course?undefined:()=>setChoose(true)} chooseDisabled={!canWrite||!catalogReady} testID="server-pomodoro-course" />
         </FocusTimerFace>
         <Row style={{gap:10}}>{row?<>
@@ -66,7 +66,6 @@ export default function ServerFocusScreen({onStudyPlan}:{onStudyPlan:()=>void}){
     {!state.pending&&(state.error||state.needsReload)&&<Button label="Đối chiếu phiên đã lưu" secondary icon="refresh-outline" loading={state.loading} disabled={state.busy||state.loading} onPress={reload}/>}
     {!!state.notice&&<T accessibilityLiveRegion="polite" testID="server-pomodoro-notice" style={{color:C.primary,lineHeight:22}}>{state.notice}</T>}
     <ServerFocusInsights/>
-    <Link label="Xem kế hoạch tự học" onPress={onStudyPlan}/>
     {choose&&<Sheet title="Chọn môn để tập trung" onClose={()=>setChoose(false)}><CourseChoices disabled={!canWrite||!!row} value={focusCourseId} onChange={id=>{prepareFocus({courseId:id});setChoose(false);}}/></Sheet>}
     {cancel&&<Sheet title="Hủy phiên đang học?" onClose={()=>setCancel(null)}><T style={{lineHeight:23}}>Phiên {cancel.name} sẽ kết thúc. Phần học dở được giữ để tra cứu và không cộng vào phút học hoàn tất.</T>{(row?.id!==cancel.id||row.version!==cancel.version)&&<T accessibilityRole="alert" style={{color:C.red}}>Phiên đã thay đổi. Đóng bảng này và kiểm tra lại.</T>}<Button label="Giữ phiên học" secondary onPress={()=>setCancel(null)}/><Button label="Xác nhận hủy phiên" danger loading={state.busy} disabled={!canWrite||row?.id!==cancel.id||row.version!==cancel.version||due} onPress={()=>{if(manager){const target=cancel;setCancel(null);perform(()=>manager.change('cancel',target.id,target.version));}}}/></Sheet>}
   </>;

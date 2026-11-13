@@ -39,10 +39,10 @@ export function TaskApiForm({ item, initialCourseId, onClose, onDeleted }: {
     if (!courseCatalog.some(course => course.id === draft.courseId)) { setError('Hãy chọn môn học đang có trong tài khoản.'); return; }
     if (!Number.isFinite(deadlineTimestamp(draft))) { setError('Ngày hoặc giờ hạn nộp chưa hợp lệ. Mở lịch/đồng hồ để chọn lại.'); return; }
     if (basis && draft.courseId !== basis.courseId && studySessions.some(s => s.taskId === basis.id)) {
-      setError('Bài tập đang có buổi tự học liên quan. Gỡ liên kết các buổi trước khi đổi môn.'); return;
+      setError('Bài tập còn liên kết với lịch tự học cũ, nên chưa thể chuyển môn.'); return;
     }
     const conflicting = basis && studySessions.find(s => s.taskId === basis.id && sessionExceedsDeadline(draft, s));
-    if (conflicting) { setError(`Hạn nộp mới ${taskDeadlineLabel(draft)} đang trước lúc kết thúc buổi “${conflicting.title}”. Điều chỉnh buổi học hoặc gỡ liên kết trước nhé.`); return; }
+    if (conflicting) { setError(`Hạn nộp ${taskDeadlineLabel(draft)} sớm hơn lúc kết thúc buổi “${conflicting.title}” trong lịch cũ.`); return; }
     execute(() => c.save(draft, basis), onClose);
   };
   const latest = () => {
@@ -75,7 +75,7 @@ export function TaskApiForm({ item, initialCourseId, onClose, onDeleted }: {
     {!!action.error?.fields && Object.entries(action.error.fields).map(([field, message]) => <T key={field} accessibilityRole="alert" style={{ color: C.red }}>{message}</T>)}
     {(needsReload || mustRebase) && <><T style={S.small}>{basis ? 'Nạp bản mới sẽ thay nội dung đang chỉnh sửa bằng dữ liệu đã lưu.' : 'Kiểm tra danh sách trước khi tạo tiếp để biết lần lưu trước đã được ghi nhận hay chưa.'}</T><Button label={basis ? 'Nạp bản bài tập mới nhất' : 'Kiểm tra lại danh sách bài tập'} secondary loading={action.busy} disabled={c.busy || c.loading || !!courseConnection?.busy || !!courseConnection?.loading} onPress={latest} /></>}
     <Button label={basis ? 'Lưu thay đổi' : 'Tạo bài tập'} icon="checkmark" loading={action.busy} disabled={locked || needsReload || mustRebase} onPress={save} />
-    {basis && <><T style={S.small}>Xóa bài tập sẽ gỡ liên kết các buổi tự học đã lưu; buổi học vẫn được giữ lại.</T>
+    {basis && <>
       {confirmDelete && <T accessibilityRole="alert" style={S.small}>Xóa bài tập “{basis.title}” khỏi tài khoản?</T>}
       <Button label={confirmDelete ? 'Xác nhận xóa bài tập' : 'Xóa bài tập'} danger={confirmDelete} secondary={!confirmDelete} disabled={locked || needsReload || mustRebase} onPress={remove} />
       {confirmDelete && <Button label="Giữ bài tập" secondary disabled={locked} onPress={() => setConfirmDelete(false)} />}</>}

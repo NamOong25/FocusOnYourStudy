@@ -1,31 +1,26 @@
 import { TaskStatusControl } from './components/TaskStatusControl';
-import StudySessionDialog from '../study/StudyDialog';
 import React, { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, Button, Card, Icon, IconButton, IconTile, Progress, Row, Section, Segments, Sheet, T } from '../../shared/components';
 import { TaskForm } from './TaskForm';
 import { SampleAttachment, TaskExtras, sampleDocuments } from '../study/learning';
-import { TaskStatus, dateLabel, dueLabel, uid, useApp } from '../../store/model';
-import { StudySessionForm } from '../study/StudyForm';
-import { StudySessionCard } from '../study/components';
+import { uid, useApp } from '../../store/model';
 import { C, F, S } from '../../shared/theme';
 import {taskDeadlineLabel,taskDueLabel,taskIsOverdue} from './assignments';
 import useCurrentTime from '../../shared/hooks/useCurrentTime';
 
 export default function TaskDialog({ taskId, onClose }: { taskId: string; onClose: () => void }) {
-  const { tasks, taskExtras, updateTaskExtras, saveTask, studySessions, prepareFocus } = useApp();
+  const { tasks, taskExtras, updateTaskExtras, prepareFocus } = useApp();
   const now=useCurrentTime();
-  const [mode, setMode] = useState<'detail' | 'edit' | 'session' | 'attach' | 'preview'>('detail');
+  const [mode, setMode] = useState<'detail' | 'edit' | 'attach' | 'preview'>('detail');
   const [section, setSection] = useState('Tổng quan'); const [draft, setDraft] = useState('');
-  const [sessionId, setSessionId] = useState<string | undefined>(); const [preview, setPreview] = useState<SampleAttachment | null>(null);
+  const [preview, setPreview] = useState<SampleAttachment | null>(null);
   const [editBasis, setEditBasis] = useState<import('./assignments').Task | undefined>();
   const task = tasks.find(t => t.id === taskId);
   if (mode === 'edit') return <TaskForm item={editBasis} onClose={() => setMode('detail')} onDeleted={onClose} />;
-  if (mode === 'session') return sessionId ? <StudySessionDialog id={sessionId} onClose={() => setMode('detail')} onTask={() => { setSection('Buổi học'); setMode('detail'); }} /> : <StudySessionForm initialTaskId={taskId} onClose={() => setMode('detail')} onDeleted={() => setMode('detail')} />;
   if (!task) return <Sheet title="Bài tập không còn trong danh sách" onClose={onClose}><T style={S.small}>Bài tập đã bị xóa hoặc không còn truy cập được. Đóng để xem danh sách mới.</T><Button label="Đóng chi tiết bài tập" onPress={onClose} /></Sheet>;
   const extras: TaskExtras = taskExtras[taskId] ?? { checklist: [], attachments: [] };
-  const linked = studySessions.filter(s => s.taskId === taskId).sort((a,b) => `${a.date} ${a.start}`.localeCompare(`${b.date} ${b.start}`));
   const done = extras.checklist.filter(c => c.done).length;
   const addCheck = () => { if (!draft.trim()) return; updateTaskExtras(taskId, { ...extras, checklist: [...extras.checklist, { id: uid(), title: draft.trim(), done: false }] }); setDraft(''); };
 
@@ -38,11 +33,11 @@ export default function TaskDialog({ taskId, onClose }: { taskId: string; onClos
       <View style={{backgroundColor:'#FFFFFF99',borderRadius:15,padding:12,gap:9}}><Row between><Row><Icon name="calendar-outline" size={16}/><T style={{color:C.muted,fontSize:10}}>HẠN NỘP BÀI</T></Row><Badge label={taskDueLabel(task,now)} bg={task.status==='Hoàn thành'?C.greenSoft:taskIsOverdue(task,now)?C.redSoft:C.soft} color={task.status==='Hoàn thành'?C.green:taskIsOverdue(task,now)?C.red:C.primary}/></Row><T style={{fontFamily:F.bold,fontSize:14,lineHeight:22}}>{taskDeadlineLabel(task)}</T></View>
     </LinearGradient>
     <TaskStatusControl task={task} />
-    <Segments values={['Tổng quan', 'Việc nhỏ', 'Tài liệu', 'Buổi học']} value={section} onChange={setSection} />
+    <Segments values={['Tổng quan', 'Việc nhỏ', 'Tài liệu']} value={section} onChange={setSection} />
     {section === 'Tổng quan' && <>
       <T style={{ fontFamily: F.bold, fontSize: 16 }}>Yêu cầu & ghi chú</T><T style={{ color: C.muted, fontSize: 13, lineHeight: 23 }}>{task.notes || 'Chưa có ghi chú. Bạn có thể bổ sung ở phần chỉnh sửa bài tập.'}</T>
-      <Card style={{ backgroundColor: C.canvas, gap: 12 }}><Row between><T style={{ fontFamily: F.bold, fontSize: 13 }}>Từng việc nhỏ, gần đích hơn</T><Badge label={`${done}/${extras.checklist.length}`} /></Row><Progress value={extras.checklist.length ? done / extras.checklist.length * 100 : 0} /><T style={S.small}>{extras.checklist.length ? `${done} việc nhỏ đã hoàn thành · ${linked.length} buổi học được lên lịch` : 'Chia bài tập thành những bước nhỏ và dành thời gian cho từng bước.'}</T><Button label="Xem việc nhỏ" secondary onPress={() => setSection('Việc nhỏ')} /></Card>
-      <Button label="Lên lịch học cho bài này" icon="calendar-outline" onPress={() => { setSessionId(undefined); setMode('session'); }} /><Button label="Tập trung vào bài này" icon="timer-outline" secondary onPress={() => { prepareFocus({ courseId: task.courseId, taskId }); }} />
+      <Card style={{ backgroundColor: C.canvas, gap: 12 }}><Row between><T style={{ fontFamily: F.bold, fontSize: 13 }}>Tiến độ việc nhỏ</T><Badge label={`${done}/${extras.checklist.length}`} /></Row><Progress value={extras.checklist.length ? done / extras.checklist.length * 100 : 0} /><Button label="Xem việc nhỏ" secondary onPress={() => setSection('Việc nhỏ')} /></Card>
+      <Button label="Tập trung vào bài này" icon="timer-outline" onPress={() => { prepareFocus({ courseId: task.courseId, taskId }); }} />
     </>}
     {section === 'Việc nhỏ' && <>
       <T style={S.small}>Checklist chỉ giữ trong phiên này, chưa lưu vào tài khoản.</T><Row between><T style={{ fontFamily: F.bold }}>Checklist thực hiện</T><Badge label={`${done}/${extras.checklist.length} việc`} /></Row>
@@ -55,12 +50,6 @@ export default function TaskDialog({ taskId, onClose }: { taskId: string; onClos
       {extras.attachments.map(doc => <Card key={doc.id} style={{ backgroundColor: C.canvas, padding: 13 }}><Row><IconTile name="document-text-outline" size={39} /><Pressable accessibilityRole="button" accessibilityLabel={`Đọc ${doc.name}`} onPress={() => { setPreview(doc); setMode('preview'); }} style={[S.grow, { gap: 3, minHeight: 44, justifyContent: 'center' }]}><T style={{ fontFamily: F.bold, fontSize: 13 }}>{doc.name}</T><T style={{ fontSize: 10, color: C.muted }}>{doc.description}</T></Pressable><IconButton name="close" label={`Gỡ ${doc.name}`} bg="transparent" color={C.muted} onPress={() => updateTaskExtras(taskId, { ...extras, attachments: extras.attachments.filter(a => a.id !== doc.id) })} /></Row></Card>)}
       {extras.attachments.length === 0 && <Card style={{ backgroundColor: C.canvas, gap: 11 }}><IconTile name="folder-open-outline" /><T style={{ fontFamily: F.bold }}>Chưa gắn tài liệu</T><T style={S.small}>Thử gắn một tài liệu mẫu để xem bố cục danh sách và nội dung.</T><Button label="Chọn tài liệu mẫu" secondary onPress={() => setMode('attach')} /></Card>}
       <T style={S.small}>Đang dùng thư viện minh họa; chưa tải tệp từ thiết bị hoặc gửi lên máy chủ.</T>
-    </>}
-    {section === 'Buổi học' && <>
-      <Section title="Dành thời gian cho bài" action="+ Lên lịch" onAction={() => { setSessionId(undefined); setMode('session'); }} />
-      <T style={S.small}>Một bài có thể cần nhiều buổi học. Hoàn thành buổi học không tự đánh dấu hoàn thành bài tập.</T>
-      {linked.map(session => <View key={session.id} style={{ gap: 7 }}><Badge label={`${dateLabel(session.date)}/${session.date.slice(0,4)}`} bg={C.canvas} color={C.muted} /><StudySessionCard session={session} onOpen={() => { setSessionId(session.id); setMode('session'); }} onFocus={() => { prepareFocus({ courseId: session.courseId, taskId, sessionId: session.id }); }} /></View>)}
-      {!linked.length && <Card style={{ backgroundColor: C.canvas, gap: 11 }}><IconTile name="calendar-outline" /><T style={{ fontFamily: F.bold }}>Chưa có buổi học nào</T><T style={S.small}>Bắt đầu bằng một khoảng ngắn để đọc đề hoặc phác thảo ý tưởng.</T><Button label="Thêm buổi học đầu tiên" onPress={() => { setSessionId(undefined); setMode('session'); }} /></Card>}
     </>}
   </Sheet>;
 }

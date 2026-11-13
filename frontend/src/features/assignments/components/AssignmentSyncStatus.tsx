@@ -11,7 +11,7 @@ export function AssignmentSyncStatus({ statusOnly = false }: { statusOnly?: bool
     message={c.error?.message ?? 'Đang lấy bài tập đã lưu trong tài khoản.'} actionLabel={c.error ? 'Thử tải lại bài tập' : undefined} onAction={reload} />;
   if (statusOnly && !c.error && !c.needsReload) return null;
   return <Card style={{ backgroundColor: C.soft, gap: 9 }}>
-    {!statusOnly && <T style={S.small}>Bài tập đã lưu trong tài khoản. Buổi tự học cũng đã lưu; checklist và tài liệu mẫu chỉ giữ trong phiên này.</T>}
+    {!statusOnly && <T style={S.small}>Bài tập đã lưu trong tài khoản. Checklist và tài liệu mẫu chỉ giữ trong phiên này.</T>}
     {!!c.error && <T accessibilityRole="alert" style={{ color: C.red }}>Đang hiển thị dữ liệu lần tải thành công gần nhất. {c.error.message}</T>}
     {c.needsReload && <T style={S.small}>Cần tải lại để kiểm tra dữ liệu trước khi lưu tiếp. App không tự gửi lại thao tác lưu.</T>}
     <Button label="Tải lại danh sách bài tập" secondary loading={c.loading} disabled={c.busy || !!studyConnection?.busy || !!studyConnection?.loading || !!courseConnection?.busy || !!courseConnection?.loading} onPress={reload} />

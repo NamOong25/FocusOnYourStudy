@@ -5,26 +5,22 @@ import { Badge, Card, Icon, IconTile, Row, T, type IconName } from '../../shared
 import { C, F, S } from '../../shared/theme';
 import { useAuth } from '../account/auth/AuthProvider';
 import AIDocumentFlow from './AIDocumentFlow';
-import AIPlanFlow from './AIPlanFlow';
+import ServerStudyPlanFlow from './ServerStudyPlanFlow';
 
 const planActions = [
   { id: 'deadline', icon: 'alarm-outline', title: 'Ôn theo hạn', description: 'Theo bài tập hoặc lịch thi', label: 'Tạo kế hoạch' },
-  { id: 'free', icon: 'calendar-outline', title: 'Tìm giờ trống', description: 'Xếp buổi tự học theo lịch', label: 'Tìm lịch' },
+  { id: 'free', icon: 'calendar-outline', title: 'Tìm giờ trống', description: 'Xem khung giờ rảnh trong lịch', label: 'Tìm lịch' },
 ] as const;
 
-type Feature = typeof planActions[number]['id'] | 'adjust' | 'summary' | 'quiz';
+type Feature = typeof planActions[number]['id'] | 'summary' | 'quiz';
 
-export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string) => void }) {
+export default function Assistant() {
   const { hasSession } = useAuth();
   const { width, fontScale } = useWindowDimensions();
   const [feature, setFeature] = useState<Feature | null>(null);
   const [showSamples, setShowSamples] = useState(false);
   const stack = width < 320 || fontScale >= 1.3;
   const close = () => setFeature(null);
-  const adjust = () => {
-    if (hasSession) onStudyPlan();
-    else setFeature('adjust');
-  };
 
   return <FlowScope onClose={close}>
     <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 28, lineHeight: 39, letterSpacing: -0.7 }}>Trợ lý AI</T>
@@ -33,7 +29,7 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string
         <View style={[S.grow, { gap: 6 }]}>
           <Badge label={hasSession ? 'DỰA TRÊN LỊCH CỦA BẠN' : 'LỊCH MẪU'} bg={C.card} />
           <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 21, lineHeight: 29 }}>Lên kế hoạch học</T>
-          <T style={S.small}>Tìm giờ trống và xem trước các buổi học trước khi lưu.</T>
+          <T style={S.small}>Tìm khung giờ rảnh để ôn bài hoặc chuẩn bị cho kỳ thi.</T>
         </View>
         {!stack && <Image source={require('../../../assets/mentor.png')} accessible={false}
           resizeMode="cover" style={{ width: width < 360 ? 68 : 88, height: width < 360 ? 80 : 100, borderRadius: 20 }} />}
@@ -57,15 +53,6 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string
       </Pressable>)}
     </View>
 
-    <AssistantToolRow icon="options-outline" title="Điều chỉnh buổi học"
-      description={hasSession ? 'Mở các buổi tự học đã lưu' : 'Thử đổi giờ cho một buổi học mẫu'} onPress={adjust} />
-    <Row style={{ gap: 8, alignItems: 'flex-start', paddingHorizontal: 3 }}>
-      <Icon name="information-circle-outline" size={17} />
-      <T style={[S.grow, S.small]}>{hasSession
-        ? 'Ứng dụng xếp buổi theo lịch và giờ rảnh. Bạn xem và duyệt trước khi thêm vào lịch.'
-        : 'Bạn có thể xem và duyệt các đề xuất trên lịch mẫu.'}</T>
-    </Row>
-
     <Card style={{ padding: 12, gap: 8 }}>
       <Pressable accessibilityRole="button" accessibilityLabel="Công cụ dùng thử" accessibilityState={{ expanded: showSamples }}
         onPress={() => setShowSamples(value => !value)} style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? 0.65 : 1 })}>
@@ -84,8 +71,7 @@ export default function Assistant({ onStudyPlan }: { onStudyPlan: (date?: string
       </>}
     </Card>
 
-    {(feature === 'deadline' || feature === 'free' || feature === 'adjust') &&
-      <AIPlanFlow variant={feature} onClose={close} onStudyPlan={onStudyPlan} />}
+    {(feature === 'deadline' || feature === 'free') && <ServerStudyPlanFlow variant={feature} onClose={close} />}
     {(feature === 'summary' || feature === 'quiz') && <AIDocumentFlow initialMode={feature} onClose={close} />}
   </FlowScope>;
 }

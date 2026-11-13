@@ -13,7 +13,6 @@ export function SemesterSyncStatus({ statusOnly = false }: { statusOnly?: boolea
     message={courses.error?.message ?? 'Đang lấy các môn học đã lưu của bạn.'} actionLabel={courses.error ? 'Thử tải lại môn học' : undefined} onAction={reload} />;
   if (statusOnly && !c.error && !courses?.error && !c.needsReload && !courses?.needsReload) return null;
   return <Card style={{ backgroundColor: C.soft, gap: 9 }}>
-    {!statusOnly && <T style={S.small}>Học kỳ, môn học, bài tập và tự học được lưu cùng tài khoản. Thời khóa biểu đã lưu cả chuỗi lịch. Lịch thi đã thêm, sửa và xóa được trong mục Kỳ thi; điểm số và bộ cột được lưu trong tài khoản, xem tại Thống kê → Điểm & GPA. Đồng hồ, lịch sử, mục tiêu và tiến độ Pomodoro đã lưu trong tài khoản.</T>}
     {!!c.error && <T accessibilityRole="alert" style={{ color: C.red }}>{c.needsReload ? 'Cần kiểm tra lại danh sách trước khi lưu tiếp. ' : ''}{c.error.message}</T>}
     {!!courses?.error && <T accessibilityRole="alert" style={{ color: C.red }}>Cần kiểm tra lại danh sách môn học trước khi lưu tiếp. {courses.error.message}</T>}
     {statusOnly

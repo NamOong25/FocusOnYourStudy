@@ -24,8 +24,8 @@ import HomeWeekStrip from './components/HomeWeekStrip';
 import ServerDashboardPomodoro from './components/ServerDashboardPomodoro';
 
 type Panel={kind:'semester'|'grades'|'deadlines'}|{kind:'exam'|'grade';id:string}|null;
-export default function Home({onTask,onClass,onStudyPlan}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void;onStudyPlan:(date?:string)=>void}){
-  const {tasks,getClassesOn,exams,setTab,studySessions,courseCatalog,gradeBook,gradeRules,setScheduleMode,semesters,semesterConnection,prepareFocus,setAcademicSemesterId}=useApp();
+export default function Home({onTask,onClass}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void}){
+  const {tasks,getClassesOn,exams,setTab,courseCatalog,gradeBook,gradeRules,setScheduleMode,semesters,semesterConnection,prepareFocus,setAcademicSemesterId}=useApp();
   const auth=useAuth();
   const [selectedId,setSelectedId]=useState<string|null>(null),[panel,setPanel]=useState<Panel>(null),now=useDashboardClock();
   const [selectedDay,setSelectedDay]=useState<string|null>(null);
@@ -33,14 +33,13 @@ export default function Home({onTask,onClass,onStudyPlan}:{onTask:(t:Task)=>void
   const week=Array.from({length:7},(_,index)=>addDays(monday,index));
   const day=selectedDay&&week.some(date=>dateKey(date)===selectedDay)?selectedDay:today;
   const semester=semesters.find(s=>s.id===selectedId)??semesters.find(s=>s.status==='Đang học')??semesters[0];
-  const data=dashboardData({semesterId:semester?.id??'',catalog:courseCatalog,tasks,exams,sessions:studySessions,classes:auth.hasSession?[]:getClassesOn(today),book:gradeBook,rules:gradeRules,now});
+  const data=dashboardData({semesterId:semester?.id??'',catalog:courseCatalog,tasks,exams,classes:auth.hasSession?[]:getClassesOn(today),book:gradeBook,rules:gradeRules,now});
   const featuredTask=data.pending[0];
   const classes=day===today?data.classes:auth.hasSession?[]:getClassesOn(day).filter(item=>!item.cancelled&&data.courses.some(course=>course.id===item.courseId));
   const startFocus=()=>{
-    const session=data.todaySessions.find(s=>s.status!=='Hoàn thành');
     const task=featuredTask;
-    const courseId=session?.courseId??task?.courseId??data.courses[0]?.id;
-    if(courseId)prepareFocus({courseId,sessionId:session?.id,taskId:session?session.taskId:task?.id});
+    const courseId=task?.courseId??data.courses[0]?.id;
+    if(courseId)prepareFocus({courseId,taskId:task?.id});
     else setTab('focus');
   };
   const openSchedule=(mode:'Môn & học kỳ'|'Bài tập'|'Kỳ thi')=>{setPanel(null);if(semester)setAcademicSemesterId(semester.id);setScheduleMode(mode);};
@@ -60,7 +59,7 @@ export default function Home({onTask,onClass,onStudyPlan}:{onTask:(t:Task)=>void
     <HomeWeekStrip days={week} today={today} selected={day} onSelect={date=>setSelectedDay(date===today?null:date)}/>
     {!data.courses.length?<Empty title="Học kỳ này chưa có môn học" message="Thêm môn để xem lịch học, bài tập và GPA của học kỳ." actionLabel="Thêm môn cho học kỳ" onAdd={manage}/>:<>
     <HomeAgenda semesterId={semester.id} courses={data.courses} now={now} day={day} weekStart={dateKey(monday)} classes={classes}
-      sessions={data.sessions} onClass={onClass} onStudyPlan={onStudyPlan}/>
+      onClass={onClass}/>
     <HomeDeadlines semesterId={semester.id} courses={data.courses} task={featuredTask} previewExam={data.nextExam}
       now={now} today={today} connected={auth.hasSession} active={panel===null} onTask={onTask}
       onExam={id=>setPanel({kind:'exam',id})} onViewAll={()=>setPanel({kind:'deadlines'})}/>

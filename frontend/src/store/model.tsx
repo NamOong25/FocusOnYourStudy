@@ -1,8 +1,6 @@
 import { useFeedback } from '../shared/feedback/FeedbackProvider';
 import { useServerSemesters } from '../features/academics/api/useServerSemesters';
 import { useServerStudySessions } from '../features/study/api/useServerStudySessions';
-import { createStudyView, studyViewReducer } from '../features/study/studyView';
-import { focusLinkInvalid, withLocalFocus } from '../features/study/studyLinks';
 import { useServerAssignments } from '../features/assignments/api/useServerAssignments';
 import { reconcileAssignmentLinks } from '../features/assignments/assignmentLinks';
 import { useServerCourses } from '../features/academics/api/useServerCourses';
@@ -15,10 +13,9 @@ import { ClassItem, ClassException, Exam, classOccurrences, isClassDate } from '
 import { addDays, dateKey, today } from '../shared/utils/dates';
 import { CourseGrades, GradeBook, GradeRules, defaultRules, initialGradeBook, autoLinkAttempts, hasGradeData } from '../features/grades/grades';
 import { AccountPreferences, StudentProfile, initialPreferences, initialProfile } from '../features/account/account';
-import { AiProposal, proposalSessions, validateProposal } from '../features/assistant/aiPlanner';
 import { AppRoute, ScheduleMode, Tab, homeRoute, previousRoute, pushRoute } from '../navigation/navigationState';
 import type { AssignmentStatisticsLink } from '../features/assignments/assignmentStatisticsLink';
-import { createFocusState, creditFocusRecords, focusDurations, focusReducer, sampleFocusRecords } from '../features/focus/focus';
+import { createFocusState, focusReducer, sampleFocusRecords } from '../features/focus/focus';
 export { addDays, dateKey, dateLabel, dueLabel, isValidDate, parseDay, today } from '../shared/utils/dates';
 
 export type { Tab } from '../navigation/navigationState';
@@ -44,12 +41,7 @@ const initialExams: Exam[] = [
   { id: 'e1', courseId: 'course-math', course: courses[4]!, date: dateKey(addDays(today, 6)), time: '08:30', room: 'B202', type: 'Giữa kỳ • Tự luận', end: '10:00', kind: 'Giữa kỳ', format: 'Tự luận', reminder: true, reminderMinutes: [1440, 180], notes: 'Mang theo thẻ sinh viên và máy tính được phép sử dụng.' },
   { id: 'e2', courseId: 'course-oop', course: courses[1]!, date: dateKey(addDays(today, 11)), time: '14:00', room: 'Phòng máy 3', type: 'Cuối kỳ • Thực hành', end: '16:00', kind: 'Cuối kỳ', format: 'Thực hành', reminder: false, reminderMinutes: [1440, 180], notes: 'Kiểm tra tài khoản phòng máy trước ngày thi.' },
 ];
-const initialStudySessions: StudySession[] = [
-  { id: 'study-1', title: 'Hoàn thiện bố cục trang chủ', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '18:00', duration: 45, notes: 'Bắt đầu từ thẻ tổng quan, sau đó đến danh sách công việc.', status: 'Đã lên lịch', focusedSeconds: 0 },
-  { id: 'study-2', title: 'Kiểm tra luồng và bản trình bày', courseId: 'course-oop', taskId: 't1', date: dateKey(today), start: '20:00', duration: 25, notes: 'Dành một phiên để rà soát lần cuối trước khi nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
-  { id: 'study-3', title: 'Đọc lại kiến thức cây nhị phân', courseId: 'course-dsa', date: dateKey(today), start: '21:00', duration: 25, notes: 'Tự ôn tập, không gắn với bài phải nộp.', status: 'Đã lên lịch', focusedSeconds: 0 },
-  { id: 'study-4', title: 'Phác thảo ERD cho báo cáo', courseId: 'course-db', taskId: 't2', date: dateKey(addDays(today, 1)), start: '19:00', duration: 45, notes: '', status: 'Đã lên lịch', focusedSeconds: 0 },
-];
+const noStudySessions: StudySession[] = [];
 function usePrototype(empty: boolean) {
   const { notice, showNotice: setToast } = useFeedback();
   const toast = notice?.message ?? "";
@@ -96,25 +88,17 @@ function usePrototype(empty: boolean) {
   const [focusState, dispatchFocus] = useReducer(focusReducer, empty, isEmpty => createFocusState(isEmpty ? [] : sampleFocusRecords({ courseId: 'course-dsa', courseName: courses[0]!, semesterId: 'sem-5', taskId: 't4', taskTitle: initialTasks[3]!.title }, new Date())));
   const { timer, records: focusRecords, goal: dailyFocusGoal } = focusState;
   const { mode, endsAt } = timer;
-  const seconds = Math.ceil(timer.remainingMs / 1000);
   const setDailyFocusGoal = (goal: number) => dispatchFocus({ type: 'goal', goal });
 
-  const [aiSessionIds, setAiSessionIds] = useState<string[]>([]);
-  const appliedAiProposals = useRef(new Set<string>());
-  const [previewStudySessions, setPreviewStudySessions] = useState(empty ? [] : initialStudySessions);
   const studyConnection = useServerStudySessions();
-  const [studyView, dispatchStudyView] = useReducer(studyViewReducer, dateKey(new Date()), createStudyView);
-  const serverStudies = studyConnection?.sessions;
-  const studySessions = React.useMemo(() => serverStudies ? withLocalFocus(serverStudies, focusRecords) : previewStudySessions, [serverStudies, focusRecords, previewStudySessions]);
+  const studySessions = studyConnection?.sessions ?? noStudySessions;
   // Deleting an assignment detaches persisted plans and increments their versions on the server.
   const assignmentConnection = assignmentSource ? { ...assignmentSource,
     reload: async () => { const [rows] = await Promise.all([assignmentSource.reload(), studyConnection?.reload()]); return rows; },
-    remove: async (original: Task) => { await assignmentSource.remove(original); try { await studyConnection?.reload(); } catch { /* confirmed deletion; study banner retains the reload error */ } },
+    remove: async (original: Task) => { await assignmentSource.remove(original); await studyConnection?.reload().catch(() => {}); },
   } : null;
   const [taskExtras, setTaskExtras] = useState<Record<string, TaskExtras>>(empty ? {} : initialTaskExtras);
   const [focusTaskId, setFocusTaskId] = useState<string | undefined>();
-  const [focusSessionId, setFocusSessionId] = useState<string | undefined>();
-  const creditedFocusIds = useRef(new Set<string>());
   const notifiedCompletion = useRef<string | undefined>(undefined);
   // The reducer owns run identity, timestamps and history. It stays mounted across tabs.
   useEffect(() => {
@@ -123,12 +107,6 @@ function usePrototype(empty: boolean) {
     tick(); const id = setInterval(tick, 500); const listener = AppState.addEventListener('change', s => { if (s === 'active') tick(); });
     return () => { clearInterval(id); listener.remove(); };
   }, [endsAt]);
-  useEffect(() => {
-    const pending = focusRecords.filter(record => record.source === 'timer' && !creditedFocusIds.current.has(record.id));
-    if (!pending.length) return;
-    pending.forEach(record => creditedFocusIds.current.add(record.id));
-    if (!studyConnection) setPreviewStudySessions(sessions => creditFocusRecords(sessions, pending));
-  }, [focusRecords]);
   useEffect(() => {
     const completion = focusState.lastCompletion;
     if (!completion || notifiedCompletion.current === completion.id) return;
@@ -144,41 +122,30 @@ function usePrototype(empty: boolean) {
     const reconciled = reconcileCourseLinks(lastServerCourses.current, serverCourses, { tasks, classes, exams, studySessions, gradeBook: storedGradeBook });
     lastServerCourses.current = serverCourses;
     if (!assignmentConnection) setPreviewTasks(reconciled.tasks);
-    setClasses(reconciled.classes); setExams(reconciled.exams); if (!studyConnection) setPreviewStudySessions(reconciled.studySessions); setGradeBook(reconciled.gradeBook);
+    setClasses(reconciled.classes); setExams(reconciled.exams); setGradeBook(reconciled.gradeBook);
     setClassExceptions(v => v.filter(e => reconciled.classes.some(c => c.id === e.seriesId)));
 
-    if (reconciled.invalidated.has(focusCourseId)) { resetTimer(); setFocusTaskId(undefined); setFocusSessionId(undefined); }
-    if (reconciled.cleared) setToast('Môn đã đổi học kỳ hoặc bị xóa ở nơi khác. Lịch, buổi tự học và điểm thử liên quan trong phiên này đã được đặt lại.');
+    if (reconciled.invalidated.has(focusCourseId)) { resetTimer(); setFocusTaskId(undefined); }
+    if (reconciled.cleared) setToast('Môn đã đổi học kỳ hoặc bị xóa ở nơi khác. Lịch và điểm thử liên quan trong phiên này đã được đặt lại.');
     // Reconcile only when a confirmed server catalogue changes, never on trial edits.
   }, [serverCourses]);
   useEffect(() => {
     if (!assignmentConnection?.loaded) return;
     const result = reconcileAssignmentLinks(tasks, studySessions);
-    if (!studyConnection && result.detached.size) {
-      setPreviewStudySessions(result.studySessions);
-      setToast('Bài tập đã đổi môn, đổi hạn hoặc bị xóa. Buổi tự học liên quan được giữ và gỡ liên kết.');
-    }
     setTaskExtras(previous => {
       const entries = Object.entries(previous).filter(([id]) => tasks.some(task => task.id === id));
       return entries.length === Object.keys(previous).length ? previous : Object.fromEntries(entries);
     });
     if (focusTaskId && (result.detached.has(focusTaskId) || !tasks.some(task => task.id === focusTaskId && task.courseId === focusCourseId))) {
-      resetTimer(); setFocusTaskId(undefined); setFocusSessionId(undefined);
+      resetTimer(); setFocusTaskId(undefined);
     }
   }, [tasks, assignmentConnection?.loaded, studySessions, focusTaskId, focusCourseId]);
-  useEffect(() => {
-    if (studyConnection?.loaded && focusSessionId && focusLinkInvalid(studySessions, focusSessionId, focusCourseId, focusTaskId)) {
-      resetTimer(); setFocusSessionId(undefined); setFocusTaskId(undefined);
-    }
-  }, [serverStudies, focusSessionId, focusCourseId, focusTaskId, studyConnection?.loaded]);
   const toggleTimer = () => {
-    if (!focusCourseId) return;
+    if (!focusCourseId && mode === 0) return;
     dispatchFocus({ type: 'toggle', now: Date.now(), id: uid(), context: {
       courseId: focusCourseId, courseName: focusCourse, semesterId: courseCatalog.find(course => course.id === focusCourseId)?.semesterId, taskId: focusTaskId,
       taskTitle: tasks.find(task => task.id === focusTaskId)?.title,
-      studySessionId: focusSessionId, studyTitle: studySessions.find(session => session.id === focusSessionId)?.title,
     } });
-    if (!studyConnection && endsAt === null && mode === 0 && focusSessionId) setPreviewStudySessions(v => v.map(s => s.id === focusSessionId && s.status !== 'Hoàn thành' ? { ...s, status: 'Đang học' } : s));
   };
   const saveTask = (task: Task) => {
     if (assignmentConnection) throw new Error('Use assignment API for authenticated accounts');
@@ -187,41 +154,12 @@ function usePrototype(empty: boolean) {
   const deleteTask = (id: string) => {
     if (assignmentConnection) throw new Error('Use assignment API for authenticated accounts');
     setPreviewTasks(v => v.filter(t => t.id !== id));
-    setPreviewStudySessions(v => v.map(s => s.taskId === id ? { ...s, taskId: undefined } : s));
     setTaskExtras(v => { const next = { ...v }; delete next[id]; return next; });
     if (focusTaskId === id) setFocusTaskId(undefined);
   };
   const updateTaskExtras = (id: string, extras: TaskExtras) => setTaskExtras(v => ({ ...v, [id]: extras }));
-  const saveStudySession = (session: StudySession) => {
-    if (studyConnection) throw new Error('Use study API for authenticated accounts');
-    setPreviewStudySessions(v => v.some(s => s.id === session.id) ? v.map(s => s.id === session.id ? session : s) : [...v, session]);
-    if (focusSessionId === session.id && (session.status === 'Hoàn thành' || session.courseId !== focusCourseId || session.taskId !== focusTaskId)) {
-      resetTimer(); setFocusCourseId(session.courseId); setFocusTaskId(session.taskId);
-    }
-  };
-  const applyAiProposal = (proposal: AiProposal) => {
-    if (studyConnection) return { ok: false, message: 'Kế hoạch AI đang ở bước xem trước. Tạo buổi trong Tự học để lưu vào tài khoản.' };
-    if (appliedAiProposals.current.has(proposal.id)) return { ok: false, message: 'Đề xuất này đã được duyệt.' };
-    const issues = validateProposal(proposal, { courseCatalog, tasks, classes, classExceptions, exams, studySessions });
-    if (issues.length) return { ok: false, message: issues[0]!.message };
-    const sessions = proposalSessions(proposal); const ids = new Set(sessions.map(s => s.id));
-    appliedAiProposals.current.add(proposal.id);
-    setPreviewStudySessions(v => [...v.filter(s => !ids.has(s.id)), ...sessions]);
-    setAiSessionIds(v => [...new Set([...v, ...ids])]);
-    return { ok: true, message: '' };
-  };
-  const deleteStudySession = (id: string) => {
-    if (studyConnection) throw new Error('Use study API for authenticated accounts');
-    setPreviewStudySessions(v => v.filter(s => s.id !== id));
-    if (focusSessionId === id) { setFocusSessionId(undefined); setFocusTaskId(undefined); resetTimer(); }
-  };
-  const completeStudySession = (id: string) => {
-    if (studyConnection) throw new Error('Use study API for authenticated accounts');
-    setPreviewStudySessions(v => v.map(s => s.id === id ? { ...s, status: s.status === 'Hoàn thành' ? 'Đã lên lịch' : 'Hoàn thành' } : s));
-    if (focusSessionId === id) resetTimer();
-  };
-  const prepareFocus = ({ courseId, taskId, sessionId }: { courseId: string; taskId?: string; sessionId?: string }) => {
-    setFocusCourseId(courseId); setFocusTaskId(taskId); setFocusSessionId(sessionId);
+  const prepareFocus = ({ courseId, taskId }: { courseId: string; taskId?: string }) => {
+    setFocusCourseId(courseId); setFocusTaskId(taskId);
     setMode(0); setTab('focus');
   };
   const saveClass = (item: ClassItem) => {
@@ -262,7 +200,7 @@ function usePrototype(empty: boolean) {
     if (focusCourseId === id) { resetTimer(); setFocusCourseId(courseCatalog.find(c => c.id !== id)?.id ?? ''); }
     return true;
   };
-  return { studyView, dispatchStudyView, assignmentDestination, openAssignmentStatistics, scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, saveStudySession, deleteStudySession, completeStudySession, prepareFocus, focusTaskId, focusSessionId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, seconds, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass, aiSessionIds, applyAiProposal, timerProgress: 1 - seconds / focusDurations[mode]! };
+  return { assignmentDestination, openAssignmentStatistics, scheduleRevision, invalidateSchedule, scheduleDestination, consumeScheduleDestination, openSavedSchedule, isEmptyWorkspace: empty, route, routeTrail, scheduleMode, setScheduleMode, goBackRoute, profile, saveProfile, accountPreferences, setAccountPreferences, previewSignedIn, setPreviewSignedIn, gradeBook, gradeRules, setGradeRules, saveGrades, academicSemesterId, setAcademicSemesterId, semesters, semesterConnection, saveSemester, courseCatalog, courseConnection, saveCourse, deleteCourse, tasks, assignmentConnection, deleteTask, taskExtras, updateTaskExtras, studySessions, studyConnection, prepareFocus, focusTaskId, classes, setClasses, classExceptions, getClassesOn, saveClassException, restoreClassOccurrence, deleteClass, saveExam, deleteExam, exams, setExams, tab, setTab, focusCourse, focusCourseId, setFocusCourseId, mode, setMode, timerRemainingMs: timer.remainingMs, running: endsAt !== null, toggleTimer, resetTimer, focusRecords, dailyFocusGoal, setDailyFocusGoal, toast, setToast, saveTask, saveClass };
 }
 const Context = createContext<ReturnType<typeof usePrototype> | null>(null);
 export function PrototypeProvider({ children, empty = false }: { children: ReactNode; empty?: boolean }) { const state = usePrototype(empty); return <Context.Provider value={state}>{children}</Context.Provider>; }

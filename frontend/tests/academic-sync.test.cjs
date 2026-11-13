@@ -11,7 +11,7 @@ test('HALF_UP matches API at29/200 and does not round14.5down',()=>{assert.equal
 test('invalid completion counts cannot produce a plausible percentage',()=>{for(const pair of [[-1,3],[4,3],[1.2,3],[1,NaN],[1,0]])assert.throws(()=>completionPercent(...pair),RangeError);});
 test('dashboard uses same percentage and same task ids even with duplicate names',()=>{
  const tasks=Array.from({length:200},(_,i)=>({id:String(i),courseId:'java',title:'Trùng tên',status:i<29?'Hoàn thành':'Chưa làm',deadline:'2026-11-01',deadlineTime:'23:59',priority:'Trung bình'}));
- const input={semesterId:'s1',catalog:[{id:'java',semesterId:'s1',credits:3}],tasks:[...tasks,{...tasks[0],id:'foreign',courseId:'other'}],exams:[],sessions:[],classes:[],book:{},rules:require('../src/features/grades/grades.ts').defaultRules,now:new Date('2026-10-30T00:00:00Z')};
+ const input={semesterId:'s1',catalog:[{id:'java',semesterId:'s1',credits:3}],tasks:[...tasks,{...tasks[0],id:'foreign',courseId:'other'}],exams:[],classes:[],book:{},rules:require('../src/features/grades/grades.ts').defaultRules,now:new Date('2026-10-30T00:00:00Z')};
  const data=dashboardData(input);assert.equal(data.tasks.length,200);assert.equal(data.done,29);assert.equal(data.percent,15);
 });
 test('same key scopes a signal to owner and API endpoint, not token contents',()=>{assert.equal(academicSignalKey('http://api/','A'),academicSignalKey('http://api','A'));assert.notEqual(academicSignalKey('http://api','A'),academicSignalKey('http://api','B'));assert.notEqual(academicSignalKey('http://api','A'),academicSignalKey('http://qa','A'));});
