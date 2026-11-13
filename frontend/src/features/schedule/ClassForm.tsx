@@ -1,7 +1,7 @@
 import { DateField, TimeField } from '../../shared/components/DateTimePicker';
 import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { Badge, Button, Field, Icon, Row, Segments, Sheet, T } from '../../shared/components';
+import { Pressable, View, useWindowDimensions } from 'react-native';
+import { Button, Field, Row, Segments, Sheet, T } from '../../shared/components';
 import { CourseChoices } from '../academics/CourseChoices';
 import { CalendarEvent, ClassItem, dayNames, seriesConflicts } from './calendar';
 import ConflictPanel from './ConflictPanel';
@@ -18,6 +18,7 @@ export function ClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
 }
 function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?: ClassItem; initialCourseId?: string; onClose: () => void; onDeleted?: () => void }) {
   const { saveClass, deleteClass, classes, classExceptions, exams, studySessions, courseCatalog, setToast, accountPreferences } = useApp();
+  const { width } = useWindowDimensions();
   const [courseId, setCourseId] = useState(item?.courseId ?? initialCourseId ?? courseCatalog[0]?.id ?? '');
   const course = courseCatalog.find(c => c.id === courseId);
   const [weekdays, setWeekdays] = useState(item?.weekdays ?? [today.getDay()]);
@@ -42,17 +43,21 @@ function PreviewClassForm({ item, initialCourseId, onClose, onDeleted }: { item?
     saveClass(candidate); setToast(item ? 'Đã cập nhật chuỗi lịch học' : 'Đã thêm lịch học lặp'); onClose();
   };
   return <Sheet title={item ? 'Sửa cả chuỗi lịch học' : 'Thêm lịch học'} onClose={onClose} dirty={dirty}>
-    <Badge label="Lặp theo tuần · Trong khoảng ngày đã chọn" icon="repeat-outline" />
-    <CourseChoices value={courseId} onChange={id => { setCourseId(id); const next = courseCatalog.find(c => c.id === id); setRoom(next?.room ?? ''); setTeacher(next?.teacher ?? ''); }} />
+    <CourseChoices dropdown value={courseId} onChange={id => { setCourseId(id); const next = courseCatalog.find(c => c.id === id); setRoom(next?.room ?? ''); setTeacher(next?.teacher ?? ''); }} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Các thứ trong tuần</T>
     <Row style={{ gap: 0 }}>{[1,2,3,4,5,6,0].map(day => <Pressable key={day} accessibilityRole="checkbox" accessibilityLabel={`Học vào ${dayNames[day]}`} accessibilityState={{ checked: weekdays.includes(day) }} aria-checked={weekdays.includes(day)} onPress={() => setWeekdays(v => v.includes(day) ? v.filter(d => d !== day) : [...v, day])} style={{ flex: 1, minHeight: 46, alignItems: 'center', justifyContent: 'center' }}><View style={{ width: 34, height: 38, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: weekdays.includes(day) ? C.primary : C.track }}><T style={{ fontFamily: F.bold, fontSize: 11, color: weekdays.includes(day) ? '#fff' : C.muted }}>{dayNames[day]}</T></View></Pressable>)}</Row>
-    <DateField label="Áp dụng từ" value={startsOn} onChange={setStartsOn} /><DateField label="Áp dụng đến" value={endsOn} onChange={setEndsOn} />
-    <Row><View style={S.grow}><TimeField label="Bắt đầu" value={start} onChange={setStart} /></View><View style={S.grow}><TimeField label="Kết thúc" value={end} onChange={setEnd} /></View></Row>
+    <View style={{ gap: 12, flexDirection: width < 360 ? 'column' : 'row' }}>
+      <View style={S.grow}><DateField label="Ngày bắt đầu" value={startsOn} onChange={setStartsOn} /></View>
+      <View style={S.grow}><DateField label="Ngày kết thúc" value={endsOn} onChange={setEndsOn} /></View>
+    </View>
+    <View style={{ gap: 12, flexDirection: width < 360 ? 'column' : 'row' }}>
+      <View style={S.grow}><TimeField label="Giờ bắt đầu" value={start} onChange={setStart} /></View>
+      <View style={S.grow}><TimeField label="Giờ kết thúc" value={end} onChange={setEnd} /></View>
+    </View>
     <Field label="Phòng học" value={room} onChange={setRoom} /><Field label="Giảng viên" value={teacher} onChange={setTeacher} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Nhắc trước ca học</T><Segments values={['Tắt', '5 phút', '15 phút', '30 phút', '60 phút']} value={reminder ? `${reminder} phút` : 'Tắt'} onChange={v => setReminder(v === 'Tắt' ? 0 : Number(v.split(' ')[0]))} />
     {!!error && <T accessibilityRole="alert" style={{ color: C.red }}>{error}</T>}<ConflictPanel conflicts={conflicts} candidate={`${course?.name ?? 'Ca học'} · ${start} – ${end}`} />
     <Button label="Lưu lịch học" icon="checkmark" onPress={save} actionLabel="Đang lưu" />
-    <T style={S.small}>Phạm vi áp dụng thuộc môn/học kỳ đã chọn. Khi sửa cả chuỗi, ngoại lệ còn thuộc khoảng ngày và các thứ mới sẽ được giữ; ngoại lệ ngoài phạm vi mới được bỏ. Tùy chọn nhắc hiện là mẫu, chưa phát thông báo trên thiết bị.</T>
     {item && <Button label={confirmDelete ? 'Xác nhận xóa cả chuỗi' : 'Xóa cả chuỗi lịch học'} danger={confirmDelete} secondary={!confirmDelete} onPress={() => { if (!confirmDelete) { setConfirmDelete(true); return; } deleteClass(item.id); setToast('Đã xóa chuỗi và các ngoại lệ của chuỗi'); (onDeleted ?? onClose)(); }} actionLabel={confirmDelete ? 'Đang xóa' : undefined} />}
   </Sheet>;
 }
