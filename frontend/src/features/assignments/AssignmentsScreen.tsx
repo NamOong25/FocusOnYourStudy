@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { FlowScope } from '../../navigation/Navigation';
-import { Button, Card, Empty, Icon, IconButton, Row, StateView, T } from '../../shared/components';
+import { Button, Card, EmptyState, Icon, IconButton, Row, StateView, T } from '../../shared/components';
 import { useActionState } from '../../shared/feedback/ActionScope';
 import { C, F, S } from '../../shared/theme';
 import { useApp } from '../../store/model';
@@ -34,6 +34,7 @@ export default function AssignmentsScreen({ onTask, onNewTask, initialStatistics
   const showRows = (!assignmentConnection || assignmentConnection.loaded) && !pendingRead && !failedRead && !linkError && !invalidScope;
   const filterCount = Number(!!semesterId) + Number(!!filter) + Number(status !== 'Tất cả');
   const hasFilters = filterCount > 0 || !!query.trim() || deadlineFilter !== 'Tất cả';
+  const empty = showRows && !list.length && !assignmentConnection?.loading && !assignmentConnection?.error && !assignmentConnection?.needsReload;
   const reset = () => { setReference(null); setSemesterId(''); setQuery(''); setFilter(''); setStatus('Tất cả'); setDeadlineFilter('Tất cả'); };
   const changeSemester = (id: string) => {
     if (id === semesterId) return;
@@ -51,8 +52,9 @@ export default function AssignmentsScreen({ onTask, onNewTask, initialStatistics
     <View style={{ gap: 10 }}>
       <Row between>
         <T accessibilityRole="header" style={[S.grow, { fontFamily: F.extra, fontSize: 22, lineHeight: 29, letterSpacing: -0.5 }]}>Bài tập & Deadline</T>
-        <Button label="+ Bài tập" onPress={onNewTask} style={{ minHeight: 44, paddingHorizontal: 13, paddingVertical: 8 }} />
+        {!(empty && !tasks.length) && <Button label="+ Bài tập" onPress={onNewTask} style={{ minHeight: 44, paddingHorizontal: 13, paddingVertical: 8 }} />}
       </Row>
+      {!(empty && !tasks.length) && <>
       <Row>
         <Row style={[S.grow, { minHeight: 44, borderRadius: 14, borderWidth: 1, borderColor: C.line, backgroundColor: C.card, paddingLeft: 12 }]}>
           <Icon name="search-outline" size={17} color={C.muted} />
@@ -65,13 +67,14 @@ export default function AssignmentsScreen({ onTask, onNewTask, initialStatistics
           style={{ minHeight: 44, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 14 }} />
       </Row>
       <DeadlineFilters value={deadlineFilter} onChange={setDeadlineFilter} />
+      </>}
     </View>
     {!!reference && <Card style={{ gap: 9, backgroundColor: C.soft }}><T style={{ fontFamily: F.semi, color: C.primary }}>Từ Thống kê · {assignmentGroup(reference.group).label}</T>
       <T testID="assignment-statistics-reference" style={S.small}>Hạn nộp đối chiếu tại {statisticsTimeLabel(reference.asOf, reference.timeZone)} · {reference.timeZone}. Danh sách dùng trạng thái bài đã lưu mới nhất; thời gian không tự trôi khỏi mốc này.</T>
       <Button label="Về Thống kê để cập nhật mốc" secondary onPress={backToStats} />
     </Card>}
     {!reference && <AssignmentSyncStatus statusOnly />}
-    {showRows && <Row between>
+    {showRows && !(empty && !tasks.length) && <Row between>
       <T style={{ fontFamily: F.bold, fontSize: 13 }} accessibilityLiveRegion="polite">{list.length} bài tập</T>
       {!!filterSummary && <T style={[S.small, S.grow, { textAlign: 'right' }]} numberOfLines={2}>{filterSummary}</T>}
     </Row>}
@@ -82,7 +85,10 @@ export default function AssignmentsScreen({ onTask, onNewTask, initialStatistics
       onAction={() => { void Promise.all([assignmentConnection?.reload(), app.courseConnection?.reload(), app.semesterConnection?.reload()]).catch(() => {}); }} />}
     {!reference && !!linkError && <StateView kind="error" title="Chưa thể hiển thị bài tập" message={linkError} />}
     {showRows && list.map(task => <AssignmentCard key={task.id} task={task} now={reference ? new Date(reference.asOf) : now} reference={reference ?? undefined} onPress={() => onTask(task)} />)}
-    {showRows && !list.length && <Empty title={!tasks.length ? 'Chưa có bài tập' : hasFilters ? 'Không tìm thấy bài tập phù hợp' : 'Chưa có bài tập ở mục này'} message={!tasks.length ? 'Thêm bài tập đầu tiên để theo dõi hạn nộp và tiến độ.' : hasFilters ? 'Thử từ khóa khác hoặc xóa tìm kiếm và bộ lọc. Các điều kiện đang được kết hợp với nhau.' : 'Thêm bài tập mới để bắt đầu.'} actionLabel={tasks.length && hasFilters ? 'Xóa tìm kiếm và bộ lọc' : 'Thêm bài tập đầu tiên'} onAdd={tasks.length && hasFilters ? reset : onNewTask} />}
+    {empty && (!tasks.length
+      ? <EmptyState illustration="assignments" title="Chưa có bài tập" message="Thêm bài tập để theo dõi hạn nộp."
+          actionLabel="Tạo bài tập" actionIcon="add" onAction={onNewTask} />
+      : <EmptyState title="Không tìm thấy bài tập phù hợp" actionLabel="Xóa bộ lọc" onAction={reset} />)}
     {filtersOpen && <FlowScope onClose={() => setFiltersOpen(false)}>
       <AssignmentFiltersSheet semesters={semesters} semesterId={semesterId} courses={courseCatalog} courseId={filter}
         status={status} resultCount={showRows ? list.length : undefined} onSemester={changeSemester} onCourse={setFilter} onStatus={setStatus}

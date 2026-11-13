@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Badge, Card, Icon, Row, Segments, Sheet, T } from '../../../shared/components';
+import { Badge, Card, EmptyState, Icon, Row, Segments, Sheet, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
 import { addDays, dateKey, dateLabel } from '../../../shared/utils/dates';
 import { focusClock, groupFocusRecords, type FocusRecord } from '../focus';
@@ -12,12 +12,18 @@ function dayTitle(day: string, now: Date) {
 }
 export function FocusHistorySheet({ records, now, onClose }: { records: FocusRecord[]; now: Date; onClose: () => void }) {
   const [period, setPeriod] = useState('Tất cả');
-  const groups = groupFocusRecords(records, now).filter(group => period === 'Tất cả' || (period === 'Hôm nay' ? group.day === dateKey(now) : group.day >= dateKey(addDays(now, -6))));
+  const allGroups = groupFocusRecords(records, now);
+  const groups = allGroups.filter(group => period === 'Tất cả' || (period === 'Hôm nay' ? group.day === dateKey(now) : group.day >= dateKey(addDays(now, -6))));
   return <Sheet title="Lịch sử phiên học" onClose={onClose}>
+    {allGroups.length > 0 && <>
     <T style={S.small}>Chỉ ghi phiên tập trung đã hoàn tất. Ngày học tính theo ngày kết thúc trên thiết bị; thời gian tạm dừng và nghỉ không cộng vào phút học.</T>
     <Segments values={periods} value={period} onChange={setPeriod} />
     {records.some(record => record.source === 'sample') && <Badge label="Có phiên dữ liệu mẫu" icon="flask-outline" />}
-    {!groups.length && <Card style={{ gap: 10, alignItems: 'center' }}><Icon name="leaf-outline" size={28} /><T style={{ fontFamily: F.bold }}>Chưa có phiên hoàn tất</T><T style={[S.small, { textAlign: 'center' }]}>Hoàn thành một phiên 25 phút để xem thời gian học tại đây.</T></Card>}
+    </>}
+    {!groups.length && (allGroups.length
+      ? <EmptyState title="Không tìm thấy phiên phù hợp" actionLabel="Xóa bộ lọc" onAction={() => setPeriod('Tất cả')} />
+      : <EmptyState illustration="focus" title="Chưa có phiên tập trung" message="Phiên học đã hoàn thành sẽ xuất hiện ở đây."
+          actionLabel="Về đồng hồ" onAction={onClose} />)}
     {groups.map(group => <View key={group.day} style={{ gap: 10 }}>
       <View style={{ gap: 4 }}><T accessibilityRole="header" style={{ fontFamily: F.bold, fontSize: 16 }}>{dayTitle(group.day, now)}</T><T style={S.small}>{group.entries.length} phiên · {Math.floor(group.seconds / 60)} phút học</T></View>
       {group.entries.map(record => {

@@ -15,6 +15,7 @@ export { Segments } from './Segments';
 export { Field } from './Field';
 export { Sheet, SheetFlow } from './Sheet';
 export { Empty } from './Empty';
+export { EmptyState } from './EmptyState';
 
 export { StateView } from './StateView';
 export { ActionStatus } from './ActionStatus';
