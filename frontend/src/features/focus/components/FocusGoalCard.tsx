@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Button, Card, Icon, Link, Row, Sheet, T } from '../../../shared/components';
+import { Button, Card, Link, Row, Sheet, T } from '../../../shared/components';
 import { C, F, S } from '../../../shared/theme';
 import { maxFocusGoal, type focusSummary } from '../focus';
 import FocusGoalProgress from './FocusGoalProgress';
 
 type Summary = ReturnType<typeof focusSummary>;
 export function FocusGoalCard({ goal, summary, onEdit }: { goal: number; summary: Summary; onEdit: () => void }) {
-  return <>
-    <View style={{ gap: 4 }}>
-      <FocusGoalProgress completed={summary.completed} goal={goal} />
-      <Row between><T style={[S.small, S.grow]}>{summary.remaining ? `Còn ${summary.remaining} phiên để đạt mục tiêu` : 'Bạn đã đạt mục tiêu hôm nay'}</T><Link label="Sửa mục tiêu" onPress={onEdit} /></Row>
-    </View>
-    <Row style={{ alignItems: 'stretch', gap: 12 }}>
-      <Card style={[S.grow, { gap: 8 }]}><Icon name="time-outline" /><T style={S.small}>Học hôm nay</T><T style={{ fontFamily: F.extra, fontSize: 26 }}>{summary.todayMinutes}<T style={S.small}> phút</T></T><T style={S.small}>{summary.completed} phiên đã hoàn tất</T></Card>
-      <Card style={[S.grow, { gap: 8 }]}><Icon name="calendar-outline" /><T style={S.small}>7 ngày gần nhất</T><T style={{ fontFamily: F.extra, fontSize: 26 }}>{summary.weekMinutes}<T style={S.small}> phút</T></T><T style={S.small}>Gồm cả hôm nay</T></Card>
-    </Row>
-  </>;
+  return <Card style={{ gap: 8 }}>
+    <FocusGoalProgress completed={summary.completed} goal={goal} />
+    <Row between><T style={[S.small, S.grow]}>{summary.todayMinutes} phút học · {summary.remaining ? `Còn ${summary.remaining} phiên` : 'Đã đạt mục tiêu'}</T><Link label="Sửa mục tiêu" onPress={onEdit} /></Row>
+  </Card>;
 }
 
 export function FocusGoalSheet({ goal, onSave, onClose }: { goal: number; onSave: (goal: number) => void; onClose: () => void }) {

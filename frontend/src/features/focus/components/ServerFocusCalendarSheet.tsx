@@ -10,12 +10,13 @@ import { usePomodoro } from '../api/PomodoroProvider';
 import { usePomodoroRead } from '../api/usePomodoroInsights';
 import { createStreakApi, shiftStreakMonth, streakKey } from '../api/pomodoroStreakApi';
 import { usePomodoroProgress } from '../api/PomodoroProgressProvider';
+import { pomodoroDay } from '../api/pomodoroInsightsApi';
 
 const dateLabel = (date: string) => date.split('-').reverse().join('/');
-export default function ServerFocusCalendarSheet({ onClose }: { onClose: () => void }) {
+export default function ServerFocusCalendarSheet({ onClose, showStreak = false }: { onClose: () => void; showStreak?: boolean }) {
   const auth = useAuth(), progress = usePomodoroProgress(), { state: timer } = usePomodoro();
   const [choice, setChoice] = useState<string | null>(null), [picking, setPicking] = useState(false), [draft, setDraft] = useState('');
-  const confirmedToday = useRef(progress.data?.streak.today ?? '');
+  const confirmedToday = useRef(progress.data?.streak.today ?? pomodoroDay(Date.now(), progress.timeZone));
   if (progress.data) confirmedToday.current = progress.data.streak.today;
   const month = choice ?? confirmedToday.current.slice(0, 7);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export default function ServerFocusCalendarSheet({ onClose }: { onClose: () => v
   const revision = [timer.last?.id, timer.last?.version, timer.last?.status, confirmedToday.current].join(':');
   const { state, reload } = usePomodoroRead(api.read, streakKey, { month, timeZone: progress.timeZone }, revision);
   const data = state.loaded && !state.loading && !state.error ? state.value : null;
+  const streak = data ?? progress.data?.streak;
   const calendar = data?.calendar;
   const selected = calendar?.days.find(day => day.date === selectedDate) ?? calendar?.days.find(day => day.date === data?.today) ?? calendar?.days[0];
   const offset = calendar ? (new Date(calendar.fromDate + 'T00:00:00Z').getUTCDay() + 6) % 7 : 0;
@@ -31,7 +33,13 @@ export default function ServerFocusCalendarSheet({ onClose }: { onClose: () => v
   const weeks = Array.from({ length: slots.length / 7 }, (_, i) => slots.slice(i * 7, i * 7 + 7));
   const move = (direction: -1 | 1) => { try { return shiftStreakMonth(month, direction); } catch { return null; } };
   const previous = move(-1), next = move(1);
-  return <FlowScope onClose={onClose}><Sheet title="Lịch ngày đã học" onClose={onClose}>
+  return <FlowScope onClose={onClose}><Sheet title={showStreak ? 'Chuỗi ngày học' : 'Lịch ngày đã học'} onClose={onClose}>
+    {showStreak && streak && <Card style={{ backgroundColor: C.canvas, padding: 14 }}>
+      <Row style={{ gap: 15 }}>
+        <View style={S.grow}><T style={S.small}>Hiện tại</T><T testID="server-current-streak" style={{ fontFamily: F.extra, fontSize: 23, color: C.primary }}>{streak.currentStreakDays} ngày</T></View>
+        <View style={S.grow}><T style={S.small}>Dài nhất</T><T testID="server-longest-streak" style={{ fontFamily: F.bold, fontSize: 23 }}>{streak.longestStreakDays} ngày</T></View>
+      </Row>
+    </Card>}
     <T style={S.small}>Toàn bộ tài khoản · {progress.timeZone}. Mỗi ngày có ít nhất một phiên hoàn tất được đánh dấu đã học.</T>
     <Row between style={{ gap: 8 }}><IconButton label="Lịch học tháng trước" name="chevron-back" disabled={!previous} onPress={() => { if (previous) setChoice(previous); }} />
       <View style={[S.grow, { gap: 5 }]}><T style={{ fontFamily: F.bold, fontSize: 16, textAlign: 'center' }}>Tháng {Number(month.slice(5))}/{month.slice(0, 4)}</T><Button label="Chọn tháng lịch học" secondary onPress={() => { setDraft(month + '-01'); setPicking(value => !value); }} /></View>
