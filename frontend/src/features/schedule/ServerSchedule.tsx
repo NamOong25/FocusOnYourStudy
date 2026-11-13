@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Card, Link, Row, Sheet, StateView, T } from '../../shared/components';
+import { Button, Card, Link, Row, Sheet, SheetFlow, StateView, T } from '../../shared/components';
 import { C, S } from '../../shared/theme';
 import { FlowScope, useNavigationScope } from '../../navigation/Navigation';
 import { dateKey, parseDay } from '../../shared/utils/dates';
@@ -73,9 +73,18 @@ export default function ServerSchedule() {
     </>}
     {choose && <Sheet title="Học kỳ xem lịch" onClose={() => setChoose(false)}>{semesters.map(s => <Button key={s.id} secondary={s.id !== semester?.id} label={`${s.name} · ${s.academicYear}`} onPress={() => { setAcademicSemesterId(s.id); setChoose(false); setDetail(null); }} />)}</Sheet>}
     {source.confirmedWrite && source.error && <T style={S.small}>Lần lưu/xóa đã được xác nhận. Chưa tải lại được lịch; không cần gửi lại thao tác ghi.</T>}
-    {detail?.key === key && <ServerClassDialog key={`${key}:${detail.item.scheduleId}:${detail.item.date}`} item={detail.item} title={name(detail.item)} blocked={stale || source.needsReload || !source.loaded} onClose={() => setDetail(null)} onReload={reload} onEdit={edit} onException={startException} />}
     {manage && semester && <ServerRuleList semesterId={semester.id} source={source} onEdit={edit} onClose={() => setManage(false)} />}
-    {editor && <ServerClassForm key={editor.original?.id ?? 'new'} source={source} original={editor.original} initialDate={editor.date} semesterId={editor.semesterId} onClose={() => setEditor(null)} onSaved={saved} onDeleted={() => { setEditor(null); setDetail(null); showNotice('Đã xóa cả chuỗi lịch và các ngoại lệ của chuỗi.'); }} />}
-    {occurrenceFlow && <ServerExceptionFlow key={`${occurrenceFlow.target.scheduleId}:${occurrenceFlow.target.date}:${occurrenceFlow.mode}`} request={occurrenceFlow} source={source} onClose={() => { if (!source.busy) setOccurrenceFlow(null); }} onComplete={exceptionDone} />}
+    {(occurrenceFlow || editor || detail?.key === key) && <SheetFlow>
+      {occurrenceFlow
+        ? <ServerExceptionFlow key={`${occurrenceFlow.target.scheduleId}:${occurrenceFlow.target.date}:${occurrenceFlow.mode}`}
+          request={occurrenceFlow} source={source} onClose={() => { if (!source.busy) setOccurrenceFlow(null); }} onComplete={exceptionDone} />
+        : editor
+          ? <ServerClassForm key={editor.original?.id ?? 'new'} source={source} original={editor.original} initialDate={editor.date}
+            semesterId={editor.semesterId} onClose={() => setEditor(null)} onSaved={saved}
+            onDeleted={() => { setEditor(null); setDetail(null); showNotice('Đã xóa cả chuỗi lịch và các ngoại lệ của chuỗi.'); }} />
+          : detail?.key === key && <ServerClassDialog key={`${key}:${detail.item.scheduleId}:${detail.item.date}`}
+            item={detail.item} title={name(detail.item)} blocked={stale || source.needsReload || !source.loaded}
+            onClose={() => setDetail(null)} onReload={reload} onEdit={edit} onException={startException} />}
+    </SheetFlow>}
   </FlowScope>;
 }
