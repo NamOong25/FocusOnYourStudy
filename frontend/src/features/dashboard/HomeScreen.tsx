@@ -10,6 +10,7 @@ import {useAuth} from '../account/auth/AuthProvider';
 import {ExamDialog} from '../exams/Exams';
 import SetupCard from '../onboarding/SetupCard';
 import {SemesterSyncStatus} from '../academics/components/SemesterSyncStatus';
+import {AssignmentSyncStatus} from '../assignments/components/AssignmentSyncStatus';
 import {ClassItem,Task,useApp} from '../../store/model';
 import {addDays,dateKey,dateLabel,parseDay} from '../../shared/utils/dates';
 import {dashboardData} from './dashboard';
@@ -22,10 +23,11 @@ import HomeAgenda from './components/HomeAgenda';
 import HomeDeadlines from './components/HomeDeadlines';
 import HomeWeekStrip from './components/HomeWeekStrip';
 import ServerDashboardPomodoro from './components/ServerDashboardPomodoro';
+import HomeProfileCard from './components/HomeProfileCard';
 
 type Panel={kind:'semester'|'grades'|'deadlines'}|{kind:'exam'|'grade';id:string}|null;
-export default function Home({onTask,onClass}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void}){
-  const {tasks,getClassesOn,exams,setTab,courseCatalog,gradeBook,gradeRules,setScheduleMode,semesters,semesterConnection,prepareFocus,setAcademicSemesterId}=useApp();
+export default function Home({onTask,onClass,onProfile}:{onTask:(t:Task)=>void;onClass:(item:ClassItem,date?:string)=>void;onProfile:()=>void}){
+  const {tasks,getClassesOn,exams,setTab,courseCatalog,gradeBook,gradeRules,setScheduleMode,semesters,semesterConnection,courseConnection,assignmentConnection,prepareFocus,setAcademicSemesterId}=useApp();
   const auth=useAuth();
   const [selectedId,setSelectedId]=useState<string|null>(null),[panel,setPanel]=useState<Panel>(null),now=useDashboardClock();
   const [selectedDay,setSelectedDay]=useState<string|null>(null);
@@ -45,8 +47,15 @@ export default function Home({onTask,onClass}:{onTask:(t:Task)=>void;onClass:(it
   const openSchedule=(mode:'Môn & học kỳ'|'Bài tập'|'Kỳ thi')=>{setPanel(null);if(semester)setAcademicSemesterId(semester.id);setScheduleMode(mode);};
   const manage=()=>openSchedule('Môn & học kỳ');
   const focusButton=<Button label="Bắt đầu tập trung" icon="play" style={styles.focus} onPress={startFocus}/>;
-  if(semesterConnection&&!semesterConnection.loaded)return <SemesterSyncStatus statusOnly/>;
+  const profileCard=<HomeProfileCard onOpen={onProfile}/>;
+  if(auth.hasSession&&(!semesterConnection?.loaded||!courseConnection?.loaded)){
+    return <>{profileCard}<SemesterSyncStatus statusOnly/></>;
+  }
+  if(auth.hasSession&&!assignmentConnection?.loaded){
+    return <>{profileCard}<AssignmentSyncStatus statusOnly/></>;
+  }
   return <FlowScope onClose={()=>setPanel(null)}>
+    {profileCard}
     <SemesterSyncStatus statusOnly/>
     <Row between style={{alignItems:'flex-end',flexWrap:'wrap'}}>
       <View style={{gap:2}}><T accessibilityRole="header" style={styles.heading}>{day===today?'Hôm nay':`Ngày ${dateLabel(day)}`}</T>

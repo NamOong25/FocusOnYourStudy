@@ -79,9 +79,9 @@ function AppShell() {
   const openPanel = (value: 'profile' | 'notifications') => { setPanelOrigin(current); setPanel(value); };
   const closeTaskFlow = () => setTaskForm(null);
   const renderPage = (key: string) => {
+    if (key === 'home') return <Home onTask={openTask} onClass={openClass} onProfile={() => openPanel('profile')} />;
     if (auth.hasSession && (!semesterConnection?.loaded || !courseConnection?.loaded)) return <SemesterSyncStatus />;
     if (auth.hasSession && !assignmentConnection?.loaded) return <AssignmentSyncStatus />;
-    if (key === 'home') return <Home onTask={openTask} onClass={openClass} />;
     if (key === 'focus') return <Focus />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant />;
