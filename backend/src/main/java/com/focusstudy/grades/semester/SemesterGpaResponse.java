@@ -9,7 +9,7 @@ import java.util.*;
 
 public record SemesterGpaResponse(SemesterResponse semester, Policy policy, Summary summary, List<Course> courses) {
     public enum State { EMPTY, NO_RESULTS, PARTIAL, COMPLETE }
-    public enum Exclusion { NO_CONFIGURATION, INCOMPLETE_CONFIGURATION, EXAM_BLOCKED, INCOMPLETE_SCORES }
+    public enum Exclusion { OUTSIDE_GPA, NO_CONFIGURATION, INCOMPLETE_CONFIGURATION, EXAM_BLOCKED, INCOMPLETE_SCORES }
     public record Policy(String id, String coursePolicyId, String sourceUrl, int pdfPage, int decimals, String rounding, String formula) { }
     public record Summary(State state, boolean complete, BigDecimal gpa, BigDecimal weightedGradePoints,
             long registeredCredits, long calculatedCredits, long earnedCredits, long failedCredits, long excludedCredits,

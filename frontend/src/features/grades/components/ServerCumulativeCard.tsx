@@ -11,8 +11,8 @@ import {gradePresentation} from '../gradePresentation';
 import {ServerCourseGradeDialog} from './ServerGradePanel';
 import {useAuth} from '../../account/auth/AuthProvider';
 
-const reasons={HIGHEST_PASS:'Chọn tổng kết đạt cao nhất',LATEST_COMPLETE_F:'Chưa có lần đạt · Tính lần F hoàn chỉnh gần nhất',NO_COMPLETE_RESULT:'Chưa có lần đủ kết quả',REVIEW_REQUIRED:'Cần đối chiếu trước khi tính'};
-const uses:Record<CumulativeUse,string>={SELECTED:'Được tính vào tích lũy',PENDING_RESULT:'Chưa đủ kết quả',GROUP_REQUIRES_REVIEW:'Chưa tính · Cần đối chiếu',NOT_SELECTED_LOWER_PASS:'Không chọn · Có lần đạt cao hơn',NOT_SELECTED_OLDER_TIE:'Không chọn · Cùng điểm, có lần gần hơn',NOT_SELECTED_FAILED_ATTEMPT:'Giữ lịch sử F · Đã có lần đạt',NOT_SELECTED_OLDER_F:'Giữ lịch sử F cũ'};
+const reasons={HIGHEST_PASS:'Chọn tổng kết đạt cao nhất',LATEST_COMPLETE_F:'Chưa có lần đạt · Tính lần F hoàn chỉnh gần nhất',NO_COMPLETE_RESULT:'Chưa có lần đủ kết quả',REVIEW_REQUIRED:'Cần đối chiếu trước khi tính',OUTSIDE_GPA:'Không tính GPA'};
+const uses:Record<CumulativeUse,string>={SELECTED:'Được tính vào tích lũy',PENDING_RESULT:'Chưa đủ kết quả',GROUP_REQUIRES_REVIEW:'Chưa tính · Cần đối chiếu',OUTSIDE_GPA:'Không tính GPA',NOT_SELECTED_LOWER_PASS:'Không chọn · Có lần đạt cao hơn',NOT_SELECTED_OLDER_TIE:'Không chọn · Cùng điểm, có lần gần hơn',NOT_SELECTED_FAILED_ATTEMPT:'Giữ lịch sử F · Đã có lần đạt',NOT_SELECTED_OLDER_F:'Giữ lịch sử F cũ'};
 const issues:Record<string,string>={CREDIT_VARIANTS:'Cùng mã có số tín chỉ khác nhau',ASSESSMENT_VARIANTS:'Các lần học có loại LT/TH khác nhau',AMBIGUOUS_PERIOD:'Có nhiều lần trong cùng học kỳ'};
 export default function ServerCumulativeCard(){
   const auth=useAuth(),owner=`${auth.revision}:${auth.profile?.id??''}`;
@@ -23,6 +23,8 @@ export default function ServerCumulativeCard(){
   const currentGroup=group&&read.value?.groups.find(item=>item.key===group.key);
   const current=currentGroup??group;
   const summary=read.value?.summary;
+  const participatingGroups=read.value?.groups.filter(item=>item.reason!=='OUTSIDE_GPA').length ?? 0;
+  const unavailable=summary?.registeredGroups && !participatingGroups ? 'Chưa có môn tính GPA' : 'Chưa đủ dữ liệu';
   const close=()=>setSelection(null);
   const overview=()=>setSelection({owner});
   const reload=()=>{void read.reload();};
@@ -34,7 +36,7 @@ export default function ServerCumulativeCard(){
       {summary ? <>
         <T testID="server-cumulative-gpa" style={{fontFamily:F.extra,fontSize:28,color:C.primary}}>{gradeNumber(summary.gpa,2).replace('.',',')}<T style={S.small}> / 4</T></T>
         <T style={S.small}>{summary.earnedCredits} tín chỉ đạt</T>
-        {summary.state!=='COMPLETE'&&<T style={S.small}>{summary.gpa===null?'Chưa đủ dữ liệu':'GPA tạm tính'}</T>}
+        {summary.state!=='COMPLETE'&&<T style={S.small}>{summary.gpa===null?unavailable:'GPA tạm tính'}</T>}
       </> : <T style={S.small}>{read.error?'Chạm để thử lại':'Đang tải GPA…'}</T>}
     </Pressable>
     {open&&<FlowScope onClose={close}><SheetFlow>
@@ -45,8 +47,8 @@ export default function ServerCumulativeCard(){
               : <>
                 <Card style={{backgroundColor:C.soft,gap:8}}>
                   <T style={{fontFamily:F.extra,fontSize:28,color:C.primary}}>{gradeNumber(summary.gpa,2).replace('.',',')}<T style={S.small}> / 4</T></T>
-                  <T style={S.small}>{summary.earnedCredits} tín chỉ đạt · {summary.calculatedCredits} tín chỉ tính GPA · {summary.calculatedGroups}/{summary.registeredGroups} nhóm đã tính</T>
-                  <Badge label={summary.state==='COMPLETE'?'Đủ kết quả trong dữ liệu đã nhập':summary.gpa===null?'Chưa đủ dữ liệu':'Tạm tính · Còn dữ liệu cần bổ sung'} bg={C.card}/>
+                  <T style={S.small}>{summary.earnedCredits} tín chỉ đạt · {summary.calculatedCredits} tín chỉ tính GPA · {summary.calculatedGroups}/{participatingGroups} nhóm đã tính</T>
+                  <Badge label={summary.state==='COMPLETE'?'Đủ kết quả tính GPA':summary.gpa===null?unavailable:'Tạm tính · Còn dữ liệu cần bổ sung'} bg={C.card}/>
                   {(summary.pendingAttempts>0||summary.reviewGroups>0)&&<T style={S.small}>{summary.pendingAttempts} lần học chưa đủ kết quả · {summary.reviewGroups} nhóm cần đối chiếu.</T>}
                 </Card>
                 {read.value.groups.length>0 ? <>
@@ -71,7 +73,7 @@ function CumulativeGroupRow({group,onPress}:{group:CumulativeGroup;onPress:()=>v
       </Row>
       <T style={S.small}>{reasons[group.reason]} · {group.attempts.length} lần học</T>
       <T style={{color:group.included?(presentation?.attention?presentation.color:C.primary):C.amber,fontFamily:F.bold}}>
-        {selected?`${gradeNumber(selected.result.total,1)}/10 · ${gradeNumber(selected.result.gradePoint,1)}/4`:'Chưa tính vào GPA'}
+        {selected?`${gradeNumber(selected.result.total,1)}/10 · ${gradeNumber(selected.result.gradePoint,1)}/4`:group.reason==='OUTSIDE_GPA'?null:'Chưa tính vào GPA'}
       </T>
     </Card>
   </Pressable>;

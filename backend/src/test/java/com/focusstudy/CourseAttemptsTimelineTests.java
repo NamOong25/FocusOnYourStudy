@@ -17,7 +17,7 @@ class CourseAttemptsTimelineTests {
         var semester = new SemesterResponse(UUID.randomUUID(), term, year, "Kỳ " + term, "Năm " + year,
                 SemesterEntity.Status.UPCOMING, null, 0, null, null);
         var course = new Course(UUID.randomUUID(), code, "Cùng tên môn", credits, CourseEntity.Status.COMPLETED, 0,
-                null, null, assessment, complete, passed,
+                null, null, assessment, true, complete, passed,
                 complete ? Boolean.TRUE.equals(passed) ? IuhCourseResult.Status.PASSED : IuhCourseResult.Status.FAILED : null,
                 "TEST", complete ? BigDecimal.valueOf(Boolean.TRUE.equals(passed) ? 8 : 0) : null,
                 complete ? Boolean.TRUE.equals(passed) ? "B+" : "F" : null,

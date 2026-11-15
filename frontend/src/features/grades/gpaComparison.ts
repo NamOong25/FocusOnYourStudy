@@ -16,13 +16,14 @@ export function resolveGpaPair(semesters: Semester[], selected: { base?: string;
 export function semesterGpaReport(semester: Semester, catalog: Course[], book: GradeBook, rules: GradeRules) {
   const courses = catalog.filter(course => course.semesterId === semester.id);
   const summary = summarizeGrades(courses, book, rules);
-  const excludedPassFail = courses.filter(course => book[course.id]?.assessment === 'pass-fail').length;
-  const gpaCourseCount = courses.length - excludedPassFail;
-  const pending = courses.filter(course => book[course.id]?.assessment !== 'pass-fail' && !courseResult(book[course.id], rules).completeForGpa).length;
+  const participating = courses.filter(course => course.countsTowardGpa !== false);
+  const excludedPassFail = participating.filter(course => book[course.id]?.assessment === 'pass-fail').length;
+  const gpaCourseCount = participating.length - excludedPassFail;
+  const pending = participating.filter(course => book[course.id]?.assessment !== 'pass-fail' && !courseResult(book[course.id], rules).completeForGpa).length;
   const provisional = summary.gpa !== null && pending > 0;
   return { semester, courses, summary, excludedPassFail, gpaCourseCount, pending, provisional,
     status: summary.gpa === null ? 'Chưa đủ dữ liệu' : provisional ? 'GPA tạm tính' : 'Đủ kết quả tính GPA',
-    unavailableReason: !courses.length ? 'Học kỳ chưa có môn học.' : !gpaCourseCount ? 'Học kỳ chỉ có môn đạt/không đạt, không tham gia GPA.' : 'Chưa có môn đủ điều kiện để tính GPA.',
+    unavailableReason: !courses.length ? 'Học kỳ chưa có môn học.' : !gpaCourseCount ? 'Học kỳ không có môn tham gia GPA.' : 'Chưa có môn đủ điều kiện để tính GPA.',
   };
 }
 export type SemesterGpaReport = ReturnType<typeof semesterGpaReport>;

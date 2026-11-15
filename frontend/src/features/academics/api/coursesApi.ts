@@ -12,6 +12,7 @@ function course(value: unknown): Course {
   if (!v || typeof v.id !== 'string' || !uuid.test(v.id) || typeof v.semesterId !== 'string' || !uuid.test(v.semesterId)
     || !string('code', 64) || !(v.code as string).trim() || !string('name', 200) || !(v.name as string).trim()
     || !Number.isInteger(v.credits) || Number(v.credits) < 1 || Number(v.credits) > 30
+    || (v.countsTowardGpa !== undefined && typeof v.countsTowardGpa !== 'boolean')
     || !string('teacher', 200) || !string('room', 100) || !string('description', 5000)
     || !['STUDYING', 'COMPLETED', 'PLANNED'].includes(v.status as string)
     || !['lavender', 'mint', 'peach', 'blue'].includes(v.color as string)
@@ -19,6 +20,7 @@ function course(value: unknown): Course {
     throw new ApiError('Phản hồi môn học chưa hợp lệ. Hãy tải lại.', 'INVALID_RESPONSE');
   }
   return { id: v.id, semesterId: v.semesterId, code: v.code as string, name: v.name as string, credits: v.credits as number,
+    ...(typeof v.countsTowardGpa === 'boolean' ? { countsTowardGpa: v.countsTowardGpa } : {}),
     teacher: v.teacher as string, room: v.room as string, description: v.description as string,
     status: statuses[v.status as string]!, color: v.color as CourseColor, version: v.version as number };
 }
@@ -44,10 +46,16 @@ export function createCoursesApi(baseUrl: string, authorized: Authorized, option
       const expected = original ? version(original) : undefined;
       const body = { semesterId: input.semesterId, name: input.name, code: input.code, credits: input.credits,
         teacher: input.teacher, room: input.room, description: input.description, status: serverStatus[input.status], color: input.color,
+        ...(input.countsTowardGpa !== undefined ? { countsTowardGpa: input.countsTowardGpa } : {}),
         ...(original ? { version: expected } : {}) };
-      return course(await authorized(token => http<unknown>('/api/v1/courses' + (original ? '/' + encodeURIComponent(original.id) : ''), {
+      const saved = course(await authorized(token => http<unknown>('/api/v1/courses' + (original ? '/' + encodeURIComponent(original.id) : ''), {
         method: original ? 'PUT' : 'POST', headers: headers(token), body,
       })));
+      if ((input.countsTowardGpa ?? original?.countsTowardGpa) === false && saved.countsTowardGpa !== false
+        || input.countsTowardGpa === true && saved.countsTowardGpa === false) {
+        throw new ApiError('Chưa xác nhận được tùy chọn GPA đã lưu. Hãy tải lại danh sách môn.', 'INVALID_RESPONSE');
+      }
+      return saved;
     },
     async remove(original: Course) {
       const expected = version(original);

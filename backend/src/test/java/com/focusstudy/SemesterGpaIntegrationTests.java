@@ -94,6 +94,49 @@ class SemesterGpaIntegrationTests {
     record Scored(Map<?,?> course,Map<?,?> config,Map<?,?> marks){}
     Scored scored(Account a,Map<?,?> sem,String code,int credits,double grade)throws Exception{var c=withCredits(a,sem,code,credits);var config=create(a,c,theory());var marks=save(a,config,grade==0?values(config,8,8,0):values(config,grade,grade,grade));return new Scored(c,config,marks);}
     void number(Object value,String expected){assertThat(new java.math.BigDecimal(value.toString())).isEqualByComparingTo(expected);}
+    @Test void togglingCoursesWithSavedScoresRecalculatesBothGpasAndPreservesPoints() throws Exception {
+        var a = account();
+        var sem = semester(a, 1);
+        scored(a, sem, "TIN", 2, 8.6);
+        scored(a, sem, "LT", 2, 9.7);
+        scored(a, sem, "TRIET", 3, 8);
+        var pe = scored(a, sem, "GDTC", 2, 7.5);
+        var defense = scored(a, sem, "GDQP", 8, 8.1);
+        number(summary(gpa(a, sem)).get("gpa"), "3.54");
+        for (var item : List.of(pe, defense)) {
+            assertThat(item.course().get("countsTowardGpa")).isEqualTo(true);
+            var path = COURSES + "/" + item.course().get("id");
+            var update = courseUpdate(item.course());
+            update.put("countsTowardGpa", false);
+            var saved = data(send("PUT", path, a.token, update));
+            assertThat(saved.get("countsTowardGpa")).isEqualTo(false);
+            var legacyUpdate = courseUpdate(saved);
+            legacyUpdate.put("teacher", "Đã đổi giảng viên");
+            assertThat(data(send("PUT", path, a.token, legacyUpdate)).get("countsTowardGpa")).isEqualTo(false);
+        }
+
+        var report = gpa(a, sem);
+        number(summary(report).get("gpa"), "3.73");
+        assertThat(summary(report).get("calculatedCredits")).isEqualTo(7);
+        assertThat(summary(report).get("state")).isEqualTo("COMPLETE");
+        var peResult = rows(report).stream().filter(row -> "GDTC".equals(row.get("code"))).findFirst().orElseThrow();
+        assertThat(peResult.get("exclusionReason")).isEqualTo("OUTSIDE_GPA");
+        number(peResult.get("total"), "7.50");
+        assertThat(read(a, pe.config())).isEqualTo(pe.marks());
+
+        var cumulative = data(send("GET", "/api/v1/gpa/cumulative", a.token, null));
+        number(summary(cumulative).get("gpa"), "3.73");
+        assertThat(summary(cumulative).get("calculatedCredits")).isEqualTo(7);
+        assertThat(summary(cumulative).get("state")).isEqualTo("COMPLETE");
+        assertThat(summary(cumulative).get("pendingAttempts")).isEqualTo(0);
+
+        var pePath = COURSES + "/" + pe.course().get("id");
+        var restore = courseUpdate(data(send("GET", pePath, a.token, null)));
+        restore.put("countsTowardGpa", true);
+        data(send("PUT", pePath, a.token, restore));
+        assertThat(summary(gpa(a, sem)).get("calculatedCredits")).isEqualTo(9);
+        assertThat(summary(data(send("GET", "/api/v1/gpa/cumulative", a.token, null))).get("calculatedCredits")).isEqualTo(9);
+    }
     @Test void emptyOwnedSemesterHasNullGpaAndDoesNotWriteAnyData()throws Exception{
         var a=account();var sem=semester(a,1);var response=send("GET",gpaPath(sem),a.token,null);var value=data(response);var s=summary(value);assertThat(s.get("state")).isEqualTo("EMPTY");assertThat(s.get("gpa")).isNull();assertThat(s.get("registeredCourses")).isEqualTo(0);assertThat(s.get("registeredCredits")).isEqualTo(0);assertThat(rows(value)).isEmpty();assertThat(((Map<?,?>)value.get("semester")).get("id")).isEqualTo(sem.get("id"));assertThat(response.headers().firstValue("Cache-Control").orElseThrow()).contains("no-store");assertThat(body(response).get("meta")).isNotNull();assertThat(gpa(a,sem)).isEqualTo(value);
     }

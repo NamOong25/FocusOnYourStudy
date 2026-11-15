@@ -47,6 +47,16 @@ test('integrated grade detail retains both credit counts and totals through the 
   assert.deepEqual([saved.theoryCredits,saved.practiceCredits],[2,1]);
 });
 test('unconfigured course is null, never an F or zero',()=>{const s=semester(),c=s.courses[0];Object.assign(c,{configurationId:null,gradeVersion:null,assessment:null,resultStatus:null,resultReason:'NO_CONFIGURATION',complete:false,passed:null,total:null,letter:null,gradePoint:null});s.summary={state:'NO_RESULTS',gpa:null,registeredCourses:1,calculatedCourses:0,calculatedCredits:0,excludedCourses:1};const v=parseSemesterGrades(s,query);assert.equal(v.summary.gpa,null);assert.equal(serverGradeView(v.courses[0].result).failed,false);assert.equal(v.courses[0].result.total,null);});
+test('an opted-out course keeps its grade in the semester report', () => {
+  const response = semester();
+  const catalog = { ...query, courses: [{ ...query.courses[0], countsTowardGpa: false }] };
+  Object.assign(response.courses[0], { exclusionReason: 'OUTSIDE_GPA', included: false, weightedGradePoints: null });
+  response.summary = { state: 'NO_RESULTS', gpa: null, registeredCourses: 1, calculatedCourses: 0, calculatedCredits: 0, excludedCourses: 1 };
+  const report = parseSemesterGrades(response, catalog);
+  assert.equal(report.summary.outsideGpaCourses, 1);
+  assert.equal(report.courses[0].result.total, response.courses[0].total);
+  assert.throws(() => parseSemesterGrades(response, query), { code: 'GRADE_CATALOG_CHANGED' });
+});
 test('complete F zero is retained in the semester GPA',()=>{const s=semester();Object.assign(s.courses[0],{resultStatus:'FAILED',resultReason:'TOTAL_BELOW_4',passed:false,total:0,letter:'F',gradePoint:0});s.summary.gpa=0;const v=parseSemesterGrades(s,query);assert.equal(v.summary.gpa,0);assert.equal(v.courses[0].result.total,0);assert.equal(serverGradeView(v.courses[0].result).failed,true);});
 test('semester/version, credits, and course versions must match current catalog',()=>{for(const mutate of [s=>s.semester.version++,s=>s.courses[0].courseVersion++,s=>s.courses[0].credits++]){const s=semester();mutate(s);assert.throws(()=>parseSemesterGrades(s,query),code('GRADE_CATALOG_CHANGED'));}});
 test('foreign semester, duplicated and foreign courses cannot enter a snapshot',()=>{let s=semester();s.semester.id=configid;assert.throws(()=>parseSemesterGrades(s,query));s=semester();s.courses.push({...s.courses[0]});assert.throws(()=>parseSemesterGrades(s,query));s=semester();s.courses[0].id=configid;assert.throws(()=>parseSemesterGrades(s,query));});

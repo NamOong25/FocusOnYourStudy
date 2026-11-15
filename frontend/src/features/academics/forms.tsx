@@ -10,6 +10,7 @@ import { C, F, S } from '../../shared/theme';
 import { useFormChanges } from '../../shared/forms/useFormChanges';
 import { SemesterApiForm } from './components/SemesterApiForm';
 import { CourseApiForm } from './components/CourseApiForm';
+import { CourseGpaSwitch } from './components/CourseGpaSwitch';
 
 export function SemesterForm(props: { item?: Semester; onClose: () => void; onSaved: (id: string) => void; onDeleted?: () => void }) {
   const { semesterConnection } = useApp();
@@ -49,13 +50,14 @@ function PreviewCourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
   const { semesters, courseCatalog, saveCourse, deleteCourse, tasks, classes, exams, studySessions, gradeBook, setToast } = useApp();
   const [name, setName] = useState(item?.name ?? ''); const [code, setCode] = useState(item?.code ?? '');
   const [credits, setCredits] = useState(String(item?.credits ?? 3));
+  const [countsTowardGpa, setCountsTowardGpa] = useState(item?.countsTowardGpa ?? true);
   const [teacher, setTeacher] = useState(item?.teacher ?? ''); const [room, setRoom] = useState(item?.room ?? '');
   const [semester, setSemester] = useState(item?.semesterId ?? semesterId);
   const [status, setStatus] = useState<CourseStatus>(item?.status ?? 'Đang học');
   const [color, setColor] = useState<CourseColor>(item?.color ?? 'lavender');
   const [description, setDescription] = useState(item?.description ?? '');
   const [error, setError] = useState(''); const [confirmDelete, setConfirmDelete] = useState(false);
-  const dirty = useFormChanges({ name, code, credits, teacher, room, semester, status, color, description });
+  const dirty = useFormChanges({ name, code, credits, countsTowardGpa, teacher, room, semester, status, color, description });
   const linkCount = item ? tasks.filter(t => t.courseId === item.id).length + classes.filter(c => c.courseId === item.id).length + exams.filter(e => e.courseId === item.id).length + studySessions.filter(s => s.courseId === item.id).length : 0;
   const gradeLinked = !!item && (hasGradeData(gradeBook[item.id]) || !!gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id));
   const save = () => {
@@ -66,12 +68,13 @@ function PreviewCourseForm({ item, semesterId, onClose, onSaved, onDeleted }: { 
     if (item && semester !== item.semesterId && linkCount > 0) { setError('Môn đang có lịch hoặc bài tập liên quan. Giữ nguyên học kỳ để tránh chuyển nhầm dữ liệu.'); return; }
     if (item && gradeLinked && semester !== item.semesterId) { setError('Môn đang có điểm hoặc liên kết học lại. Giữ nguyên học kỳ để không thay đổi lịch sử điểm.'); return; }
     if (item && Number(credits)!==item.credits && (gradeBook[item.id]?.previousCourseId || Object.values(gradeBook).some(g=>g.previousCourseId===item.id))) { setError('Các lần học lại cần cùng số tín chỉ. Xử lý liên kết học lại trước khi đổi tín chỉ.'); return; }
-    const course: Course = { id: item?.id ?? uid(), name: name.trim(), code: code.trim().toUpperCase(), credits: Number(credits), teacher: teacher.trim(), room: room.trim(), semesterId: semester, status, color, description: description.trim() };
+    const course: Course = { id: item?.id ?? uid(), name: name.trim(), code: code.trim().toUpperCase(), credits: Number(credits), countsTowardGpa, teacher: teacher.trim(), room: room.trim(), semesterId: semester, status, color, description: description.trim() };
     saveCourse(course); setToast(item ? 'Đã cập nhật môn học' : 'Đã thêm môn học mới'); onSaved(course.id, course.semesterId);
   };
   return <Sheet title={item ? 'Chỉnh sửa môn học' : 'Môn học mới'} onClose={onClose} dirty={dirty}>
     <Field label="Tên môn học" value={name} onChange={setName} placeholder="Ví dụ: Công nghệ phần mềm" />
     <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><Field label="Mã môn học" value={code} onChange={setCode} placeholder="SE301" /></View><View style={{ width: 105 }}><Field label="Số tín chỉ" value={credits} onChange={setCredits} numeric /></View></Row>
+    <CourseGpaSwitch value={countsTowardGpa} onChange={setCountsTowardGpa} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Thuộc học kỳ</T>
     <View style={{ gap: 7 }}>{semesters.map(s => <Pressable key={s.id} accessibilityRole="radio" accessibilityLabel={`${s.name}, ${s.academicYear}`} accessibilityState={{ checked: semester === s.id }} aria-checked={semester === s.id} onPress={() => setSemester(s.id)} style={{ backgroundColor: semester === s.id ? C.soft : C.canvas, padding: 12, minHeight: 48, borderRadius: 14 }}><Row><Icon name={semester === s.id ? 'radio-button-on' : 'radio-button-off'} size={19} /><T style={[S.grow, { fontFamily: F.semi, fontSize: 12 }]}>{s.name} · {s.academicYear}</T></Row></Pressable>)}</View>
     <Field label="Giảng viên" value={teacher} onChange={setTeacher} placeholder="Họ và tên giảng viên" />

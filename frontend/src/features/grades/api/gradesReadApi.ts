@@ -9,12 +9,12 @@ export type MissingScore = { columnId: string; field: 'SCORE' | 'REMAINDER_SCORE
 export type Notice = { code: string; message: string };
 export type ResultCore = { status: ResultStatus | null; reason: string; complete: boolean; passed: boolean | null;
   total: number | null; letter: string | null; gradePoint: number | null; missingGroups: string[]; missingScores: MissingScore[]; notices: Notice[] };
-export type CourseRef = Pick<Course, 'id' | 'semesterId' | 'credits' | 'version'>;
+export type CourseRef = Pick<Course, 'id' | 'semesterId' | 'credits' | 'version' | 'countsTowardGpa'>;
 export type SemesterGradeQuery = { semesterId: string; semesterVersion: number; courses: CourseRef[] };
-export type ServerCourseGrade = { id: string; code: string; name: string; credits: number; courseVersion: number;
+export type ServerCourseGrade = { id: string; code: string; name: string; credits: number; courseVersion: number; countsTowardGpa: boolean;
   configurationId: string | null; gradeVersion: number | null; assessment: Assessment | null; result: ResultCore };
 export type ServerSemesterGrades = { semesterId: string; semesterVersion: number; courses: ServerCourseGrade[];
-  summary: { state: 'EMPTY' | 'NO_RESULTS' | 'PARTIAL' | 'COMPLETE'; gpa: number | null; registeredCourses: number; calculatedCourses: number; calculatedCredits: number; excludedCourses: number } };
+  summary: { state: 'EMPTY' | 'NO_RESULTS' | 'PARTIAL' | 'COMPLETE'; gpa: number | null; registeredCourses: number; calculatedCourses: number; calculatedCredits: number; excludedCourses: number; outsideGpaCourses: number } };
 export type GradePart = { id: string; name: string; kind: string; project: { target: 'PRACTICE' | 'FINAL'; share: number } | null;
   weight: number; weightNumerator: number; weightDenominator: number; score: number | null; remainderScore: number | null; effectiveScore: number | null };
 export type ServerGradeDetail = { kind: 'unconfigured'; courseId: string } | { kind: 'configured'; courseId: string;
@@ -51,7 +51,7 @@ export function core(v: Record<string, unknown>, status: unknown, reason: unknow
 function ref(c: CourseRef) {
   if (!validGradeId(c.id) || !validGradeId(c.semesterId) || !version(c.version) || !Number.isInteger(c.credits) || c.credits < 1 || c.credits > 30)
     throw new ApiError('Chọn môn học đã được tải từ tài khoản.', 'INVALID_GRADE_QUERY');
-  return [c.id.toLowerCase(), c.semesterId.toLowerCase(), c.version, c.credits];
+  return [c.id.toLowerCase(), c.semesterId.toLowerCase(), c.version, c.credits, c.countsTowardGpa !== false];
 }
 export function semesterGradesKey(q: SemesterGradeQuery) {
   if (!validGradeId(q.semesterId) || !version(q.semesterVersion) || !Array.isArray(q.courses)) throw new ApiError('Chọn học kỳ và danh sách môn hợp lệ.', 'INVALID_GRADE_QUERY');
@@ -70,6 +70,9 @@ export function parseSemesterGrades(input: unknown, query: SemesterGradeQuery): 
     const row = obj(input), courseId = id(row.id), local = expected.get(courseId);
     if (!local) throw changed();
     if (!version(row.courseVersion) || row.courseVersion !== local.version || row.credits !== local.credits) throw changed();
+    const countsTowardGpa = row.exclusionReason !== 'OUTSIDE_GPA';
+    if (countsTowardGpa !== (local.countsTowardGpa !== false)) throw changed();
+    if (!countsTowardGpa && (row.included !== false || row.weightedGradePoints !== null)) throw invalid();
     if (!text(row.code,64) || !row.code.trim() || !text(row.name,200) || !row.name.trim()) throw invalid();
     const configurationId = row.configurationId === null ? null : id(row.configurationId);
     const assessment = row.assessment === null ? null : token(row.assessment, gradeAssessments);
@@ -77,17 +80,18 @@ export function parseSemesterGrades(input: unknown, query: SemesterGradeQuery): 
     const result = core(row, row.resultStatus, row.resultReason);
     if (configurationId === null && (result.status !== null || result.complete || result.reason !== 'NO_CONFIGURATION') || configurationId !== null && result.status === null) throw invalid();
     return { id: courseId, code: row.code, name: row.name, credits: local.credits, courseVersion: Number(row.courseVersion),
-      configurationId, gradeVersion: row.gradeVersion as number | null, assessment, result };
+      countsTowardGpa, configurationId, gradeVersion: row.gradeVersion as number | null, assessment, result };
   });
   if (new Set(courses.map(c => c.id)).size !== courses.length) throw invalid();
   if (courses.length !== expected.size) throw changed();
   const state = token(summary.state,['EMPTY','NO_RESULTS','PARTIAL','COMPLETE'] as const), gpa = decimal(summary.gpa,4);
+  const outsideGpaCourses = courses.filter(course => !course.countsTowardGpa).length;
   for (const field of ['registeredCourses','calculatedCourses','calculatedCredits','excludedCourses']) if (!version(summary[field])) throw invalid();
   if (summary.registeredCourses !== courses.length || Number(summary.calculatedCourses) + Number(summary.excludedCourses) !== courses.length
-    || (Number(summary.calculatedCredits) === 0) !== (gpa === null)) throw invalid();
+    || Number(summary.excludedCourses) < outsideGpaCourses || (Number(summary.calculatedCredits) === 0) !== (gpa === null)) throw invalid();
   return { semesterId: query.semesterId.toLowerCase(), semesterVersion: Number(semester.version), courses,
     summary: { state, gpa, registeredCourses: Number(summary.registeredCourses), calculatedCourses: Number(summary.calculatedCourses),
-      calculatedCredits: Number(summary.calculatedCredits), excludedCourses: Number(summary.excludedCourses) } };
+      calculatedCredits: Number(summary.calculatedCredits), excludedCourses: Number(summary.excludedCourses), outsideGpaCourses } };
 }
 function configuration(input: unknown, courseId: string) {
   const v = obj(input); if (id(v.courseId) !== courseId.toLowerCase() || !version(v.version)) throw invalid();

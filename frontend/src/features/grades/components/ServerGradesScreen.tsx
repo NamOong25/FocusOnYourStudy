@@ -119,7 +119,7 @@ function CourseGradeRow({ course, onOpen }: { course: ServerCourseGrade; onOpen:
     <Row style={{ gap: 7 }}>
       <View style={[S.grow, { gap: 4 }]}>
         <T style={{ fontFamily: F.bold, fontSize: 15 }}>{course.name}</T>
-        <T style={S.small}>{course.code} · {course.credits} tín chỉ</T>
+        <T style={S.small}>{course.code} · {course.credits} tín chỉ{!course.countsTowardGpa && ' · Không tính GPA'}</T>
       </View>
       <View style={{ maxWidth: '45%', flexShrink: 1, alignItems: 'flex-end', gap: 4 }}>
         <T style={{ fontFamily: F.extra, fontSize: 23, color: scoreColor }}>{value}<T style={S.small}> / 10</T></T>

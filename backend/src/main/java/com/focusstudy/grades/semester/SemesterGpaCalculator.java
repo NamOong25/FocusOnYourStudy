@@ -12,9 +12,11 @@ public final class SemesterGpaCalculator {
     private SemesterGpaCalculator() { }
     public static Course course(CourseEntity course, GradeConfigurationEntity config) {
         if (config == null) return new Course(course.getId(), course.getCode(), course.getName(), course.getCredits(), course.getStatus(), course.getVersion(),
-                null, null, null, false, Exclusion.NO_CONFIGURATION, null, "NO_CONFIGURATION", false, null, null, null, null, null, List.of(), List.of(), List.of());
+                null, null, null, false, course.countsTowardGpa() ? Exclusion.NO_CONFIGURATION : Exclusion.OUTSIDE_GPA,
+                null, "NO_CONFIGURATION", false, null, null, null, null, null, List.of(), List.of(), List.of());
         var scores = GradeScoresResponse.from(config); var result = IuhCourseCalculator.calculate(scores, course.getCredits());
-        Exclusion exclusion = !scores.missingGroups().isEmpty() ? Exclusion.INCOMPLETE_CONFIGURATION
+        Exclusion exclusion = !course.countsTowardGpa() ? Exclusion.OUTSIDE_GPA
+                : !scores.missingGroups().isEmpty() ? Exclusion.INCOMPLETE_CONFIGURATION
                 : result.examEligibility() == IuhCourseResult.ExamEligibility.BLOCKED_BY_MIDTERM_ZERO ? Exclusion.EXAM_BLOCKED
                 : !result.complete() || result.gradePoint() == null ? Exclusion.INCOMPLETE_SCORES : null;
         var weighted = exclusion == null ? result.gradePoint().multiply(BigDecimal.valueOf(course.getCredits())) : null;
@@ -25,11 +27,16 @@ public final class SemesterGpaCalculator {
     }
     public static Summary summarize(List<Course> courses) {
         long registered = 0, calculated = 0, earned = 0, failed = 0, excluded = 0;
-        int calculatedCount = 0, passedCount = 0, failedCount = 0, excludedCount = 0;
+        int calculatedCount = 0, passedCount = 0, failedCount = 0, excludedCount = 0, pendingCount = 0;
         BigDecimal weighted = BigDecimal.ZERO;
         for (var course : courses) {
             registered = Math.addExact(registered, course.credits());
-            if (!course.included()) { excluded = Math.addExact(excluded, course.credits()); excludedCount++; continue; }
+            if (!course.included()) {
+                excluded = Math.addExact(excluded, course.credits());
+                excludedCount++;
+                if (course.exclusionReason() != Exclusion.OUTSIDE_GPA) pendingCount++;
+                continue;
+            }
             // A completed F is included, with zero numerator contribution but
             // its full credit count in the denominator.
             calculated = Math.addExact(calculated, course.credits()); calculatedCount++;
@@ -37,7 +44,7 @@ public final class SemesterGpaCalculator {
             if (Boolean.TRUE.equals(course.passed())) { earned = Math.addExact(earned, course.credits()); passedCount++; }
             else { failed = Math.addExact(failed, course.credits()); failedCount++; }
         }
-        var state = courses.isEmpty() ? State.EMPTY : calculatedCount == 0 ? State.NO_RESULTS : excludedCount > 0 ? State.PARTIAL : State.COMPLETE;
+        var state = courses.isEmpty() ? State.EMPTY : calculatedCount == 0 ? State.NO_RESULTS : pendingCount > 0 ? State.PARTIAL : State.COMPLETE;
         var gpa = calculated == 0 ? null : weighted.divide(BigDecimal.valueOf(calculated), 2, RoundingMode.HALF_UP);
         return new Summary(state, state == State.COMPLETE, gpa, weighted, registered, calculated, earned, failed, excluded,
                 courses.size(), calculatedCount, passedCount, failedCount, excludedCount);

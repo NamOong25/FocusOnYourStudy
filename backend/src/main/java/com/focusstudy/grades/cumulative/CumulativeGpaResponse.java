@@ -7,8 +7,8 @@ import java.util.*;
 
 public record CumulativeGpaResponse(Policy policy, Summary summary, List<Group> groups) {
     public enum State { EMPTY, NO_RESULTS, PARTIAL, COMPLETE }
-    public enum Reason { HIGHEST_PASS, LATEST_COMPLETE_F, NO_COMPLETE_RESULT, REVIEW_REQUIRED }
-    public enum Use { SELECTED, PENDING_RESULT, GROUP_REQUIRES_REVIEW,
+    public enum Reason { HIGHEST_PASS, LATEST_COMPLETE_F, NO_COMPLETE_RESULT, REVIEW_REQUIRED, OUTSIDE_GPA }
+    public enum Use { SELECTED, PENDING_RESULT, GROUP_REQUIRES_REVIEW, OUTSIDE_GPA,
         NOT_SELECTED_LOWER_PASS, NOT_SELECTED_OLDER_TIE, NOT_SELECTED_FAILED_ATTEMPT, NOT_SELECTED_OLDER_F }
     public record Policy(String id, String authority, boolean officialIuhCumulativeVerified, String scope,
             String coursePolicyId, String historyPolicyId, String selection, String tieBreak, String noPassRule,

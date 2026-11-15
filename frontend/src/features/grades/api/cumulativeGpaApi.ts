@@ -3,9 +3,9 @@ import type {Authorized} from '../../academics/api/semestersApi';
 import {core,courseGradeKey,gradeAssessments,validGradeId,type Assessment,type CourseRef,type ResultCore} from './gradesReadApi';
 
 export type CumulativeQuery={semesters:{id:string;version:number}[];courses:CourseRef[]};
-export type CumulativeUse='SELECTED'|'PENDING_RESULT'|'GROUP_REQUIRES_REVIEW'|'NOT_SELECTED_LOWER_PASS'|'NOT_SELECTED_OLDER_TIE'|'NOT_SELECTED_FAILED_ATTEMPT'|'NOT_SELECTED_OLDER_F';
+export type CumulativeUse='SELECTED'|'PENDING_RESULT'|'GROUP_REQUIRES_REVIEW'|'OUTSIDE_GPA'|'NOT_SELECTED_LOWER_PASS'|'NOT_SELECTED_OLDER_TIE'|'NOT_SELECTED_FAILED_ATTEMPT'|'NOT_SELECTED_OLDER_F';
 export type CumulativeAttempt={id:string;name:string;semesterId:string;semesterName:string;academicYear:string;term:number;result:ResultCore;use:CumulativeUse};
-export type CumulativeGroup={key:string;code:string;credits:number;included:boolean;selectedCourseId:string|null;reason:'HIGHEST_PASS'|'LATEST_COMPLETE_F'|'NO_COMPLETE_RESULT'|'REVIEW_REQUIRED';pendingAttempts:number;issues:string[];otherCredits:number[];attempts:CumulativeAttempt[]};
+export type CumulativeGroup={key:string;code:string;credits:number;included:boolean;selectedCourseId:string|null;reason:'HIGHEST_PASS'|'LATEST_COMPLETE_F'|'NO_COMPLETE_RESULT'|'REVIEW_REQUIRED'|'OUTSIDE_GPA';pendingAttempts:number;issues:string[];otherCredits:number[];attempts:CumulativeAttempt[]};
 export type CumulativeGpa={groups:CumulativeGroup[];summary:{state:'EMPTY'|'NO_RESULTS'|'PARTIAL'|'COMPLETE';complete:boolean;gpa:number|null;weightedGradePoints:number;calculatedCredits:number;earnedCredits:number;failedCredits:number;registeredGroups:number;recordedAttempts:number;repeatedGroups:number;calculatedGroups:number;passedGroups:number;failedGroups:number;excludedGroups:number;reviewGroups:number;pendingAttempts:number}};
 const invalid=()=>new ApiError('Phản hồi GPA tích lũy chưa hợp lệ. Hãy tải lại.','INVALID_RESPONSE');
 const changed=()=>new ApiError('Danh sách học kỳ hoặc môn đã thay đổi. Tải lại để xem đúng GPA tích lũy.','GRADE_CATALOG_CHANGED');
@@ -33,7 +33,7 @@ export function parseCumulativeGpa(input:unknown,q:CumulativeQuery):CumulativeGp
     const g=object(raw),h=object(g.history),code=text(h.code,64),credits=count(h.credits);if(credits<1||credits>30||typeof g.included!=='boolean'||typeof h.needsReview!=='boolean')throw invalid();
     const issues=array(h.issues,3).map(v=>choice(v,['CREDIT_VARIANTS','ASSESSMENT_VARIANTS','AMBIGUOUS_PERIOD'] as const));if(new Set(issues).size!==issues.length||h.needsReview!==(issues.length>0))throw invalid();
     const otherCredits=array(h.otherCreditVariants,30).map(v=>{const variant=object(v),n=count(variant.credits);if(n<1||n>30)throw invalid();for(const c of array(variant.courseIds)){if(!expected.has(id(c)))throw changed();}return n;});
-    const decisions=new Map<string,CumulativeUse>();for(const item of array(g.decisions)){const d=object(item),key=id(d.courseId);if(decisions.has(key))throw invalid();decisions.set(key,choice(d.use,['SELECTED','PENDING_RESULT','GROUP_REQUIRES_REVIEW','NOT_SELECTED_LOWER_PASS','NOT_SELECTED_OLDER_TIE','NOT_SELECTED_FAILED_ATTEMPT','NOT_SELECTED_OLDER_F'] as const));}
+    const decisions=new Map<string,CumulativeUse>();for(const item of array(g.decisions)){const d=object(item),key=id(d.courseId);if(decisions.has(key))throw invalid();decisions.set(key,choice(d.use,['SELECTED','PENDING_RESULT','GROUP_REQUIRES_REVIEW','OUTSIDE_GPA','NOT_SELECTED_LOWER_PASS','NOT_SELECTED_OLDER_TIE','NOT_SELECTED_FAILED_ATTEMPT','NOT_SELECTED_OLDER_F'] as const));}
     const attempts=array(h.attempts).map(rawAttempt=>{
       const a=object(rawAttempt),s=object(a.semester),c=object(a.course),courseId=id(c.id),semesterId=id(s.id),local=expected.get(courseId);
       if(seen.has(courseId))throw invalid();seen.add(courseId);
@@ -43,12 +43,15 @@ export function parseCumulativeGpa(input:unknown,q:CumulativeQuery):CumulativeGp
       if(configurationId===null?(c.gradeVersion!==null||c.assessment!==null):(!Number.isSafeInteger(c.gradeVersion)||Number(c.gradeVersion)<0||!gradeAssessments.includes(c.assessment as Assessment)))throw invalid();
       const result=core(c,c.resultStatus,c.resultReason);if(configurationId===null?(result.status!==null||result.reason!=='NO_CONFIGURATION'):result.status===null)throw invalid();
       const use=decisions.get(courseId);if(!use)throw invalid();
+      if ((c.countsTowardGpa !== false) !== (local.countsTowardGpa !== false)) throw changed();
+      if ((c.countsTowardGpa !== undefined && typeof c.countsTowardGpa !== 'boolean') || (use === 'OUTSIDE_GPA') !== (c.countsTowardGpa === false)) throw invalid();
       return{id:courseId,name:text(c.name),semesterId,semesterName:text(s.name,100),academicYear:text(s.academicYear,50),term:Number(s.term),result,use};
     });
     if(!attempts.length||decisions.size!==attempts.length)throw invalid();
     const selectedCourseId=g.selectedCourseId===null?null:id(g.selectedCourseId),selected=attempts.find(a=>a.id===selectedCourseId),selectedCount=attempts.filter(a=>a.use==='SELECTED').length;
-    const reason=choice(g.reason,['HIGHEST_PASS','LATEST_COMPLETE_F','NO_COMPLETE_RESULT','REVIEW_REQUIRED'] as const),pendingAttempts=count(g.pendingAttempts);
-    if(pendingAttempts>attempts.length||(g.included?( !selected||!selected.result.complete||selected.use!=='SELECTED'||selectedCount!==1||h.needsReview||!['HIGHEST_PASS','LATEST_COMPLETE_F'].includes(reason)):(selectedCourseId!==null||selectedCount!==0||!['NO_COMPLETE_RESULT','REVIEW_REQUIRED'].includes(reason))))throw invalid();
+    const reason=choice(g.reason,['HIGHEST_PASS','LATEST_COMPLETE_F','NO_COMPLETE_RESULT','REVIEW_REQUIRED','OUTSIDE_GPA'] as const),pendingAttempts=count(g.pendingAttempts);
+    const participating = attempts.filter(a => a.use !== 'OUTSIDE_GPA').length;
+    if((reason === 'OUTSIDE_GPA') !== (participating === 0) || pendingAttempts>participating||(g.included?( !selected||!selected.result.complete||selected.use!=='SELECTED'||selectedCount!==1||h.needsReview||!['HIGHEST_PASS','LATEST_COMPLETE_F'].includes(reason)):(selectedCourseId!==null||selectedCount!==0||!['NO_COMPLETE_RESULT','REVIEW_REQUIRED','OUTSIDE_GPA'].includes(reason))))throw invalid();
     if(h.needsReview!==(reason==='REVIEW_REQUIRED')||reason==='HIGHEST_PASS'&&selected?.result.passed!==true||reason==='LATEST_COMPLETE_F'&&(selected?.result.passed!==false||selected.result.gradePoint!==0))throw invalid();
     if(g.included)amount(g.weightedGradePoints,credits*4);else if(g.weightedGradePoints!==null)throw invalid();
     return{key:JSON.stringify([code,credits]),code,credits,included:g.included,selectedCourseId,reason,pendingAttempts,issues,otherCredits,attempts};
@@ -58,7 +61,8 @@ export function parseCumulativeGpa(input:unknown,q:CumulativeQuery):CumulativeGp
   const fields=['calculatedCredits','earnedCredits','failedCredits','registeredGroups','recordedAttempts','repeatedGroups','calculatedGroups','passedGroups','failedGroups','excludedGroups','reviewGroups','pendingAttempts'] as const;
   const values=Object.fromEntries(fields.map(k=>[k,count(summary[k])])) as Record<typeof fields[number],number>;
   if(typeof summary.complete!=='boolean'||summary.complete!==(state==='COMPLETE')||values.registeredGroups!==groups.length||values.recordedAttempts!==seen.size||values.calculatedGroups!==groups.filter(g=>g.included).length||values.excludedGroups+values.calculatedGroups!==groups.length||values.passedGroups+values.failedGroups!==values.calculatedGroups||values.earnedCredits+values.failedCredits!==values.calculatedCredits||(values.calculatedCredits===0)!==(gpa===null)||values.reviewGroups!==groups.filter(g=>g.reason==='REVIEW_REQUIRED').length||values.pendingAttempts!==groups.reduce((sum,g)=>sum+g.pendingAttempts,0))throw invalid();
-  if(state!==(groups.length===0?'EMPTY':values.calculatedGroups===0?'NO_RESULTS':values.excludedGroups>0||values.pendingAttempts>0?'PARTIAL':'COMPLETE'))throw invalid();
+  const outsideGpaGroups=groups.filter(g=>g.reason==='OUTSIDE_GPA').length;
+  if(state!==(groups.length===0?'EMPTY':values.calculatedGroups===0?'NO_RESULTS':values.excludedGroups>outsideGpaGroups||values.pendingAttempts>0?'PARTIAL':'COMPLETE'))throw invalid();
   return{groups,summary:{...values,state,complete:summary.complete,gpa,weightedGradePoints:amount(summary.weightedGradePoints)}};
 }
 export function createCumulativeGpaApi(baseUrl:string,authorized:Authorized,options?:Parameters<typeof createHttpClient>[1]){

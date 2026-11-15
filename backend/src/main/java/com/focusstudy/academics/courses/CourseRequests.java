@@ -18,7 +18,8 @@ public final class CourseRequests {
             @Size(max = 100) String room,
             Status status,
             @Pattern(regexp = "lavender|mint|peach|blue") String color,
-            @Size(max = 5000) String description) {
+            @Size(max = 5000) String description,
+            Boolean countsTowardGpa) {
         public Create {
             code = CourseRequests.code(code); name = text(name); teacher = text(teacher); room = text(room); description = text(description);
             status = status == null ? Status.STUDYING : status; color = color == null ? "lavender" : color;
@@ -34,6 +35,7 @@ public final class CourseRequests {
             Status status,
             @Pattern(regexp = "lavender|mint|peach|blue") String color,
             @Size(max = 5000) String description,
+            Boolean countsTowardGpa,
             @NotNull @PositiveOrZero Long version) {
         public Update {
             code = CourseRequests.code(code); name = text(name); teacher = text(teacher); room = text(room); description = text(description);

@@ -28,14 +28,16 @@ public record CourseAttemptsResponse(UUID focusCourseId, Policy policy, Summary 
             Relation relation, SemesterResponse semester, Course course) { }
     // Result fields are reused from 5A/5B.1, without a cumulative inclusion flag.
     public record Course(UUID id, String code, String name, int credits, CourseEntity.Status status, long version,
-            UUID configurationId, Long gradeVersion, Assessment assessment, boolean complete, Boolean passed,
+            UUID configurationId, Long gradeVersion, Assessment assessment, boolean countsTowardGpa, boolean complete, Boolean passed,
             IuhCourseResult.Status resultStatus, String resultReason, BigDecimal total, String letter, BigDecimal gradePoint,
             SemesterGpaResponse.Exclusion incompleteReason, List<String> missingGroups,
             List<IuhCourseResult.MissingScore> missingScores, List<IuhCourseResult.Notice> notices) {
         public static Course from(SemesterGpaResponse.Course c) {
+            boolean countsTowardGpa = c.exclusionReason() != SemesterGpaResponse.Exclusion.OUTSIDE_GPA;
+            var incompleteReason = countsTowardGpa ? c.exclusionReason() : null;
             return new Course(c.id(), c.code(), c.name(), c.credits(), c.courseStatus(), c.courseVersion(),
-                    c.configurationId(), c.gradeVersion(), c.assessment(), c.complete(), c.passed(), c.resultStatus(),
-                    c.resultReason(), c.total(), c.letter(), c.gradePoint(), c.exclusionReason(),
+                    c.configurationId(), c.gradeVersion(), c.assessment(), countsTowardGpa, c.complete(), c.passed(), c.resultStatus(),
+                    c.resultReason(), c.total(), c.letter(), c.gradePoint(), incompleteReason,
                     c.missingGroups(), c.missingScores(), c.notices());
         }
     }

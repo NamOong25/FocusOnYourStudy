@@ -11,8 +11,10 @@ import { createGradesReadApi } from '../../grades/api/gradesReadApi';
 import { courseGradeLinks } from '../courseLinks';
 import { Course, CourseColor, CourseStatus, courseColors } from '../academic';
 import type { CourseInput } from '../api/coursesApi';
+import { CourseGpaSwitch } from './CourseGpaSwitch';
 
 const draftOf = (course?: Course, semesterId = '') => ({ name: course?.name ?? '', code: course?.code ?? '', credits: String(course?.credits ?? 3),
+  countsTowardGpa: course?.countsTowardGpa ?? true,
   teacher: course?.teacher ?? '', room: course?.room ?? '', semesterId: course?.semesterId ?? semesterId,
   status: course?.status ?? 'Đang học' as CourseStatus, color: course?.color ?? 'lavender' as CourseColor, description: course?.description ?? '' });
 
@@ -95,6 +97,7 @@ export function CourseApiForm({ item, semesterId, onClose, onSaved, onDeleted }:
     <Badge label="MÔN HỌC TRONG TÀI KHOẢN" icon="cloud-done-outline" />
     <Field label="Tên môn học" value={draft.name} onChange={name => update({ name })} placeholder="Ví dụ: Công nghệ phần mềm" disabled={locked} maxLength={200} />
     <Row style={{ alignItems: 'flex-start' }}><View style={S.grow}><Field label="Mã môn học" value={draft.code} onChange={code => update({ code })} placeholder="SE301" disabled={locked} maxLength={64} /></View><View style={{ width: 105 }}><Field label="Số tín chỉ" value={draft.credits} onChange={credits => update({ credits })} numeric disabled={locked} maxLength={3} /></View></Row>
+    <CourseGpaSwitch value={draft.countsTowardGpa} onChange={countsTowardGpa => update({ countsTowardGpa })} disabled={locked} />
     <T style={{ fontFamily: F.semi, fontSize: 12 }}>Thuộc học kỳ</T>
     <View style={{ gap: 7 }}>{semesters.map(s => <Pressable key={s.id} disabled={locked} accessibilityRole="radio" accessibilityLabel={`${s.name}, ${s.academicYear}`} accessibilityState={{ checked: draft.semesterId === s.id, disabled: locked }} aria-checked={draft.semesterId === s.id} onPress={() => update({ semesterId: s.id })} style={{ backgroundColor: draft.semesterId === s.id ? C.soft : C.canvas, padding: 12, minHeight: 48, borderRadius: 14 }}><Row><Icon name={draft.semesterId === s.id ? 'radio-button-on' : 'radio-button-off'} size={19} /><T style={[S.grow, { fontFamily: F.semi, fontSize: 12 }]}>{s.name} · {s.academicYear}</T></Row></Pressable>)}</View>
     <Field label="Giảng viên" value={draft.teacher} onChange={teacher => update({ teacher })} disabled={locked} maxLength={200} />

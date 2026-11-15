@@ -15,12 +15,15 @@ import static org.assertj.core.api.Assertions.*;
 
 class CumulativeGpaCalculatorTests {
     CourseAttemptsTimeline.Entry entry(String code,int credits,int year,int term,Double total,Double point,Boolean passed) {
+        return entry(code, credits, year, term, total, point, passed, true);
+    }
+    CourseAttemptsTimeline.Entry entry(String code,int credits,int year,int term,Double total,Double point,Boolean passed,boolean countsTowardGpa) {
         boolean complete=total!=null&&point!=null&&passed!=null;
         var s=new SemesterResponse(UUID.randomUUID(),term,year,"Kỳ "+term,year+" – "+(year+1),SemesterEntity.Status.UPCOMING,null,0,null,null);
         String letter=point==null?null:switch(BigDecimal.valueOf(point).stripTrailingZeros().toPlainString()){
             case "4"->"A+";case "3.8"->"A";case "3.5"->"B+";case "3"->"B";case "2.5"->"C+";case "2"->"C";case "1.5"->"D+";case "1"->"D";default->"F";};
         var c=new CourseAttemptsResponse.Course(UUID.randomUUID(),code,"Trùng tên môn",credits,CourseEntity.Status.COMPLETED,0,
-                UUID.randomUUID(),1L,Assessment.THEORY,complete,passed,
+                UUID.randomUUID(),1L,Assessment.THEORY,countsTowardGpa,complete,passed,
                 !complete?IuhCourseResult.Status.INCOMPLETE_SCORES:passed?IuhCourseResult.Status.PASSED:IuhCourseResult.Status.FAILED,
                 "TEST",total==null?null:BigDecimal.valueOf(total),letter,point==null?null:BigDecimal.valueOf(point),
                 complete?null:Exclusion.INCOMPLETE_SCORES,List.of(),List.of(),List.of());
@@ -31,6 +34,20 @@ class CumulativeGpaCalculatorTests {
     CourseAttemptsTimeline.Entry pending(String code,int credits,int term){return entry(code,credits,2026,term,null,null,null);}
     CumulativeGpaResponse report(CourseAttemptsTimeline.Entry... entries){return CumulativeGpaCalculator.calculate(CourseAttemptsTimeline.build(null,List.of(entries)));}
     void number(BigDecimal value,String expected){assertThat(value).isEqualByComparingTo(expected);}
+    @Test void coursesOutsideGpaRemainVisibleWithoutCompetingWithRetakesOrCreatingConflicts() {
+        var active = pass("A", 3, 1, 8, 3.5);
+        var higher = entry("A", 3, 2026, 2, 10.0, 4.0, true, false);
+        var differentCredits = entry("A", 2, 2026, 3, null, null, null, false);
+        var result = report(active, higher, differentCredits);
+        assertThat(result.summary().state()).isEqualTo(State.COMPLETE);
+        assertThat(result.summary().calculatedCredits()).isEqualTo(3);
+        assertThat(result.summary().reviewGroups()).isZero();
+        assertThat(result.summary().pendingAttempts()).isZero();
+        number(result.summary().gpa(), "3.50");
+        assertThat(result.groups().getFirst().reason()).isEqualTo(Reason.OUTSIDE_GPA);
+        assertThat(result.groups().getLast().selectedCourseId()).isEqualTo(active.course().id());
+        assertThat(result.groups().getLast().decisions()).contains(new Decision(higher.course().id(), Use.OUTSIDE_GPA));
+    }
     @Test void emptyAndNoResultsHaveNullGpaRatherThanZero(){
         var empty=report();assertThat(empty.summary().state()).isEqualTo(State.EMPTY);assertThat(empty.summary().gpa()).isNull();assertThat(empty.groups()).isEmpty();
         var draft=report(pending("A",3,1));assertThat(draft.summary().state()).isEqualTo(State.NO_RESULTS);assertThat(draft.summary().gpa()).isNull();assertThat(draft.summary().calculatedCredits()).isZero();assertThat(draft.summary().pendingAttempts()).isEqualTo(1);assertThat(draft.groups().getFirst().reason()).isEqualTo(Reason.NO_COMPLETE_RESULT);

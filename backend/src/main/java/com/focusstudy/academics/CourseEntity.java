@@ -12,6 +12,7 @@ public class CourseEntity extends BaseEntity {
     @Column(nullable = false, length = 64) private String code;
     @Column(nullable = false, length = 200) private String name;
     @Column(nullable = false) private int credits;
+    @Column(name = "counts_toward_gpa", nullable = false) private boolean countsTowardGpa = true;
     @Column(nullable = false, length = 200) private String teacher = "";
     @Column(nullable = false, length = 100) private String room = "";
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private Status status = Status.STUDYING;
@@ -32,6 +33,8 @@ public class CourseEntity extends BaseEntity {
     public String getCode() { return code; }
     public String getName() { return name; }
     public int getCredits() { return credits; }
+    public boolean countsTowardGpa() { return countsTowardGpa; }
+    public void setCountsTowardGpa(boolean countsTowardGpa) { this.countsTowardGpa = countsTowardGpa; }
     public String getTeacher() { return teacher; }
     public String getRoom() { return room; }
     public Status getStatus() { return status; }

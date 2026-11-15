@@ -22,7 +22,8 @@ class IntegratedGradeMigrationTests {
         Path bundledMigrations = Path.of("src/main/resources/db/migration");
         try (var files = Files.list(bundledMigrations)) {
             for (Path file : files.filter(path -> path.toString().endsWith(".sql"))
-                    .filter(path -> !path.getFileName().toString().startsWith("V17__")).toList()) {
+                    .filter(path -> !path.getFileName().toString().startsWith("V17__"))
+                    .filter(path -> !path.getFileName().toString().startsWith("V20__")).toList()) {
                 Files.copy(file, previousMigrations.resolve(file.getFileName()));
             }
         }
@@ -54,17 +55,19 @@ class IntegratedGradeMigrationTests {
                     VALUES ('%s','%s','%s',1,'2026-08-03','2026-09-07','08:00','09:00','Asia/Ho_Chi_Minh','PRACTICE','TEAMS','existing-class')
                     """.formatted(UUID.randomUUID(), owner, course));
 
-            var recovery = Flyway.configure().dataSource(url, user, password).schemas(schema).outOfOrder(true).load();
+            var recovery = Flyway.configure().dataSource(url, user, password).schemas(schema).target("19").outOfOrder(true).load();
             assertThat(recovery.migrate().migrationsExecuted).isEqualTo(1);
 
             var normal = Flyway.configure().dataSource(url, user, password).schemas(schema).load();
+            assertThat(normal.migrate().migrationsExecuted).isEqualTo(1);
             normal.validate();
-            assertThat(normal.migrate().migrationsExecuted).isZero();
+            assertThat(normal.info().current().getVersion().getVersion()).isEqualTo("20");
             try (var rows = sql.executeQuery("""
                     SELECT c.score, c.theory_midterm_slot, g.theory_credits, g.practice_credits, p.remaining_ms,
-                           s.lesson_type, s.meeting_platform, s.meeting_id, u.full_name
+                           s.lesson_type, s.meeting_platform, s.meeting_id, u.full_name, co.counts_toward_gpa
                     FROM grade_columns c
                     JOIN grade_configurations g ON g.id = c.configuration_id
+                    JOIN courses co ON co.id = g.course_id
                     JOIN pomodoro_breaks p ON p.user_id = g.user_id
                     JOIN class_schedules s ON s.course_id = g.course_id
                     JOIN app_users u ON u.id = g.user_id
@@ -80,6 +83,7 @@ class IntegratedGradeMigrationTests {
                 assertThat(rows.getString("meeting_platform")).isEqualTo("TEAMS");
                 assertThat(rows.getString("meeting_id")).isEqualTo("existing-class");
                 assertThat(rows.getString("full_name")).isEqualTo("Existing user");
+                assertThat(rows.getBoolean("counts_toward_gpa")).isTrue();
             }
         } finally {
             try (var connection = DriverManager.getConnection(url, user, password);

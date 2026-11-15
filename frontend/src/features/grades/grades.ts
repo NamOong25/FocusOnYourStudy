@@ -178,7 +178,8 @@ export function validateRetake(id: string, previousId: string | undefined, catal
   return null;
 }
 export function summarizeGrades(catalog: Course[], book: GradeBook, rules: GradeRules, cumulative = false) {
-  const eligible = catalog.filter(c => courseResult(book[c.id],rules).completeForGpa);
+  const participating = catalog.filter(c => c.countsTowardGpa !== false);
+  const eligible = participating.filter(c => courseResult(book[c.id],rules).completeForGpa);
   let selected = eligible;
   if (cumulative) {
     const groups = new Map<string, Course[]>();
@@ -191,7 +192,7 @@ export function summarizeGrades(catalog: Course[], book: GradeBook, rules: Grade
   const scoredCredits = selected.reduce((sum,c) => sum+c.credits,0);
   const earnedCredits = selected.filter(c => courseResult(book[c.id],rules).passed).reduce((sum,c) => sum+c.credits,0);
   const gpa = scoredCredits ? selected.reduce((sum,c) => sum+courseResult(book[c.id],rules).point!*c.credits,0)/scoredCredits : null;
-  return { gpa, scoredCredits, earnedCredits, completeCourses: eligible.length, totalCourses: catalog.length, excludedIncomplete: catalog.length-eligible.length, selectedIds: selected.map(c=>c.id), selectedCount: selected.length };
+  return { gpa, scoredCredits, earnedCredits, completeCourses: eligible.length, totalCourses: participating.length, excludedIncomplete: participating.length-eligible.length, selectedIds: selected.map(c=>c.id), selectedCount: selected.length };
 }
 export function requiredRemaining(record: CourseGrades | undefined, target: number) {
   const parts = record?.parts ?? emptyGrades().parts;

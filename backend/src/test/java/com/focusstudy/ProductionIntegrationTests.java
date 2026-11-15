@@ -74,7 +74,7 @@ class ProductionIntegrationTests {
         var health = send(request("/api/v1/health").GET().build());
         assertThat(health.statusCode()).isEqualTo(200);
         assertThat(health.body()).contains("UP").doesNotContain(PASSWORD, SCHEMA);
-        assertThat(flyway.info().current().getVersion().toString()).isEqualTo("19");
+        assertThat(flyway.info().current().getVersion().toString()).isEqualTo("20");
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         var actuator = send(request("/actuator/health").GET().build());
         assertThat(actuator.body()).doesNotContain("components", "jdbc:", "PostgreSQL");

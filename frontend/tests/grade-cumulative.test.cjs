@@ -6,6 +6,24 @@ const {GradeReadManager}=require('../src/features/grades/api/GradeReadManager.ts
 // Recorded from an isolated PostgreSQL QA schema; all identities and courses are synthetic.
 const fixture=require('./fixtures/cumulative-gpa.json'),fresh=()=>structuredClone(fixture),hasCode=code=>e=>e.code===code;
 const parse=f=>parseCumulativeGpa(f.response,f.query);
+test('an opted-out attempt remains in history without making a complete GPA provisional', () => {
+  const sample = fresh();
+  const group = sample.response.groups.find(g => g.history.code === 'PENDING');
+  const other = sample.response.groups.find(g => g.history.code === 'FAILED');
+  const optedOut = group.history.attempts[0].course;
+  optedOut.countsTowardGpa = false;
+  sample.query.courses = sample.query.courses.filter(c => [optedOut.id, other.selectedCourseId].includes(c.id));
+  sample.query.courses.find(c => c.id === optedOut.id).countsTowardGpa = false;
+  Object.assign(group, { reason: 'OUTSIDE_GPA', pendingAttempts: 0 });
+  group.decisions[0].use = 'OUTSIDE_GPA';
+  sample.response.groups = [group, other];
+  Object.assign(sample.response.summary, { state: 'COMPLETE', complete: true, gpa: 0, weightedGradePoints: 0, calculatedCredits: 1,
+    earnedCredits: 0, failedCredits: 1, registeredGroups: 2, recordedAttempts: 2, repeatedGroups: 0,
+    calculatedGroups: 1, passedGroups: 0, failedGroups: 1, excludedGroups: 1, reviewGroups: 0, pendingAttempts: 0 });
+  const result = parse(sample);
+  assert.equal(result.summary.state, 'COMPLETE');
+  assert.equal(result.groups[0].attempts[0].use, 'OUTSIDE_GPA');
+});
 test('real API snapshot keeps highest-pass selection and all three attempts',()=>{const r=parse(fresh()),g=r.groups.find(g=>g.code==='WEB');assert.equal(r.summary.gpa,2.51);assert.equal(r.summary.state,'PARTIAL');assert.equal(g.attempts.length,3);assert.equal(g.attempts.find(a=>a.id===g.selectedCourseId).result.total,8);assert.ok(g.attempts.some(a=>a.result.status==='FAILED'));assert.ok(g.attempts.some(a=>a.use==='NOT_SELECTED_LOWER_PASS'));});
 test('review variants and pending courses are retained with reasons',()=>{const r=parse(fresh());assert.equal(r.summary.reviewGroups,2);assert.equal(r.summary.pendingAttempts,1);assert.ok(r.groups.filter(g=>g.code==='VAR').every(g=>!g.included&&g.reason==='REVIEW_REQUIRED'&&g.otherCredits.length>0));assert.equal(r.groups.find(g=>g.code==='PENDING').selectedCourseId,null);});
 test('empty account has null GPA, not zero',()=>{const f=fresh();f.query={semesters:[],courses:[]};f.response.groups=[];for(const k of Object.keys(f.response.summary))f.response.summary[k]=0;Object.assign(f.response.summary,{state:'EMPTY',complete:false,gpa:null});assert.equal(parse(f).summary.gpa,null);});

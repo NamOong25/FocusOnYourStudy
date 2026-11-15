@@ -40,8 +40,10 @@ public class CourseService {
     public CourseResponse create(UUID owner, CourseRequests.Create input) {
         lockOwner(owner); ownedSemester(owner, input.semesterId());
         if (courses.existsByUserIdAndSemesterIdAndCode(owner, input.semesterId(), input.code())) throw duplicate();
-        return CourseResponse.from(courses.saveAndFlush(CourseEntity.create(owner, input.semesterId(), input.code(), input.name(), input.credits(),
-                input.teacher(), input.room(), input.status(), input.color(), input.description())));
+        var course = CourseEntity.create(owner, input.semesterId(), input.code(), input.name(), input.credits(),
+                input.teacher(), input.room(), input.status(), input.color(), input.description());
+        course.setCountsTowardGpa(!Boolean.FALSE.equals(input.countsTowardGpa()));
+        return CourseResponse.from(courses.saveAndFlush(course));
     }
     @Transactional
     public CourseResponse update(UUID owner, UUID id, CourseRequests.Update input) {
@@ -49,6 +51,7 @@ public class CourseService {
         if (!course.getSemesterId().equals(input.semesterId())) requireNoLearningData(owner, id);
         if (courses.existsByUserIdAndSemesterIdAndCodeAndIdNot(owner, input.semesterId(), input.code(), id)) throw duplicate();
         course.change(input.semesterId(), input.code(), input.name(), input.credits(), input.teacher(), input.room(), input.status(), input.color(), input.description());
+        if (input.countsTowardGpa() != null) course.setCountsTowardGpa(input.countsTowardGpa());
         courses.flush(); return CourseResponse.from(course);
     }
     @Transactional
