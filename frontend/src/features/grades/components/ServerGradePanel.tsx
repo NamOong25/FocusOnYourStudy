@@ -7,7 +7,7 @@ import { C, F, S } from '../../../shared/theme';
 import GradeStatus from '../GradeStatus';
 import { gradePresentation } from '../gradePresentation';
 import { useServerCourseGrades } from '../api/useServerGrades';
-import { gradeKindLabels, gradeNumber, serverGradeView } from '../serverGradeView';
+import { gradeAssessmentLabels, gradeKindLabels, gradeNumber, serverGradeView } from '../serverGradeView';
 import ServerGradeEditorRouter,{type ServerGradeEditMode} from './ServerGradeEditorRouter';
 import {useGradeConfigurationWrites} from '../api/GradeConfigurationWritesProvider';
 
@@ -38,9 +38,13 @@ export default function ServerGradePanel({courseId,onConfigure,onScores}:{course
       <GradeStatus result={result} detail/>
       <Row between><View><T style={S.small}>Tổng kết / 10</T><T style={{fontFamily:F.extra,fontSize:37,lineHeight:52,color:presentation.attention?presentation.color:C.primary}}>{gradeNumber(result.total,1)}</T></View>
         <View style={{alignItems:'flex-end',gap:5}}><T style={{fontFamily:F.extra,fontSize:27,color:presentation.attention?presentation.color:C.primary}}>{result.letter??'—'}</T><T style={S.small}>{result.point===null?'Chưa quy đổi':`${gradeNumber(result.point,1)} / 4.0`}</T></View></Row>
+      {data.assessment==='INTEGRATED'&&<Row between style={{flexWrap:'wrap'}}>
+        <T style={S.small}>LT · {data.theoryCredits} TC · {gradeNumber(data.theoryTotal??null,1)}</T>
+        <T style={S.small}>TH · {data.practiceCredits} TC · {gradeNumber(data.practiceTotal??null,1)}</T>
+      </Row>}
       <Progress value={data.columnCount?data.enteredColumns/data.columnCount*100:0}/><T style={S.small}>{data.enteredColumns}/{data.columnCount} cột đã đủ điểm</T>
     </Card>
-    <Row between><T style={{fontFamily:F.bold}}>Điểm thành phần</T><Badge label={data.assessment==='THEORY'?'Lý thuyết':'Thực hành'}/></Row>
+    <Row between><T style={{fontFamily:F.bold}}>Điểm thành phần</T><Badge label={gradeAssessmentLabels[data.assessment]}/></Row>
     {!data.parts.length&&<T style={S.small}>Bảng điểm chưa có cột thành phần.</T>}
     {data.parts.map(p=><Card key={p.id} style={{gap:8}}>
       <Row between><View style={S.grow}><T style={{fontFamily:F.bold,fontSize:14}}>{p.name}</T><T style={S.small}>{gradeKindLabels[p.kind]} · Trọng số {gradeNumber(Number(p.weight.toFixed(2)))}%</T></View><T style={{fontFamily:F.extra,fontSize:22,color:p.effectiveScore===null?C.muted:C.ink}}>{gradeNumber(p.effectiveScore)}</T></Row>
@@ -49,7 +53,7 @@ export default function ServerGradePanel({courseId,onConfigure,onScores}:{course
         {p.project.share<100&&<T style={S.small}>Phần còn lại của cột: {p.remainderScore===null?'Chưa nhập':gradeNumber(p.remainderScore)}</T>}
         <T style={S.small}>Điểm cột sau quy đổi: {gradeNumber(p.effectiveScore)}</T></>}
     </Card>)}
-    {!!data.result.missingGroups.length&&<Card style={{backgroundColor:C.amberSoft,gap:6}}><T style={{fontFamily:F.semi}}>Nhóm điểm còn thiếu</T><T style={S.small}>{data.result.missingGroups.map(g=>({REGULAR:'Thường kỳ',MIDTERM:'Giữa kỳ',FINAL:'Cuối kỳ',PRACTICAL_COLUMNS:'Các cột thực hành'}[g]??g)).join(' · ')}</T></Card>}
+    {!!data.result.missingGroups.length&&<Card style={{backgroundColor:C.amberSoft,gap:6}}><T style={{fontFamily:F.semi}}>Cấu hình cần bổ sung</T><T style={S.small}>{data.result.missingGroups.map(g=>({REGULAR:'Thường kỳ',MIDTERM:'Giữa kỳ',FINAL:'Cuối kỳ',PRACTICAL_COLUMNS:'Các cột thực hành',CREDIT_SPLIT:'Tín chỉ lý thuyết và thực hành'}[g]??g)).join(' · ')}</T></Card>}
     {data.result.notices.map((notice,i)=><Card key={`${notice.code}-${i}`} style={{backgroundColor:C.canvas}}><T style={S.small}>{notice.message}</T></Card>)}
     {onScores&&data.parts.length>0&&<Button label="Nhập / chỉnh sửa điểm" icon="create-outline" onPress={onScores}/>}
     {onConfigure&&<Button label="Chỉnh sửa cấu hình cột điểm" secondary icon="options-outline" onPress={onConfigure}/>}

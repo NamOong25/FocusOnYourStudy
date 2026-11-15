@@ -1,4 +1,8 @@
-import type { ResultCore } from './api/gradesReadApi';
+import type { Assessment, ResultCore } from './api/gradesReadApi';
+
+export const gradeAssessmentLabels: Record<Assessment, string> = {
+  THEORY: 'Lý thuyết', PRACTICAL: 'Thực hành', INTEGRATED: 'Tích hợp LT + TH',
+};
 
 const reasons:Record<string,string>={
   NO_CONFIGURATION:'Môn học chưa có bảng điểm được lưu trong tài khoản.',
@@ -14,7 +18,9 @@ export function serverGradeView(r:ResultCore){
   const status=r.status===null?'Chưa có bảng điểm':r.status==='EXAM_BLOCKED'?'Không đủ điều kiện thi'
     :r.status==='FAILED'?(r.complete?'Không đạt · Cần học lại':'Không đạt · Chưa đủ tổng kết')
     :r.status==='PASSED'?'Đạt môn':r.status==='INCOMPLETE_CONFIGURATION'?'Chưa đủ cột điểm':'Chưa đủ dữ liệu';
-  return {complete:r.complete,passed:r.passed===true,failed,status,reason:reasons[r.reason]??'Xem các cột điểm và thông tin còn thiếu của môn.',
+  return {complete:r.complete,passed:r.passed===true,failed,status,reason:r.missingGroups.includes('CREDIT_SPLIT')
+    ? 'Cập nhật tín chỉ lý thuyết và thực hành trong cấu hình để khớp số tín chỉ của môn.'
+    : reasons[r.reason]??'Xem các cột điểm và thông tin còn thiếu của môn.',
     total:r.total,letter:r.letter,point:r.gradePoint};
 }
 export function gradeNumber(value:number|null,decimals?:number){return value===null?'—':decimals===undefined?String(value):value.toFixed(decimals);}

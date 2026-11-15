@@ -50,14 +50,15 @@ public class GradeConfigurationService {
     }
     @Transactional
     public GradeConfigurationResponse create(UUID owner, UUID courseId, Create input) {
-        lockOwner(owner); ownedCourse(owner, courseId);
+        lockOwner(owner); var course = ownedCourse(owner, courseId);
         if (configurations.existsByUserIdAndCourseId(owner, courseId)) throw new GradeConfigurationApiException(HttpStatus.CONFLICT, "GRADE_CONFIGURATION_ALREADY_EXISTS", "Môn đã có cấu hình điểm. Đọc lại và sửa bằng version mới nhất.");
-        validate(input);
+        validate(input, course.getCredits());
         return GradeConfigurationResponse.from(configurations.saveAndFlush(GradeConfigurationEntity.create(owner, courseId, input)));
     }
     @Transactional
     public GradeConfigurationResponse update(UUID owner, UUID id, Update input) {
-        lockOwner(owner); var config = owned(owner, id); checkVersion(config, input.version); validate(input);
+        lockOwner(owner); var config = owned(owner, id); checkVersion(config, input.version);
+        validate(input, ownedCourse(owner, config.getCourseId()).getCredits());
         protectScores(config, input);
         config.change(input); configurations.flush(); return GradeConfigurationResponse.from(config);
     }
@@ -83,28 +84,36 @@ public class GradeConfigurationService {
     private void scoredColumnConflict() {
         throw new GradeConfigurationApiException(HttpStatus.CONFLICT, "GRADE_COLUMN_HAS_SCORES", "Có cột đã nhập điểm (kể cả 0). Có thể đổi tên/thứ tự; cần xóa điểm ở cột bị ảnh hưởng trước khi xóa cột, đổi loại/cách quy BTL hoặc đổi loại học phần.");
     }
-    private void validate(Create input) {
+    private void validate(Create input, int credits) {
+        if (input.assessment == Assessment.INTEGRATED) {
+            if (input.theoryCredits == null || input.practiceCredits == null || input.theoryCredits + input.practiceCredits != credits)
+                invalid("Tổng tín chỉ lý thuyết và thực hành phải bằng số tín chỉ của môn.");
+        } else if (input.theoryCredits != null || input.practiceCredits != null) {
+            invalid("Chỉ học phần tích hợp cần khai báo tín chỉ từng phần.");
+        }
+        var allowed = switch (input.assessment) {
+            case THEORY -> EnumSet.of(Kind.REGULAR, Kind.REGULAR_TEST, Kind.MIDTERM, Kind.FINAL, Kind.PROJECT);
+            case PRACTICAL -> EnumSet.of(Kind.PRACTICE_REGULAR, Kind.PRACTICE_TEST, Kind.MIDTERM, Kind.FINAL, Kind.PROJECT);
+            case INTEGRATED -> EnumSet.allOf(Kind.class);
+        };
         var keys = new HashSet<String>(); int finalCount = 0, midCount = 0;
         for (var part : input.parts) {
             if (!keys.add(part.id)) invalid("Mỗi cột cần một mã riêng trong môn.");
-            var allowed = input.assessment == Assessment.THEORY
-                    ? EnumSet.of(Kind.REGULAR, Kind.REGULAR_TEST, Kind.MIDTERM, Kind.FINAL, Kind.PROJECT)
-                    : EnumSet.of(Kind.PRACTICE_REGULAR, Kind.PRACTICE_TEST, Kind.MIDTERM, Kind.FINAL, Kind.PROJECT);
             if (!allowed.contains(part.kind)) invalid("Chọn loại cột phù hợp với Lý thuyết hoặc Thực hành.");
             if (part.kind == Kind.PROJECT) {
                 if (part.project == null) invalid("Bài tập lớn cần có cách quy đổi và tỷ lệ theo đề cương môn.");
-                if (part.project.target == Target.PRACTICE && (input.assessment != Assessment.PRACTICAL || part.project.share.compareTo(BigDecimal.valueOf(100)) != 0))
-                    invalid("BTL thay một cột thực hành chỉ dùng ở học phần thực hành và phải chiếm 100% cột đó.");
+                if (part.project.target == Target.PRACTICE && (input.assessment == Assessment.THEORY || part.project.share.compareTo(BigDecimal.valueOf(100)) != 0))
+                    invalid("BTL thay một cột thực hành phải thuộc học phần có thực hành và chiếm 100% cột đó.");
             } else if (part.project != null) invalid("Chỉ cột Bài tập lớn được có cấu hình quy đổi.");
             if (part.kind == Kind.FINAL || (part.project != null && part.project.target == Target.FINAL)) finalCount++;
             if (part.kind == Kind.MIDTERM) midCount++;
         }
         if (finalCount > 1) invalid("Chỉ một cột làm điểm cuối kỳ; BTL thay hoặc góp vào cột này, không tạo thêm cột cuối kỳ.");
-        if (input.assessment == Assessment.THEORY && midCount > 1) invalid("Lý thuyết chỉ có một cột giữa kỳ.");
+        if (input.assessment != Assessment.PRACTICAL && midCount > 1) invalid("Phần lý thuyết chỉ có một cột giữa kỳ.");
     }
     private void invalid(String detail) { throw new GradeConfigurationApiException(HttpStatus.BAD_REQUEST, "INVALID_GRADE_CONFIGURATION", detail); }
     private void lockOwner(UUID owner) { users.lockForAcademicChanges(owner).orElseThrow(() -> new GradeConfigurationApiException(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", "Cần đăng nhập lại để tiếp tục.")); }
-    private void ownedCourse(UUID owner, UUID id) { courses.findByIdAndUserId(id, owner).orElseThrow(() -> new CourseApiException(HttpStatus.NOT_FOUND, "COURSE_NOT_FOUND", "Không tìm thấy môn học.")); }
+    private CourseEntity ownedCourse(UUID owner, UUID id) { return courses.findByIdAndUserId(id, owner).orElseThrow(() -> new CourseApiException(HttpStatus.NOT_FOUND, "COURSE_NOT_FOUND", "Không tìm thấy môn học.")); }
     private GradeConfigurationEntity owned(UUID owner, UUID id) { return configurations.findByIdAndUserId(id, owner).orElseThrow(this::missing); }
     private GradeConfigurationApiException missing() { return new GradeConfigurationApiException(HttpStatus.NOT_FOUND, "GRADE_CONFIGURATION_NOT_FOUND", "Không tìm thấy cấu hình điểm."); }
     private void checkVersion(GradeConfigurationEntity config, long version) {

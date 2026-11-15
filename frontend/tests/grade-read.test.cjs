@@ -5,6 +5,9 @@ require.extensions['.ts']=(module,filename)=>module._compile(ts.transpileModule(
 const {parseSemesterGrades,parseGradeDetail,createGradesReadApi,semesterGradesKey,courseGradeKey}=require('../src/features/grades/api/gradesReadApi.ts');
 const {GradeReadManager,visibleGradeRead}=require('../src/features/grades/api/GradeReadManager.ts');
 const {serverGradeView,gradeNumber}=require('../src/features/grades/serverGradeView.ts');
+const {configurationInput,draftFromDetail,inputFromDraft}=require('../src/features/grades/gradeConfigurationDraft.ts');
+const {parseSavedConfiguration}=require('../src/features/grades/api/gradeConfigurationsApi.ts');
+const {draftFromScores,inputFromScoresDraft}=require('../src/features/grades/gradeScoresDraft.ts');
 // The Node runner has no native StyleSheet runtime; keep the actual palette/policy.
 const Module=require('node:module'),nativeLoad=Module._load;
 let gradePresentation;
@@ -26,6 +29,23 @@ function detail(){return {credits:3,courseVersion:2,scores:{configurationId:conf
 const parseDetail=v=>parseGradeDetail(v,course,{id:configid,version:3});
 const code=expected=>error=>error instanceof ApiError&&error.code===expected;
 test('semester snapshot preserves authoritative results and GPA',()=>{const v=parseSemesterGrades(semester(),query);assert.equal(v.summary.gpa,3);assert.equal(v.courses[0].result.total,7.4);});
+test('integrated grade detail retains both credit counts and totals through the normal editors',()=>{
+  const raw=detail();
+  Object.assign(raw.scores,{assessment:'INTEGRATED',theoryCredits:2,practiceCredits:1});
+  const practice={id:'th',name:'Thực hành',kind:'PRACTICE_TEST',project:null,weightNumerator:100,weightDenominator:3,weight:100/3,score:9,remainderScore:null};
+  raw.scores.parts.push(practice);
+  raw.result.columns.push({id:'th',effectiveScore:9});
+  Object.assign(raw.result,{theoryTotal:7.4,practiceTotal:9,enteredColumns:4,columnCount:4,total:7.9});
+  const read=parseDetail(raw);
+  assert.deepEqual([read.theoryCredits,read.practiceCredits,read.theoryTotal,read.practiceTotal],[2,1,7.4,9]);
+  const config=inputFromDraft(draftFromDetail(read),3);
+  assert.deepEqual([config.theoryCredits,config.practiceCredits],[2,1]);
+  assert.throws(()=>configurationInput(config,4),/Tổng tín chỉ/);
+  assert.equal(inputFromScoresDraft(draftFromScores(read),read).parts.at(-1).score,9);
+  const saved=parseSavedConfiguration({id:configid,courseId:cid,version:4,state:'READY',missingGroups:[],assessment:'INTEGRATED',
+    theoryCredits:2,practiceCredits:1,parts:raw.scores.parts.map(({score,remainderScore,...part})=>part)},cid);
+  assert.deepEqual([saved.theoryCredits,saved.practiceCredits],[2,1]);
+});
 test('unconfigured course is null, never an F or zero',()=>{const s=semester(),c=s.courses[0];Object.assign(c,{configurationId:null,gradeVersion:null,assessment:null,resultStatus:null,resultReason:'NO_CONFIGURATION',complete:false,passed:null,total:null,letter:null,gradePoint:null});s.summary={state:'NO_RESULTS',gpa:null,registeredCourses:1,calculatedCourses:0,calculatedCredits:0,excludedCourses:1};const v=parseSemesterGrades(s,query);assert.equal(v.summary.gpa,null);assert.equal(serverGradeView(v.courses[0].result).failed,false);assert.equal(v.courses[0].result.total,null);});
 test('complete F zero is retained in the semester GPA',()=>{const s=semester();Object.assign(s.courses[0],{resultStatus:'FAILED',resultReason:'TOTAL_BELOW_4',passed:false,total:0,letter:'F',gradePoint:0});s.summary.gpa=0;const v=parseSemesterGrades(s,query);assert.equal(v.summary.gpa,0);assert.equal(v.courses[0].result.total,0);assert.equal(serverGradeView(v.courses[0].result).failed,true);});
 test('semester/version, credits, and course versions must match current catalog',()=>{for(const mutate of [s=>s.semester.version++,s=>s.courses[0].courseVersion++,s=>s.courses[0].credits++]){const s=semester();mutate(s);assert.throws(()=>parseSemesterGrades(s,query),code('GRADE_CATALOG_CHANGED'));}});

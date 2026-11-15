@@ -28,7 +28,7 @@ export default function GradeConfigurationColumn({part,index,count,assessment,sc
     }}/>
     {part.project&&<View style={{gap:12,borderTopWidth:1,borderColor:C.line,paddingTop:13}}>
       <T style={{fontFamily:F.bold,fontSize:13}}>Bài tập lớn tính vào đâu?</T>
-      {assessment==='PRACTICAL'&&!locked?<Segments values={['Một cột thực hành','Điểm cuối kỳ']} value={part.project.target==='PRACTICE'?'Một cột thực hành':'Điểm cuối kỳ'} onChange={value=>onChange({...part,project:{target:value==='Một cột thực hành'?'PRACTICE':'FINAL',share:value==='Một cột thực hành'?'100':''}})}/>
+      {assessment!=='THEORY'&&!locked?<Segments values={['Một cột thực hành','Điểm cuối kỳ']} value={part.project.target==='PRACTICE'?'Một cột thực hành':'Điểm cuối kỳ'} onChange={value=>onChange({...part,project:{target:value==='Một cột thực hành'?'PRACTICE':'FINAL',share:value==='Một cột thực hành'?'100':''}})}/>
         :<T style={S.small}>{part.project.target==='PRACTICE'?'BTL thay một cột thực hành.':'BTL làm hoặc góp vào cột cuối kỳ.'}</T>}
       {part.project.target==='PRACTICE'?<T style={S.small}>BTL chiếm 100% cột này và chỉ tính một lần trong bộ cột thực hành.</T>:<>
         {!locked&&<Segments values={['Toàn bộ cột cuối kỳ','Một phần cột cuối kỳ']} value={part.project.share==='100'?'Toàn bộ cột cuối kỳ':'Một phần cột cuối kỳ'} onChange={value=>onChange({...part,project:{target:'FINAL',share:value==='Toàn bộ cột cuối kỳ'?'100':''}})}/>}

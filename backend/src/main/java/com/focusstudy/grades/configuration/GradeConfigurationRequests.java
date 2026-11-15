@@ -8,7 +8,7 @@ import java.util.List;
 
 public final class GradeConfigurationRequests {
     private GradeConfigurationRequests() { }
-    public enum Assessment { THEORY, PRACTICAL }
+    public enum Assessment { THEORY, PRACTICAL, INTEGRATED }
     public enum Kind { REGULAR, REGULAR_TEST, MIDTERM, PRACTICE_REGULAR, PRACTICE_TEST, FINAL, PROJECT }
     public enum Target { PRACTICE, FINAL }
 
@@ -21,6 +21,8 @@ public final class GradeConfigurationRequests {
     }
     public static class Create extends StrictInput {
         @NotNull public Assessment assessment;
+        @Min(1) @Max(29) public Integer theoryCredits;
+        @Min(1) @Max(29) public Integer practiceCredits;
         @NotNull @Size(max = 10) public List<@NotNull @Valid Part> parts;
     }
     public static class Update extends Create {

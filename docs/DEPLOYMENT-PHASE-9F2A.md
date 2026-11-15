@@ -64,3 +64,19 @@ Image chạy user `focus` đã được thử với khóa chỉ đọc do root s
 3. Đo bộ nhớ và lần gọi đầu sau khi dịch vụ ngủ. Xác nhận đăng nhập hoạt động qua proxy và chỉ cho phép origin web đã cấu hình. Nếu web được triển khai cùng đợt, kiểm tra cookie refresh và F5 trên trình duyệt.
 
 Render Free cho dịch vụ ngủ sau 15 phút không có lượt truy cập. Thời gian khởi động trong bài test local không gồm thời gian Render bật lại dịch vụ hoặc Neon mở kết nối. [Render Free và trạng thái ngủ](https://render.com/docs/free#spinning-down-on-idle)
+## Kiểm tra migration V17 trước khi nâng cấp
+
+`V17__integrated_grade_configurations.sql` bổ sung cấu hình điểm cho môn tích hợp. V18 thêm loại buổi học và thông tin học online. V19 thêm bảng lưu nghỉ Pomodoro.
+
+Trên database đã dùng, đọc lịch sử Flyway trước khi triển khai. Chạy truy vấn dưới đây trong schema của app.
+
+```sql
+SELECT installed_rank, version, script, success
+FROM flyway_schema_history
+WHERE version IN ('17', '18', '19')
+ORDER BY installed_rank;
+```
+
+- Database mới, hoặc database chưa tới V17, chạy Flyway theo mặc định.
+- Nếu V17 đã chạy thành công, giữ tên và nội dung file V17 đã áp dụng rồi triển khai theo mặc định.
+- Nếu V18 hoặc V19 đã chạy thành công và V17 còn thiếu, sao lưu database và xác nhận V17 là migration duy nhất còn thiếu trước phiên bản hiện tại. Đặt `SPRING_FLYWAY_OUT_OF_ORDER=true` cho lần khởi động nâng cấp đó. Kiểm tra V17 xuất hiện với `success=true`, endpoint health báo database `UP` và bảng điểm cũ đọc được. Gỡ biến này ở lần triển khai tiếp theo để quay lại chế độ mặc định.

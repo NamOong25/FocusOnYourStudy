@@ -16,7 +16,7 @@ class IuhCourseCalculatorTests {
     BigDecimal n(String value) { return value == null ? null : new BigDecimal(value); }
     GradeScoresResponse.Part part(String id, Kind kind, String score) { return new GradeScoresResponse.Part(id,id,kind,null,100,3,new BigDecimal("33.333333333333"),n(score),null); }
     GradeScoresResponse.Part project(String score,Target target,String share,String remainder) { return new GradeScoresResponse.Part("btl","BTL",Kind.PROJECT,new GradeConfigurationResponse.Project(target,n(share)),50,1,new BigDecimal("50"),n(score),n(remainder)); }
-    GradeScoresResponse snapshot(Assessment mode,List<GradeScoresResponse.Part> parts,GradeConfigurationResponse.State state,List<String> missing){return new GradeScoresResponse(UUID.randomUUID(),UUID.randomUUID(),mode,parts,state,missing,parts.stream().anyMatch(p->p.score()!=null||p.remainderScore()!=null),0,Instant.EPOCH,Instant.EPOCH);}
+    GradeScoresResponse snapshot(Assessment mode,List<GradeScoresResponse.Part> parts,GradeConfigurationResponse.State state,List<String> missing){return new GradeScoresResponse(UUID.randomUUID(),UUID.randomUUID(),mode,mode==Assessment.INTEGRATED?2:null,mode==Assessment.INTEGRATED?1:null,parts,state,missing,parts.stream().anyMatch(p->p.score()!=null||p.remainderScore()!=null),0,Instant.EPOCH,Instant.EPOCH);}
     IuhCourseResult result(Assessment mode,List<GradeScoresResponse.Part> parts){return IuhCourseCalculator.calculate(snapshot(mode,parts,GradeConfigurationResponse.State.READY,List.of()),3);}
     IuhCourseResult theory(String regular,String mid,String finalScore){return result(Assessment.THEORY,List.of(part("tk",Kind.REGULAR,regular),part("mid",Kind.MIDTERM,mid),part("final",Kind.FINAL,finalScore)));}
     @ParameterizedTest @CsvSource({"0,0.0,F,0.0","3.9499,3.9,F,0.0","3.95,4.0,D,1.0","4,4.0,D,1.0","4.9499,4.9,D,1.0","4.95,5.0,D+,1.5","5.4499,5.4,D+,1.5","5.45,5.5,C,2.0","5.9499,5.9,C,2.0","5.95,6.0,C+,2.5","6.9499,6.9,C+,2.5","6.95,7.0,B,3.0","7.9499,7.9,B,3.0","7.95,8.0,B+,3.5","8.4499,8.4,B+,3.5","8.45,8.5,A,3.8","8.9499,8.9,A,3.8","8.95,9.0,A+,4.0","10,10.0,A+,4.0"})
@@ -47,4 +47,32 @@ class IuhCourseCalculatorTests {
     @Test void knownMidpointZeroStillWarnsWhenOtherGroupsAreNotConfigured(){var r=IuhCourseCalculator.calculate(snapshot(Assessment.THEORY,List.of(part("mid",Kind.MIDTERM,"0")),GradeConfigurationResponse.State.DRAFT,List.of("REGULAR","FINAL")),3);assertThat(r.status()).isEqualTo(IuhCourseResult.Status.EXAM_BLOCKED);assertThat(r.total()).isNull();}
     @Test void customPracticalCountComputesButMakesTheAssumptionVisible(){var r=result(Assessment.PRACTICAL,List.of(part("a",Kind.PRACTICE_REGULAR,"6"),part("b",Kind.PRACTICE_REGULAR,"8")));assertThat(r.total()).isEqualByComparingTo("7.0");assertThat(r.notices().stream().map(IuhCourseResult.Notice::code)).containsExactly("CUSTOM_PRACTICAL_COLUMN_COUNT");}
     @Test void exactRationalAverageDoesNotUseDisplayedRoundedWeights(){var parts=new ArrayList<GradeScoresResponse.Part>();for(int i=0;i<7;i++)parts.add(part("p"+i,Kind.PRACTICE_REGULAR,i==0?"9.45":"0"));var r=result(Assessment.PRACTICAL,parts);assertThat(r.total()).isEqualByComparingTo("1.4");assertThat(r.rawTotal()).isEqualByComparingTo("1.35");}
+    List<GradeScoresResponse.Part> integrated(String mid, String finalScore, String practice) {
+        return List.of(part("tk", Kind.REGULAR, "8"), part("mid", Kind.MIDTERM, mid), part("final", Kind.FINAL, finalScore),
+                part("th1", Kind.PRACTICE_REGULAR, "9"), part("th2", Kind.PRACTICE_TEST, practice),
+                project("10", Target.PRACTICE, "100", null));
+    }
+    @Test void integratedBlendsRoundedTheoryAndPracticeByCredits() {
+        var result = result(Assessment.INTEGRATED, integrated("7.5", "8", "8"));
+        assertThat(result.theoryTotal()).isEqualByComparingTo("7.9");
+        assertThat(result.practiceTotal()).isEqualByComparingTo("9.0");
+        assertThat(result.total()).isEqualByComparingTo("8.3");
+        assertThat(result.gradePoint()).isEqualByComparingTo("3.5");
+    }
+    @Test void integratedDistinguishesMissingPracticeFromZeroAndBlocksZeroMidterm() {
+        assertThat(result(Assessment.INTEGRATED, integrated("8", "8", null)).total()).isNull();
+        assertThat(result(Assessment.INTEGRATED, integrated("8", "8", "0")).practiceTotal()).isEqualByComparingTo("6.3");
+        assertThat(result(Assessment.INTEGRATED, integrated("0", "8", "8")).status()).isEqualTo(IuhCourseResult.Status.EXAM_BLOCKED);
+    }
+    @Test void integratedLowFinalCapsTheoryBeforeBlending() {
+        var result = result(Assessment.INTEGRATED, integrated("8", "2", "8"));
+        assertThat(result.theoryTotal()).isEqualByComparingTo("2.0");
+        assertThat(result.total()).isEqualByComparingTo("4.3");
+    }
+    @Test void mismatchedCreditsAfterCourseEditPauseResultUntilSplitIsCorrected() {
+        var result = IuhCourseCalculator.calculate(snapshot(Assessment.INTEGRATED, integrated("8", "8", "8"), GradeConfigurationResponse.State.READY, List.of()), 4);
+        assertThat(result.status()).isEqualTo(IuhCourseResult.Status.INCOMPLETE_CONFIGURATION);
+        assertThat(result.missingGroups()).containsExactly("CREDIT_SPLIT");
+        assertThat(result.gradePoint()).isNull();
+    }
 }

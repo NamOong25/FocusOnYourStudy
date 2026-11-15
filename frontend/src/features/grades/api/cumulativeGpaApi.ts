@@ -1,6 +1,6 @@
 import {ApiError,createHttpClient} from '../../../shared/api/http';
 import type {Authorized} from '../../academics/api/semestersApi';
-import {core,courseGradeKey,validGradeId,type CourseRef,type ResultCore} from './gradesReadApi';
+import {core,courseGradeKey,gradeAssessments,validGradeId,type Assessment,type CourseRef,type ResultCore} from './gradesReadApi';
 
 export type CumulativeQuery={semesters:{id:string;version:number}[];courses:CourseRef[]};
 export type CumulativeUse='SELECTED'|'PENDING_RESULT'|'GROUP_REQUIRES_REVIEW'|'NOT_SELECTED_LOWER_PASS'|'NOT_SELECTED_OLDER_TIE'|'NOT_SELECTED_FAILED_ATTEMPT'|'NOT_SELECTED_OLDER_F';
@@ -40,7 +40,7 @@ export function parseCumulativeGpa(input:unknown,q:CumulativeQuery):CumulativeGp
       if(!local||local.semesterId.toLowerCase()!==semesterId||local.version!==c.version||local.credits!==c.credits||periods.get(semesterId)!==s.version)throw changed();
       if(c.credits!==credits||![1,2,3].includes(Number(s.term)))throw invalid();
       const configurationId=c.configurationId===null?null:id(c.configurationId);
-      if(configurationId===null?(c.gradeVersion!==null||c.assessment!==null):(!Number.isSafeInteger(c.gradeVersion)||Number(c.gradeVersion)<0||!['THEORY','PRACTICAL'].includes(String(c.assessment))))throw invalid();
+      if(configurationId===null?(c.gradeVersion!==null||c.assessment!==null):(!Number.isSafeInteger(c.gradeVersion)||Number(c.gradeVersion)<0||!gradeAssessments.includes(c.assessment as Assessment)))throw invalid();
       const result=core(c,c.resultStatus,c.resultReason);if(configurationId===null?(result.status!==null||result.reason!=='NO_CONFIGURATION'):result.status===null)throw invalid();
       const use=decisions.get(courseId);if(!use)throw invalid();
       return{id:courseId,name:text(c.name),semesterId,semesterName:text(s.name,100),academicYear:text(s.academicYear,50),term:Number(s.term),result,use};

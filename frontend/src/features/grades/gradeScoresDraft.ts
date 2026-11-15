@@ -17,7 +17,7 @@ function value(v:unknown,field:string):number|null{
 export function scoreBasis(original:ServerGradeDetail):ConfiguredGrade{
   if(original.kind!=='configured'||!validGradeId(original.configurationId)||!validGradeId(original.courseId)||!Number.isSafeInteger(original.gradeVersion)||original.gradeVersion<0)
     throw new ApiError('Cần tải bộ cột đã lưu trước khi nhập điểm.','INVALID_GRADE_QUERY');
-  configurationInput({assessment:original.assessment,parts:original.parts.map(p=>({id:p.id,name:p.name,kind:p.kind as ConfigurationKind,...(p.project?{project:p.project}:{})}))});
+  configurationInput({assessment:original.assessment,theoryCredits:original.theoryCredits,practiceCredits:original.practiceCredits,parts:original.parts.map(p=>({id:p.id,name:p.name,kind:p.kind as ConfigurationKind,...(p.project?{project:p.project}:{})}))});
   original.parts.forEach((p,i)=>{value(p.score,`parts[${i}].score`);value(p.remainderScore,`parts[${i}].remainderScore`);if(!hasRemainder(p)&&p.remainderScore!==null)fail('Cột này không dùng điểm phần còn lại.',`parts[${i}].remainderScore`);});
   return original;
 }

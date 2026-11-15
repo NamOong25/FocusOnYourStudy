@@ -9,6 +9,8 @@ public class GradeConfigurationEntity extends BaseEntity {
     @Column(name = "user_id", nullable = false) private UUID userId;
     @Column(name = "course_id", nullable = false) private UUID courseId;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 12) private GradeConfigurationRequests.Assessment assessment;
+    @Column(name = "theory_credits") private Integer theoryCredits;
+    @Column(name = "practice_credits") private Integer practiceCredits;
     @Column(name = "update_revision", nullable = false) private long updateRevision;
     @OneToMany(mappedBy = "configuration", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC") private List<GradeColumnEntity> columns = new ArrayList<>();
@@ -19,6 +21,8 @@ public class GradeConfigurationEntity extends BaseEntity {
     }
     private void assign(GradeConfigurationRequests.Create input) {
         assessment = input.assessment;
+        theoryCredits = input.theoryCredits;
+        practiceCredits = input.practiceCredits;
         var existing = new HashMap<String, GradeColumnEntity>();
         columns.forEach(column -> existing.put(column.getKey(), column));
         var keys = new HashSet<String>(); input.parts.forEach(part -> keys.add(part.id));
@@ -44,5 +48,7 @@ public class GradeConfigurationEntity extends BaseEntity {
     UUID getUserId() { return userId; }
     public UUID getCourseId() { return courseId; }
     public GradeConfigurationRequests.Assessment getAssessment() { return assessment; }
+    public Integer getTheoryCredits() { return theoryCredits; }
+    public Integer getPracticeCredits() { return practiceCredits; }
     public List<GradeColumnEntity> getColumns() { return Collections.unmodifiableList(columns); }
 }

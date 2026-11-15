@@ -5,7 +5,7 @@ import java.util.List;
 
 public record IuhCourseResult(Status status, String reason, boolean complete, boolean allScoresEntered,
         Boolean passed, Boolean needsRetake, ExamEligibility examEligibility,
-        BigDecimal regularAverage, BigDecimal finalExamScore, BigDecimal weightedTotal, BigDecimal rawTotal,
+        BigDecimal regularAverage, BigDecimal finalExamScore, BigDecimal theoryTotal, BigDecimal practiceTotal, BigDecimal weightedTotal, BigDecimal rawTotal,
         BigDecimal total, String letter, BigDecimal gradePoint,
         int enteredColumns, int columnCount, List<String> missingGroups,
         List<MissingScore> missingScores, List<Column> columns, List<Notice> notices) {

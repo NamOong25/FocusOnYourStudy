@@ -2,7 +2,8 @@ import { ApiError, createHttpClient } from '../../../shared/api/http';
 import type { Authorized } from '../../academics/api/semestersApi';
 import type { Course } from '../../academics/academic';
 
-export type Assessment = 'THEORY' | 'PRACTICAL';
+export const gradeAssessments = ['THEORY', 'PRACTICAL', 'INTEGRATED'] as const;
+export type Assessment = typeof gradeAssessments[number];
 export type ResultStatus = 'INCOMPLETE_CONFIGURATION' | 'INCOMPLETE_SCORES' | 'EXAM_BLOCKED' | 'FAILED' | 'PASSED';
 export type MissingScore = { columnId: string; field: 'SCORE' | 'REMAINDER_SCORE' };
 export type Notice = { code: string; message: string };
@@ -18,6 +19,7 @@ export type GradePart = { id: string; name: string; kind: string; project: { tar
   weight: number; weightNumerator: number; weightDenominator: number; score: number | null; remainderScore: number | null; effectiveScore: number | null };
 export type ServerGradeDetail = { kind: 'unconfigured'; courseId: string } | { kind: 'configured'; courseId: string;
   configurationId: string; gradeVersion: number; courseVersion: number; credits: number; assessment: Assessment;
+  theoryCredits?: number; practiceCredits?: number; theoryTotal?: number | null; practiceTotal?: number | null;
   configurationState: 'DRAFT' | 'READY'; parts: GradePart[]; result: ResultCore; enteredColumns: number; columnCount: number };
 
 export const validGradeId = (v: unknown): v is string => typeof v === 'string' && /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i.test(v);
@@ -31,7 +33,7 @@ function decimal(v: unknown, max: number): number | null { if (v === null) retur
 const id = (v: unknown) => { if (!validGradeId(v)) throw invalid(); return v.toLowerCase(); };
 function list(v: unknown, max: number): unknown[] { if (!Array.isArray(v) || v.length > max) throw invalid(); return v; }
 function token<T extends string>(v: unknown, values: readonly T[]): T { if (typeof v !== 'string' || !values.includes(v as T)) throw invalid(); return v as T; }
-function groups(v: unknown) { const a = list(v, 4).map(x => token(x, ['REGULAR', 'MIDTERM', 'FINAL', 'PRACTICAL_COLUMNS'] as const)); if (new Set(a).size !== a.length) throw invalid(); return a; }
+function groups(v: unknown) { const a = list(v, 5).map(x => token(x, ['REGULAR', 'MIDTERM', 'FINAL', 'PRACTICAL_COLUMNS', 'CREDIT_SPLIT'] as const)); if (new Set(a).size !== a.length) throw invalid(); return a; }
 const columnId = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(v);
 function missing(v: unknown): MissingScore[] { return list(v, 20).map(x => { const p = obj(x); if (!columnId(p.columnId)) throw invalid(); return { columnId: p.columnId, field: token(p.field, ['SCORE', 'REMAINDER_SCORE']) }; }); }
 function notices(v: unknown): Notice[] { return list(v, 30).map(x => { const n = obj(x); if (!text(n.code, 100) || !text(n.message, 1200)) throw invalid(); return { code: n.code, message: n.message }; }); }
@@ -70,7 +72,7 @@ export function parseSemesterGrades(input: unknown, query: SemesterGradeQuery): 
     if (!version(row.courseVersion) || row.courseVersion !== local.version || row.credits !== local.credits) throw changed();
     if (!text(row.code,64) || !row.code.trim() || !text(row.name,200) || !row.name.trim()) throw invalid();
     const configurationId = row.configurationId === null ? null : id(row.configurationId);
-    const assessment = row.assessment === null ? null : token(row.assessment, ['THEORY','PRACTICAL'] as const);
+    const assessment = row.assessment === null ? null : token(row.assessment, gradeAssessments);
     if (configurationId === null ? row.gradeVersion !== null || assessment !== null : !version(row.gradeVersion) || assessment === null) throw invalid();
     const result = core(row, row.resultStatus, row.resultReason);
     if (configurationId === null && (result.status !== null || result.complete || result.reason !== 'NO_CONFIGURATION') || configurationId !== null && result.status === null) throw invalid();
@@ -96,14 +98,18 @@ export function parseGradeDetail(input: unknown, course: CourseRef, config: { id
   const v = obj(input), scores = obj(v.scores), result = obj(v.result);
   if (id(scores.courseId) !== course.id.toLowerCase() || id(scores.configurationId) !== config.id || !version(scores.version) || scores.version < config.version) throw invalid();
   if (!version(v.courseVersion) || v.courseVersion !== course.version || v.credits !== course.credits) throw changed();
-  const assessment = token(scores.assessment, ['THEORY','PRACTICAL'] as const), configurationState = token(scores.configurationState,['DRAFT','READY'] as const);
+  const assessment = token(scores.assessment, gradeAssessments), configurationState = token(scores.configurationState,['DRAFT','READY'] as const);
+  const integrated = assessment === 'INTEGRATED';
+  const theoryCredits = Number(scores.theoryCredits), practiceCredits = Number(scores.practiceCredits);
+  if (integrated && (!Number.isInteger(scores.theoryCredits) || !Number.isInteger(scores.practiceCredits)
+    || theoryCredits < 1 || practiceCredits < 1 || theoryCredits + practiceCredits > 30)) throw invalid();
   const columns = list(result.columns,10).map(x => { const c=obj(x); if (!columnId(c.id)) throw invalid(); return { id:c.id,score:decimal(c.effectiveScore,10) }; });
   if (new Set(columns.map(c=>c.id)).size !== columns.length) throw invalid();
   const effective = new Map(columns.map(c=>[c.id,c.score]));
   const parts: GradePart[] = list(scores.parts,10).map(x => {
     const p=obj(x); if (!columnId(p.id) || !text(p.name,200) || !p.name.trim() || !number(p.weight,0,100)
-      || !Number.isInteger(p.weightNumerator) || Number(p.weightNumerator)<=0 || Number(p.weightNumerator)>100
-      || !Number.isInteger(p.weightDenominator) || Number(p.weightDenominator)<1 || Number(p.weightDenominator)>10 || !effective.has(p.id)) throw invalid();
+      || !Number.isInteger(p.weightNumerator) || Number(p.weightNumerator)<=0 || Number(p.weightNumerator)>(integrated?2900:100)
+      || !Number.isInteger(p.weightDenominator) || Number(p.weightDenominator)<1 || Number(p.weightDenominator)>(integrated?300:10) || !effective.has(p.id)) throw invalid();
     const kind=token(p.kind,['REGULAR','REGULAR_TEST','MIDTERM','PRACTICE_REGULAR','PRACTICE_TEST','FINAL','PROJECT']);
     let project: GradePart['project']=null;
     if (kind==='PROJECT') { const pr=obj(p.project); if (!number(pr.share,0,100) || pr.share===0) throw invalid(); project={target:token(pr.target,['PRACTICE','FINAL']),share:pr.share}; }
@@ -115,9 +121,12 @@ export function parseGradeDetail(input: unknown, course: CourseRef, config: { id
     || result.enteredColumns>parts.length || result.columnCount!==parts.length || typeof scores.hasScores!=='boolean') throw invalid();
   // Display the server's atomic result, never rebalance columns or rerun the preview calculator.
   const parsed=core(result,result.status,result.reason); if (parsed.status===null) throw invalid();
+  const split = integrated ? { theoryCredits, practiceCredits, theoryTotal: decimal(result.theoryTotal,10), practiceTotal: decimal(result.practiceTotal,10) } : null;
+  if (split && (parsed.complete !== (split.theoryTotal !== null && split.practiceTotal !== null)
+    || (theoryCredits + practiceCredits !== course.credits) !== parsed.missingGroups.includes('CREDIT_SPLIT'))) throw invalid();
   const ids=new Set(parts.map(p=>p.id)); if (parsed.missingScores.some(m=>!ids.has(m.columnId))) throw invalid();
   return {kind:'configured',courseId:course.id.toLowerCase(),configurationId:config.id,gradeVersion:Number(scores.version),courseVersion:Number(v.courseVersion),
-    credits:course.credits,assessment,configurationState,parts,result:parsed,enteredColumns:Number(result.enteredColumns),columnCount:parts.length};
+    credits:course.credits,assessment,...split,configurationState,parts,result:parsed,enteredColumns:Number(result.enteredColumns),columnCount:parts.length};
 }
 export function createGradesReadApi(baseUrl: string, authorized: Authorized, options?: Parameters<typeof createHttpClient>[1]) {
   const http=createHttpClient(baseUrl,options);

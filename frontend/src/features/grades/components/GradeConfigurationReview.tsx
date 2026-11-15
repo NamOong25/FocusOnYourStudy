@@ -5,7 +5,7 @@ import {C,F,S} from '../../../shared/theme';
 import {asApiError,type ApiError} from '../../../shared/api/http';
 import {useGradeConfigurationWrites} from '../api/GradeConfigurationWritesProvider';
 import type {ServerGradeDetail} from '../api/gradesReadApi';
-import {gradeKindLabels} from '../serverGradeView';
+import {gradeAssessmentLabels,gradeKindLabels} from '../serverGradeView';
 
 export function GradeConfigurationPendingNotice({onOpen}:{onOpen:(id:string)=>void}){
   const {state}=useGradeConfigurationWrites(),{courseCatalog}=useApp();const pending=state.pending;
@@ -32,7 +32,8 @@ export default function GradeConfigurationReview({courseId,onReplace,onKeepDraft
       <T style={{fontFamily:F.bold}}>Dữ liệu vừa đọc từ tài khoản</T>
       {!state.checked.courseExists?<><T style={S.small}>Môn học không còn truy cập được trong tài khoản. Không tạo lại bảng điểm từ bản nháp cũ.</T><Button label="Đã kiểm tra, đóng biểu mẫu" secondary disabled={loading||state.checking||state.busy} onPress={()=>accept(onClose)}/></>
         :current?.kind==='configured'?<>
-          <T style={S.small}>{current.assessment==='THEORY'?'Lý thuyết':'Thực hành'} · {current.parts.length} cột</T>
+          <T style={S.small}>{gradeAssessmentLabels[current.assessment]} · {current.parts.length} cột</T>
+          {current.assessment==='INTEGRATED'&&<T style={S.small}>{current.theoryCredits} tín chỉ LT · {current.practiceCredits} tín chỉ TH</T>}
           {current.parts.map(p=><T key={p.id} style={S.small}>{p.name} · {gradeKindLabels[p.kind]}{p.project?` · ${p.project.target==='PRACTICE'?'Một cột thực hành':'Cuối kỳ'} ${p.project.share}%`:''}{p.score!==null||p.remainderScore!==null?' · Đã có điểm':''}</T>)}
           <Button label="Thay bản nháp bằng cấu hình vừa kiểm tra" secondary disabled={loading||state.checking||state.busy} onPress={()=>accept(()=>onReplace(current))}/>
         </>:<>

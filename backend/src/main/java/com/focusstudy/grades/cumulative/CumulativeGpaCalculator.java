@@ -1,7 +1,6 @@
 package com.focusstudy.grades.cumulative;
 
 import com.focusstudy.grades.attempts.CourseAttemptsResponse;
-import com.focusstudy.grades.configuration.GradeConfigurationRequests.Assessment;
 import java.math.*;
 import java.util.*;
 import static com.focusstudy.grades.cumulative.CumulativeGpaResponse.*;
@@ -57,7 +56,7 @@ public final class CumulativeGpaCalculator {
     }
     private static boolean eligible(CourseAttemptsResponse.Course c) {
         return c.complete() && c.incompleteReason() == null && c.total() != null && c.gradePoint() != null && c.passed() != null
-                && (c.assessment() == Assessment.THEORY || c.assessment() == Assessment.PRACTICAL);
+                && c.assessment() != null;
     }
     private static Use use(CourseAttemptsResponse.Group group, CourseAttemptsResponse.Attempt a, CourseAttemptsResponse.Attempt selected) {
         if (group.needsReview()) return Use.GROUP_REQUIRES_REVIEW;

@@ -2,6 +2,15 @@
 
 Theo yêu cầu ngày 20/10/2026: dựng các giao diện còn thiếu trước, sau đó hoàn thiện từng đợt. Ban đầu hoãn bốn nhóm dưới đây; sau UI 2F đã làm bộ chọn ngày/giờ (3A) và điều hướng (3B) theo yêu cầu. Đã hoàn thành các đợt trạng thái (3C) và Dashboard theo học kỳ (3D). Đây là checklist trong project, không phải lịch nhắc tự động.
 
+## Công việc trước khi chia sẻ APK
+
+- [ ] Chốt các thay đổi local theo từng nhóm: Điểm/GPA và migration V17, Thống kê, Hồ sơ, Lịch thi. Kiểm tra bản dựng từ mã nguồn đã chốt.
+- [ ] Nghiệm thu một vòng với tài khoản mới và một tài khoản đã có dữ liệu: học kỳ, môn, lịch lặp và ngoại lệ, bài tập, lịch thi, điểm, Trang chủ và Thống kê.
+- [ ] Đối chiếu kết quả từng môn và GPA với bảng điểm IUH, gồm môn tích hợp, bài tập lớn, điểm trống, điểm 0 và môn học lại.
+- [ ] Triển khai backend và PostgreSQL online (9F.2B), nối frontend và thử trên máy thật (9G.1), cài và chia sẻ bản Android (9G.2).
+
+App đã gỡ màn Tự học và luồng thêm, sửa, lưu buổi tự học. Trợ lý còn mở đề xuất giờ học để xem. Dữ liệu các buổi đã lưu trước đây vẫn nằm trong tài khoản. Các dòng 8A.3 và Tự học bên dưới ghi lại phạm vi cũ.
+
 ## Điều chỉnh phạm vi — bỏ đính kèm tài liệu
 
 Theo yêu cầu ngày 30/10/2026: bỏ triển khai upload/lưu/tải/xóa tệp đính kèm bài tập; không thực hiện đề xuất 8A.1–8A.3 về tài liệu PDF. Giữ AI gợi ý kế hoạch học và luồng xem trước/sửa/duyệt. Tóm tắt PDF và tạo câu hỏi từ tệp không nằm trong đợt tiếp theo; chỉ mở lại khi người dùng yêu cầu riêng. Các màn tài liệu mẫu hiện có chưa bị thay đổi trong lần điều chỉnh checklist này.

@@ -24,7 +24,12 @@ public final class IuhCourseCalculator {
                             .divide(HUNDRED, 1, RoundingMode.HALF_UP);
             effective.put(part.id(), value); columns.add(new Column(part.id(), value));
         }
-        boolean theory = snapshot.assessment() == Assessment.THEORY;
+        boolean integrated = snapshot.assessment() == Assessment.INTEGRATED;
+        boolean theory = snapshot.assessment() != Assessment.PRACTICAL;
+        boolean creditMismatch = integrated && snapshot.theoryCredits() + snapshot.practiceCredits() != credits;
+        var missingGroups = new ArrayList<>(snapshot.missingGroups());
+        if (creditMismatch) missingGroups.add("CREDIT_SPLIT");
+        var practice = integrated ? parts.stream().filter(GradeScoresResponse.Part::belongsToPractice).toList() : parts;
         var regular = parts.stream().filter(p -> p.kind() == Kind.REGULAR || p.kind() == Kind.REGULAR_TEST).toList();
         BigDecimal average = null;
         if (!regular.isEmpty() && regular.stream().allMatch(p -> effective.get(p.id()) != null)) {
@@ -40,20 +45,32 @@ public final class IuhCourseCalculator {
         var eligibility = !theory ? ExamEligibility.NOT_EVALUATED : mid == null ? ExamEligibility.UNKNOWN
                 : mid.signum() == 0 ? ExamEligibility.BLOCKED_BY_MIDTERM_ZERO : ExamEligibility.ELIGIBLE_BY_MIDTERM;
         boolean blocked = eligibility == ExamEligibility.BLOCKED_BY_MIDTERM_ZERO;
-        boolean ready = snapshot.configurationState() == State.READY;
+        boolean ready = snapshot.configurationState() == State.READY && !creditMismatch;
         boolean allEntered = !parts.isEmpty() && missing.isEmpty();
         boolean complete = ready && allEntered && !blocked;
         boolean finalBelowMinimum = theory && finalScore != null && finalScore.compareTo(new BigDecimal("3")) < 0;
         if (theory && regular.size() == 1) notices.add(new Notice("REPORTED_REGULAR_AVERAGE", "Cột thường kỳ duy nhất được dùng như điểm trung bình thường kỳ đã công bố."));
-        if (theory && regular.size() > 1 && regular.size() != (credits >= 3 ? 3 : 2))
+        int theoryCredits = integrated ? snapshot.theoryCredits() : credits;
+        int practiceCredits = integrated ? snapshot.practiceCredits() : credits;
+        if (theory && regular.size() > 1 && regular.size() != (theoryCredits >= 3 ? 3 : 2))
             notices.add(new Notice("CUSTOM_REGULAR_COLUMN_COUNT", "Số cột thường kỳ khác gợi ý theo tín chỉ; kiểm tra đúng bộ cột của môn."));
-        if (!theory && !parts.isEmpty() && parts.size() != (credits >= 3 ? 5 : 3))
-            notices.add(new Notice("CUSTOM_PRACTICAL_COLUMN_COUNT", "Đang tính trung bình bộ cột tùy chỉnh; gợi ý theo tín chỉ là " + (credits >= 3 ? 5 : 3) + " cột."));
+        if ((!theory || integrated) && !practice.isEmpty() && practice.size() != (practiceCredits >= 3 ? 5 : 3))
+            notices.add(new Notice("CUSTOM_PRACTICAL_COLUMN_COUNT", "Đang tính trung bình bộ cột thực hành tùy chỉnh; gợi ý theo tín chỉ là " + (practiceCredits >= 3 ? 5 : 3) + " cột."));
         BigDecimal weighted = null, raw = null, total = null, point = null; String letter = null;
+        BigDecimal theoryTotal = null, practiceTotal = null;
         if (complete) {
             if (theory) {
                 weighted = average.multiply(new BigDecimal("0.2")).add(mid.multiply(new BigDecimal("0.3"))).add(finalScore.multiply(new BigDecimal("0.5")));
                 raw = finalBelowMinimum ? finalScore : weighted; total = raw.setScale(1, RoundingMode.HALF_UP);
+                if (integrated) {
+                    theoryTotal = total;
+                    practiceTotal = practice.stream().map(p -> effective.get(p.id())).reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .divide(BigDecimal.valueOf(practice.size()), 1, RoundingMode.HALF_UP);
+                    var sum = theoryTotal.multiply(BigDecimal.valueOf(theoryCredits)).add(practiceTotal.multiply(BigDecimal.valueOf(practiceCredits)));
+                    var divisor = BigDecimal.valueOf(credits);
+                    weighted = sum.divide(divisor, 12, RoundingMode.HALF_UP); raw = weighted;
+                    total = sum.divide(divisor, 1, RoundingMode.HALF_UP);
+                }
             } else {
                 BigDecimal sum = effective.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
                 var denominator = BigDecimal.valueOf(parts.size());
@@ -67,12 +84,12 @@ public final class IuhCourseCalculator {
         Status status; String reason; Boolean passed = null, retake = null;
         if (blocked) { status = Status.EXAM_BLOCKED; reason = "MIDTERM_ZERO"; }
         else if (!ready) { status = Status.INCOMPLETE_CONFIGURATION; reason = "MISSING_GROUPS"; }
-        else if (finalBelowMinimum) { status = Status.FAILED; reason = "FINAL_BELOW_3"; passed = false; retake = true; }
+        else if (!integrated && finalBelowMinimum) { status = Status.FAILED; reason = "FINAL_BELOW_3"; passed = false; retake = true; }
         else if (!allEntered) { status = Status.INCOMPLETE_SCORES; reason = "MISSING_SCORES"; }
         else if (total.compareTo(new BigDecimal("4")) < 0) { status = Status.FAILED; reason = "TOTAL_BELOW_4"; passed = false; retake = true; }
         else { status = Status.PASSED; reason = "TOTAL_AT_LEAST_4"; passed = true; retake = false; }
-        return new IuhCourseResult(status, reason, complete, allEntered, passed, retake, eligibility, average, finalScore, weighted, raw, total, letter, point,
-                (int) columns.stream().filter(c -> c.effectiveScore() != null).count(), parts.size(), snapshot.missingGroups(),
+        return new IuhCourseResult(status, reason, complete, allEntered, passed, retake, eligibility, average, finalScore, theoryTotal, practiceTotal, weighted, raw, total, letter, point,
+                (int) columns.stream().filter(c -> c.effectiveScore() != null).count(), parts.size(), List.copyOf(missingGroups),
                 List.copyOf(missing), List.copyOf(columns), List.copyOf(notices));
     }
     private record Band(BigDecimal minimum, String letter, BigDecimal point) { }

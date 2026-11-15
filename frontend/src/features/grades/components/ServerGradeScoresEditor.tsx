@@ -10,7 +10,7 @@ import {useServerCourseGrades} from '../api/useServerGrades';
 import {useGradeConfigurationWrites} from '../api/GradeConfigurationWritesProvider';
 import type {CourseRef,ServerGradeDetail} from '../api/gradesReadApi';
 import {draftFromScores,draftFromScoreInput,hasRemainder,inputFromScoresDraft,scoreBasis,scoresDraftKey,type ConfiguredGrade,type GradeScoresDraft} from '../gradeScoresDraft';
-import {gradeKindLabels,gradeNumber,serverGradeView} from '../serverGradeView';
+import {gradeAssessmentLabels,gradeKindLabels,gradeNumber,serverGradeView} from '../serverGradeView';
 import GradeStatus from '../GradeStatus';
 import GradeScoresReview from './GradeScoresReview';
 
@@ -50,7 +50,7 @@ function ScoresForm({course,name,initial,onClose,onConfigure}:{course:CourseRef;
   const replace=(current:ConfiguredGrade)=>{setBase(current);setDraft(draftFromScores(current));setError(null);setClear(false);};
   const issue=error??state.error,result=serverGradeView(base.result);
   return <FlowScope onClose={guardClose}><Sheet title="Nhập điểm môn học" onClose={guardClose} dirty={!busy&&dirty&&!pending} scrollKey={'scores-'+course.id}>
-    <T style={{fontFamily:F.extra,fontSize:21,lineHeight:30}}>{name}</T><Badge label={`${base.assessment==='THEORY'?'Lý thuyết':'Thực hành'} · ${base.parts.length} cột`}/>
+    <T style={{fontFamily:F.extra,fontSize:21,lineHeight:30}}>{name}</T><Badge label={`${gradeAssessmentLabels[base.assessment]} · ${base.parts.length} cột`}/>
     <T style={S.small}>Nhập điểm đã công bố, từ 0 đến 10, tối đa 4 số thập phân. Để trống khi chưa có điểm; điểm 0 là kết quả thật. Để trống một điểm đang có rồi lưu sẽ xóa điểm đó.</T>
     {state.pending?<>
       <GradeScoresReview courseId={course.id} onReplace={replace} onClose={onClose}/>
@@ -59,7 +59,7 @@ function ScoresForm({course,name,initial,onClose,onConfigure}:{course:CourseRef;
       {busy&&<StateView kind="loading" title="Đang lưu điểm" message="Đợi kết quả trước khi đóng hoặc thực hiện thao tác khác."/>}
       <Card style={{backgroundColor:C.canvas,gap:8}}><T style={{fontFamily:F.semi}}>Kết quả lần lưu gần nhất</T><GradeStatus result={result}/><Row between><T style={{fontFamily:F.extra,fontSize:25,color:C.primary}}>{gradeNumber(result.total,1)} /10</T><T style={S.small}>{result.letter??'Chưa quy đổi'}{result.point===null?'':` · ${result.point.toFixed(1)} /4`}</T></Row><T style={S.small}>Lưu điểm để cập nhật tổng kết.</T></Card>
       {!base.parts.length&&<StateView title="Bảng điểm chưa có cột" message="Thiết lập bộ cột theo đề cương trước khi nhập điểm." actionLabel="Thiết lập bộ cột" onAction={onConfigure}/>}
-      {base.assessment==='THEORY'&&base.parts.filter(p=>['REGULAR','REGULAR_TEST'].includes(p.kind)).length===1&&<T style={S.small}>Với một cột thường kỳ, nhập điểm trung bình thường kỳ đã được công bố.</T>}
+      {base.assessment!=='PRACTICAL'&&base.parts.filter(p=>['REGULAR','REGULAR_TEST'].includes(p.kind)).length===1&&<T style={S.small}>Với một cột thường kỳ, nhập điểm trung bình thường kỳ đã được công bố.</T>}
       {base.parts.map((p,i)=>{
         const item=draft.parts.find(v=>v.id===p.id)!;const set=(field:'score'|'remainderScore',text:string)=>change({parts:draft.parts.map(v=>v.id===p.id?{...v,[field]:text}:v)});
         return <Card key={p.id} style={{backgroundColor:C.canvas,gap:12}}>

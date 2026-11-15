@@ -80,6 +80,36 @@ class GradeConfigurationIntegrationTests {
         var a=account();var c=course(a,semester(a,1),"EMPTY");assertThat(list(a,"")).isEmpty();error(send("GET",courseConfig(c.get("id")),a.token,null),404,"GRADE_CONFIGURATION_NOT_FOUND");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM grade_configurations WHERE user_id=?",Integer.class,a.id)).isZero();
     }
+    @Test void integratedScoresPersistAndFlowIntoBothGpaReports() throws Exception {
+        var a = account();
+        var semester = semester(a, 1);
+        var course = course(a, semester, "INTEGRATED");
+        var path = courseConfig(course.get("id"));
+        var config = input("INTEGRATED", part("tk", "REGULAR"), part("gk", "MIDTERM"),
+                part("ck", "FINAL"), part("th", "PRACTICE_TEST"));
+        config.put("theoryCredits", 2);
+        config.put("practiceCredits", 2);
+        error(send("POST", path, a.token, config), 400, "INVALID_GRADE_CONFIGURATION");
+        config.put("practiceCredits", 1);
+        var saved = create(a, course, config);
+        assertThat(saved.get("state")).isEqualTo("READY");
+        assertThat(saved.get("theoryCredits")).isEqualTo(2);
+        assertThat(saved.get("practiceCredits")).isEqualTo(1);
+        var scores = Map.of("tk", 8, "gk", 8, "ck", 8, "th", 10).entrySet().stream().map(entry -> {
+            var score = new HashMap<String, Object>(Map.of("id", entry.getKey(), "score", entry.getValue()));
+            score.put("remainderScore", null);
+            return score;
+        }).toList();
+        data(send("PUT", item(saved) + "/scores", a.token, Map.of("version", saved.get("version"), "parts", scores)));
+        var result = (Map<?, ?>) data(send("GET", item(saved) + "/result", a.token, null)).get("result");
+        assertThat(((Number) result.get("theoryTotal")).doubleValue()).isEqualTo(8.0);
+        assertThat(((Number) result.get("practiceTotal")).doubleValue()).isEqualTo(10.0);
+        assertThat(((Number) result.get("total")).doubleValue()).isEqualTo(8.7);
+        var term = (Map<?, ?>) data(send("GET", "/api/v1/semesters/" + semester.get("id") + "/gpa", a.token, null)).get("summary");
+        var cumulative = (Map<?, ?>) data(send("GET", "/api/v1/gpa/cumulative", a.token, null)).get("summary");
+        assertThat(((Number) term.get("gpa")).doubleValue()).isEqualTo(3.8);
+        assertThat(((Number) cumulative.get("gpa")).doubleValue()).isEqualTo(3.8);
+    }
     @Test void createReadPersistsTrimmedNamesExactWeightsAndNoScores()throws Exception{
         var a=account();var c=course(a,semester(a,1),"LT");var p=part("tk1","REGULAR");p.put("name","  Thường kỳ số 1  ");
         var response=send("POST",courseConfig(c.get("id")),a.token,input("THEORY",p,part("tk2","REGULAR_TEST"),part("mid","MIDTERM"),part("final","FINAL")));var row=data(response);

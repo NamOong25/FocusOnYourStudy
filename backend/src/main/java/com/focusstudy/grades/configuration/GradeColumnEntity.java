@@ -40,4 +40,6 @@ public class GradeColumnEntity {
     public boolean hasScores() { return score != null || remainderScore != null; }
     void changeScores(Scores scores) { score = scores.score(); remainderScore = scores.remainderScore(); }
     public boolean isFinal() { return kind == GradeConfigurationRequests.Kind.FINAL || projectTarget == GradeConfigurationRequests.Target.FINAL; }
+    public boolean isPractice() { return kind == GradeConfigurationRequests.Kind.PRACTICE_REGULAR
+            || kind == GradeConfigurationRequests.Kind.PRACTICE_TEST || projectTarget == GradeConfigurationRequests.Target.PRACTICE; }
 }

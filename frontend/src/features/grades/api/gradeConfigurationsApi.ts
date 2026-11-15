@@ -5,6 +5,7 @@ import {courseGradeKey,createGradesReadApi,validGradeId,type CourseRef} from './
 
 export type ConfigurationBasis={configurationId:string;gradeVersion:number};
 export type SavedConfiguration={id:string;courseId:string;version:number;state:'DRAFT'|'READY';missingGroups:string[];
+  theoryCredits?:number;practiceCredits?:number;
   assessment:ConfigurationInput['assessment'];parts:(ConfigurationInput['parts'][number]&{weight:number;weightNumerator:number;weightDenominator:number})[]};
 const bad=()=>new ApiError('Chưa xác nhận được phản hồi lưu cấu hình. Kiểm tra dữ liệu đã lưu trước khi gửi lại.','INVALID_RESPONSE');
 const errors:Record<string,string>={
@@ -26,28 +27,29 @@ export function parseSavedConfiguration(input:unknown,courseId:string):SavedConf
   if(!validGradeId(v.id)||!validGradeId(v.courseId)||v.courseId.toLowerCase()!==courseId.toLowerCase()||!Number.isSafeInteger(v.version)||Number(v.version)<0
     ||v.state!=='DRAFT'&&v.state!=='READY'||!Array.isArray(v.parts)||!Array.isArray(v.missingGroups))throw bad();
   const groups=v.missingGroups;if(groups.length>4||new Set(groups).size!==groups.length||groups.some(g=>!['REGULAR','MIDTERM','FINAL','PRACTICAL_COLUMNS'].includes(String(g)))||(v.state==='READY')!==(groups.length===0))throw bad();
+  const integrated=v.assessment==='INTEGRATED';
   const weighted=v.parts.map(item=>{
     if(!item||typeof item!=='object'||Array.isArray(item))throw bad();const p=item as Record<string,unknown>;
     if('score'in p||'remainderScore'in p||typeof p.weight!=='number'||!Number.isFinite(p.weight)||p.weight<0||p.weight>100
-      ||!Number.isInteger(p.weightNumerator)||Number(p.weightNumerator)<1||Number(p.weightNumerator)>100
-      ||!Number.isInteger(p.weightDenominator)||Number(p.weightDenominator)<1||Number(p.weightDenominator)>10)throw bad();
+      ||!Number.isInteger(p.weightNumerator)||Number(p.weightNumerator)<1||Number(p.weightNumerator)>(integrated?2900:100)
+      ||!Number.isInteger(p.weightDenominator)||Number(p.weightDenominator)<1||Number(p.weightDenominator)>(integrated?300:10))throw bad();
     return p;
   });
   let parsed:ConfigurationInput;
-  try{parsed=configurationInput({assessment:v.assessment,parts:weighted.map(p=>({id:p.id,name:p.name,kind:p.kind,project:p.project}))} as ConfigurationInput);}catch{throw bad();}
+  try{parsed=configurationInput({assessment:v.assessment,...(integrated?{theoryCredits:v.theoryCredits,practiceCredits:v.practiceCredits}:{}),parts:weighted.map(p=>({id:p.id,name:p.name,kind:p.kind,project:p.project}))} as ConfigurationInput);}catch{throw bad();}
   return {id:v.id.toLowerCase(),courseId:v.courseId.toLowerCase(),version:Number(v.version),assessment:parsed.assessment,state:v.state,
-    missingGroups:groups as string[],parts:parsed.parts.map((p,i)=>({...p,weight:Number(weighted[i]!.weight),weightNumerator:Number(weighted[i]!.weightNumerator),weightDenominator:Number(weighted[i]!.weightDenominator)}))};
+    ...(integrated?{theoryCredits:parsed.theoryCredits,practiceCredits:parsed.practiceCredits}:{}),missingGroups:groups as string[],parts:parsed.parts.map((p,i)=>({...p,weight:Number(weighted[i]!.weight),weightNumerator:Number(weighted[i]!.weightNumerator),weightDenominator:Number(weighted[i]!.weightDenominator)}))};
 }
 export function createGradeConfigurationsApi(baseUrl:string,authorized:Authorized,options?:Parameters<typeof createHttpClient>[1]){
   const http=createHttpClient(baseUrl,options),reads=createGradesReadApi(baseUrl,authorized,options);
   return {
     async save(course:CourseRef,input:ConfigurationInput,original?:ConfigurationBasis){
-      courseGradeKey(course);const data=configurationInput(input),basis=original?configurationBasis(original):undefined;
+      courseGradeKey(course);const data=configurationInput(input,course.credits),basis=original?configurationBasis(original):undefined;
       let raw:unknown;
       try{raw=await authorized(token=>http<unknown>(basis?'/api/v1/grade-configurations/'+encodeURIComponent(basis.configurationId):'/api/v1/courses/'+encodeURIComponent(course.id)+'/grade-configuration',{
         method:basis?'PUT':'POST',headers:{Authorization:`Bearer ${token}`},body:basis?{...data,version:basis.gradeVersion}:data}));}catch(e){throw mapped(e);}
       const saved=parseSavedConfiguration(raw,course.id);
-      const body={assessment:saved.assessment,parts:saved.parts.map(p=>({id:p.id,name:p.name,kind:p.kind,...(p.project?{project:p.project}:{})}))};
+      const body={assessment:saved.assessment,theoryCredits:saved.theoryCredits,practiceCredits:saved.practiceCredits,parts:saved.parts.map(p=>({id:p.id,name:p.name,kind:p.kind,...(p.project?{project:p.project}:{})}))};
       if(basis?(saved.id!==basis.configurationId||saved.version!==basis.gradeVersion+1):saved.version!==0)throw bad();
       if(JSON.stringify(body)!==JSON.stringify(data))throw bad();
       return saved;
