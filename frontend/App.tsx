@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { FeedbackProvider } from './src/shared/feedback/FeedbackProvider';
+import { FeedbackProvider, useFeedback } from './src/shared/feedback/FeedbackProvider';
 import { ActionScope, useActionState } from './src/shared/feedback/ActionScope';
 import { ActionStatus, NoticeToast } from './src/shared/components';
 import { BrandLogo } from './src/shared/components/BrandLogo';
@@ -73,31 +73,44 @@ function AppShell() {
   }, [current, action?.cancel]);
   const date = useCurrentTime(); const canBack = routeTrail.length > 1;
   const notifications = useInAppNotifications(date);
-  useBackAction(canBack, goBackRoute, 0);
+  const [focusLocked, setFocusLocked] = useState(false);
+  const { showNotice } = useFeedback();
+  const allowNavigation = () => {
+    if (!focusLocked) return true;
+    showNotice('Tạm dừng hoặc đợi hết giờ để rời Tập trung.');
+    return false;
+  };
+  const goBack = () => { if (allowNavigation() && canBack) goBackRoute(); };
+  const selectTab = (next: Tab) => { if (next !== tab && allowNavigation()) setTab(next); };
+  useBackAction(canBack || focusLocked, goBack, 0);
   const openTask = (task: Task | 'new') => { setTaskOrigin(current); setTaskForm(task); };
   const openClass = (item: ClassItem | 'new', date?: string) => { setClassOrigin(current); setClassForm(item); setClassDate(date); };
-  const openPanel = (value: 'profile' | 'notifications') => { setPanelOrigin(current); setPanel(value); };
+  const openPanel = (value: 'profile' | 'notifications') => {
+    if (!allowNavigation()) return;
+    setPanelOrigin(current); setPanel(value);
+    if (value === 'notifications' && notifications.schedule) void notifications.schedule.reload().catch(() => {});
+  };
   const closeTaskFlow = () => setTaskForm(null);
   const renderPage = (key: string) => {
     if (key === 'home') return <Home onTask={openTask} onClass={openClass} onProfile={() => openPanel('profile')} />;
     if (auth.hasSession && (!semesterConnection?.loaded || !courseConnection?.loaded)) return <SemesterSyncStatus />;
     if (auth.hasSession && !assignmentConnection?.loaded) return <AssignmentSyncStatus />;
-    if (key === 'focus') return <Focus />;
+    if (key === 'focus') return <Focus onLockChange={setFocusLocked} />;
     if (key === 'stats') return <Stats />;
     if (key === 'ai') return <Assistant />;
     return <><LearningNavigation value={key as ScheduleMode} onChange={setScheduleMode} />{key === 'Thời khóa biểu' ? <Schedule onClass={openClass} onNewClass={() => openClass('new')} /> : key === 'Bài tập' ? <AssignmentsScreen key={assignmentDestination?.key ?? 'regular'} initialStatisticsLink={assignmentDestination?.link} onTask={openTask} onNewTask={() => openTask('new')} /> : key === 'Kỳ thi' ? <ExamList /> : <Academics />}</>;
   };
   return <View style={styles.page}><StatusBar style="dark" /><View style={[styles.app, polished && styles.polishedSurface, { paddingTop: inset.top }]}>
     <Row between style={[styles.header, polished && styles.polishedSurface]}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => setTab('home')} style={[S.row, S.grow, { gap: 10 }]}><BrandLogo /><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T>{!polished && <T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tabs.find(t => t.id === tab)?.label}</T>}</View></Pressable>
-      <NotificationBell quiet={notifications.quiet} unread={notifications.unread} pending={!!notifications.schedule && !notifications.schedule.ready || !!notifications.readState && !notifications.readState.ready} onPress={() => { openPanel('notifications'); if (notifications.schedule) void notifications.schedule.reload().catch(() => {}); }} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
+      <Pressable accessibilityRole="button" accessibilityLabel="Về Trang chủ" onPress={() => selectTab('home')} style={[S.row, S.grow, { gap: 10 }]}><BrandLogo /><View style={S.grow}><T style={{ color: C.primary, fontFamily: F.extra, fontSize: 16, letterSpacing: -0.6 }}>FocusYourStudy</T>{!polished && <T style={{ color: C.muted, fontSize: 9, lineHeight: 15 }}>{tabs.find(t => t.id === tab)?.label}</T>}</View></Pressable>
+      <NotificationBell quiet={notifications.quiet} unread={notifications.unread} pending={!!notifications.schedule && !notifications.schedule.ready || !!notifications.readState && !notifications.readState.ready} onPress={() => openPanel('notifications')} /><IconButton name="person-outline" label="Hồ sơ" bg={C.primary} color="#fff" onPress={() => openPanel('profile')} />
     </Row>
 
-    {canBack && <Pressable accessibilityRole="button" accessibilityLabel="Quay lại màn trước" onPress={goBackRoute} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 40, gap: 7 }]}><Icon name="arrow-back" size={18} /><T style={{fontSize:12,color:C.primary,fontFamily:F.semi}}>Quay lại {routeLabel(routeTrail[routeTrail.length - 2]!)}</T></Pressable>}
+    {canBack && <Pressable accessibilityRole="button" accessibilityLabel="Quay lại màn trước" onPress={goBack} style={[S.row, { marginHorizontal: 20, marginBottom: 8, minHeight: 40, gap: 7 }]}><Icon name="arrow-back" size={18} /><T style={{fontSize:12,color:C.primary,fontFamily:F.semi}}>Quay lại {routeLabel(routeTrail[routeTrail.length - 2]!)}</T></Pressable>}
     {[...visited.current].map(key => <NavigationScope key={key} active={current === key}><RememberedScrollView memoryKey={'page-' + key + (key === 'Bài tập' ? ':' + (assignmentDestination?.key ?? 'regular') : '')} testID={'page-' + key} active={current === key} style={{ flex: 1, display: current === key ? 'flex' : 'none' }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 9, paddingBottom: 125 + inset.bottom, gap: key === 'home' ? 14 : 16 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">{renderPage(key)}</RememberedScrollView></NavigationScope>)}
     <View style={{ position: 'absolute', bottom: 100 + inset.bottom, left: 10, right: 10 }}><ActionStatus /></View>
     <NoticeToast bottom={105 + inset.bottom} />
-    <View style={[styles.dockWrap, { bottom: Math.max(14, inset.bottom) }]}><View style={styles.dock}>{tabs.map(t => { const active = tab === t.id; const center = t.id === 'focus'; return <Pressable accessibilityRole="tab" accessibilityLabel={t.label} aria-selected={active} accessibilityState={{ selected: active }} key={t.id} onPress={() => setTab(t.id)} style={({ pressed }) => ({ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 63, gap: 4, opacity: pressed ? 0.65 : 1 })}>{center ? <View style={{ marginTop: -18, width: 54, height: 54, borderRadius: 27, backgroundColor: active ? C.primary : C.purple, justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#fff', boxShadow: '0px 5px 14px rgba(108,92,231,0.27)' }}><Icon name={t.icon} color="#fff" size={27} /></View> : <Icon name={active ? t.activeIcon : t.icon} color={active ? C.primary : '#686878'} size={21} />}<T style={{ fontFamily: active ? F.bold : F.medium, fontSize: 9, lineHeight: 14, color: active ? C.primary : '#686878' }}>{t.label}</T></Pressable>; })}</View></View>
+    <View style={[styles.dockWrap, { bottom: Math.max(14, inset.bottom) }]}><View style={styles.dock}>{tabs.map(t => { const active = tab === t.id; const center = t.id === 'focus'; return <Pressable accessibilityRole="tab" accessibilityLabel={t.label} aria-selected={active} accessibilityState={{ selected: active }} key={t.id} onPress={() => selectTab(t.id)} style={({ pressed }) => ({ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 63, gap: 4, opacity: pressed ? 0.65 : 1 })}>{center ? <View style={{ marginTop: -18, width: 54, height: 54, borderRadius: 27, backgroundColor: active ? C.primary : C.purple, justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#fff', boxShadow: '0px 5px 14px rgba(108,92,231,0.27)' }}><Icon name={t.icon} color="#fff" size={27} /></View> : <Icon name={active ? t.activeIcon : t.icon} color={active ? C.primary : '#686878'} size={21} />}<T style={{ fontFamily: active ? F.bold : F.medium, fontSize: 9, lineHeight: 14, color: active ? C.primary : '#686878' }}>{t.label}</T></Pressable>; })}</View></View>
     <NavigationScope active={current === taskOrigin}><FlowScope onClose={closeTaskFlow}>
       {taskForm === 'new' && <TaskForm onClose={() => setTaskForm(null)} />}
       {taskForm && taskForm !== 'new' && <TaskDialog key={taskForm.id} taskId={taskForm.id} onClose={() => setTaskForm(null)} />}

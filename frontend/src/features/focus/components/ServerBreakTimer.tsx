@@ -32,6 +32,6 @@ export default function ServerBreakTimer({ timer, mode, clock }: {
         onPress={() => { if (running) void change('PAUSE'); else if (paused) void change('RESUME'); else void change('START', mode === 1 ? 'SHORT' : 'LONG'); }}
         style={[S.grow, { borderRadius: 15, backgroundColor: focusTone(mode).accent }]} />
     </Row>
-    {(running || paused) && <Button label="Kết thúc nghỉ" secondary disabled={blocked} onPress={() => { void change('RESET'); }} />}
+    {paused && <Button label="Kết thúc nghỉ" secondary disabled={blocked} onPress={() => { void change('RESET'); }} />}
   </>;
 }

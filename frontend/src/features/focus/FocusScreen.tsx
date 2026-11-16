@@ -14,8 +14,8 @@ import FocusSetup, { FocusCourseSelector, focusHeading } from './components/Focu
 import LocalFocusTimer from './components/LocalFocusTimer';
 import FocusActivityLinks from './components/FocusActivityLinks';
 
-export default function Focus() {
-  const auth=useAuth();return auth.hasSession?<ServerFocusScreen/>:<PreviewFocus/>;
+export default function Focus({ onLockChange }: { onLockChange: (locked: boolean) => void }) {
+  const auth=useAuth();return auth.hasSession?<ServerFocusScreen onLockChange={onLockChange}/>:<PreviewFocus/>;
 }
 function PreviewFocus() {
   const { mode, setMode, focusCourse, focusCourseId, prepareFocus, focusTaskId, tasks, focusRecords, dailyFocusGoal, setDailyFocusGoal, setTab, courseCatalog, setScheduleMode, setToast } = useApp();

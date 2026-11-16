@@ -12,7 +12,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.focusyourstudy.app"
+      "package": "com.focusyourstudy.app",
+      "permissions": ["android.permission.VIBRATE"]
     },
     "web": {
       "bundler": "metro",
@@ -20,6 +21,7 @@
       "name": "FocusYourStudy"
     },
     "plugins": [
+      "expo-notifications",
       "expo-secure-store",
       "expo-font",
       "expo-sharing",

@@ -1,4 +1,6 @@
 import React,{useEffect,useState} from 'react';
+import { Platform } from 'react-native';
+import { useKeepAwake } from 'expo-keep-awake';
 import {Button,Card,Row,Sheet,StateView,T} from '../../../shared/components';
 import {C,F,S} from '../../../shared/theme';
 import {useApp} from '../../../store/model';
@@ -17,8 +19,14 @@ import {focusDurations} from '../focus';
 import {useFeedback} from '../../../shared/feedback/FeedbackProvider';
 import {asApiError} from '../../../shared/api/http';
 import ServerFocusInsights from './ServerFocusInsights';
+import { useFocusSessionDevice } from '../useFocusSessionDevice';
 
-export default function ServerFocusScreen(){
+function FocusKeepAwake() {
+  useKeepAwake('focus-timer', { suppressDeactivateWarnings: true });
+  return null;
+}
+
+export default function ServerFocusScreen({onLockChange}:{onLockChange:(locked:boolean)=>void}){
   const {manager,state}=usePomodoro(),clock=usePomodoroClock(),auth=useAuth(),{showNotice}=useFeedback();
   const app=useApp(),{courseCatalog,focusCourseId,focusTaskId,tasks,prepareFocus,setScheduleMode,mode,setMode}=app;
   const [choose,setChoose]=useState(false),[cancel,setCancel]=useState<{id:string;version:number;name:string}|null>(null);
@@ -26,6 +34,7 @@ export default function ServerFocusScreen(){
   const hasActiveSession=!!row;
   const breakTimer=usePomodoroBreak();
   const savedBreak=breakTimer.saved;
+  const locked=useFocusSessionDevice({study:state.active,rest:savedBreak,clock,onLockChange});
   const resting=!!savedBreak&&breakActive(savedBreak.row)&&breakRemaining(savedBreak.row,savedBreak.receivedAt,clock)>0;
   const shownMode=hasActiveSession?0:resting?breakMode(savedBreak.row.kind):mode;
   useEffect(()=>{
@@ -44,6 +53,7 @@ export default function ServerFocusScreen(){
   const label=state.busy?'Đang xác nhận':state.pending?'Chờ đối chiếu':state.needsReload?'Chưa đồng bộ':due?'Chờ xác nhận hoàn tất':row?.status==='PAUSED'?'Đang tạm dừng':row?'Đang tập trung':'Sẵn sàng tập trung';
   const pendingName=state.pending?.kind==='start'?'bắt đầu':state.pending?.kind==='pause'?'tạm dừng':state.pending?.kind==='resume'?'tiếp tục':state.pending?.kind==='cancel'?'hủy phiên':'hoàn tất';
   return <>
+    {locked&&Platform.OS!=='web'&&<FocusKeepAwake/>}
     <T accessibilityRole="header" style={focusHeading}>Tập trung</T>
     {!!state.error&&<Card style={{gap:10}}><T accessibilityRole="alert" style={{color:C.red}}>{state.error.message}</T><T style={S.small}>Kiểm tra phiên đã lưu trước khi thao tác tiếp. Đồng hồ chưa được công nhận hoàn tất khi chưa có xác nhận.</T></Card>}
     {state.pending&&!state.busy&&<Card style={{backgroundColor:C.soft,gap:12}}><T style={{fontFamily:F.bold}}>Yêu cầu {pendingName} cần đối chiếu</T><T style={S.small}>Thông tin yêu cầu cũ được giữ trên thiết bị. Gửi lại sẽ dùng đúng yêu cầu đó.</T><Button label="Đối chiếu phiên đã lưu" secondary disabled={state.busy||state.loading} loading={state.loading} onPress={reload}/><Button label={`Gửi lại yêu cầu ${pendingName}`} disabled={!ready} onPress={()=>manager&&perform(()=>manager.retry())}/></Card>}
@@ -59,7 +69,7 @@ export default function ServerFocusScreen(){
         </FocusTimerFace>
         <Row style={{gap:10}}>{row?<>
           <Button label={due?'Xác nhận hoàn tất':row.status==='RUNNING'?'Tạm dừng':'Tiếp tục'} loading={state.busy} disabled={!canWrite} icon={due?'checkmark':row.status==='RUNNING'?'pause':'play'} onPress={()=>change(due?'complete':row.status==='RUNNING'?'pause':'resume')} style={[S.grow,{borderRadius:15}]}/>
-          {!due&&<Button label="Hủy phiên" secondary disabled={!canWrite} onPress={()=>setCancel({id:row.id,version:row.version,name:row.context.courseName})}/>}
+          {row.status==='PAUSED'&&<Button label="Hủy phiên" secondary disabled={!canWrite} onPress={()=>setCancel({id:row.id,version:row.version,name:row.context.courseName})}/>}
         </>:<Button label="Bắt đầu tập trung" icon="play" loading={state.busy} disabled={!canWrite||!catalogReady} onPress={start} style={[S.grow,{borderRadius:15}]}/>}</Row>
       </>}
     </>}
