@@ -13,14 +13,17 @@ const isProfile = (p: unknown): p is AccountProfile => {
 };
 const invalidResponse = () => new ApiError('Phản hồi tài khoản chưa hợp lệ. Hãy thử lại sau.', 'INVALID_RESPONSE');
 type BeforeSend = () => Promise<void>;
+const SESSION_TIMEOUT_MS = 90_000;
 
 export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', options?: Parameters<typeof createHttpClient>[1]) {
   const request = createHttpClient(baseUrl, options);
+  // Render Free can take about a minute to start after being idle.
+  const sessionRequest = createHttpClient(baseUrl, { ...options, timeoutMs: options?.timeoutMs ?? SESSION_TIMEOUT_MS });
   const credentials = transport === 'cookie' ? 'include' as const : 'omit' as const;
-  async function authHeaders(signal?: AbortSignal): Promise<Record<string, string>> {
+  async function authHeaders(signal?: AbortSignal, send = request): Promise<Record<string, string>> {
     if (transport === 'body') return { 'X-Auth-Transport': 'body' };
     // Get a fresh masked CSRF token for each deliberate submission; never automatically retry a mutation.
-    const proof = await request<{ headerName: string; token: string }>('/api/v1/auth/csrf', { signal, credentials });
+    const proof = await send<{ headerName: string; token: string }>('/api/v1/auth/csrf', { signal, credentials });
     if (!proof || proof.headerName !== 'X-XSRF-TOKEN' || typeof proof.token !== 'string' || !proof.token) throw invalidResponse();
     return { 'X-Auth-Transport': 'cookie', 'X-XSRF-TOKEN': proof.token };
   }
@@ -62,20 +65,20 @@ export function createAccountApi(baseUrl: string, transport: 'cookie' | 'body', 
       return profile;
     },
     async login(input: LoginInput, signal?: AbortSignal, beforeSend?: BeforeSend): Promise<LoginResult> {
-      const headers = await authHeaders(signal);
+      const headers = await authHeaders(signal, sessionRequest);
       await beforeSend?.();
-      const value = await request<LoginResult>('/api/v1/auth/login', { method: 'POST', body: input, signal, credentials, headers });
+      const value = await sessionRequest<LoginResult>('/api/v1/auth/login', { method: 'POST', body: input, signal, credentials, headers });
       return tokens(value);
     },
     async refresh(refreshToken?: string, beforeSend?: BeforeSend): Promise<LoginResult> {
-      const headers = await authHeaders();
+      const headers = await authHeaders(undefined, sessionRequest);
       await beforeSend?.();
-      return tokens(await request<LoginResult>('/api/v1/auth/refresh', { method: 'POST',
+      return tokens(await sessionRequest<LoginResult>('/api/v1/auth/refresh', { method: 'POST',
         body: transport === 'cookie' ? {} : { refreshToken }, credentials, headers }));
     },
     async logout(refreshToken?: string): Promise<void> {
-      const headers = await authHeaders();
-      await request<void>('/api/v1/auth/logout', { method: 'POST', body: transport === 'cookie' ? {} : { refreshToken },
+      const headers = await authHeaders(undefined, sessionRequest);
+      await sessionRequest<void>('/api/v1/auth/logout', { method: 'POST', body: transport === 'cookie' ? {} : { refreshToken },
         credentials, headers, empty: true });
     },
     async profile(accessToken: string, signal?: AbortSignal) {
