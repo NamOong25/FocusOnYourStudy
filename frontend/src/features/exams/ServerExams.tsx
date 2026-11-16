@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { Button, Card, Row, Segments, Sheet, StateView, T } from '../../shared/components';
 import { C, F, S } from '../../shared/theme';
 import { FlowScope, useNavigationScope } from '../../navigation/Navigation';
@@ -76,8 +77,8 @@ export default function ServerExams() {
           {visible.map(exam => <ExamListCard key={exam.id} exam={exam} course={courses.find(c => c.id === exam.courseId)!}
             now={now.getTime()} featured={exam.id === nearest} onOpen={() => setOpened({ id: exam.id, key })} />)}
           {!visible.length && source.loading && <T accessibilityLiveRegion="polite" style={S.small}>Đang cập nhật lịch thi…</T>}
-          {!visible.length && overview?.ready && <StateView title={overview.rows.length ? 'Chưa có kỳ thi ở mục này' : course ? 'Môn này chưa có lịch thi' : 'Học kỳ này chưa có lịch thi'}
-            message={overview.rows.length ? 'Chọn Tất cả để xem những kỳ thi đã lưu ở thời điểm khác.' : courses.length ? 'Thêm lịch thi khi có thông báo từ giảng viên.' : 'Thêm môn học vào học kỳ này để tạo lịch thi.'}
+          {!visible.length && overview?.ready && <ExamListEmptyState title={overview.rows.length ? 'Chưa có kỳ thi ở mục này' : course ? 'Môn này chưa có lịch thi' : 'Học kỳ này chưa có lịch thi'}
+            message={overview.rows.length ? 'Chọn Tất cả để xem những kỳ thi đã lưu ở thời điểm khác.' : courses.length ? 'Thêm lịch khi có thông báo từ giảng viên.' : 'Thêm môn học vào học kỳ này để tạo lịch thi.'}
             actionLabel={overview.rows.length ? 'Xem tất cả lịch thi' : !courses.length ? 'Đến Môn & học kỳ' : undefined}
             onAction={() => overview.rows.length ? setPeriod('Tất cả') : setScheduleMode('Môn & học kỳ')} />}
         </>}
@@ -117,3 +118,29 @@ export default function ServerExams() {
     }} />}
   </FlowScope>;
 }
+
+function ExamListEmptyState({ title, message, actionLabel, onAction }: {
+  title: string; message: string; actionLabel?: string; onAction: () => void;
+}) {
+  return <Card style={emptyStyles.card}>
+    <View style={emptyStyles.icon} accessible={false} aria-hidden>
+      <Svg width={36} height={36} viewBox="0 0 36 36" fill="none" stroke={C.amber} strokeWidth={2}
+        strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M17 29H8a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4h17a4 4 0 0 1 4 4v6M4 13h25M10 3v6M23 3v6" />
+        <Circle cx={26} cy={26} r={7} />
+        <Path d="M26 22.5V26h3.5" />
+      </Svg>
+    </View>
+    <T accessibilityRole="header" accessibilityLiveRegion="polite" style={emptyStyles.title}>{title}</T>
+    <T style={[S.small, emptyStyles.message]}>{message}</T>
+    {actionLabel && <Button label={actionLabel} style={emptyStyles.action} onPress={onAction} />}
+  </Card>;
+}
+
+const emptyStyles = StyleSheet.create({
+  card: { alignItems: 'center', borderRadius: 20, borderColor: C.line, paddingVertical: 24, paddingHorizontal: 16, gap: 7, boxShadow: 'none' },
+  icon: { width: 62, height: 62, borderRadius: 17, backgroundColor: C.amberSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  title: { fontFamily: F.bold, fontSize: 17, textAlign: 'center' },
+  message: { textAlign: 'center' },
+  action: { alignSelf: 'stretch', marginTop: 5 },
+});
