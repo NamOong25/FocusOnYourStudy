@@ -16,7 +16,11 @@ export default function AccountProfileEditor({ onClose }: { onClose: () => void 
     <T style={S.small}>Cập nhật thông tin để góc học tập mang tên bạn. Trường học và ngành học có thể để trống.</T>
     {!state.loaded ? <><StateView kind={state.error ? 'error' : 'loading'} title={state.error ? 'Chưa mở được hồ sơ' : 'Đang tải hồ sơ hiện tại'} message={state.error?.message ?? 'Đợi một chút để lấy thông tin đã lưu.'} />
       {state.error && manager && <Button label="Thử tải lại hồ sơ" secondary onPress={act(manager.read)} loading={state.busy} />}</> : <>
-      <Card style={{ gap: 5, backgroundColor: C.canvas }}><T style={S.small}>Email tài khoản</T><T selectable style={{ fontFamily: F.semi }}>{state.baseline?.email ?? auth.email}</T></Card>
+      <Card style={{ gap: 5, backgroundColor: C.canvas }}>
+        <T style={S.small}>Email tài khoản</T>
+        <T selectable style={{ fontFamily: F.semi }}>{state.baseline?.email ?? auth.email}</T>
+        {!!state.baseline?.timeZone && <T style={S.small}>Múi giờ · {state.baseline.timeZone}</T>}
+      </Card>
       {profileFields.map(field => <AccountField key={field} label={labels[field]} value={state.draft[field]} onChange={value => manager?.edit(field, value)} disabled={state.busy} error={state.error?.fields[field]} />)}
       <FormMessage message={state.error?.message ?? ''} />
       <FormMessage message={state.notice} success />

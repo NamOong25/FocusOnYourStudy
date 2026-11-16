@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, TextInput, useWindowDimensions, View } from 'react-native';
-import { Badge, Button, Card, Icon, Row, Segments, Sheet, SheetFlow, StateView, T } from '../../../shared/components';
+import { Badge, Button, Card, EmptyState, Icon, Row, Segments, Sheet, SheetFlow, StateView, T } from '../../../shared/components';
 import { useNavigationScope } from '../../../navigation/Navigation';
 import { useApp } from '../../../store/model';
 import { C, F, S } from '../../../shared/theme';
@@ -62,7 +62,7 @@ export default function ServerGradesScreen({ fixedSemesterId, onOpenCourse, onCo
     {fixedSemesterId
       ? <T style={S.title}>{semester.name} · {semester.academicYear}</T>
       : <StatisticsSemesterSelector semester={semester} onPress={() => setPickerOpen(true)} />}
-    <View style={{ flexDirection: fixedSemesterId || width < 320 || fontScale >= 1.3 ? 'column' : 'row', alignItems: 'stretch', gap: 10 }}>
+    <View style={{ flexDirection: fixedSemesterId || width < 350 || fontScale >= 1.3 ? 'column' : 'row', alignItems: 'stretch', gap: 10 }}>
       <SemesterGpaCard summary={read.value?.summary} error={!!read.error} />
       {!fixedSemesterId && <ServerCumulativeCard />}
     </View>
@@ -71,7 +71,7 @@ export default function ServerGradesScreen({ fixedSemesterId, onOpenCourse, onCo
         : <>
           <T accessibilityRole="header" style={S.title}>Bảng điểm học kỳ</T>
           {!read.value.courses.length
-            ? <StateView title="Học kỳ chưa có môn học" message="Thêm môn vào học kỳ này để theo dõi kết quả." actionLabel="Thêm môn học" onAction={manage} />
+            ? <EmptyState illustration="books" title="Học kỳ chưa có môn học" message="Thêm môn vào học kỳ này để theo dõi kết quả." actionLabel="Thêm môn học" actionIcon="add" onAction={manage} />
             : <>
               <Row style={{ backgroundColor: C.card, borderRadius: 16, paddingHorizontal: 13, borderWidth: 1, borderColor: C.line }}>
                 <Icon name="search-outline" size={18} />
@@ -80,8 +80,9 @@ export default function ServerGradesScreen({ fixedSemesterId, onOpenCourse, onCo
               </Row>
               <Segments values={filters} value={filter} onChange={setFilter} />
               {filtered.length > 0
-                ? <View style={{ gap: 8 }}>{filtered.map(course => <CourseGradeRow key={course.id} course={course} onOpen={() => openCourse(course.id)} />)}</View>
-                : <StateView title="Không có môn phù hợp" message="Thử đổi bộ lọc hoặc từ khóa tìm kiếm." actionLabel="Xóa bộ lọc" onAction={() => { setQuery(''); setFilter('Tất cả'); }} />}
+                ? <Card style={{ paddingVertical: 0, paddingHorizontal: 13 }}>{filtered.map((course, index) => <CourseGradeRow key={course.id} course={course}
+                    separated={index > 0} onOpen={() => openCourse(course.id)} />)}</Card>
+                : <EmptyState title="Không có môn phù hợp" actionLabel="Xóa bộ lọc" onAction={() => { setQuery(''); setFilter('Tất cả'); }} />}
             </>}
         </>}
     {!fixedSemesterId && onCompare && <Button label="So sánh GPA giữa các học kỳ" secondary icon="analytics-outline" onPress={onCompare} />}
@@ -94,11 +95,11 @@ export default function ServerGradesScreen({ fixedSemesterId, onOpenCourse, onCo
 }
 
 function SemesterGpaCard({ summary, error }: { summary?: ServerSemesterGrades['summary']; error: boolean }) {
-  return <Card style={[S.grow, { backgroundColor: C.soft, padding: 12, gap: 5 }]}>
+  return <Card style={[S.grow, { backgroundColor: C.soft, borderColor: '#E2D9FC', padding: 13, gap: 4 }]}>
     <T style={{ fontFamily: F.bold }}>GPA học kỳ</T>
     {summary ? <>
       <T testID="server-semester-gpa" style={{ fontFamily: F.extra, fontSize: 28, color: C.primary }}>
-        {gradeNumber(summary.gpa, 2).replace('.', ',')}<T style={S.small}> / 4</T>
+        {gradeNumber(summary.gpa, 2).replace('.', ',')}{summary.gpa !== null && <T style={S.small}> / 4</T>}
       </T>
       <T style={S.small}>{summary.calculatedCredits} tín chỉ tính GPA</T>
       {summary.state !== 'COMPLETE' && <T style={S.small}>{semesterGpaCaption(summary)}</T>}
@@ -106,7 +107,7 @@ function SemesterGpaCard({ summary, error }: { summary?: ServerSemesterGrades['s
   </Card>;
 }
 
-function CourseGradeRow({ course, onOpen }: { course: ServerCourseGrade; onOpen: () => void }) {
+function CourseGradeRow({ course, separated, onOpen }: { course: ServerCourseGrade; separated: boolean; onOpen: () => void }) {
   const result = serverGradeView(course.result);
   const presentation = gradePresentation(result);
   const value = gradeNumber(result.total, 1).replace('.', ',');
@@ -115,15 +116,16 @@ function CourseGradeRow({ course, onOpen }: { course: ServerCourseGrade; onOpen:
     : presentation.lowPass ? 'Đạt · Điểm thấp' : result.passed ? 'Đạt' : 'Chưa đủ điểm';
   return <Pressable accessibilityRole="button" accessibilityLabel={`Bảng điểm ${course.name}`}
     accessibilityHint={`${course.code}, ${course.credits} tín chỉ, ${result.total === null ? status : value + ' trên 10, ' + status}`}
-    onPress={onOpen} style={({ pressed }) => [S.card, { padding: 12, opacity: pressed ? 0.72 : 1 }]}>
+    onPress={onOpen} style={({ pressed }) => [{ paddingVertical: 12, minHeight: 64, justifyContent: 'center', opacity: pressed ? 0.72 : 1 },
+      separated && { borderTopWidth: 1, borderTopColor: C.line }]}>
     <Row style={{ gap: 7 }}>
       <View style={[S.grow, { gap: 4 }]}>
         <T style={{ fontFamily: F.bold, fontSize: 15 }}>{course.name}</T>
         <T style={S.small}>{course.code} · {course.credits} tín chỉ{!course.countsTowardGpa && ' · Không tính GPA'}</T>
       </View>
       <View style={{ maxWidth: '45%', flexShrink: 1, alignItems: 'flex-end', gap: 4 }}>
-        <T style={{ fontFamily: F.extra, fontSize: 23, color: scoreColor }}>{value}<T style={S.small}> / 10</T></T>
-        <View style={{ alignItems: 'flex-end' }}><Badge label={status} bg={presentation.background} color={presentation.color} /></View>
+        <T style={{ fontFamily: F.extra, fontSize: 22, color: scoreColor }}>{value}{result.total !== null && <T style={S.small}> / 10</T>}</T>
+        {(!result.passed || presentation.lowPass) && <Badge label={status} bg={presentation.background} color={presentation.color} />}
       </View>
       <Icon name="chevron-forward" size={15} />
     </Row>

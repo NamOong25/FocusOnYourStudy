@@ -8,12 +8,12 @@ import type { Semester } from '../../academics/academic';
 import { validateStatisticsRange, type StatisticsRange } from '../statistics';
 
 export function StatisticsSemesterSelector({ semester, onPress }: { semester: Semester; onPress: () => void }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel="Chọn học kỳ thống kê" accessibilityHint={`${semester.name} · ${semester.academicYear}`} onPress={onPress} style={[S.card, { paddingVertical: 17 }]}>
-    <Row style={{ gap: 12 }}>
-      <View style={{ width: 40, height: 44, borderRadius: 13, backgroundColor: C.soft, justifyContent: 'center', alignItems: 'center' }}><Icon name="calendar-outline" size={24} /></View>
-      <View style={S.grow}><T style={[S.small, { fontSize: 10, letterSpacing: 0.5 }]}>HỌC KỲ ĐANG XEM</T><T style={{ fontFamily: F.bold, fontSize: 16 }}>{semester.name} · {semester.academicYear}</T></View>
-      <Icon name="chevron-down" size={18} />
-    </Row>
+  return <Pressable accessibilityRole="button" accessibilityLabel="Chọn học kỳ thống kê" accessibilityHint={`${semester.name} · ${semester.academicYear}`} onPress={onPress}
+    style={({ pressed }) => [S.row, { minHeight: 48, borderRadius: 15, paddingHorizontal: 13, paddingVertical: 8,
+      borderWidth: 1, borderColor: C.line, backgroundColor: pressed ? C.soft : C.card }]}>
+    <Icon name="calendar-outline" size={17} />
+    <T style={[S.grow, { fontFamily: F.bold }]}>{semester.name} · {semester.academicYear}</T>
+    <Icon name="chevron-down" size={16} />
   </Pressable>;
 }
 export function StatisticsSemesterSheet({ semesters, selectedId, onSelect, onManage, onClose, description = 'Thời gian học, phân bổ môn và bài tập hiển thị theo học kỳ bạn chọn.' }: { semesters: Semester[]; selectedId: string; onSelect: (id: string) => void; onManage: () => void; onClose: () => void; description?: string }) {

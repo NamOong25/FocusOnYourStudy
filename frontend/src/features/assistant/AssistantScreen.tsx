@@ -31,7 +31,7 @@ export default function Assistant() {
           <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 21, lineHeight: 29 }}>Lên kế hoạch học</T>
           <T style={S.small}>Tìm khung giờ rảnh để ôn bài hoặc chuẩn bị cho kỳ thi.</T>
         </View>
-        {!stack && <Image source={require('../../../assets/mentor.png')} accessible={false}
+        {!stack && <Image source={require('../../../assets/mentor.jpg')} accessible={false}
           resizeMode="cover" style={{ width: width < 360 ? 68 : 88, height: width < 360 ? 80 : 100, borderRadius: 20 }} />}
       </Row>
     </Card>

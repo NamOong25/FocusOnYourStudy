@@ -31,10 +31,10 @@ export default function ServerCumulativeCard(){
   return <>
     <Pressable accessibilityRole="button" accessibilityLabel="Xem chi tiết GPA tích lũy"
       accessibilityHint={summary ? `${gradeNumber(summary.gpa,2).replace('.',',')} trên 4, ${summary.earnedCredits} tín chỉ đạt` : undefined}
-      onPress={overview} style={({pressed})=>[S.card,S.grow,{padding:12,gap:5,backgroundColor:pressed?C.canvas:C.card}]}>
+      onPress={overview} style={({pressed})=>[S.card,S.grow,{padding:13,gap:4,borderColor:'#E2D9FC',backgroundColor:pressed?C.soft:'#F6F2FF'}]}>
       <Row style={{gap:3}}><T style={[S.grow,{fontFamily:F.bold}]}>GPA tích lũy</T><Icon name="chevron-forward" size={15}/></Row>
       {summary ? <>
-        <T testID="server-cumulative-gpa" style={{fontFamily:F.extra,fontSize:28,color:C.primary}}>{gradeNumber(summary.gpa,2).replace('.',',')}<T style={S.small}> / 4</T></T>
+        <T testID="server-cumulative-gpa" style={{fontFamily:F.extra,fontSize:28,color:C.primary}}>{gradeNumber(summary.gpa,2).replace('.',',')}{summary.gpa!==null&&<T style={S.small}> / 4</T>}</T>
         <T style={S.small}>{summary.earnedCredits} tín chỉ đạt</T>
         {summary.state!=='COMPLETE'&&<T style={S.small}>{summary.gpa===null?unavailable:'GPA tạm tính'}</T>}
       </> : <T style={S.small}>{read.error?'Chạm để thử lại':'Đang tải GPA…'}</T>}

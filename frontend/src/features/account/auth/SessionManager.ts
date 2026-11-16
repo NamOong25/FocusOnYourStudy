@@ -63,14 +63,15 @@ export class SessionManager {
     try { await this.store.write({ ...record, kind: 'logout-pending' }); }
     finally { this.clear(notice, true); this.coordinator.notify(); }
   }
-  private async finishLogout(record: SessionRecord): Promise<boolean> {
+  private async finishLogout(record: SessionRecord): Promise<ApiError | null> {
     try {
       await this.api.logout(record.refreshToken);
       await this.store.write({ kind: 'signed-out' });
-      this.clear('Đã đăng xuất.'); this.coordinator.notify(); return true;
-    } catch {
-      this.clear('Đã thoát trên thiết bị này. Chưa xác nhận được đăng xuất với máy chủ; hãy thử lại khi có mạng.', true);
-      return false;
+      this.clear('Đã đăng xuất.'); this.coordinator.notify(); return null;
+    } catch (failure) {
+      const error = asApiError(failure);
+      this.clear(`Chưa hoàn tất đăng xuất. ${error.message}`, true);
+      return error;
     }
   }
   restore = (): Promise<void> => {
@@ -141,7 +142,9 @@ export class SessionManager {
     assertNotCancelled(signal);
     let previous = await this.store.read();
     if (previous && previous.kind !== 'active' && previous.kind !== 'signed-out') {
-      if (!await this.finishLogout(previous)) throw new ApiError('Cần hoàn tất đăng xuất phiên trước khi đăng nhập. Kiểm tra mạng và thử lại.', 'LOGOUT_PENDING');
+      const logoutError = await this.finishLogout(previous);
+      if (logoutError) throw logoutError;
+      assertNotCancelled(signal);
       previous = null;
     }
     let sent = false, received: LoginResult | null = null;

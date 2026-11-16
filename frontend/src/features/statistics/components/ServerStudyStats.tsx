@@ -56,15 +56,17 @@ export default function ServerStudyStats() {
         <Row style={{ gap: 10 }}>
           <IconTile name="time-outline" size={38} />
           <View style={S.grow}>
-            <T style={{ fontFamily: F.bold, fontSize: 16 }}>Thời gian học</T>
+            <T style={{ fontFamily: F.bold, fontSize: 16 }}>Thời gian tập trung</T>
             {data ? <T accessibilityLiveRegion="polite" style={{ fontFamily: F.semi, color: C.primary }}>
               <T testID="server-statistics-time" style={{ fontFamily: F.semi, color: C.primary }}>{studyTime}</T>
               {' · '}<T testID="server-statistics-sessions" style={{ fontFamily: F.semi, color: C.primary }}>{data.completedSessions}</T> phiên
             </T> : <T style={S.small}>{state.error ? 'Chưa tải được thời gian học' : 'Đang tải các phiên hoàn tất…'}</T>}
+            {!detailsOpen && !state.error && <T style={S.small}>{period === 'WEEK' ? 'Tuần' : 'Tháng'} · {rangeLabel}</T>}
           </View>
           <Icon name={detailsOpen ? 'chevron-up' : 'chevron-down'} size={17} />
         </Row>
       </Pressable>
+      {detailsOpen && <>
       <View style={{ flexDirection: stacked ? 'column' : 'row', alignItems: stacked ? 'stretch' : 'center', gap: 8 }}>
         <View style={stacked ? undefined : { width: 108 }}>
           <Segments values={['Tuần', 'Tháng']} value={period === 'WEEK' ? 'Tuần' : 'Tháng'} onChange={choosePeriod} />
@@ -80,7 +82,9 @@ export default function ServerStudyStats() {
       {range && (today < range.fromDate || today > range.toDate) && <Button label={`Về ${periodLabel} này`} secondary onPress={() => setAnchor(null)} />}
       {(semester || course) && <T style={S.small}>{[semester?.label, course?.label].filter(Boolean).join(' · ')}</T>}
       {state.error && <><T accessibilityRole="alert" style={[S.small, { color: C.red }]}>{state.error.message}</T><Button label="Thử lại thống kê" secondary onPress={retry} /></>}
-      {detailsOpen && <Button label="Bộ lọc thời gian học" icon="options-outline" secondary onPress={() => setFiltersOpen(true)} />}
+      <Button label="Bộ lọc thời gian học" icon="options-outline" secondary onPress={() => setFiltersOpen(true)} />
+      </>}
+      {!detailsOpen && state.error && <Button label="Thử lại thống kê" secondary onPress={retry} />}
     </Card>
     {chart && <>
       <StudyTimeChart data={chart} preferredDay={query.date} period={period} onStart={() => app.setTab('focus')} startLabel="Đến Pomodoro" />
@@ -88,7 +92,7 @@ export default function ServerStudyStats() {
       <T style={S.small}>Múi giờ {timeZone}. Thời gian học được tính vào ngày kết thúc phiên, kể cả phiên cũ của môn đã thay đổi hoặc bị xóa.</T>
     </>}
     <ServerAssignmentProgressCard />
-    <ServerFocusStreakCard />
+    {detailsOpen && <ServerFocusStreakCard />}
     {dateOpen && <StatisticsAnchorSheet date={query.date} period={period} onApply={date => { setAnchor(date); setDateOpen(false); }} onClose={() => setDateOpen(false)} />}
     {filtersOpen && <StatisticsScopeSheet
       semester={{

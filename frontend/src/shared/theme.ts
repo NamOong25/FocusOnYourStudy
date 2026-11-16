@@ -14,7 +14,7 @@ export const S = StyleSheet.create({
   between: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   grow: { flex: 1, minWidth: 0 },
   stack: { gap: 16 },
-  card: { backgroundColor: C.card, borderRadius: 22, padding: 18, borderWidth: 1, borderColor: '#F0F0FA', boxShadow: '0px 4px 18px rgba(92, 78, 170, 0.035)' },
+  card: { backgroundColor: C.card, borderRadius: 22, padding: 18, borderWidth: 1, borderColor: '#EDEEF8', boxShadow: '0px 4px 16px rgba(83, 65, 205, 0.045)' },
   title: { fontFamily: F.bold, fontSize: 19, lineHeight: 28, color: C.ink, letterSpacing: -0.5 },
   small: { fontFamily: F.regular, fontSize: 12, lineHeight: 19, color: C.muted },
   body: { fontFamily: F.regular, fontSize: 14, lineHeight: 22, color: C.ink },

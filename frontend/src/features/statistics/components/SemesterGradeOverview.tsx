@@ -36,11 +36,12 @@ export default function SemesterGradeOverview() {
         : !semester ? <StateView title="Chưa có học kỳ" message="Tạo học kỳ để xem GPA và điểm tổng kết của từng môn." actionLabel="Quản lý học kỳ và môn" onAction={manage} />
           : !summary ? <StateView kind="loading" title="Đang tải điểm học kỳ" message="Đang đọc kết quả tổng kết của từng môn." />
             : <>
-              <Card style={{ backgroundColor: C.soft, padding: 15, gap: 3 }}>
-                <T style={{ fontFamily: F.semi }}>GPA học kỳ</T>
-                <T style={{ fontFamily: F.extra, fontSize: 30, color: C.primary }}>
-                  {gradeNumber(summary.gpa, 2).replace('.', ',')}<T style={S.small}> / 4</T>
+              <Card style={{ backgroundColor: C.soft, borderColor: '#E2D9FC', padding: 17, gap: 3 }}>
+                <T style={{ fontFamily: F.bold }}>GPA học kỳ</T>
+                <T style={{ fontFamily: F.extra, fontSize: 36, color: C.primary }}>
+                  {gradeNumber(summary.gpa, 2).replace('.', ',')}{summary.gpa !== null && <T style={S.small}> / 4</T>}
                 </T>
+                <T style={S.small}>{summary.calculatedCredits} tín chỉ tính GPA</T>
                 {summary.state !== 'COMPLETE' && <T style={S.small}>{semesterGpaCaption(summary)}</T>}
               </Card>
               {read.value && read.value.courses.length > 0

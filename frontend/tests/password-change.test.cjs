@@ -54,4 +54,24 @@ test('queued account switch completes after password outcome without an old call
 test('a queued background 401 cannot erase the password result or replay refresh after logout',{timeout:1500},async()=>{const x=await setup(),g=gate(),started=gate();x.api.changePassword=async()=>{started.resolve();await g.promise;};const p=x.m.changePassword(input(),signal(),A);await started.promise;const background=x.m.authorized(async()=>{throw fail('INVALID_ACCESS_TOKEN',401);},signal()).catch(e=>e);await new Promise(r=>setImmediate(r));g.resolve();await p;assert.equal((await background).code,'REQUEST_CANCELLED');assert.equal(x.m.state.passwordChange.outcome,'changed');assert.equal(x.saved().kind,'signed-out');assert.equal(x.calls.length,0);});
 test('recovering an inflight journal after a restart only logs out and never retries password update',async()=>{const x=await setup();await x.store.write({kind:'inflight',userId:A,refreshToken:'rt-a'});const reboot=new SessionManager(x.api,x.store,x.coordinator);await reboot.restore();assert.equal(reboot.state.hasSession,false);assert.equal(x.saved().kind,'signed-out');assert.deepEqual(x.calls,['logout']);});
 test('after an uncertain response, deliberate login closes the old session first and clears the notice',async()=>{const x=await setup();x.api.changePassword=async()=>{throw fail('NETWORK_ERROR');};await x.m.changePassword(input(),signal(),A);await x.m.signIn({email:'a',password:NEW},signal());assert.equal(x.calls[0],'logout');assert.equal(x.m.state.hasSession,true);assert.equal(x.m.state.passwordChange,null);assert.equal(x.m.state.notice,'');});
+
+test('logout shows the underlying failure and sign-in recovers after connectivity returns', async () => {
+  const x = await setup();
+  const networkError = new ApiError('Không thể kết nối.', 'NETWORK_ERROR');
+  x.api.logout = async () => { throw networkError; };
+
+  await x.m.logout();
+  assert.equal(x.saved().kind, 'logout-pending');
+  assert.equal(x.m.state.hasSession, false);
+  assert.match(x.m.state.notice, /Không thể kết nối/);
+  await assert.rejects(x.m.signIn({ email: 'a', password: OLD }, signal()), error => error === networkError);
+  assert.equal(x.saved().kind, 'logout-pending');
+
+  x.api.logout = async () => {};
+  await x.m.logout();
+  assert.equal(x.saved().kind, 'signed-out');
+  await x.m.signIn({ email: 'a', password: OLD }, signal());
+  assert.equal(x.m.state.logoutPending, false);
+  assert.equal(x.m.state.hasSession, true);
+});
 test('unconfirmed copy never claims that the password was saved',()=>{assert.match(passwordChangeMessage('unconfirmed'),/Chưa xác nhận/);assert.doesNotMatch(passwordChangeMessage('unconfirmed'),/Đã đổi/);});

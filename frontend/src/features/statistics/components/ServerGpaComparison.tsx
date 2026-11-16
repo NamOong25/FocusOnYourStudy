@@ -43,28 +43,30 @@ export default function ServerGpaComparison() {
   const error = a.error ?? b.error;
   const selectedSemester = picker === 'A' ? base : target;
   const otherSemester = picker === 'A' ? target : base;
-  const stack = width < 320 || fontScale >= 1.3;
+  const stack = width < 350 || fontScale >= 1.3;
   return <>
-    <Row between style={{ flexWrap: 'wrap' }}>
-      <View style={{ flexGrow: 1, flexShrink: 1 }}>
-        <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 22 }}>So sánh GPA</T>
-        <T style={S.small}>Chọn hai học kỳ để đối chiếu.</T>
-      </View>
+    {!target && <StateView title="Thêm học kỳ thứ hai để so sánh" message="Bạn có thể mở bảng điểm của học kỳ hiện có." actionLabel="Quản lý học kỳ" onAction={manage} />}
+    <View style={{ flexDirection: stack ? 'column' : 'row', alignItems: 'stretch', gap: 8 }}>
+      <SemesterPicker slot="A" semester={base} onPick={target ? () => setPicker('A') : undefined} />
+      {target && <SemesterPicker slot="B" semester={target} onPick={() => setPicker('B')} />}
       {target && <Pressable accessibilityRole="button" accessibilityLabel="Đổi chiều so sánh GPA"
         onPress={() => setSelected({ base: target.id, target: base.id })}
-        style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 10, justifyContent: 'center', borderRadius: 14, borderWidth: 1, borderColor: C.lavender, backgroundColor: pressed ? C.soft : C.card })}>
+        style={({ pressed }) => ({ minHeight: 44, alignSelf: stack ? 'flex-start' : 'center', paddingHorizontal: 8, justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderColor: C.lavender, backgroundColor: pressed ? C.soft : C.card })}>
         <Row style={{ gap: 6 }}><Icon name="swap-horizontal-outline" size={18} /><T style={{ fontFamily: F.bold, fontSize: 12, color: C.primary }}>Đổi chiều</T></Row>
       </Pressable>}
-    </Row>
-    {!target && <StateView title="Thêm học kỳ thứ hai để so sánh" message="Bạn có thể mở bảng điểm của học kỳ hiện có." actionLabel="Quản lý học kỳ" onAction={manage} />}
-    <View style={{ flexDirection: stack ? 'column' : 'row', alignItems: 'stretch', gap: 10 }}>
-      <ComparisonSemesterCard slot="A" semester={base} summary={a.value?.summary} error={!!a.error}
-        onPick={target ? () => setPicker('A') : undefined} onOpen={() => setOpened(base.id)} />
-      {target && <ComparisonSemesterCard slot="B" semester={target} summary={b.value?.summary} error={!!b.error}
-        onPick={() => setPicker('B')} onOpen={() => setOpened(target.id)} />}
     </View>
     {error && <StateView kind="error" title="Chưa tải được GPA để so sánh" message={error.message} actionLabel="Thử lại" onAction={reload} />}
     {target && a.value && b.value && <ComparisonDifference base={a.value.summary} target={b.value.summary} />}
+    <Card style={{ padding: 14, gap: 12 }}>
+      <T accessibilityRole="header" style={{ fontFamily: F.bold, fontSize: 16 }}>{target ? 'GPA giữa hai học kỳ' : 'GPA học kỳ'}<T style={S.small}> · Thang 4</T></T>
+      <ComparisonBar slot="A" semester={base} summary={a.value?.summary} error={!!a.error} />
+      {target && <ComparisonBar slot="B" semester={target} summary={b.value?.summary} error={!!b.error} />}
+      <Row between aria-hidden><T style={S.small}>0</T><T style={S.small}>2</T><T style={S.small}>4</T></Row>
+    </Card>
+    <Card style={{ paddingVertical: 1, paddingHorizontal: 13 }}>
+      <ComparisonLink slot="A" semester={base} onOpen={() => setOpened(base.id)} />
+      {target && <ComparisonLink slot="B" semester={target} onOpen={() => setOpened(target.id)} />}
+    </Card>
     {picker && target && <Sheet title={`Chọn học kỳ ${picker}`} onClose={() => setPicker(null)}>
       {orderedGpaSemesters(catalog.semesters).map(semester => {
         const disabled = semester.id === otherSemester?.id;
@@ -89,38 +91,48 @@ export default function ServerGpaComparison() {
   </>;
 }
 
-function ComparisonSemesterCard({ slot, semester, summary, error, onPick, onOpen }: {
-  slot: Slot; semester: Semester; summary?: Summary; error: boolean; onPick?: () => void; onOpen: () => void;
-}) {
-  return <Card style={[S.grow, { padding: 11, gap: 9, backgroundColor: slot === 'B' ? C.soft : C.card }]}>
-    <Badge label={`KỲ ${slot}`} bg={slot === 'B' ? C.card : C.soft} />
-    <Pressable accessibilityRole={onPick ? 'button' : undefined} onPress={onPick}
+function SemesterPicker({ slot, semester, onPick }: { slot: Slot; semester: Semester; onPick?: () => void }) {
+  return <Pressable accessibilityRole={onPick ? 'button' : undefined} onPress={onPick}
       accessibilityLabel={onPick ? `Chọn học kỳ ${slot} để so sánh` : undefined}
       accessibilityHint={onPick ? `${semester.name}, ${semester.academicYear}` : undefined}
-      style={({ pressed }) => ({ minHeight: 44, padding: 7, justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderColor: C.line, backgroundColor: pressed ? C.canvas : C.card })}>
-      <Row style={{ gap: 2 }}>
+      style={({ pressed }) => [S.grow, { minHeight: 56, padding: 9, justifyContent: 'center', borderRadius: 13, borderWidth: 1, borderColor: C.line, backgroundColor: pressed ? C.soft : C.card }]}>
+      <T style={S.small}>Kỳ {slot}</T>
+      <Row style={{ gap: 3 }}>
         <T style={[S.grow, { fontFamily: F.bold, fontSize: 13 }]}>{semester.name}</T>
         {onPick && <Icon name="chevron-down" size={14} />}
       </Row>
-    </Pressable>
-    <T style={S.small}>{semester.academicYear}</T>
-    <View accessibilityLiveRegion="polite" style={[S.grow, separator, { paddingTop: 8, gap: 3 }]}>
-      {summary ? <>
-        <T testID={`server-comparison-${slot}`} style={{ fontFamily: F.extra, fontSize: 28, color: C.primary }}>
-          {gradeNumber(summary.gpa, 2).replace('.', ',')}<T style={S.small}> / 4</T>
-        </T>
-        <T style={S.small}>{summary.calculatedCredits} tín chỉ tính GPA</T>
-        {summary.state !== 'COMPLETE' && <T style={S.small}>{semesterGpaCaption(summary)}</T>}
-      </> : <T style={S.small}>{error ? 'Chưa tải được GPA' : 'Đang tải GPA…'}</T>}
-    </View>
-    <Pressable accessibilityRole="button" accessibilityLabel={`Mở bảng điểm kỳ ${slot}`} onPress={onOpen}
-      style={({ pressed }) => [separator, { minHeight: 44, justifyContent: 'center', opacity: pressed ? 0.65 : 1 }]}>
-      <Row style={{ gap: 3 }}>
-        <T style={[S.grow, { fontFamily: F.bold, fontSize: 12, color: C.primary }]}>Xem bảng điểm</T>
-        <Icon name="chevron-forward" size={14} />
-      </Row>
-    </Pressable>
-  </Card>;
+      <T style={S.small}>{semester.academicYear}</T>
+    </Pressable>;
+}
+
+function ComparisonBar({ slot, semester, summary, error }: { slot: Slot; semester: Semester; summary?: Summary; error: boolean }) {
+  const gpa = summary?.gpa ?? null;
+  const color = slot === 'A' ? '#7666D9' : C.primary;
+  return <View style={{ gap: 4 }}>
+    <Row between>
+      <T style={[S.grow, { fontFamily: F.semi }]}>Kỳ {slot} · {semester.name}</T>
+      <T testID={`server-comparison-${slot}`} accessibilityLiveRegion="polite"
+        style={{ fontFamily: F.extra, fontSize: 19, color: gpa === null ? C.muted : color }}>{gradeNumber(gpa, 2).replace('.', ',')}</T>
+    </Row>
+    {gpa !== null && <View accessible accessibilityRole="progressbar" accessibilityLabel={`GPA kỳ ${slot} trên thang 4`}
+      accessibilityValue={{ min: 0, max: 4, now: gpa, text: `${gradeNumber(gpa, 2)} trên 4` }}
+      style={{ height: 11, borderRadius: 6, backgroundColor: C.track, overflow: 'hidden' }}>
+      <View style={{ height: '100%', width: `${gpa / 4 * 100}%`, borderRadius: 6, backgroundColor: color }} />
+    </View>}
+    <T style={S.small}>{summary ? summary.state === 'COMPLETE' ? `${summary.calculatedCredits} tín chỉ tính GPA` : semesterGpaCaption(summary)
+      : error ? 'Chưa tải được GPA' : 'Đang tải GPA…'}</T>
+  </View>;
+}
+
+function ComparisonLink({ slot, semester, onOpen }: { slot: Slot; semester: Semester; onOpen: () => void }) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={`Mở bảng điểm kỳ ${slot}`}
+    accessibilityHint={`${semester.name}, ${semester.academicYear}`} onPress={onOpen}
+    style={({ pressed }) => [slot === 'B' && separator, { minHeight: 46, justifyContent: 'center', opacity: pressed ? 0.65 : 1 }]}>
+    <Row>
+      <T style={[S.grow, { fontFamily: F.bold, fontSize: 13, color: C.primary }]}>Xem bảng điểm kỳ {slot}</T>
+      <Icon name="chevron-forward" size={15} />
+    </Row>
+  </Pressable>;
 }
 
 function ComparisonDifference({ base, target }: { base: Summary; target: Summary }) {
@@ -130,7 +142,7 @@ function ComparisonDifference({ base, target }: { base: Summary; target: Summary
   const description = !difference ? 'Cần cả hai học kỳ có GPA để đối chiếu.'
     : amount > 0 ? 'GPA kỳ B cao hơn kỳ A.'
       : amount < 0 ? 'GPA kỳ B thấp hơn kỳ A.' : 'GPA hai kỳ bằng nhau.';
-  return <Card style={{ backgroundColor: C.soft, padding: 16, gap: 7 }}>
+  return <Card style={{ backgroundColor: amount > 0 ? C.greenSoft : amount < 0 ? C.redSoft : C.soft, padding: 16, gap: 5 }}>
     <Row between style={{ flexWrap: 'wrap' }}>
       <T accessibilityRole="header" style={{ fontFamily: F.bold }}>Kỳ B so với kỳ A</T>
       {difference?.provisional && <Badge label="Tạm tính" bg={C.card} />}

@@ -59,7 +59,7 @@ const tabs: { id: Tab; label: string; icon: IconName; activeIcon: IconName }[] =
 function AppShell() {
   const auth = useAuth();
   const { tab, setTab, setScheduleMode, route, routeTrail, goBackRoute, assignmentDestination, semesterConnection, courseConnection, assignmentConnection, openSavedSchedule } = useApp(); const inset = useSafeAreaInsets();
-  const current = viewKey(route), polished = current === 'home' || current === 'focus'; const visited = useRef(new Set<string>()); visited.current.add(current);
+  const current = viewKey(route), polished = current === 'home' || current === 'focus' || current === 'stats'; const visited = useRef(new Set<string>()); visited.current.add(current);
   const [taskForm, setTaskForm] = useState<Task | 'new' | null>(null); const [classForm, setClassForm] = useState<ClassItem | 'new' | null>(null);
   const [taskOrigin, setTaskOrigin] = useState(current), [classOrigin, setClassOrigin] = useState(current), [panelOrigin, setPanelOrigin] = useState(current);
   const [panel, setPanel] = useState<'profile' | 'notifications' | null>(auth.notice || auth.profileError ? 'profile' : null);

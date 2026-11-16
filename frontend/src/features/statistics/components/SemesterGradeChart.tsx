@@ -8,8 +8,8 @@ import { gradePresentation } from '../../grades/gradePresentation';
 import { gradeNumber, serverGradeView } from '../../grades/serverGradeView';
 
 const scale = [10, 8, 6, 4, 2, 0];
-const plotHeight = 130;
-const labelSpace = 28;
+const plotHeight = 144;
+const labelSpace = 25;
 const baseline = labelSpace + plotHeight;
 const columnWidth = 54;
 const legend = [
@@ -64,7 +64,7 @@ export default function SemesterGradeChart({ courses }: { courses: ServerCourseG
               onPress={() => setSelectedId(course.id)} style={({ pressed }) => ({ flex: 1, minWidth: columnWidth, opacity: pressed ? 0.72 : 1 })}>
               <View style={{ height: baseline, justifyContent: 'flex-end', alignItems: 'center', gap: 3 }}>
                 <T numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: F.bold, fontSize: 12, lineHeight: 18, color }}>{value}</T>
-                {result.total !== null && <View style={{ height: Math.max(2, result.total / 10 * plotHeight), width: '68%', maxWidth: 38, backgroundColor: color, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} />}
+                {result.total !== null && <View style={{ height: result.total / 10 * plotHeight, width: '68%', maxWidth: 42, backgroundColor: color, borderTopLeftRadius: 7, borderTopRightRadius: 7 }} />}
               </View>
               <T numberOfLines={1} style={{ textAlign: 'center', fontFamily: F.semi, color: C.muted, fontSize: 10, lineHeight: 17, marginTop: 6, paddingHorizontal: 2 }}>{courseLabel(course.name)}</T>
             </Pressable>;
@@ -72,7 +72,7 @@ export default function SemesterGradeChart({ courses }: { courses: ServerCourseG
         </Row>
       </ScrollView>
     </Row>
-    <T style={S.small}>Vuốt ngang nếu còn môn. Chạm cột để xem chi tiết.</T>
+    <T style={[S.small, { textAlign: 'center' }]}>{courses.length > 5 ? 'Vuốt ngang để xem thêm. ' : ''}Chạm cột để xem môn.</T>
     <Row style={{ flexWrap: 'wrap', gap: 9 }}>
       {legend.map(item => <Row key={item.label} style={{ gap: 5 }}>
         <View style={{ width: 9, height: 9, borderRadius: 3, backgroundColor: item.color }} />
