@@ -1,0 +1,16 @@
+{
+  "cli": {
+    "appVersionSource": "local"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_NATIVE_API_URL": "https://focusonyourstudy.onrender.com"
+      }
+    }
+  }
+}

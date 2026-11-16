@@ -2,7 +2,7 @@
   "expo": {
     "name": "FocusYourStudy",
     "slug": "quan-ly-hoc-tap",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "focusyourstudy",
@@ -13,7 +13,8 @@
     },
     "android": {
       "package": "com.focusyourstudy.app",
-      "permissions": ["android.permission.VIBRATE"]
+      "permissions": ["android.permission.VIBRATE"],
+      "versionCode": 3
     },
     "web": {
       "bundler": "metro",
@@ -26,6 +27,12 @@
       "expo-font",
       "expo-sharing",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b1263f8f-a1e2-4ea5-8e86-a19cd312b80f"
+      }
+    },
+    "owner": "namoong25"
   }
 }

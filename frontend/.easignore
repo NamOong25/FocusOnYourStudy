@@ -1,0 +1,14 @@
+node_modules
+.git
+.expo
+.cache
+dist
+qa
+tests
+.env*
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+credentials.json
