@@ -22,14 +22,14 @@ export default function Stats() {
   return <>
     {auth.hasSession &&
       <T accessibilityRole="header" style={{ fontFamily: F.extra, fontSize: 28, lineHeight: 39, letterSpacing: -0.7 }}>Thống kê</T>}
-    <Segments values={['Tổng quan', 'So sánh GPA', 'Điểm & GPA']} value={view} onChange={setView} />
+    <Segments values={['Tổng quan', 'So sánh GPA', 'Điểm & GPA']} value={view} onChange={setView} singleLine />
     <NavigationScope active={view === 'Tổng quan'}><View style={{ display: view === 'Tổng quan' ? 'flex' : 'none', gap: 16 }}>
       {auth.hasSession ? <React.Fragment key={`${auth.revision}:${auth.profile?.id ?? ''}`}>
         <SemesterGradeOverview />
         <ServerStudyStats />
       </React.Fragment> : <PreviewStudyStats />}
     </View></NavigationScope>
-    <NavigationScope active={view === 'So sánh GPA'}><View style={{ display: view === 'So sánh GPA' ? 'flex' : 'none', gap: 16 }}><GpaComparisonScreen /></View></NavigationScope>
+    <NavigationScope active={view === 'So sánh GPA'}><View style={{ display: view === 'So sánh GPA' ? 'flex' : 'none', gap: 16 }}><GpaComparisonScreen onViewGrades={() => setView('Điểm & GPA')} /></View></NavigationScope>
     <NavigationScope active={view === 'Điểm & GPA'}><View style={{ display: view === 'Điểm & GPA' ? 'flex' : 'none', gap: 16 }}><Grades onCompare={() => setView('So sánh GPA')} /></View></NavigationScope>
   </>;
 }
