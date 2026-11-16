@@ -121,9 +121,10 @@ test('old write success is removed when completed/deleted sources change the vis
  const f=fixture();await load(f);await f.manager.mark([seen(desc())]);assert.match(f.manager.state.message,/1\/1/);
  f.manager.setFrame([]);assert.equal(f.manager.state.message,'');await f.manager.reload();assert.equal(f.manager.state.loaded,true);assert.equal(f.manager.state.message,'');
 });
-test('manual reconciliation success does not describe a later source revision',async()=>{
- const f=fixture();await load(f);await f.manager.reload(true);assert.match(f.manager.state.message,/Đã đối chiếu/);
- f.manager.setFrame([desc('two')]);assert.equal(f.manager.state.message,'');
+test('manual reconciliation clears the previous notice when read state is confirmed',async()=>{
+ const f=fixture();await load(f);await f.manager.mark([seen(desc())]);assert.match(f.manager.state.message,/Đã lưu/);
+ await f.manager.reload(true);assert.equal(f.manager.state.message,'');assert.equal(f.manager.state.loaded,true);
+ assert.equal(f.manager.state.rows.one.state.read,true);
 });
 test('new query clears a prior success while its result is still pending',async()=>{
  const f=fixture(),gate=deferred();await load(f);await f.manager.mark([seen(desc())]);f.api.query=()=>gate.promise;

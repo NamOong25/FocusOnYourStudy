@@ -49,7 +49,7 @@ export class NotificationReadManager {
         }
         if(this.disposed || seq !== this.generation)throw cancelledRequest();
         this.publish({key,rows,loaded:true,loading:false,error:null,sourceMismatch:false,needsReload:manual ? false : this.state.needsReload,
-          message:manual ? 'Đã đối chiếu trạng thái đọc với tài khoản.' : this.state.message});
+          message:manual ? '' : this.state.message});
       }catch(error) {
         if(this.disposed || seq !== this.generation)throw cancelledRequest();
         const failure=asApiError(error);this.publish({loaded:false,loading:false,error:failure,sourceMismatch:failure.code === 'NOTIFICATION_SOURCES_CHANGED'});throw failure;
