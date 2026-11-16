@@ -101,7 +101,7 @@ Java 21, Spring Boot **4.1.1**, Maven Wrapper **3.10.0**, PostgreSQL **17.11**, 
 Máy cần JDK 21 có `java` trong PATH, PowerShell, `tar.exe` (Windows 10/11) và mạng cho lần tải dependency đầu. Không cần Maven/Docker/PostgreSQL cài sẵn.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\backend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\backend'
 .\scripts\Run-Local.ps1
 ```
 
@@ -143,7 +143,7 @@ Lần chạy đầu có thể lâu vì tải dependency. Không xóa `.local/dat
 ## Kiểm tra
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\backend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\backend'
 .\scripts\Test-Local.ps1
 ```
 

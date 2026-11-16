@@ -423,12 +423,12 @@ Xem [hướng dẫn học kỳ 3C.1](docs/FRONTEND-SEMESTERS-3C1.md). UI môn đ
 Chạy hai terminal (PowerShell trong IntelliJ/VS Code đều được):
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\backend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\backend'
 .\scripts\Run-Local.ps1
 ```
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\frontend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\frontend'
 npx expo start --web --port 8092
 ```
 
@@ -445,7 +445,7 @@ URL API mặc định dùng cùng hostname với web và cổng 8080. Cần cổ
 Java 21 + Spring Boot 4.1.1; PostgreSQL cục bộ, Flyway và API health. Đã có đăng ký/đăng nhập/hồ sơ, access token 15 phút, refresh token luân chuyển và đăng xuất thu hồi phiên. Phiên lưu trong PostgreSQL; web có cookie HttpOnly + CSRF, native nhận token qua JSON. Frontend đã nối khôi phục/refresh/logout ở 2C.2; nghiệm thu thiết bị thật ở 2C.3.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\backend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\backend'
 .\scripts\Run-Local.ps1
 ```
 
@@ -462,7 +462,7 @@ API môn đã mở ở 3B: CRUD/lọc học kỳ, kiểm tra chủ sở hữu, m
 Khuyên dùng Node.js 24 LTS (24.3 trở lên) cho Expo SDK 58.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\frontend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\frontend'
 npm install # Lần đầu sau khi clone
 npm start
 ```
@@ -472,7 +472,7 @@ Khi mở app chưa đăng nhập, chọn **Bắt đầu với dữ liệu trốn
 Nhấn `w` để mở web. Có thể mở địa chỉ Metro trong Mobile View của VS Code. Muốn thử trên điện thoại, dùng Expo Go tương thích SDK 58 hoặc development build. Xem địa chỉ và cổng thực tế trong terminal; không dùng terminal đang đứng ở StudyPlanner cũ.
 
 ```powershell
-cd 'D:\Video OBS\QuanLyHocTap\frontend'
+cd 'D:\Video OBS\Portfolio\QuanLyHocTap\frontend'
 npm run typecheck
 npm run check:dependencies
 npm run build:web
